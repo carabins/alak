@@ -1,4 +1,4 @@
-![Image of alak](http://x.gleb.pw/alak.jpg)
+
 # alak / अलक  (sanskrit)
 ### FRP Library for TypeScript
 [![npm version](https://badge.fury.io/js/alak.svg)](https://badge.fury.io/js/alak)
@@ -36,6 +36,7 @@ someNum(3)
 console.log(someNum(), squareNum(), convertedValue())
 //output: 3 9 '3kg'
 ```
+[other tests here](https://github.com/gleba/alak/blob/master/tests/index.ts)
 
 ## Instalation 
 `npm i alak -S`
@@ -51,9 +52,11 @@ console.log(someNum(), squareNum(), convertedValue())
 - TypeScript
 - npm/yarn/lasso/e.t.c. package manager
 
+![Image of alak](http://x.gleb.pw/alak.jpg)
+# अलक 
 ## Multilanguage documentation
 
-Please use Google Translate and your imagination, if you intersting The literary meaning of the concept of this library.
+Please use [Google Translate](https://translate.googleusercontent.com/translate_c?depth=1&hl=en&rurl=translate.google.com&sl=ru&sp=nmt4&tl=en&u=https://github.com/gleba/alak/) and your imagination, if you intersting The literary meaning of the concept of this library.
 
 Meanings of अलक in English :
 - Curl / Forelock / Sliver 
@@ -69,8 +72,10 @@ Meanings of अलक in English :
 
 ## Inspiration / Вдохновение
 - [Functional reactive programming](https://en.wikipedia.org/wiki/Functional_reactive_programming)
-- Atomic updates
 - [Purely functional data structure](https://en.wikipedia.org/wiki/Purely_functional_data_structure)
+- Atomic updates
+- Pattern Matching
+- Scala
 - [awesome-frp-js](https://github.com/stoeffel/awesome-frp-js)
 - [flyd](https://github.com/paldepind/flyd)
 
