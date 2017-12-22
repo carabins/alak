@@ -5,7 +5,7 @@ function parsePattern(pattern) {
     let keys = []
     let fn = []
     let j = 0
-    let lastFnIndex = 0
+    let lastFnIndex = -100
     keys[j] = []
     for (let i = 0; i < pattern.length; i++) {
         let v = pattern[i]
@@ -13,9 +13,9 @@ function parsePattern(pattern) {
             case "function" :
                 fn[j] = v
                 j++
-                if (pattern.length == i + 1 && lastFnIndex == i - 1)
+                if (pattern.length - 1 == i && lastFnIndex == i - 1)
                     o.else = v
-                else if (pattern.length > i + 1)
+                else
                     keys[j] = []
                 lastFnIndex = i
                 break
@@ -29,12 +29,12 @@ function parsePattern(pattern) {
 
 export function patternMatch(arg) {
     let a = arg
-
-
     if (a.length >= 2) {
         let p = parsePattern(a)
         return (...value) => {
+
             let matchFn = p.map[value.join(',')]
+            if (!matchFn) matchFn = p.map[value[0]]
             if (matchFn) matchFn.apply(matchFn, value)
             else if (p.else) p.else.apply(matchFn, value)
         }
@@ -47,10 +47,16 @@ export function patternMatch(arg) {
                 let runFns = []
                 pattern.forEach((v, i) => {
                     let lastPattern = pattern[i - 1]
-                    if (isFunction(v) && lastPattern)
+                    if (isFunction(v) && lastPattern && !isFunction(lastPattern))
                         runFns.push(v)
-                })
 
+                })
+                if (runFns.length == 0) {
+                    let l = pattern.length
+                    if (isFunction(pattern[l - 1]) && isFunction(pattern[l - 2])) {
+                        runFns.push(pattern[l - 1])
+                    }
+                }
                 runFns.forEach(f => f.apply(fn, value))
             }
         }
