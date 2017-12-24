@@ -8,7 +8,8 @@ export type TypeFN<T> = (...a: any[]) => T
 export interface DChannel<T extends any> {
     (...a: T[]): T
 
-    data: T
+    v: T
+    data: T[]
 
     on(fn: Listener<T>): DChannel<T>
 
@@ -23,20 +24,28 @@ export interface DChannel<T extends any> {
     stop(fn): void
 
     drop(): void
+
+    inject(obj: any, key?: string): void
+
+    reject(obj): void
+
 }
 
-//, ...b: any[]
+
+export class DInjectableFlow {
+    inject() {
+        this
+    }
+}
 
 
 // function compose<T, ...U>(base: T, ...mixins: ...U): T&U {}
 export default function DFlow<T>(...a: T[]): DChannel<T> {
     type Fn = Listener<T>
     let listeners = []
+    let mapObjects: Map<any, Function>
     let proxy = {
         data: [],
-        get v(): T {
-            return getValue()
-        },
         on: function (fn: Fn) {
             listeners.push([this, fn])
             if (proxy.data.length > 0)
@@ -49,8 +58,15 @@ export default function DFlow<T>(...a: T[]): DChannel<T> {
             proxy = null
         },
         mutate: function (fn: Fn) {
-            let newValue = fn.apply(this, proxy.data)
-            setValue(newValue)
+            let newValue
+
+            if (proxy.data.length > 1) {
+                newValue = fn.apply(this, proxy.data)
+                setValues(newValue)
+            } else {
+                newValue = fn.apply(this, [getValue()])
+                setValues([newValue])
+            }
         },
         match: function () {
             proxy.on(AMatch(arguments))
@@ -64,12 +80,27 @@ export default function DFlow<T>(...a: T[]): DChannel<T> {
             proxy.on((...v) => newCn(...f(...v)))
             return newCn
         },
+        inject(obj: any, key?: string) {
+            if (!mapObjects) mapObjects = new Map<any, Function>()
+            let fn = key
+                ? v => obj[key] = v
+                : v => Object.keys(v).forEach(k => obj[k] = v[k])
+            mapObjects.set(obj, fn)
+            proxy.on(fn)
+        },
+        reject(obj) {
+            if (mapObjects.has(obj)) {
+                proxy.stop(mapObjects.get(obj))
+                mapObjects.delete(obj)
+            }
+        }
     }
 
     const getValue = () => proxy.data ? proxy.data.length > 1 ? proxy.data : proxy.data[0] : null
-    const setValue = v => {
+    const setValues = v => {
         if (v.length > 0) {
-            proxy.data = v
+            functor['data'] = proxy.data = v
+            functor['v'] = v ? v.length > 1 ? v : v[0] : null
             listeners.forEach(f => f[1].apply(f[0], v))
         }
     }
@@ -79,11 +110,12 @@ export default function DFlow<T>(...a: T[]): DChannel<T> {
             console.error("emit ended channel: " + a)
             return
         }
-        setValue(Object.values(arguments))
+        setValues(Object.values(arguments))
         return getValue()
     }
 
-    setValue(Object.values(arguments))
+    let v = Object.values(arguments)
+    setValues(v)
     Object.assign(functor, proxy)
     return functor as any as DChannel<T>
 }
