@@ -1,5 +1,13 @@
-import { createObjectFlow, createProxyFlow } from './create'
+/**
+ * Ядро атома
+ * @remarks
+ *
+ *
+ * @packageDocumentation
+ */
 
+
+import { createObjectFlow, createProxyFlow } from './create'
 /**
  * Опции расширения
  * @remarks
@@ -10,10 +18,11 @@ export type ExtensionOptions = {
   properties?: FlowHandlers
 }
 
-/*обработчик потока*/
+/** Функция с контекстом {@link Atom | атома}*/
 export type FlowHandler = {
   (this: Atom, ...a: any[]): any
 }
+/** Объект с обработчиками {@link FlowHandler}*/
 export type FlowHandlers = {
   [key: string]: FlowHandler
 }
@@ -27,7 +36,6 @@ export const AC: AtomCreator = Object.assign(createProxyFlow, {
 })
 /** Функция-контейнер*/
 export type Atom = {
-  /** функции слушатели обновления значения */
   children: Set<AnyFunction>
   grandChildren: Map<AnyFunction, AnyFunction>
   stateListeners: Map<string, Set<AnyFunction>>
@@ -42,38 +50,45 @@ export type Atom = {
   id?: string
   flowName?: string
   haveFrom?: boolean
+  strongFn?: Function
   isAsync?: boolean
   inAwaiting?: boolean
-  strongFn?: Function
   (...a: any[]): void
 }
+
+
+export type MaybeAny<T> = unknown extends T ? any : T
 /**
- * Интерфейс создания атома
+ * Создание атома как контейнер потока
  */
 export interface AtomCreator {
+  /* Создать {@link ProxyFlow} - прокси контейнера потока*/
+  <T>(value?:T):AFlow<MaybeAny<T>>
   /**
-   * Создать {@link ProxyFlow} - прокси контейнера потока
+   * Создать {@link AFlow} - прокси контейнера потока
    * @remarks
    * Базовые функции, максимальная скорость создания, минимальное потребление памяти.
    * @param value - необязательное стартовое значение, может быть асинхронной функцией возвращающей значение
    * @returns {@link ProxyFlow}
    */
-  proxy()
+  proxy<T>(value?:T):AFlow<MaybeAny<T>>
   /**
    * Создать {@link ObjectFlow} - контейнер потока
    * @remarks
    * Минимальные функции, максимальная скорость доставки, за счёт увеличения потребления памяти.
-   * Используйте {@link ObjectFlow}, когда нет возможности использовать {@link ProxyFlow}.
+   * Используйте {@link ObjectFlow}, когда нет возможности использовать {@link AFlow}.
    * @param value - необязательное стартовое значние
    * @returns {@link ObjectFlow}
    */
-  object()
+  object<T>(value?:T):ObjectFlow<MaybeAny<T>>
 }
 
 type ValueReceiver<T extends any> = (value: T) => void
 
 /**
- * Основные функции контейнера потока
+ * Атом как объект потока
+ * @remarks
+ * Базовые функции, максимальная скорость создания, минимальное потребление памяти.
  */
 export declare interface ObjectFlow<T> {
   /**
@@ -96,14 +111,14 @@ export declare interface ObjectFlow<T> {
   clear(): ObjectFlow<T>
 }
 
-/** Интерфейс прокси потока
+/** Атом как прокси поток
  * @remarks
  * Прокси поток - является функцией-контейнером
  * аргумент которой устанавливает значение контейнера
  * и передаёт значение всем функциям-слушателям.
  * Вызов функции без аргументов - вернёт значение контейнера.
  */
-export interface ProxyFlow<T> {
+export interface AFlow<T> {
   /** Доставить значение всем дочерним слушателям и установить новое значение в контейнер.*/
   (value?: T, ...auxiliaryValues): void
 
@@ -140,39 +155,39 @@ export interface ProxyFlow<T> {
    * и передать текущее значение контейнера, если оно есть
    * @param receiver - функция-получатель
    * @returns {@link core#ProxyFlow}*/
-  up(receiver: ValueReceiver<T>): ProxyFlow<T>
+  up(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Добавить функцию-получатель и передать значение со следующего обновления
    * @param receiver - функция-получатель
    * @returns {@link ProxyFlow}*/
-  next(receiver: ValueReceiver<T>): ProxyFlow<T>
+  next(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Удалить функцию-получатель
    * @param receiver - функция-получатель
    * @returns {@link core#ProxyFlow}*/
-  down(receiver: ValueReceiver<T>): ProxyFlow<T>
+  down(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Передать один раз в функцию-получатель значение контейнера,
    * текущее если оно есть или как появится
    * @param receiver - функция-получатель
    * @returns {@link ProxyFlow}*/
-  once(receiver: ValueReceiver<T>): ProxyFlow<T>
+  once(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Добавить функцию-получатель значений не равных `null` и `undefined`
    * @param receiver - функция-получатель
    * @returns {@link ProxyFlow}*/
-  upSome(receiver: ValueReceiver<T>): ProxyFlow<T>
+  upSome(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Добавить функцию-получатель значений равных `true`
    * после приведения значения к типу `boolean` методом `!!value`
    * @param receiver - функция-получатель
    * @returns {@link ProxyFlow}*/
-  upTrue(receiver: ValueReceiver<T>): ProxyFlow<T>
+  upTrue(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Добавить функцию-получатель значений равных `null` и `undefined`
    * @param receiver - функция-получатель
    * @returns {@link ProxyFlow}*/
-  upNone(receiver: ValueReceiver<T>): ProxyFlow<T>
+  upNone(receiver: ValueReceiver<T>): AFlow<T>
 
   /** Проверить значение контейнера на соответствие
    * @param compareValue - проверяемое значение
@@ -182,41 +197,41 @@ export interface ProxyFlow<T> {
   /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link ProxyFlow.useGetter}
    * @param listener - функция-слушатель
    * @returns {@link ProxyFlow}*/
-  onAwait(listener: (isAwaiting: boolean) => void): ProxyFlow<T>
+  onAwait(listener: (isAwaiting: boolean) => void): AFlow<T>
   /** Удалить слушатель изменения асинхронного состояния
    * @param listener - функция-слушатель
    * @returns {@link ProxyFlow}*/
   offAwait(listener: AnyFunction): void
   /** Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
    * @returns {@link ProxyFlow}*/
-  clear(): ProxyFlow<T>
+  clear(): AFlow<T>
 
   /** Очистить значение контейнера
    * @returns {@link core#ProxyFlow} */
-  clearValue(): ProxyFlow<T>
+  clearValue(): AFlow<T>
 
   /** Закрыть поток, удалить все свойства {@link core#ProxyFlow}*/
   close(): void
 
   /** Повторно отправить значение всем функциям-получателям
    * @returns {@link ProxyFlow} */
-  resend(): ProxyFlow<T>
+  resend(): AFlow<T>
 
   /** Установить идентификатор потока
    * @param id - идентификатор
    * @returns {@link ProxyFlow} */
-  setId(id: string): ProxyFlow<T>
+  setId(id: string): AFlow<T>
 
   /** Установить имя потока
    * @param name - имя
    * @returns {@link ProxyFlow} */
-  setName(name: string): ProxyFlow<T>
+  setName(name: string): AFlow<T>
 
   /** Добавить мета-данные
    * @param metaName - название-ключ мета-данных
    * @param value - необязательное значение мета-данных
    * @returns {@link ProxyFlow} */
-  addMeta(metaName: string, value?: any): ProxyFlow<T>
+  addMeta(metaName: string, value?: any): AFlow<T>
 
   /** Проверить на наличие мета-данных
    * @param metaName - имя мета-данных
@@ -233,18 +248,18 @@ export interface ProxyFlow<T> {
    * Функция-добытчик вызывается каждый раз при вызове функции-потока
    * @param getter - функция-добытчик
    * @returns {@link ProxyFlow} */
-  useGetter(getter: () => T | Promise<T>): ProxyFlow<T>
+  useGetter(getter: () => T | Promise<T>): AFlow<T>
 
   /** Использовать функцию-обёртку
    * Каждое значение переданное в функцию-потока, обновление контейнера, перед
    * @param wrapper
    * @returns {@link ProxyFlow} */
-  useWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>): ProxyFlow<T>
+  useWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>): AFlow<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текушее значение и возвращающей новое зачение в поток
    * @returns {@link ProxyFlow} */
-  fmap(fun: (v: T) => T): ProxyFlow<T>
+  fmap(fun: (v: T) => T): AFlow<T>
 
   /**
    * Создать дубликат значение
@@ -257,5 +272,5 @@ export interface ProxyFlow<T> {
    * @param targetObject - целевой объект
    * @param key - ключ доступа к значению в объекте
    */
-  injectOnce(targetObject: any, key?: string): ProxyFlow<T>
+  injectOnce(targetObject: any, key?: string): AFlow<T>
 }
