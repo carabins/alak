@@ -1,38 +1,107 @@
+// import './benchmark'
+
+
+
 import A from '../packages/facade'
 import chalk from 'chalk'
 import { ComputeStrategy, installComputedExtension } from '../packages/ext-computed'
-import { AC } from '../packages/core'
+// import { AC } from '../packages/core'
 import { installMatchingExtension } from '../packages/ext-matching'
-const inAwaiting = atom =>
-  typeof atom().then === 'function'
-    ? console.log(chalk.green('async'))
-    : console.log(chalk.red('sync'))
-
-installComputedExtension()
-installMatchingExtension()
-
-declare module '../packages/core' {
-  interface ProxyAtom<T> {
-    match(...pattern: any[]): ProxyAtom<T>
-    from<A extends ProxyAtom<any>[]>(...a: A): ComputeStrategy<T, A>
+import { installAtomDebuggerTool } from '../packages/debug'
+// const inAwaiting = atom =>
+//   typeof atom().then === 'function'
+//     ? console.log(chalk.green('async'))
+//     : console.log(chalk.red('sync'))
+//
+// installComputedExtension()
+// installMatchingExtension()
+// //
+declare module '../packages/facade' {
+  interface Atom<T> {
+    match(...pattern: any[]): Atom<T>
+    from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
-let a = A()
 
-a.match(
-  3, v => console.log("is 3"),
-  Array.isArray, v=> console.log("is array", v),
-  _ => console.log("мимо")
-)
+// const a = A.id("statr",10)
+// console.log(a['match'])
+// console.log("?")
 
-a(1)
-a(3)
-a('8')
-a([0])
+const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
+const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
+const atomA = A.id('a').useGetter(asyncHello)
+const atomB = A.id('b').useGetter(asyncWorld)
+const atomAB = A.id('c')
+  .from(atomA, atomB)
+  .strong((valueA, valueB) => {
+    console.log("aa")
+    return `${valueA} ${valueB}`
+  })
 
-console.log(a.match)
+atomAB()
+// // console.log(a)
+// // // console.log(a.id)
+// // //
+// // // a(10)
+// // // a.once(v=>{
+// // //   console.log("once", v)
+// // // })
+// // // a(20)
+// // // a.setName("ok")
+// // const o = {}
+// // a.injectOnce(o)
+// //
+// console.log(o)
+//
 
+// console.log(a['gimmeFive'])
+
+// console.log(o.gimmeFive); // 5
+// const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 200))
+// const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
+//
+// const atomA = A.getter(asyncHello).setId('a')
+// const atomB = A.getter(asyncWorld).setId('b')
+// const atomAB = A.id('c')
+//   .from(atomA, atomB)
+//   .strong((valueA, valueB) => {
+//     console.log("... in fn", valueB, valueB)
+//     return `${valueA} ${valueB}`
+//   })
+//
+// atomAB.up(v=>{
+//   console.log("up", v)
+// })
+// console.log(atomAB())
+
+//
+// const debugInstance = installAtomDebuggerTool.instance()
+// debugInstance.onRecord(log => {
+//   console.log(log.toString())
+// })
+// a('sd')
+// a('sd-s')
+//
+// debugInstance.startCollect()
+// a('!')
+// a('!')
+// a('!')
+// console.log(debugInstance.stopCollect())
+//
+// a.match(
+//   3, v => console.log("is 3"),
+//   Array.isArray, v=> console.log("is array", v),
+//   _ => console.log("мимо")
+// )
+//
+// a(1)
+// a(3)
+// a('8')
+// a([0])
+//
+//
+// console.log(a.match)
 
 // console.log(a.children)
 // const a = A()
