@@ -11,7 +11,7 @@ import * as path from 'path'
 import { exec, execSync, fork } from 'child_process'
 import { mkdirSync, readdirSync, renameSync, rmdirSync, unlinkSync } from 'fs'
 import { info, log0, rm, prepare, executeCommand } from './helpers'
-import { tsc } from './make-lib'
+import { tsc } from './tsc'
 const chalk = require('chalk')
 const { log } = console
 
@@ -29,7 +29,7 @@ async function checkModule(name) {
   const modulePath = getModuleStartPath(name)
   if (!existsSync(modulePath)) {
     info(`installing ${name}...`)
-    await executeCommand(`npm i @microsoft/api-${name}`, homeDir)
+    await executeCommand(`npm i @microsoft/api-${name} --no-save`, homeDir)
   } else {
     log0(`${name} found`)
   }
@@ -64,7 +64,7 @@ async function make() {
   prepare(workDir)
 
   await Promise.all([
-    extractApi('core'),
+    extractApi('atom'),
     extractApi('facade'),
     extractApi('ext-matching'),
     extractApi('ext-computed'),
@@ -72,7 +72,6 @@ async function make() {
   info('making documentation...')
   await Promise.all([
     executeCommand(`node ../${getModuleStartPath(documenter)} markdown`, workDir),
-    executeCommand(`node ../${getModuleStartPath(documenter)} yaml`, workDir),
     ])
   log0('cleaning working directory')
   if (!existsSync('docs')) mkdirSync('docs')

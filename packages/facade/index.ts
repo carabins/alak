@@ -1,29 +1,31 @@
 /**
  * Корневой модуль библиотеки.
  * @remarks
- * Сборка всех частей библиотеки в {@link AConstant| A} константе.
+ * Сборка всех частей библиотеки в {@link AConstructor| A} константе.
  *
  * Импорт модуля устанавливает все модули-расширения библиотеки.
  * @public
  * @packageDocumentation
  */
 
-import { AC, AtomCreator, installExtension, MaybeAny, ProxyAtom } from '../core'
-import { ComputeStrategicAtom, from, installComputedExtension } from '../ext-computed'
-import { alive } from '../core/utils'
-import { installMatchingExtension } from '../ext-matching'
+import { AC, AtomCoreConstructor, installAtomExtension, MaybeAny, Atom } from '../atom/index'
+import { ComputeStrategicAtom, from, installComputedExtension } from '../ext-computed/index'
+import { alive } from '../atom/utils'
+import { installMatchingExtension } from '../ext-matching/index'
 
 installComputedExtension()
 installMatchingExtension()
 
-// @ts-ignore
-declare module 'alak/core' {
-  import { ComputeStrategy } from '../ext-computed'
-  interface ProxyAtom<T> {
-    match(...pattern: any[]): ProxyAtom<T>
-    from<A extends ProxyAtom<any>[]>(...a: A): ComputeStrategy<T, A>
-  }
-}
+
+// // @ts-ignore
+// declare module 'alak/core' {
+//   // @ts-ignore
+//   import { ComputeStrategy } from 'alak/ext-computed'
+//   interface Atom<T> {
+//     match(...pattern: any[]): Atom<T>
+//     from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
+//   }
+// }
 // installExtension({
 //   handlers: {
 //     from: fromFlows,
@@ -31,46 +33,46 @@ declare module 'alak/core' {
 // })
 /** Конструктор атома
  * @remarks
- * Функция-константа, расширяет {@link core#AtomCreator}
+ * Функция-константа, расширяет {@link atom#AtomCreator}
  * @example
  * ```javascript
  * const atom = A() // сокращённая запись A.proxy()
  * ```
  * */
-export interface AConstant<D> extends AtomCreator {
-  <T>(value?: T): ProxyAtom<MaybeAny<T>>
+export interface AConstructor<D> extends AtomCoreConstructor {
+  <T>(value?: T): Atom<MaybeAny<T>>
 
   /**
-   * Создать атом c предустановленным идентификатором {@link ProxyAtom.setId}.
+   * Создать атом c предустановленным идентификатором {@link Atom.setId}.
    * @remarks
    * Сокращённая запись  `A().setId(id)`
    * @param id - идентификатор
    * @param startValue - стартовое значение
    */
-  id<T>(id: string | number, startValue?:T): ProxyAtom<MaybeAny<T>>
+  id<T>(id: string | number, startValue?:T): Atom<MaybeAny<T>>
 
   /**
-   * Создать атом c функцией обёртки {@link ProxyAtom.useWrapper}.
+   * Создать атом c функцией обёртки {@link Atom.useWrapper}.
    * @remarks
    * Сокращённая запись `A().useWrapper(wrapperFun)`
    * @param wrapperFun - функция-обёртка
    */
-  wrap<T>(wrapperFun: (v:D) => T): ProxyAtom<MaybeAny<T>>
+  useWrapper<T>(wrapperFun: (v:D) => T): Atom<MaybeAny<T>>
   /**
-   * Создать атом c функцией добытчика {@link ProxyAtom.useGetter}.
+   * Создать атом c функцией добытчика {@link Atom.useGetter}.
    * @remarks
    * Сокращённая запись `A().useGetter(fun)`
    * @param getterFn - функция-добытчик
    */
-  getter<T>(getterFn: () => T): ProxyAtom<T>
+  useGetter<T>(getterFn: () => T): Atom<T>
 
   /**
-   * Создать атом c функцией добытчика {@link ProxyAtom.useGetter}.
+   * Создать атом c функцией добытчика {@link Atom.useGetter}.
    * @remarks
    * Сокращённая запись `A().useOnceGet(fun)`
    * @param getterFn - функция-добытчик
    */
-  getOnce<D>(getterFn: () => D): ProxyAtom<D>
+  useOnceGet<D>(getterFn: () => D): Atom<D>
 
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
@@ -87,19 +89,19 @@ export interface AConstant<D> extends AtomCreator {
    * @param atoms - набор входных атомов для вычисления значения
    * @returns {@link ext-computed#ComputeStrategy}
    */
-  from<IN extends ProxyAtom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
+  from<IN extends Atom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
 }
-/**{@link AConstant}*/
+/**{@link AConstructor}*/
 export const A = (Object.assign(AC, {
-  getOnce(getterFun) {
+  useOnceGet(getterFun) {
     return A().useOnceGet(getterFun)
   },
-  getter(getterFun) {
+  useGetter(getterFun) {
     const a = A()
     a.useGetter(getterFun)
     return a
   },
-  wrap(wrapperFun) {
+  useWrapper(wrapperFun) {
     return A().useWrapper(wrapperFun)
   },
   from(...atoms){
@@ -111,9 +113,9 @@ export const A = (Object.assign(AC, {
     alive(v) && a(v)
     return  a
   }
-}) as any) as AConstant<any>
+}) as any) as AConstructor<any>
 
 export default A
 
 
-export { ProxyAtom } from '../core'
+export { Atom } from '../atom/index'

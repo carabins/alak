@@ -1,6 +1,5 @@
-import { ComputeStrategy, from } from '../ext-computed'
-import A from '../facade'
-import { installExtension } from '../core'
+import { installAtomExtension } from '../atom/create'
+// import { installExtension } from '../core'
 
 /**
  * Расширение паттерн-матчинга
@@ -12,13 +11,13 @@ import { installExtension } from '../core'
 
 // @ts-ignore
 declare module 'alak/core' {
-  interface ProxyAtom<T> {
-    match(...pattern: any[]): ProxyAtom<T>
+  interface Atom<T> {
+    match(...pattern: any[]): Atom<T>
   }
 }
 
 export function installMatchingExtension(){
-  installExtension({
+  installAtomExtension({
     handlers: {
       match,
     },
@@ -64,7 +63,7 @@ function parsePattern(pattern) {
 }
 export function match(...pattern) {
   const matcher = matching(...pattern)
-  this.proxy.up(matcher)
+  this._.up(matcher)
 }
 
 function matching(...args) {
