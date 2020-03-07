@@ -1,8 +1,16 @@
 # Alak - Reactive Atom  
 
 [![npm version](https://badge.fury.io/js/alak.svg)](https://badge.fury.io/js/alak)
-[![dependencies](https://david-dm.org/gleba/alak.svg)](https://david-dm.org/carabins/alak)
+
+[![dependents](https://david-dm.org/carabins/alak/status.svg)](https://david-dm.org/carabins/alak/status.svg)
+[![dependents](https://badgen.net/npm/dependents/alak)](https://badgen.net/npm/dependents/alak)
 [![Downloads](https://img.shields.io/npm/dt/alak.svg)](https://www.npmjs.com/package/alak)
+
+[![Types](https://badgen.net/npm/types/alak)](https://badgen.net/npm/types/alak)
+[![Install Size](https://badgen.net/packagephobia/install/alak)](https://badgen.net/packagephobia/install/alak)
+[![Install Size](https://badgen.net/bundlephobia/minzip/alak)](https://badgen.net/bundlephobia/minzip/alak)
+
+
 
 Базовая реактивная частица для создания простейших конечных автоматов или логики бесконечной сложности.
 
