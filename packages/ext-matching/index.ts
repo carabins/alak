@@ -2,7 +2,7 @@ import { installAtomExtension } from '../atom/create'
 // import { installExtension } from '../core'
 
 /**
- * Расширение паттерн-матчинга
+ * Расширение паттерн-матчинга. Описание в процессе...
  * @remarks
  * @public
  * @packageDocumentation

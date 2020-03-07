@@ -16,6 +16,7 @@ export interface AtomCoreConstructor
 
 
 ```javascript
+import {AC} from 'alak/atom'
 const flow = AC() // сокращённая запись AC.proxy()
 
 ```

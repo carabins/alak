@@ -1,7 +1,7 @@
 /**
- * Ядро атома
+ * Mодуль ядра атома
  * @remarks
- * Атом - это функция-контейнер, предназначенная для множественной доставки значения контейнера
+ * Атом - это функция-контейнер, предназначенная для атомарной доставки данных
  * в дочерние функции-получатели.
  *
  * - Передача значения в функцию-атом установит значение контейнера и
@@ -18,31 +18,25 @@ import { createProtoAtom, createAtom } from './create'
  * Опции расширения
  * @remarks
  * Содержит параметры расширения для методов и свойств атома.
- * Доступ к атому из {@link FlowHandler| функций обработчиков}  происходит через контекст `this`.
+ * Доступ к атому из {@link ExtensionHandler| функций обработчиков}  происходит через контекст `this`.
  */
 export interface ExtensionOptions {
-  /** {@link FlowHandlers | обработчики методов атома}
-   * @remarks
-   * смотрите так же: {@link FlowHandlers} и {@link FlowHandler}*/
-  handlers?: FlowHandlers
-  /** {@link FlowHandlers | обработчики свойств атома}
-   * @remarks
-   * смотрите так же: {@link FlowHandlers} и {@link FlowHandler}*/
-  properties?: FlowHandlers
+  /** {@link ExtensionOptionsHandlers | обработчики методов атома}*/
+  handlers: {
+    [key: string]: (this: Core, ...a: any[]) => any
+  }
+  // /** {@link ExtensionOptionsHandlers | обработчики свойств атома}*/
+  // properties?: ExtensionOptionsHandlers
 }
 
-/** Функция с контекстом {@link Core | атома}
- * @remarks
- * смотрите так же: {@link ExtensionOptions}*/
-export type FlowHandler = {
-  (this: Core, ...a: any[]): any
-}
-/** Объект с обработчиками {@link FlowHandler}
- * @remarks
- * смотрите так же: {@link ExtensionOptions}*/
-export type FlowHandlers = {
-  [key: string]: FlowHandler
-}
+// /** Функция с контекстом {@link Core | атома}*/
+// export type ExtensionHandler = {
+//   (this: Core, ...a: any[]): any
+// }
+// /** Объект с обработчиками {@link ExtensionHandler}*/
+// export type ExtensionOptionsHandlers = {
+//   [key: string]: ExtensionHandler
+// }
 export { installAtomExtension } from './create'
 
 /** {@link AtomCoreConstructor} */
@@ -52,6 +46,12 @@ export const AC: AtomCoreConstructor = Object.assign(createProtoAtom, {
 })
 /** Функция-контейнер*/
 export type Core = {
+  (...a: any[]): void
+  _: Atom<any>
+  _name: string
+  value: any
+  uid: number
+  id: string
   children: Set<AnyFunction>
   grandChildren: Map<AnyFunction, AnyFunction>
   stateListeners: Map<string, Set<AnyFunction>>
@@ -59,16 +59,10 @@ export type Core = {
   wrapperFn: any
   meta: any
   metaMap?: Map<string, any>
-  _: any
-  value: any
-  uid: number
-  id: string
-  _name: string
   haveFrom: boolean
   isEmpty: boolean
   isAsync: boolean
   isAwaiting: boolean | any
-  (...a: any[]): void
 }
 type AnyFunction = {
   (...v: any[]): any
@@ -80,6 +74,7 @@ export type MaybeAny<T> = unknown extends T ? any : T
  * Создание прокси-атома и атома
  * @example
  * ```javascript
+ * import {AC} from 'alak/atom'
  * const flow = AC() // сокращённая запись AC.proxy()
  * ```
  */
