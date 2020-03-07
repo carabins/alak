@@ -20,7 +20,6 @@ function pathCore() {
     core_1.debug.enabled = true;
     Object.keys(events_1.DebugEvent).forEach(eventName => (core_1.debug[eventName] = (...a) => routeEvent(eventName, ...a)));
 }
-//event: string, atom: Atom, context?: string
 function routeEvent(...args) {
     receivers.forEach(r => r(...args));
 }

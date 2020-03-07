@@ -3,9 +3,9 @@
  * @remarks
  * импорт модуля расширяет интерфейс `Atom`
  * ```typescript
- * declare module 'alak/core' {
- *   interface Atom<T> {
- *     from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
+ * declare module 'alak/atom' {
+ *   interface IAtom<T> {
+ *     from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
  *   }
  * }
  * ```
@@ -32,7 +32,7 @@
 
 import { setAtomValue } from '../atom/core'
 import { alive, isPromise } from '../atom/utils'
-import { Core, installAtomExtension, Atom } from '../atom/index'
+import { Core, installAtomExtension, IAtom } from '../atom/index'
 import { createPrivateKey } from 'crypto'
 
 /** Установить расширение вычисления множеств прокси-атома*/
@@ -45,8 +45,8 @@ export function installComputedExtension() {
 }
 // @ts-ignore
 declare module 'alak/core' {
-  interface Atom<T> {
-    from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
+  interface IAtom<T> {
+    from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
 
@@ -84,7 +84,7 @@ type ComputeInOut<IN extends any[], OUT> = {
   (...v: ReturnArrayTypes<IN>): OUT
 }
 type ComputeAtom<IN extends any[]> = {
-  <OUT>(fn: ComputeInOut<IN, OUT>): Atom<OUT>
+  <OUT>(fn: ComputeInOut<IN, OUT>): IAtom<OUT>
 }
 
 /** @internal */
@@ -95,7 +95,7 @@ export type ComputeStrategicAtom<IN extends any[]> = {
 const computedContext = 'computed'
 
 /** @internal */
-export function from(...fromAtoms: Atom<any>[]) {
+export function from(...fromAtoms: IAtom<any>[]) {
   const atom: Core = this
   if (atom.haveFrom) {
     throw `from atoms already has a assigned`
@@ -124,7 +124,7 @@ export function from(...fromAtoms: Atom<any>[]) {
     return mixedValue
   }
   const makeMix = mixFn => {
-    const inAwaiting: Atom<any>[] = []
+    const inAwaiting: IAtom<any>[] = []
     const { strong, some } = mixFn
     const needFull = strong || some
     let values = fromAtoms.map(a => {
@@ -144,11 +144,11 @@ export function from(...fromAtoms: Atom<any>[]) {
   }
   const linkedValues = {}
   function weak(mixFn) {
-    function mixer(v) {
-      const linkedValue = linkedValues[this.id]
+    function mixer(v, a) {
+      const linkedValue = linkedValues[a.id]
       if (v !== linkedValue) {
         makeMix(mixFn)
-        linkedValues[this.id] = v
+        linkedValues[a.id] = v
       }
     }
     fromAtoms.forEach(a => {
@@ -209,10 +209,10 @@ export function from(...fromAtoms: Atom<any>[]) {
       return mixFn(...values)
     }
 
-    function mixer(v) {
-      const linkedValue = linkedValues[this.id]
+    function mixer(v, a) {
+      const linkedValue = linkedValues[a.id]
       if (v !== linkedValue) {
-        linkedValues[this.id] = v
+        linkedValues[a.id] = v
       }
     }
     fromAtoms.forEach(a => {

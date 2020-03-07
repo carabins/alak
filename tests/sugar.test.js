@@ -84,3 +84,13 @@ test('grand down', () => {
   a(true)
   expect(fn).toHaveBeenCalledTimes(3)
 })
+
+test('upDown', ()=>{
+  const a = A()
+  a.upDown((v, down)=>{
+    expect(v).toBeTruthy()
+    down()
+  })
+  a(true)
+  a(false)
+})

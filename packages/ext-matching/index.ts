@@ -11,8 +11,8 @@ import { installAtomExtension } from '../atom/create'
 
 // @ts-ignore
 declare module 'alak/core' {
-  interface Atom<T> {
-    match(...pattern: any[]): Atom<T>
+  interface IAtom<T> {
+    match(...pattern: any[]): IAtom<T>
   }
 }
 

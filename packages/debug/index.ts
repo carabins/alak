@@ -24,7 +24,6 @@ function pathCore() {
     eventName => (debug[eventName] = (...a) => routeEvent(eventName, ...a)),
   )
 }
-//event: string, atom: Atom, context?: string
 function routeEvent(...args) {
   receivers.forEach(r => r(...args))
 }

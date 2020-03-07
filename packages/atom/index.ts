@@ -1,5 +1,5 @@
 /**
- * Mодуль ядра атома
+ * Коренной модуль атома
  * @remarks
  * Атом - это функция-контейнер, предназначенная для атомарной доставки данных
  * в дочерние функции-получатели.
@@ -18,10 +18,10 @@ import { createProtoAtom, createAtom } from './create'
  * Опции расширения
  * @remarks
  * Содержит параметры расширения для методов и свойств атома.
- * Доступ к атому из {@link ExtensionHandler| функций обработчиков}  происходит через контекст `this`.
+ * Доступ к атому из функций обработчиков происходит через контекст `this`.
  */
 export interface ExtensionOptions {
-  /** {@link ExtensionOptionsHandlers | обработчики методов атома}*/
+  /** { обработчики методов атома}*/
   handlers: {
     [key: string]: (this: Core, ...a: any[]) => any
   }
@@ -39,15 +39,15 @@ export interface ExtensionOptions {
 // }
 export { installAtomExtension } from './create'
 
-/** {@link AtomCoreConstructor} */
-export const AC: AtomCoreConstructor = Object.assign(createProtoAtom, {
+/** {@link IAtomCoreConstructor} */
+export const AC: IAtomCoreConstructor = Object.assign(createProtoAtom, {
   proxy: createAtom,
   proto: createProtoAtom,
 })
 /** Функция-контейнер*/
 export type Core = {
   (...a: any[]): void
-  _: Atom<any>
+  _: IAtom<any>
   _name: string
   value: any
   uid: number
@@ -78,36 +78,37 @@ export type MaybeAny<T> = unknown extends T ? any : T
  * const flow = AC() // сокращённая запись AC.proxy()
  * ```
  */
-export interface AtomCoreConstructor {
-  /** Создать {@link Atom} с необязательным аргументом как стартовое значение*/
-  <T>(value?: T): Atom<MaybeAny<T>>
+export interface IAtomCoreConstructor {
+  /** Создать {@link IAtom} с необязательным аргументом как стартовое значение*/
+  <T>(value?: T): IAtom<MaybeAny<T>>
   /**
-   * Создать {@link Atom} с необязательным аргументом как стартовое значение
+   * Создать {@link IAtom} с необязательным аргументом как стартовое значение
    * @remarks
    * Максимальные функции, максимальная скорость создания, минимальное потребление памяти.
    * @param value - необязательное стартовое значение
-   * @returns {@link Atom}
+   * @returns {@link IAtom}
    * @readonly
    */
-  proxy<T>(value?: T): Atom<MaybeAny<T>>
+  proxy<T>(value?: T): IAtom<MaybeAny<T>>
   /**
-   * Создать {@link Atom} с необязательным аргументом как стартовое значение
+   * Создать {@link IAtom} с необязательным аргументом как стартовое значение
    * @remarks
    * Минимальные функции, максимальная скорость доставки значения за счёт увеличения потребления памяти.
    * @param value - необязательное стартовое значение
-   * @returns {@link Atom}
+   * @returns {@link IAtom}
    */
-  proto<T>(value?: T): Atom<MaybeAny<T>>
+  proto<T>(value?: T): IAtom<MaybeAny<T>>
 }
 
-type ValueReceiver<T extends any> = (v: T) => void
+type ValueReceiver<T extends any> = (v: T, a:IAtom<T>) => void
+type ValueDownReceiver<T extends any> = (v: T, down:()=>void) => void
 
 
-/** Экземпляр атома
+/** Интерфейс ядра атома.
  * @remarks
  * Функция-контейнер.
  */
-export interface Atom<T> {
+export interface IAtom<T> {
   /**
    * Вернуть текущее значение контейнера
    */
@@ -133,9 +134,9 @@ export interface Atom<T> {
   /** Вернёт `true` при отсутствующем значении в контейнере*/
   readonly isEmpty: boolean
 
-  /** Идентификатор, вернёт `uid` если не был задан {@link Atom.setId}*/
+  /** Идентификатор, вернёт `uid` если не был задан {@link IAtom.setId}*/
   readonly id: string
-  /** Имя заданное {@link Atom.setName} */
+  /** Имя заданное {@link IAtom.setName} */
   readonly name: string
 
   /** Уникальный идентификатор генерируется при создании.*/
@@ -146,106 +147,111 @@ export interface Atom<T> {
   // off: FlowStateListner
 
   /** check 'from' or 'warp' function are async*/
-  /** Является ли уставленный добытчик {@link Atom.useGetter} асинхронным */
+  /** Является ли уставленный добытчик {@link IAtom.useGetter} асинхронным */
   readonly isAsync: Boolean
   /** Находится ли атом в процессе получения значения от асинхронного добытчика
-   * {@link Atom.useGetter}*/
+   * {@link IAtom.useGetter}*/
   readonly isAwaiting: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * и передать текущее значение контейнера, если оно есть
    * @param receiver - функция-получатель
-   * @returns {@link atom#Atom}*/
-  up(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link atom#IAtom}*/
+  up(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель и передать значение со следующего обновления
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  next(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  next(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Удалить функцию-получатель
    * @param receiver - функция-получатель
-   * @returns {@link atom#Atom}*/
-  down(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link atom#IAtom}*/
+  down(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Передать один раз в функцию-получатель значение контейнера,
    * текущее если оно есть или как появится
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  once(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  once(receiver: ValueReceiver<T>): IAtom<T>
+
+  /** Добавить функцию-получатель со вторым аргументом функцией-отмены подписки
+   * @param receiver - функция-получатель
+   * @returns {@link IAtom}*/
+  upDown(receiver: ValueDownReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель значений не равных `null` и `undefined`
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  upSome(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  upSome(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель значений равных `true`
    * после приведения значения к типу `boolean` методом `!!value`
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  upTrue(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  upTrue(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель значений равных `false`
    * после приведения значения к типу `boolean` методом `!value`
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  upFalse(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  upFalse(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель значений равных `false`
    * после приведения значения к типу `boolean` методом `!value`
    * за исключением `null` и `undefined`
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  upSomeFalse(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  upSomeFalse(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить функцию-получатель значений равных `null` и `undefined`
    * @param receiver - функция-получатель
-   * @returns {@link Atom}*/
-  upNone(receiver: ValueReceiver<T>): Atom<T>
+   * @returns {@link IAtom}*/
+  upNone(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Проверить значение контейнера на соответствие
    * @param compareValue - проверяемое значение
    * @returns положительно при соответствии заданного значения значению контейнера*/
   is(compareValue: T): boolean
 
-  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link Atom.useGetter}
+  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link IAtom.useGetter}
    * @param listener - функция-слушатель
-   * @returns {@link Atom}*/
-  onAwait(listener: (isAwaiting: boolean) => void): Atom<T>
+   * @returns {@link IAtom}*/
+  onAwait(listener: (isAwaiting: boolean) => void): IAtom<T>
   /** Удалить слушатель изменения асинхронного состояния
    * @param listener - функция-слушатель
-   * @returns {@link Atom}*/
+   * @returns {@link IAtom}*/
   offAwait(listener: AnyFunction): void
   /** Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
-   * @returns {@link Atom}*/
-  clear(): Atom<T>
+   * @returns {@link IAtom}*/
+  clear(): IAtom<T>
 
   /** Очистить значение контейнера
-   * @returns {@link atom#Atom} */
-  clearValue(): Atom<T>
+   * @returns {@link atom#IAtom} */
+  clearValue(): IAtom<T>
 
-  /** Удалить все свойства, функции и ссылки,  {@link core#Atom}*/
+  /** Распад атома, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.*/
   decay(): void
 
   /** Повторно отправить значение всем функциям-получателям
-   * @returns {@link Atom} */
-  resend(): Atom<T>
+   * @returns {@link IAtom} */
+  resend(): IAtom<T>
 
   /** Установить идентификатор
    * @param id - идентификатор
-   * @returns {@link Atom} */
-  setId(id: string): Atom<T>
+   * @returns {@link IAtom} */
+  setId(id: string): IAtom<T>
 
   /** Установить имя
    * @param name - имя
-   * @returns {@link Atom} */
-  setName(name: string): Atom<T>
+   * @returns {@link IAtom} */
+  setName(name: string): IAtom<T>
 
   /** Добавить мета-данные
    * @param metaName - название-ключ мета-данных
    * @param value - необязательное значение мета-данных
-   * @returns {@link Atom} */
-  addMeta(metaName: string, value?: any): Atom<T>
+   * @returns {@link IAtom} */
+  addMeta(metaName: string, value?: any): IAtom<T>
 
   /** Проверить на наличие мета-данных
    * @param metaName - имя мета-данных
@@ -261,28 +267,28 @@ export interface Atom<T> {
    * @remarks
    * Функция-добытчик вызывается каждый раз при вызове функции-атома
    * @param getter - функция-добытчик
-   * @param isAsync - установить значение {@link Atom.isAsync}
-   * @returns {@link Atom} */
-  useGetter(getter: () => T | Promise<T>, isAsync?:boolean): Atom<T>
+   * @param isAsync - установить значение {@link IAtom.isAsync}
+   * @returns {@link IAtom} */
+  useGetter(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
   /** Использовать функцию-добытчик только один раз
    * @param getter - функция-добытчик
-   * @param isAsync - установить значение {@link Atom.isAsync}
-   * @returns {@link Atom} */
-  useOnceGet(getter: () => T | Promise<T>, isAsync?:boolean): Atom<T>
+   * @param isAsync - установить значение {@link IAtom.isAsync}
+   * @returns {@link IAtom} */
+  useOnceGet(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
 
   /** Использовать функцию-обёртку
    * Каждое новое обновление значение контейнера атома,
    * всегда будет проходить сперва через функцию-обёртку
    * @param wrapper - функция-обёртка
-   * @param isAsync - установить значение returns {@link Atom.isAsync}
-   * @returns {@link Atom} */
-  useWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): Atom<T>
+   * @param isAsync - установить значение returns {@link IAtom.isAsync}
+   * @returns {@link IAtom} */
+  useWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей
    * новое значение в контейнер и дочерним функциям-получателям
-   * @returns {@link Atom} */
-  fmap(fun: (v: T) => T): Atom<T>
+   * @returns {@link IAtom} */
+  fmap(fun: (v: T) => T): IAtom<T>
 
   /**
    * Создать дубликат значение
@@ -295,5 +301,5 @@ export interface Atom<T> {
    * @param targetObject - целевой объект
    * @param key - ключ доступа к значению в объекте
    */
-  injectOnce(targetObject: any, key?: string): Atom<T>
+  injectOnce(targetObject: any, key?: string): IAtom<T>
 }

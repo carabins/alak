@@ -4,10 +4,10 @@
 
 ## AC variable
 
-[AtomCoreConstructor](./atom.atomcoreconstructor.md)
+[IAtomCoreConstructor](./atom.iatomcoreconstructor.md)
 
 <b>Signature:</b>
 
 ```typescript
-AC: AtomCoreConstructor
+AC: IAtomCoreConstructor
 ```

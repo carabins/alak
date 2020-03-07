@@ -4,10 +4,10 @@
 
 ## A variable
 
-[AtomConstructor](./facade.atomconstructor.md)
+[IAtomConstructor](./facade.iatomconstructor.md)
 
 <b>Signature:</b>
 
 ```typescript
-A: AtomConstructor<any>
+A: IAtomConstructor<any>
 ```

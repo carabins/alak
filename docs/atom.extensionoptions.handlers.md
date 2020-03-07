@@ -4,6 +4,7 @@
 
 ## ExtensionOptions.handlers property
 
+{ обработчики методов атома<!-- -->}
 
 <b>Signature:</b>
 
