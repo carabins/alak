@@ -1,0 +1,5 @@
+{
+  "watch": ["make-doc", "./../docs"],
+  "ext": "md, js",
+  "exec": "node make-doc"
+}

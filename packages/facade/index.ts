@@ -1,7 +1,7 @@
 /**
- * Корневой модуль библиотеки.
+ * Лицевой модуль библиотеки.
  * @remarks
- * Сборка всех частей библиотеки в {@link AConstructor| A} константе.
+ * Сборка всех частей библиотеки в {@link AtomConstructor| A} константе.
  *
  * Импорт модуля устанавливает все модули-расширения библиотеки.
  * @public
@@ -36,10 +36,11 @@ installMatchingExtension()
  * Функция-константа, расширяет {@link atom#AtomCreator}
  * @example
  * ```javascript
+ * import A from 'alak'
  * const atom = A() // сокращённая запись A.proxy()
  * ```
  * */
-export interface AConstructor<D> extends AtomCoreConstructor {
+export interface AtomConstructor<D> extends AtomCoreConstructor {
   <T>(value?: T): Atom<MaybeAny<T>>
 
   /**
@@ -91,7 +92,7 @@ export interface AConstructor<D> extends AtomCoreConstructor {
    */
   from<IN extends Atom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
 }
-/**{@link AConstructor}*/
+/**{@link AtomConstructor}*/
 export const A = (Object.assign(AC, {
   useOnceGet(getterFun) {
     return A().useOnceGet(getterFun)
@@ -113,7 +114,7 @@ export const A = (Object.assign(AC, {
     alive(v) && a(v)
     return  a
   }
-}) as any) as AConstructor<any>
+}) as any) as AtomConstructor<any>
 
 export default A
 

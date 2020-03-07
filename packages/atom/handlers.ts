@@ -15,7 +15,7 @@ import {
   someFilter,
   trueFilter,
 } from './utils'
-import { FlowHandlers } from './index'
+// import { ExtensionOptionsHandlers } from './index'
 
 const valueProp = 'value'
 
@@ -65,7 +65,7 @@ export const proxyProps = {
 
 const applyValue = (a, f) => (!a.isEmpty ? (f(a.value, a), true) : false)
 
-export const handlers: FlowHandlers = {
+export const handlers = {
   up(f) {
     this.children.add(f)
     applyValue(this._, f)

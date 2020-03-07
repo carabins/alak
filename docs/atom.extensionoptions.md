@@ -14,12 +14,11 @@ export interface ExtensionOptions
 
 ## Remarks
 
-Содержит параметры расширения для методов и свойств атома. Доступ к атому из [функций обработчиков](./atom.flowhandler.md) происходит через контекст `this`<!-- -->.
+Содержит параметры расширения для методов и свойств атома. Доступ к атому из  происходит через контекст `this`<!-- -->.
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [handlers](./atom.extensionoptions.handlers.md) | <code>FlowHandlers</code> | [обработчики методов атома](./atom.flowhandlers.md) |
-|  [properties](./atom.extensionoptions.properties.md) | <code>FlowHandlers</code> | [обработчики свойств атома](./atom.flowhandlers.md) |
+|  [handlers](./atom.extensionoptions.handlers.md) | <code>{</code><br/><code>        [key: string]: (this: Core, ...a: any[]) =&gt; any;</code><br/><code>    }</code> |  |
 

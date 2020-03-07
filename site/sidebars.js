@@ -11,16 +11,18 @@ module.exports = {
     API: [
       //'start',
       'api/index',
-      'api/atom',
+      'api/atom.atom',
+      'api/facade.atomconstructor',
       'api/facade',
-      //'api/facade.proxyatom',
-      //'api/facade.aconstant',
+      'api/atom',
+      'api/atom.atomcoreconstructor',
+      'api/atom.extensionoptions',
     ],
 
     Extensions: [
-      //'ext-computed',
-      //'ext-computed.computestrategy',
-
+      'api/ext-computed',
+      'api/ext-computed.computestrategy',
+      'api/ext-matching',
     ],
   },
 }

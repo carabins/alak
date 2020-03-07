@@ -4,15 +4,11 @@
 
 ## ExtensionOptions.handlers property
 
-[обработчики методов атома](./atom.flowhandlers.md)
 
 <b>Signature:</b>
 
 ```typescript
-handlers?: FlowHandlers;
+handlers: {
+        [key: string]: (this: Core, ...a: any[]) => any;
+    };
 ```
-
-## Remarks
-
-смотрите так же: [FlowHandlers](./atom.flowhandlers.md) и [FlowHandler](./atom.flowhandler.md)
-

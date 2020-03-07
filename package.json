@@ -9,7 +9,8 @@
     "/facade",
     "/ext-computed",
     "/ext-matching",
-    "/debug"
+    "/debug",
+    "/umd"
   ],
   "keywords": [
     "dependency free",

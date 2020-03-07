@@ -9,6 +9,7 @@ export function clearLib() {
   rm('ext-matching')
   rm('ext-computed')
   rm('debug')
+  rm('umd')
 }
 
 export async function tsc() {

@@ -2,9 +2,10 @@
 id: start
 title: Начало
 ---
-```jsx live
 
-const a = A()
+В процессе написания....
+
+```jsx live
 function Clock(props) {    
   const [date, setDate] = useState(new Date());
   useEffect(() => {

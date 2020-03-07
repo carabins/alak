@@ -10,6 +10,12 @@
 
 ```typescript
 export declare type Core = {
+    (...a: any[]): void;
+    _: Atom<any>;
+    _name: string;
+    value: any;
+    uid: number;
+    id: string;
     children: Set<AnyFunction>;
     grandChildren: Map<AnyFunction, AnyFunction>;
     stateListeners: Map<string, Set<AnyFunction>>;
@@ -17,15 +23,9 @@ export declare type Core = {
     wrapperFn: any;
     meta: any;
     metaMap?: Map<string, any>;
-    _: any;
-    value: any;
-    uid: number;
-    id: string;
-    _name: string;
     haveFrom: boolean;
     isEmpty: boolean;
     isAsync: boolean;
     isAwaiting: boolean | any;
-    (...a: any[]): void;
 };
 ```

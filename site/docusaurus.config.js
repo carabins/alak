@@ -1,10 +1,10 @@
 module.exports = {
   title: 'Alak Atom',
   tagline: 'базовая частица реактивности',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://alak.now.sh',
   baseUrl: '/',
   favicon: '/favicon.ico',
-  organizationName: 'gleba/alak', // Usually your GitHub org/user name.
+  organizationName: 'carabins/alak', // Usually your GitHub org/user name.
   projectName: 'alak', // Usually your repo name.
   themeConfig: {
     navbar: {
@@ -17,53 +17,49 @@ module.exports = {
         //{ to: 'docs/start', label: 'Docs', position: 'left' },
         { to: 'docs/api/index', label: 'API', position: 'left' },
         //{ to: 'blog', label: 'Blog', position: 'left' },
-        //{
-        //  href: 'https://github.com/facebook/docusaurus',
-        //  label: 'GitHub',
-        //  position: 'right',
-        //},
+        {
+          href: 'https://github.com/carabins/alak',
+          label: 'GitHub',
+          position: 'right',
+        },
       ],
     },
 
     footer: {
       style: 'dark',
       links: [
-        //{
-        //  title: 'Docs',
-        //  items: [
-        //    {
-        //      label: 'Style Guide',
-        //      to: 'docs/doc1',
-        //    },
-        //    {
-        //      label: 'Second Doc',
-        //      to: 'docs/doc2',
-        //    },
-        //  ],
-        //},
-        //{
-        //  title: 'Community',
-        //  items: [
-        //    {
-        //      label: 'Stack Overflow',
-        //      href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-        //    },
-        //    {
-        //      label: 'Discord',
-        //      href: 'https://discordapp.com/invite/docusaurus',
-        //    },
-        //  ],
-        //},
+        {
+          title: 'Docs',
+          items: [
+            {
+              label: 'Начало',
+              to: 'docs/start',
+            }
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'Telegram',
+              href: 'http://gleb.pw/',
+            }
+            //{
+            //  label: 'Discord',
+            //  href: 'https://discordapp.com/invite/docusaurus',
+            //},
+          ],
+        },
         {
           title: 'Social',
           items: [
-            {
-              label: 'Blog',
-              to: 'blog',
-            },
+            //{
+            //  label: 'Blog',
+            //  to: 'blog',
+            //},
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/glebyp',
+              href: 'https://github.com/carabins/alak',
             },
             {
               label: 'Twitter',
