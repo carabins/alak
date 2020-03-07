@@ -103,6 +103,7 @@ async function make() {
     body = body.replace(/<\/code>/g, '`')
     body = body.replace(/&lt;/g, '<')
     body = body.replace(/&gt;/g, '>')
+    body = body.replace(/&#124;/g, '|')
     const parts = f.split('.')
     const title = titleCode.exec(body)[0].slice(3)
     const type = title.split(' ')[1]
