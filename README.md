@@ -1,10 +1,10 @@
-# Alak - Reactive IAtom  
+# Alak - Reactive Atom  
 
 [![npm version](https://badge.fury.io/js/alak.svg)](https://badge.fury.io/js/alak)
 [![dependencies](https://david-dm.org/gleba/alak.svg)](https://david-dm.org/carabins/alak)
 [![Downloads](https://img.shields.io/npm/dt/alak.svg)](https://www.npmjs.com/package/alak)
 
-Базовая реактивная частица реализации логики бесконечной сложности и простейших конечных автоматов.
+Базовая реактивная частица для создания простейших конечных автоматов или логики бесконечной сложности.
 
 ```bash
 npm i alak
