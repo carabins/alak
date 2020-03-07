@@ -6,9 +6,9 @@
 [![dependents](https://badgen.net/npm/dependents/alak)](https://badgen.net/npm/dependents/alak)
 [![Downloads](https://img.shields.io/npm/dt/alak.svg)](https://www.npmjs.com/package/alak)
 
-[![Types](https://badgen.net/npm/types/alak)](https://badgen.net/npm/types/alak)
 [![Install Size](https://badgen.net/packagephobia/install/alak)](https://badgen.net/packagephobia/install/alak)
 [![Install Size](https://badgen.net/bundlephobia/minzip/alak)](https://badgen.net/bundlephobia/minzip/alak)
+[![Types](https://badgen.net/npm/types/alak)](https://badgen.net/npm/types/alak)
 
 
 
@@ -30,7 +30,7 @@ a(2)
 
   
 ### alak / अलक 
-Новое звучение таких понятий как стримы, потоки, каналы.
+Новое звучение понятий - стримы, потоки, каналы.
   
 Значение अलक на Русском :
 - Локоны, Виться, Пряди, Завитки, Вселенная
