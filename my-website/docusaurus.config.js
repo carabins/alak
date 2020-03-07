@@ -1,6 +1,6 @@
 module.exports = {
   title: 'Alak Atom',
-  tagline: 'базовая частица реактивного приложения',
+  tagline: 'базовая частица реактивности',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   favicon: '/favicon.ico',

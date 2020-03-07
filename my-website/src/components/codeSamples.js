@@ -1,6 +1,3 @@
-const a = A()
-
-
 
 export const codeSamples = [
   {
@@ -60,3 +57,4 @@ a(2)
 a(["."])`,
   },
 ]
+
