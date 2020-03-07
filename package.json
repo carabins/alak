@@ -24,7 +24,7 @@
   ],
   "author": "Gleb Panteleev <dev@gleb.pw> (http://gleb.pw/)",
   "license": "MIT",
-  "repository": "https://github.com/gleba/alak",
+  "repository": "https://github.com/carabins/alak",
   "husky": {
     "hooks": {}
   },

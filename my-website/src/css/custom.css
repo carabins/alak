@@ -59,13 +59,11 @@
   -ms-transition: opacity 0.4s;
 }
 
-
-
-.full-width{
+.full-width {
   width: 100%;
 }
 .home-repl {
-  box-shadow: 0px 0px 50px rgba(0,0,0,0.3);
+  box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.3);
   display: flex;
   background-color: var(--ifm-pre-background);
   margin-bottom: 100px;
@@ -82,8 +80,9 @@
 .home-repl .try li {
   padding: 7px 20px;
   padding-left: 31px;
+  cursor: pointer;
 }
-.home-repl .try .selected{
+.home-repl .try .selected {
   background: #2e3440;
   color: #d8dee9;
 }
@@ -94,13 +93,29 @@
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-rows: 1fr;
-  grid-template-areas: ". .";
+  grid-template-areas: '. .';
+  min-height: 100px;
+}
+.overflow-mirror {
+  width: 100%;
+  position: relative;
+  height: 300px;
+}
+.mirror {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.target {
+  width: 500px;
+  background: #4c566a;
 }
 .atom-stats .controls {
   height: 100%;
   width: 80px;
   background-color: yellow;
-  /*font-family: 'Fira Code', monospace;*/
   font-size: 10px;
 }
 .atom-stats pre {
@@ -127,6 +142,13 @@
   font-size: 12px;
   padding: 0 0 !important;
   margin: 0 0 !important;
+}
+
+@media screen and (max-width: 700px) {
+  .atom-stats table {
+    visibility: hidden;
+    display: none;
+  }
 }
 .atom-stats tr .norm {
   padding: 2px 4px !important;
