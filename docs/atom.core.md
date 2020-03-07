@@ -11,7 +11,7 @@
 ```typescript
 export declare type Core = {
     (...a: any[]): void;
-    _: Atom<any>;
+    _: IAtom<any>;
     _name: string;
     value: any;
     uid: number;

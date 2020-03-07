@@ -49,12 +49,8 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
 
 export function notifyChildes(atom: Core) {
   const v = atom.value
-  atom.children.size > 0 && atom.children.forEach(f => f.call(atom._, v))
-  atom.grandChildren &&
-    atom.grandChildren.size > 0 &&
-    atom.grandChildren.forEach((f, k) => {
-      f(v)
-    })
+  atom.children.size > 0 && atom.children.forEach(f => f(v, atom._))
+  atom.grandChildren && atom.grandChildren.size > 0 && atom.grandChildren.forEach(f => f(v, atom._))
 }
 
 export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction): any {

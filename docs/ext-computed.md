@@ -11,9 +11,9 @@
 импорт модуля расширяет интерфейс `Atom`
 
 ```typescript
-declare module 'alak/core' {
-  interface Atom<T> {
-    from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
+declare module 'alak/atom' {
+  interface IAtom<T> {
+    from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
 

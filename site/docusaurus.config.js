@@ -16,7 +16,13 @@ module.exports = {
       links: [
         //{ to: 'docs/start', label: 'Docs', position: 'left' },
         { to: 'docs/api/index', label: 'API', position: 'left' },
+        //{ to: 'coverage/', label: 'Test Coverage', position: 'left' },
         //{ to: 'blog', label: 'Blog', position: 'left' },
+        {
+          href: '/coverage',
+          label: 'Test coverage',
+          position: 'right',
+        },
         {
           href: 'https://github.com/carabins/alak',
           label: 'GitHub',

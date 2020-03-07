@@ -17,9 +17,9 @@ import { installAtomDebuggerTool } from '../packages/debug'
 // installMatchingExtension()
 // //
 declare module '../packages/facade' {
-  interface Atom<T> {
-    match(...pattern: any[]): Atom<T>
-    from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
+  interface IAtom<T> {
+    match(...pattern: any[]): IAtom<T>
+    from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
 
@@ -30,16 +30,21 @@ declare module '../packages/facade' {
 const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
 const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
-const atomA = A.id('a').useGetter(asyncHello)
-const atomB = A.id('b').useGetter(asyncWorld)
-const atomAB = A.id('c')
-  .from(atomA, atomB)
-  .strong((valueA, valueB) => {
-    console.log("aa")
-    return `${valueA} ${valueB}`
-  })
+const a = A()
 
-atomAB()
+
+
+
+// const atomA = A.id('a').useGetter(asyncHello)
+// const atomB = A.id('b').useGetter(asyncWorld)
+// const atomAB = A.id('c')
+//   .from(atomA, atomB)
+//   .strong((valueA, valueB) => {
+//     console.log("aa")
+//     return `${valueA} ${valueB}`
+//   })
+//
+// atomAB()
 // // console.log(a)
 // // // console.log(a.id)
 // // //

@@ -11,11 +11,11 @@ module.exports = {
     API: [
       //'start',
       'api/index',
-      'api/atom.atom',
-      'api/facade.atomconstructor',
+      'api/atom.iatom',
+      'api/facade.iatomconstructor',
       'api/facade',
       'api/atom',
-      'api/atom.atomcoreconstructor',
+      'api/atom.iatomcoreconstructor',
       'api/atom.extensionoptions',
     ],
 

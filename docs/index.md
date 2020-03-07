@@ -8,8 +8,8 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [atom](./atom.md) | Mодуль ядра атома |
+|  [atom](./atom.md) | Коренной модуль атома |
 |  [ext-computed](./ext-computed.md) | Расширение вычисления множеств |
 |  [ext-matching](./ext-matching.md) | Расширение паттерн-матчинга. Описание в процессе... |
-|  [facade](./facade.md) | Лицевой модуль библиотеки. |
+|  [facade](./facade.md) | Модуль входа в библиотеку. |
 

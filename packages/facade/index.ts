@@ -1,14 +1,14 @@
 /**
- * Лицевой модуль библиотеки.
+ * Модуль входа в библиотеку.
  * @remarks
- * Сборка всех частей библиотеки в {@link AtomConstructor| A} константе.
+ * Сборка всех частей библиотеки в {@link IAtomConstructor| A} константе.
  *
  * Импорт модуля устанавливает все модули-расширения библиотеки.
  * @public
  * @packageDocumentation
  */
 
-import { AC, AtomCoreConstructor, installAtomExtension, MaybeAny, Atom } from '../atom/index'
+import { AC, IAtomCoreConstructor, installAtomExtension, MaybeAny, IAtom } from '../atom/index'
 import { ComputeStrategicAtom, from, installComputedExtension } from '../ext-computed/index'
 import { alive } from '../atom/utils'
 import { installMatchingExtension } from '../ext-matching/index'
@@ -33,47 +33,47 @@ installMatchingExtension()
 // })
 /** Конструктор атома
  * @remarks
- * Функция-константа, расширяет {@link atom#AtomCreator}
+ * Функция-константа, расширяет {@link atom#IAtomCoreConstructor}
  * @example
  * ```javascript
  * import A from 'alak'
  * const atom = A() // сокращённая запись A.proxy()
  * ```
  * */
-export interface AtomConstructor<D> extends AtomCoreConstructor {
-  <T>(value?: T): Atom<MaybeAny<T>>
+export interface IAtomConstructor<D> extends IAtomCoreConstructor {
+  <T>(value?: T): IAtom<MaybeAny<T>>
 
   /**
-   * Создать атом c предустановленным идентификатором {@link Atom.setId}.
+   * Создать атом c предустановленным идентификатором {@link IAtom.setId}.
    * @remarks
    * Сокращённая запись  `A().setId(id)`
    * @param id - идентификатор
    * @param startValue - стартовое значение
    */
-  id<T>(id: string | number, startValue?:T): Atom<MaybeAny<T>>
+  id<T>(id: string | number, startValue?:T): IAtom<MaybeAny<T>>
 
   /**
-   * Создать атом c функцией обёртки {@link Atom.useWrapper}.
+   * Создать атом c функцией обёртки {@link IAtom.useWrapper}.
    * @remarks
    * Сокращённая запись `A().useWrapper(wrapperFun)`
    * @param wrapperFun - функция-обёртка
    */
-  useWrapper<T>(wrapperFun: (v:D) => T): Atom<MaybeAny<T>>
+  useWrapper<T>(wrapperFun: (v:D) => T): IAtom<MaybeAny<T>>
   /**
-   * Создать атом c функцией добытчика {@link Atom.useGetter}.
+   * Создать атом c функцией добытчика {@link IAtom.useGetter}.
    * @remarks
    * Сокращённая запись `A().useGetter(fun)`
    * @param getterFn - функция-добытчик
    */
-  useGetter<T>(getterFn: () => T): Atom<T>
+  useGetter<T>(getterFn: () => T): IAtom<T>
 
   /**
-   * Создать атом c функцией добытчика {@link Atom.useGetter}.
+   * Создать атом c функцией добытчика {@link IAtom.useGetter}.
    * @remarks
    * Сокращённая запись `A().useOnceGet(fun)`
    * @param getterFn - функция-добытчик
    */
-  useOnceGet<D>(getterFn: () => D): Atom<D>
+  useOnceGet<D>(getterFn: () => D): IAtom<D>
 
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
@@ -90,9 +90,9 @@ export interface AtomConstructor<D> extends AtomCoreConstructor {
    * @param atoms - набор входных атомов для вычисления значения
    * @returns {@link ext-computed#ComputeStrategy}
    */
-  from<IN extends Atom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
+  from<IN extends IAtom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
 }
-/**{@link AtomConstructor}*/
+/**{@link IAtomConstructor}*/
 export const A = (Object.assign(AC, {
   useOnceGet(getterFun) {
     return A().useOnceGet(getterFun)
@@ -114,9 +114,9 @@ export const A = (Object.assign(AC, {
     alive(v) && a(v)
     return  a
   }
-}) as any) as AtomConstructor<any>
+}) as any) as IAtomConstructor<any>
 
 export default A
 
 
-export { Atom } from '../atom/index'
+export { IAtom } from '../atom/index'

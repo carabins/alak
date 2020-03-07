@@ -5,6 +5,13 @@ export const someFilter = f => v => (alive(v) ? f(v) : null)
 export const trueFilter = f => v => (isTruth(v) ? f(v) : null)
 export const someFalseFilter = f => v => (alive(v) && !isTruth(v) ? f(v) : null)
 export const falseFilter = f => v => (!isTruth(v) ? f(v) : null)
+export const upDownFilter = fun =>f => {
+  const down = a => () => a.down(fun)
+    return (v, a) => {
+    f(v, down(a))
+  }
+}
+
 
 export const DECAY_ATOM_ERROR = 'Attempt to pass into the decayed atom'
 export const PROPERTY_ATOM_ERROR = 'undefined atom property'

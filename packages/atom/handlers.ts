@@ -13,9 +13,8 @@ import {
   noneFilter,
   someFalseFilter,
   someFilter,
-  trueFilter,
+  trueFilter, upDownFilter,
 } from './utils'
-// import { ExtensionOptionsHandlers } from './index'
 
 const valueProp = 'value'
 
@@ -111,7 +110,6 @@ export const handlers = {
     if (!applyValue(this._, f)) {
       const once = v => {
         this.children.delete(once)
-        console.log(this.children.has(once))
         f(v)
       }
       this.children.add(once)
@@ -124,6 +122,10 @@ export const handlers = {
     } else {
       return value === undefined
     }
+  },
+  upDown(fun) {
+    grandUpFn(this, fun, upDownFilter(fun))
+    return this._
   },
   upSome(fun) {
     grandUpFn(this, fun, someFilter)

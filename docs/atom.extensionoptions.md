@@ -14,11 +14,11 @@ export interface ExtensionOptions
 
 ## Remarks
 
-Содержит параметры расширения для методов и свойств атома. Доступ к атому из  происходит через контекст `this`<!-- -->.
+Содержит параметры расширения для методов и свойств атома. Доступ к атому из функций обработчиков происходит через контекст `this`<!-- -->.
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [handlers](./atom.extensionoptions.handlers.md) | <code>{</code><br/><code>        [key: string]: (this: Core, ...a: any[]) =&gt; any;</code><br/><code>    }</code> |  |
+|  [handlers](./atom.extensionoptions.handlers.md) | <code>{</code><br/><code>        [key: string]: (this: Core, ...a: any[]) =&gt; any;</code><br/><code>    }</code> | { обработчики методов атома<!-- -->} |
 

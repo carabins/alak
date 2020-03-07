@@ -24,7 +24,7 @@ test('some strategy', () => {
 
 test('some async strategy', async () => {
   const aGetter = jest.fn()
-  const a = A.getter(() => {
+  const a = A.useGetter(() => {
     aGetter()
     return new Promise(done => setTimeout(() => done(Math.random()), 24))
   })
@@ -50,11 +50,11 @@ test('some async strategy', async () => {
 test('strong sync strategy', () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
-  const a = A.getter(() => {
+  const a = A.useGetter(() => {
     aGetter()
     return Math.random()
   })
-  const b = A.getOnce(() => {
+  const b = A.useOnceGet(() => {
     bOnceGetter()
     return '-'
   })
@@ -71,11 +71,11 @@ test('strong sync strategy', () => {
 test('strong async strategy', async () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
-  const a = A.getter(() => {
+  const a = A.useGetter(() => {
     aGetter()
     return new Promise(done => setTimeout(() => done(Math.random()), 24))
   })
-  const b = A.getOnce(() => {
+  const b = A.useOnceGet(() => {
     bOnceGetter()
     return '-'
   })
@@ -93,8 +93,8 @@ test('strong async strategy', async () => {
 test('strong async wait', async () => {
   const asyncFn = () => new Promise(fin => setTimeout(fin, 1))
   const asyncWait = () => new Promise(fin => setTimeout(fin, 24))
-  const atomA = A.getter(asyncFn)
-  const atomB = A.getter(asyncFn)
+  const atomA = A.useGetter(asyncFn)
+  const atomB = A.useGetter(asyncFn)
   A.from(atomA, atomB).strong(() => expect.anything())
   await asyncWait()
   expect.assertions(0)

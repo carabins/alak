@@ -4,7 +4,7 @@
 
 ## atom package
 
-Mодуль ядра атома
+Коренной модуль атома
 
 ## Remarks
 
@@ -24,15 +24,15 @@ Mодуль ядра атома
 
 |  Interface | Description |
 |  --- | --- |
-|  [Atom](./atom.atom.md) | Экземпляр атома |
-|  [AtomCoreConstructor](./atom.atomcoreconstructor.md) | Создание прокси-атома и атома |
 |  [ExtensionOptions](./atom.extensionoptions.md) | Опции расширения |
+|  [IAtom](./atom.iatom.md) | Интерфейс ядра атома. |
+|  [IAtomCoreConstructor](./atom.iatomcoreconstructor.md) | Создание прокси-атома и атома |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [AC](./atom.ac.md) | [AtomCoreConstructor](./atom.atomcoreconstructor.md) |
+|  [AC](./atom.ac.md) | [IAtomCoreConstructor](./atom.iatomcoreconstructor.md) |
 
 ## Type Aliases
 

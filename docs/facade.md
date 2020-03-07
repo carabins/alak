@@ -4,11 +4,11 @@
 
 ## facade package
 
-Лицевой модуль библиотеки.
+Модуль входа в библиотеку.
 
 ## Remarks
 
-Сборка всех частей библиотеки в [A](./facade.atomconstructor.md) константе.
+Сборка всех частей библиотеки в [A](./facade.iatomconstructor.md) константе.
 
 Импорт модуля устанавливает все модули-расширения библиотеки.
 
@@ -16,12 +16,12 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [Atom](./facade.atom.md) | Экземпляр атома |
-|  [AtomConstructor](./facade.atomconstructor.md) | Конструктор атома |
+|  [IAtom](./facade.iatom.md) | Интерфейс ядра атома. |
+|  [IAtomConstructor](./facade.iatomconstructor.md) | Конструктор атома |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [A](./facade.a.md) | [AtomConstructor](./facade.atomconstructor.md) |
+|  [A](./facade.a.md) | [IAtomConstructor](./facade.iatomconstructor.md) |
 
