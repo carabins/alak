@@ -30,25 +30,28 @@ title: ${title}
 `
 async function make() {
 
-  info('making documentation...')
+  info('making site docs...')
   // log0('cleaning working directory')
   const docDir = path.join(homeDir, 'docs')
-  const siteDir = path.join(homeDir, 'my-website', 'docs', 'api')
+  const siteDir = path.join(homeDir, 'site', 'docs', 'api')
   if (!existsSync('docs')) mkdirSync('docs')
   readdirSync(docDir).forEach(f=>{
+    // console.log(f)
     let mdStr = readFileSync(path.join(docDir, f), {
        encoding:"Utf8"
     })
+
     const title = titleCode.exec(mdStr)[0].slice(3)
     mdStr = mdStr.replace(/<code>/g, "`")
     mdStr = mdStr.replace(/<\/code>/g, "`")
     const mdOut = dinoTitle(title, f.replace(".md", ""))
+    //
+    // console.log(path.join(siteDir, f))
 
     writeFileSync(path.join(siteDir, f), mdOut + mdStr)
-    console.log(path.join(siteDir, f))
-
+    // console.log(path.join(siteDir, f))
   })
 
-  info('documentation ready')
+  info('site docs ready')
 }
 make()
