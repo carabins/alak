@@ -1,6 +1,6 @@
 import { debug, grandUpFn, notifyChildes, setAtomValue } from './core'
 import {
-  addStateEventListener,
+  addStateEventListener, ClearState,
   FState,
   notifyStateListeners,
   removeStateEventListener,
@@ -78,7 +78,8 @@ export const handlers = {
     else if (this.grandChildren && this.grandChildren.has(f)) this.grandChildren.delete(f)
     return this._
   },
-  clear() {
+  clear(silent) {
+    !silent && notifyStateListeners(this, FState.CLEAR,  ClearState.ALL)
     delete this.value
     this.children.clear()
     this.grandChildren && this.grandChildren.clear()
@@ -87,13 +88,20 @@ export const handlers = {
     return this._
   },
   decay() {
-    this._.clear()
+    notifyStateListeners(this, FState.CLEAR,  ClearState.DECAY)
+    this._.clear(true)
     deleteParams(this)
   },
   clearValue() {
-    notifyStateListeners(this, 'empty')
+    notifyStateListeners(this, FState.CLEAR,  ClearState.VALUE)
     delete this.value
     return this._
+  },
+  onClear(fun) {
+    addStateEventListener(this, FState.CLEAR, fun)
+  },
+  offClear(fun) {
+    removeStateEventListener(this, FState.CLEAR, fun)
   },
   onAwait(fun) {
     addStateEventListener(this, FState.AWAIT, fun)

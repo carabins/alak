@@ -71,6 +71,7 @@ type AnyFunction = {
 /** @internal */
 export type MaybeAny<T> = unknown extends T ? any : T
 
+type Level = "value" | "all" | "decay"
 /**
  * Создание прокси-атома и атома
  * @example
@@ -223,6 +224,22 @@ export interface IAtom<T> {
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
   onAwait(listener: (isAwaiting: boolean) => void): IAtom<T>
+  /** Добавить слушатель отчистки значения
+   * @remarks
+   *  Значение глубины отчистки
+   *
+   * - value отичстка значения {@link IAtom.clearValue}
+   *
+   * - all отичстка всего {@link IAtom.clear}
+   *
+   * - decay рапад {@link IAtom.decay}
+   * @param listener - функция-слушатель принимающая строку - значение глубины отчистки
+   * @returns {@link IAtom}*/
+  onClear(listener: (deep:Level) => void): IAtom<T>
+  /** Удалить слушатель отчистки зачения {@link IAtom.clearValue}
+   * @param listener - функция-слушатель
+   * @returns {@link IAtom}*/
+  offClear(listener: () => void): IAtom<T>
   /** Удалить слушатель изменения асинхронного состояния
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
@@ -293,7 +310,7 @@ export interface IAtom<T> {
    * @param Сделать конетейнер всегда пустым.
    * Значение переданное в атом, доставится в функции-получатели минуя контейнер.
    * @param bool? - по умолчанию `true`
-   * @returns {@link ProxyAtom} */
+   * @returns {@link IAtom} */
   setStateless(bool?:boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере

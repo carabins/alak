@@ -33,6 +33,6 @@ const atom = A() // сокращённая запись A.proxy()
 |  [id(id, startValue)](./facade.iatomconstructor.id.md) | Создать атом c предустановленным идентификатором [IAtom.setId()](./facade.iatom.setid.md)<!-- -->. |
 |  [setGetter(getterFn)](./facade.iatomconstructor.setgetter.md) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.setgetter.md)<!-- -->. |
 |  [setOnceGet(getterFn)](./facade.iatomconstructor.setonceget.md) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.setgetter.md)<!-- -->. |
-|  [setStateless(bool)](./facade.iatomconstructor.setstateless.md) | Создать атом, с контейнерем не запоминающием значение. . |
+|  [setStateless(bool)](./facade.iatomconstructor.setstateless.md) | Создать атом, с контейнерем не запоминающием значение. [IAtom.setStateless()](./facade.iatom.setstateless.md)<!-- -->. |
 |  [setWrapper(wrapperFun)](./facade.iatomconstructor.setwrapper.md) | Создать атом c функцией обёртки [IAtom.setWrapper()](./facade.iatom.setwrapper.md)<!-- -->. |
 

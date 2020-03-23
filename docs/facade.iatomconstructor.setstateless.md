@@ -4,7 +4,7 @@
 
 ## IAtomConstructor.setStateless() method
 
-Создать атом, с контейнерем не запоминающием значение. .
+Создать атом, с контейнерем не запоминающием значение. [IAtom.setStateless()](./facade.iatom.setstateless.md)<!-- -->.
 
 <b>Signature:</b>
 

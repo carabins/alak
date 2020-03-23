@@ -20,4 +20,5 @@ setStateless(bool?: boolean): IAtom<T>;
 
 `IAtom<T>`
 
+[IAtom](./facade.iatom.md)
 

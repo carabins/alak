@@ -60,9 +60,8 @@ test('context', async () => {
     expect(a.id).toBe('zero')
   }
   a.up(fn)
-  //a.upSome(fn)
   a(startValue)
-  //expect.assertions(4)
+  expect.assertions(3)
 })
 
 test('resend', async () => {
@@ -133,6 +132,19 @@ test('clear', () => {
   a.clear()
   a(startValue)
   expect.assertions(3)
+})
+
+test('onClear', () => {
+  let a = A()
+  const clearResolver = jest.fn()
+  const decayResolver = jest.fn()
+  a.onClear(clearResolver)
+  a.clearValue()
+  a.clear()
+  a.onClear(decayResolver)
+  a.decay()
+  expect(clearResolver).toHaveBeenCalledTimes(2)
+  expect(decayResolver).toHaveBeenCalledTimes(1)
 })
 
 test('close', () => {
