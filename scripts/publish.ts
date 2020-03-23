@@ -2,6 +2,8 @@ import { lib } from './make-lib'
 import { readFileSync, readSync, writeFileSync } from 'fs'
 import { executeCommand } from './helpers'
 import { clearLib } from './tsc'
+import * as http from 'http'
+
 
 function pumpVersion() {
   const packageJSON = JSON.parse(readFileSync('./package.json', 'utf-8'))
@@ -12,10 +14,12 @@ function pumpVersion() {
 }
 
 async function publish() {
-  await lib()
-  pumpVersion()
-  await executeCommand('npm publish')
-  clearLib()
+  const packageJSON = JSON.parse(readFileSync('./package.json', 'utf-8'))
+  let v = await executeCommand('npm show alak version')
+  const remoteVer = v.toString().split("\n").shift()
+  if (packageJSON.version != remoteVer) {
+    await executeCommand('npm publish')
+  }
 }
 
 publish()

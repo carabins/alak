@@ -1,7 +1,7 @@
 # Alak - Reactive Atom  
 
 [![npm version](https://badge.fury.io/js/alak.svg)](https://badge.fury.io/js/alak)
-[![Build Status][ci-image]][ci-url]
+![build](https://github.com/carabins/alak/workflows/build/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/carabins/alak/badge.svg)](https://coveralls.io/github/carabins/alak)
 
 [![dependents](https://david-dm.org/carabins/alak/status.svg)](https://david-dm.org/carabins/alak/status.svg)
@@ -18,7 +18,7 @@
 ### Установка
 #### UMD
 ```
-https://unpkg.com/alak/umd/alak.js
+https://unpkg.com/alak/atom.js
 ```
 #### NPM
 ```bash

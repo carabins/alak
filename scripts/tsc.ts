@@ -10,6 +10,8 @@ export function clearLib() {
   rm('ext-computed')
   rm('debug')
   rm('umd')
+  rm('atom.core.js')
+  rm('atom.js')
 }
 
 export async function tsc() {

@@ -32,6 +32,6 @@ export const executeCommand = (command, cwd?) =>
       }
       console.log("stdout", stdout)
       log(chalk.green('done'), chalk.grey(command))
-      done()
+      done(stdout)
     })
   })
