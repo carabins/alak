@@ -40,7 +40,7 @@
   height: auto !important;
   background-color: #6e3baf;
   border: 1px solid #000;
-  border-radius: 4px 4px 4px 4px;
+  border-radius: 4px;
   color: #000;
   font-family: monospace;
   font-size: 10pt;
@@ -63,7 +63,7 @@
   width: 100%;
 }
 .home-repl {
-  box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
   display: flex;
   background-color: var(--ifm-pre-background);
   margin-bottom: 100px;
@@ -119,7 +119,7 @@
   font-size: 10px;
 }
 .atom-stats pre {
-  margin: 0 0;
+  margin: 0;
   padding: 5px 4px;
   /*justify-self: stretch;*/
   /*align-self: stretch;*/
@@ -140,8 +140,8 @@
   /*background-color: red;*/
   justify-self: right;
   font-size: 12px;
-  padding: 0 0 !important;
-  margin: 0 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 @media screen and (max-width: 700px) {
@@ -156,8 +156,8 @@
   font-weight: normal !important;
 }
 .atom-stats th {
-  padding: 0 0 !important;
-  margin: 0 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .atom-stats td .code {
