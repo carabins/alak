@@ -1,19 +1,10 @@
 language: node_js
 node_js:
-  - "8"
+  - "12"
 
 install:
-  - npm install typescript -g
-  - npm install @types/node
+  - npm install
 
 script:
-  - tsc
-  - ls
-before_deploy:
-  - ls
-deploy:
-  provider: npm
-  skip_cleanup: true
-  email: 'dev@gleb.pw'
-  api_key: $NPM_TOKEN
-  file: "dist/**/*"
+  - node run lib
+  - jest -coverage
