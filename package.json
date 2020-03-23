@@ -48,7 +48,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "test": "jest --coverage && coveralls < coverage/lcov.info",
+    "test": "jest --coverage ",
     "build": "node run lib"
   },
   "dependencies": {}
