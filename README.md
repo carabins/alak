@@ -1,8 +1,8 @@
 # Alak - Reactive Atom  
 
 [![npm version](https://badge.fury.io/js/alak.svg)](https://badge.fury.io/js/alak)
-![build](https://github.com/carabins/alak/workflows/build/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/carabins/alak/badge.svg)](https://coveralls.io/github/carabins/alak)
+![master](https://github.com/carabins/alak/workflows/master/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/carabins/alak/badge.svg?branch=refs/heads/master)](https://coveralls.io/github/carabins/alak?branch=refs/heads/master)
 
 [![dependents](https://david-dm.org/carabins/alak/status.svg)](https://david-dm.org/carabins/alak/status.svg)
 [![dependents](https://badgen.net/npm/dependents/alak)](https://badgen.net/npm/dependents/alak)
