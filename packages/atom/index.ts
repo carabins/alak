@@ -63,6 +63,7 @@ export type Core = {
   isEmpty: boolean
   isAsync: boolean
   isAwaiting: boolean | any
+  isStateless: boolean
 }
 type AnyFunction = {
   (...v: any[]): any
@@ -141,17 +142,21 @@ export interface IAtom<T> {
 
   /** Уникальный идентификатор генерируется при создании.*/
   readonly uid: string
-  // on: FlowStateListner
+  // on: FlowStateListener
   // /** remove event listener for change async state of data, "await, ready, etc...
   //  * @experimental*/
-  // off: FlowStateListner
+  // off: FlowStateListener
 
   /** check 'from' or 'warp' function are async*/
-  /** Является ли уставленный добытчик {@link IAtom.useGetter} асинхронным */
+  /** Является ли уставленный добытчик {@link IAtom.setGetter} асинхронным */
   readonly isAsync: Boolean
   /** Находится ли атом в процессе получения значения от асинхронного добытчика
-   * {@link IAtom.useGetter}*/
+   * {@link IAtom.setGetter}*/
   readonly isAwaiting: Boolean
+
+  /** `true` когда атом не запоминает значение
+   * {@link IAtom.setStateless}*/
+  readonly isStateless: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * и передать текущее значение контейнера, если оно есть
@@ -214,7 +219,7 @@ export interface IAtom<T> {
    * @returns положительно при соответствии заданного значения значению контейнера*/
   is(compareValue: T): boolean
 
-  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link IAtom.useGetter}
+  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link IAtom.setGetter}
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
   onAwait(listener: (isAwaiting: boolean) => void): IAtom<T>
@@ -269,12 +274,12 @@ export interface IAtom<T> {
    * @param getter - функция-добытчик
    * @param isAsync - установить значение {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  useGetter(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setGetter(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
   /** Использовать функцию-добытчик только один раз
    * @param getter - функция-добытчик
    * @param isAsync - установить значение {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  useOnceGet(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setOnceGet(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
 
   /** Использовать функцию-обёртку
    * Каждое новое обновление значение контейнера атома,
@@ -282,7 +287,14 @@ export interface IAtom<T> {
    * @param wrapper - функция-обёртка
    * @param isAsync - установить значение returns {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  useWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): IAtom<T>
+
+  /**
+   * @param Сделать конетейнер всегда пустым.
+   * Значение переданное в атом, доставится в функции-получатели минуя контейнер.
+   * @param bool? - по умолчанию `true`
+   * @returns {@link ProxyAtom} */
+  setStateless(bool?:boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей

@@ -41,6 +41,14 @@ test('once is', () => {
   expect.assertions(5)
 })
 
+test('stateless', async () => {
+  const a = A.setStateless()
+  a(startValue)
+  expect(a()).toBe(undefined)
+  a.setStateless(false)
+  a(finalValue)
+  expect(a()).toBe(finalValue)
+})
 
 
 test('context', async () => {
@@ -90,11 +98,11 @@ test('fmap', () => {
 })
 
 test('wrap', async () => {
-  const a = A.useWrapper(v => v * v)
+  const a = A.setWrapper(v => v * v)
   a(2)
   expect(a()).toBe(4)
 
-  const b = A.useWrapper(v => new Promise(done => setTimeout(() => done(v * v), 24)))
+  const b = A.setWrapper(v => new Promise(done => setTimeout(() => done(v * v), 24)))
   await b(4)
   expect(a()).toBe(4)
 })
