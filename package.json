@@ -47,9 +47,8 @@
     "rollup-plugin-terser": "^5.3.0"
   },
   "scripts": {
-    "test": "jest",
-    "build": "babel core -d lib",
-    "w": "webpack"
+    "test": "jest -coverage",
+    "build": "node run lib"
   },
   "dependencies": {
   }
