@@ -10,7 +10,7 @@ title: IAtom interface
 
 Интерфейс ядра атома.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IAtom<T> 
@@ -72,7 +72,7 @@ export interface IAtom<T>
 
 Добавить мета-данные
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 addMeta(metaName: string, value?: any): IAtom<T>;
@@ -85,7 +85,7 @@ addMeta(metaName: string, value?: any): IAtom<T>;
 |  metaName | `string` | название-ключ мета-данных |
 |  value | `any` | необязательное значение мета-данных |
 
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -96,12 +96,12 @@ addMeta(metaName: string, value?: any): IAtom<T>;
 
 Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 clear(): IAtom<T>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -112,12 +112,12 @@ clear(): IAtom<T>;
 
 Очистить значение контейнера
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 clearValue(): IAtom<T>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -128,12 +128,12 @@ clearValue(): IAtom<T>;
 
 Создать дубликат значение
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 cloneValue(): T;
 ```
-<b>Returns:</b>
+**Returns:**
 
 `T`
 
@@ -148,12 +148,12 @@ T
 
 Распад атома, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 decay(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 `void`
 
@@ -162,7 +162,7 @@ decay(): void;
 
 Удалить функцию-получатель
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 down(receiver: ValueReceiver<T>): IAtom<T>;
@@ -174,7 +174,7 @@ down(receiver: ValueReceiver<T>): IAtom<T>;
 |  --- | --- | --- |
 |  receiver | `ValueReceiver<T>` | функция-получатель |
 
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -185,7 +185,7 @@ down(receiver: ValueReceiver<T>): IAtom<T>;
 
 Применить функцию к значению в контейнере
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fmap(fun: (v: T) => T): IAtom<T>;
@@ -197,7 +197,7 @@ fmap(fun: (v: T) => T): IAtom<T>;
 |  --- | --- | --- |
 |  fun | `(v: T) => T` | функция принимающая текущее значение и возвращающей новое значение в контейнер и дочерним функциям-получателям |
 
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -208,7 +208,7 @@ fmap(fun: (v: T) => T): IAtom<T>;
 
 Получить мета-данные по имени
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getMeta(metaName: string): any;
@@ -220,7 +220,7 @@ getMeta(metaName: string): any;
 |  --- | --- | --- |
 |  metaName | `string` | имя мета-данных |
 
-<b>Returns:</b>
+**Returns:**
 
 `any`
 
@@ -231,7 +231,7 @@ getMeta(metaName: string): any;
 
 Проверить на наличие мета-данных
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hasMeta(metaName: string): boolean;
@@ -243,7 +243,7 @@ hasMeta(metaName: string): boolean;
 |  --- | --- | --- |
 |  metaName | `string` | имя мета-данных |
 
-<b>Returns:</b>
+**Returns:**
 
 `boolean`
 
@@ -254,7 +254,7 @@ hasMeta(metaName: string): boolean;
 
 Идентификатор, вернёт `uid` если не был задан [IAtom.setId()](./atom.iatom.md#setid-method)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly id: string;
@@ -264,7 +264,7 @@ readonly id: string;
 
 Передаёт значение контейнера в ключ объекта
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 injectOnce(targetObject: any, key?: string): IAtom<T>;
@@ -277,7 +277,7 @@ injectOnce(targetObject: any, key?: string): IAtom<T>;
 |  targetObject | `any` | целевой объект |
 |  key | `string` | ключ доступа к значению в объекте |
 
-<b>Returns:</b>
+**Returns:**
 
 `IAtom<T>`
 
@@ -286,7 +286,7 @@ injectOnce(targetObject: any, key?: string): IAtom<T>;
 
 Проверить значение контейнера на соответствие
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 is(compareValue: T): boolean;
@@ -298,7 +298,7 @@ is(compareValue: T): boolean;
 |  --- | --- | --- |
 |  compareValue | `T` | проверяемое значение |
 
-<b>Returns:</b>
+**Returns:**
 
 `boolean`
 
@@ -309,7 +309,7 @@ is(compareValue: T): boolean;
 
 Является ли уставленный добытчик [IAtom.setGetter()](./atom.iatom.md#setgetter-method) асинхронным
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isAsync: Boolean;
@@ -319,7 +319,7 @@ readonly isAsync: Boolean;
 
 Находится ли атом в процессе получения значения от асинхронного добытчика [IAtom.setGetter()](./atom.iatom.md#setgetter-method)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isAwaiting: Boolean;
@@ -329,7 +329,7 @@ readonly isAwaiting: Boolean;
 
 Вернёт `true` при отсутствующем значении в контейнере
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isEmpty: boolean;
@@ -339,7 +339,7 @@ readonly isEmpty: boolean;
 
 `true` когда атом не запоминает значение [IAtom.setStateless()](./atom.iatom.md#setstateless-method)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isStateless: Boolean;
@@ -349,7 +349,7 @@ readonly isStateless: Boolean;
 
 Имя заданное [IAtom.setName()](./atom.iatom.md#setname-method)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly name: string;
@@ -359,429 +359,8 @@ readonly name: string;
 
 Добавить функцию-получатель и передать значение со следующего обновления
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 next(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## offAwait() method
-
-Удалить слушатель изменения асинхронного состояния
-
-<b>Signature:</b>
-
-```typescript
-offAwait(listener: AnyFunction): void;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  listener | `AnyFunction` | функция-слушатель |
-
-<b>Returns:</b>
-
-`void`
-
-[IAtom](./atom.iatom.md)
-
-
-## onAwait() method
-
-Добавить слушатель изменения асинхронного состояния функции добычи значения [IAtom.setGetter()](./atom.iatom.md#setgetter-method)
-
-<b>Signature:</b>
-
-```typescript
-onAwait(listener: (isAwaiting: boolean) => void): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  listener | `(isAwaiting: boolean) => void` | функция-слушатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## once() method
-
-Передать один раз в функцию-получатель значение контейнера, текущее если оно есть или как появится
-
-<b>Signature:</b>
-
-```typescript
-once(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## resend() method
-
-Повторно отправить значение всем функциям-получателям
-
-<b>Signature:</b>
-
-```typescript
-resend(): IAtom<T>;
-```
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## setGetter() method
-
-Использовать функцию-добытчик значения контейнера
-
-<b>Signature:</b>
-
-```typescript
-setGetter(getter: () => T | Promise<T>, isAsync?: boolean): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  getter | `() => T | Promise<T>` | функция-добытчик |
-|  isAsync | `boolean` | установить значение [IAtom.isAsync](./atom.iatom.md#isasync-property) |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-###### Remarks
-
-Функция-добытчик вызывается каждый раз при вызове функции-атома
-
-
-## setId() method
-
-Установить идентификатор
-
-<b>Signature:</b>
-
-```typescript
-setId(id: string): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  id | `string` | идентификатор |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## setName() method
-
-Установить имя
-
-<b>Signature:</b>
-
-```typescript
-setName(name: string): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  name | `string` | имя |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## setOnceGet() method
-
-Использовать функцию-добытчик только один раз
-
-<b>Signature:</b>
-
-```typescript
-setOnceGet(getter: () => T | Promise<T>, isAsync?: boolean): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  getter | `() => T | Promise<T>` | функция-добытчик |
-|  isAsync | `boolean` | установить значение [IAtom.isAsync](./atom.iatom.md#isasync-property) |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## setStateless() method
-
-<b>Signature:</b>
-
-```typescript
-setStateless(bool?: boolean): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  bool | `boolean` |  |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-
-
-## setWrapper() method
-
-Использовать функцию-обёртку Каждое новое обновление значение контейнера атома, всегда будет проходить сперва через функцию-обёртку
-
-<b>Signature:</b>
-
-```typescript
-setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?: boolean): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  wrapper | `(newValue: T, prevValue: T) => T | Promise<T>` | функция-обёртка |
-|  isAsync | `boolean` | установить значение returns [IAtom.isAsync](./atom.iatom.md#isasync-property) |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## uid property
-
-Уникальный идентификатор генерируется при создании.
-
-<b>Signature:</b>
-
-```typescript
-readonly uid: string;
-```
-
-## up() method
-
-Добавить функцию-получатель обновлений значения контейнера и передать текущее значение контейнера, если оно есть
-
-<b>Signature:</b>
-
-```typescript
-up(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upDown() method
-
-Добавить функцию-получатель со вторым аргументом функцией-отмены подписки
-
-<b>Signature:</b>
-
-```typescript
-upDown(receiver: ValueDownReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueDownReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upFalse() method
-
-Добавить функцию-получатель значений равных `false` после приведения значения к типу `boolean` методом `!value`
-
-<b>Signature:</b>
-
-```typescript
-upFalse(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upNone() method
-
-Добавить функцию-получатель значений равных `null` и `undefined`
-
-<b>Signature:</b>
-
-```typescript
-upNone(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upSome() method
-
-Добавить функцию-получатель значений не равных `null` и `undefined`
-
-<b>Signature:</b>
-
-```typescript
-upSome(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upSomeFalse() method
-
-Добавить функцию-получатель значений равных `false` после приведения значения к типу `boolean` методом `!value` за исключением `null` и `undefined`
-
-<b>Signature:</b>
-
-```typescript
-upSomeFalse(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## upTrue() method
-
-Добавить функцию-получатель значений равных `true` после приведения значения к типу `boolean` методом `!!value`
-
-<b>Signature:</b>
-
-```typescript
-upTrue(receiver: ValueReceiver<T>): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  receiver | `ValueReceiver<T>` | функция-получатель |
-
-<b>Returns:</b>
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
-## value property
-
-Текущее значение контейнера
-
-<b>Signature:</b>
-
-```typescript
-readonly value: T;
 ```

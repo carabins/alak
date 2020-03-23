@@ -1,5 +1,5 @@
 {
-  "name": "my-website",
+  "name": "site-x",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,13 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.0.0-alpha.40",
-    "@docusaurus/preset-classic": "^2.0.0-alpha.40",
-    "@docusaurus/theme-live-codeblock": "^2.0.0-alpha.39",
-    "alak": "^2.0.1-next.9",
+    "@docusaurus/core": "^2.0.0-alpha.48",
+    "@docusaurus/preset-classic": "^2.0.0-alpha.48",
+    "alak": "^2.0.1-next.10",
     "classnames": "^2.2.6",
-    "codemirror": "^5.52.2",
-    "monaco-editor": "^0.20.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "fs-extra": "^9.0.0",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
   },
   "browserslist": {
     "production": [
@@ -30,8 +28,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "fs-extra": "^9.0.0"
   }
 }

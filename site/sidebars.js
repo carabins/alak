@@ -9,7 +9,7 @@ module.exports = {
   someSidebar: {
     Documentation: ['start'],
     API: [
-      //'start',
+      'start',
       'api/index',
       'api/atom.iatom',
       'api/facade.iatomconstructor',

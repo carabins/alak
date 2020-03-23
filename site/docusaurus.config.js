@@ -14,15 +14,15 @@ module.exports = {
         src: 'img/logo.svg',
       },
       links: [
-        //{ to: 'docs/start', label: 'Docs', position: 'left' },
+        { to: 'docs/start', label: 'Docs', position: 'left' },
         { to: 'docs/api/index', label: 'API', position: 'left' },
         //{ to: 'coverage/', label: 'Test Coverage', position: 'left' },
         //{ to: 'blog', label: 'Blog', position: 'left' },
-        {
-          href: '/coverage',
-          label: 'Test coverage',
-          position: 'right',
-        },
+        //{
+        //  href: '/coverage',
+        //  label: 'Test coverage',
+        //  position: 'right',
+        //},
         {
           href: 'https://github.com/carabins/alak',
           label: 'GitHub',
@@ -85,7 +85,7 @@ module.exports = {
     "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/lint.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/javascript-lint.min.js",
   ],
-  themes: ['@docusaurus/theme-live-codeblock'],
+  //themes: ['@docusaurus/theme-live-codeblock'],
   presets: [
     [
       '@docusaurus/preset-classic',

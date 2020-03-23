@@ -21,7 +21,7 @@ const asyncGetter = () => {
   trace('call getterFn')
   return new Promise(fin => setTimeout(() => fin('hello world'), 500))
 }
-const a = A.useGetter(asyncGetter) //создание атома с функцией-добычи значения
+const a = A.setGetter(asyncGetter) //создание атома с функцией-добычи значения
 trace("a is:", a()) // инициализировать получение значения
 a() // пока значение получается, функция геттер-повторно не вызовится
 a().then(v => trace("then:",v))

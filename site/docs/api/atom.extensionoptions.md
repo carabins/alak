@@ -10,7 +10,7 @@ title: ExtensionOptions interface
 
 Опции расширения
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ExtensionOptions 
@@ -18,20 +18,22 @@ export interface ExtensionOptions
 
 ## Remarks
 
-Содержит параметры расширения для методов и свойств атома. Доступ к атому из функций обработчиков происходит через контекст `this`<!-- -->.
+Содержит параметры расширения для методов и свойств атома. Доступ к атому из функций обработчиков происходит через контекст `this`.
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [handlers](./atom.extensionoptions.md#handlers-property) | `{`<br/>`        [key: string]: (this: Core, ...a: any[]) => any;`<br/>`    }` | { обработчики методов атома<!-- -->} |
+|  [handlers](./atom.extensionoptions.md#handlers-property) | `{`
+`        [key: string]: (this: Core, ...a: any[]) => any;`
+`    }` | { обработчики методов атома} |
 
 
 ## handlers property
 
-{ обработчики методов атома<!-- -->}
+{ обработчики методов атома}
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 handlers: {
