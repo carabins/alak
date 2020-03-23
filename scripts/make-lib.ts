@@ -12,7 +12,6 @@ import { terser } from 'rollup-plugin-terser'
 import { rollup } from 'rollup'
 import { tsc } from './tsc'
 
-console.log({ commonjs })
 
 const packUmd = (packName, outName) =>
   new Promise(done =>
@@ -29,12 +28,12 @@ const packUmd = (packName, outName) =>
     }).then(build =>
       build
         .write({
-          file: `./umd/${outName}.js`,
+          file: `./${outName}.js`,
           format: 'umd',
           name: 'A',
         })
         .then(()=>{
-          rm(`./umd/${outName}.d.ts`)
+          rm(`./${outName}.d.ts`)
           done()
         }),
     ),
@@ -43,8 +42,8 @@ const packUmd = (packName, outName) =>
 export async function lib(){
   info('make library...')
   await tsc()
-  await packUmd('umd', 'alak')
-  await packUmd('umd', 'alak.core')
+  await packUmd('umd', 'atom')
+  await packUmd('umd', 'atom.core')
   info('library created')
 }
 
