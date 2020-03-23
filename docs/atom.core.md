@@ -27,5 +27,6 @@ export declare type Core = {
     isEmpty: boolean;
     isAsync: boolean;
     isAwaiting: boolean | any;
+    isStateless: boolean;
 };
 ```
