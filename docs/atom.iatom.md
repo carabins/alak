@@ -46,8 +46,10 @@ export interface IAtom<T>
 |  [is(compareValue)](./atom.iatom.is.md) | Проверить значение контейнера на соответствие |
 |  [next(receiver)](./atom.iatom.next.md) | Добавить функцию-получатель и передать значение со следующего обновления |
 |  [offAwait(listener)](./atom.iatom.offawait.md) | Удалить слушатель изменения асинхронного состояния |
+|  [offClear(listener)](./atom.iatom.offclear.md) | Удалить слушатель отчистки зачения [IAtom.clearValue()](./atom.iatom.clearvalue.md) |
 |  [onAwait(listener)](./atom.iatom.onawait.md) | Добавить слушатель изменения асинхронного состояния функции добычи значения [IAtom.setGetter()](./atom.iatom.setgetter.md) |
 |  [once(receiver)](./atom.iatom.once.md) | Передать один раз в функцию-получатель значение контейнера, текущее если оно есть или как появится |
+|  [onClear(listener)](./atom.iatom.onclear.md) | Добавить слушатель отчистки значения |
 |  [resend()](./atom.iatom.resend.md) | Повторно отправить значение всем функциям-получателям |
 |  [setGetter(getter, isAsync)](./atom.iatom.setgetter.md) | Использовать функцию-добытчик значения контейнера |
 |  [setId(id)](./atom.iatom.setid.md) | Установить идентификатор |

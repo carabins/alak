@@ -46,8 +46,10 @@ export interface IAtom<T>
 |  [is(compareValue)](./facade.iatom.is.md) | Проверить значение контейнера на соответствие |
 |  [next(receiver)](./facade.iatom.next.md) | Добавить функцию-получатель и передать значение со следующего обновления |
 |  [offAwait(listener)](./facade.iatom.offawait.md) | Удалить слушатель изменения асинхронного состояния |
+|  [offClear(listener)](./facade.iatom.offclear.md) | Удалить слушатель отчистки зачения [IAtom.clearValue()](./facade.iatom.clearvalue.md) |
 |  [onAwait(listener)](./facade.iatom.onawait.md) | Добавить слушатель изменения асинхронного состояния функции добычи значения [IAtom.setGetter()](./facade.iatom.setgetter.md) |
 |  [once(receiver)](./facade.iatom.once.md) | Передать один раз в функцию-получатель значение контейнера, текущее если оно есть или как появится |
+|  [onClear(listener)](./facade.iatom.onclear.md) | Добавить слушатель отчистки значения |
 |  [resend()](./facade.iatom.resend.md) | Повторно отправить значение всем функциям-получателям |
 |  [setGetter(getter, isAsync)](./facade.iatom.setgetter.md) | Использовать функцию-добытчик значения контейнера |
 |  [setId(id)](./facade.iatom.setid.md) | Установить идентификатор |

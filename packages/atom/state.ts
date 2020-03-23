@@ -2,7 +2,12 @@
 
 export const FState = {
   AWAIT: 'await',
-  EMPTY: 'empty',
+  CLEAR: 'clear',
+}
+export const ClearState = {
+  VALUE: "value",
+  ALL: "all",
+  DECAY: "decay"
 }
 
 export function notifyStateListeners(atom, state:string, ...value) {

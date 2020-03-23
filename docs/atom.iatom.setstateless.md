@@ -20,4 +20,5 @@ setStateless(bool?: boolean): IAtom<T>;
 
 `IAtom<T>`
 
+[IAtom](./atom.iatom.md)
 

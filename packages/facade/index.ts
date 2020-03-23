@@ -76,7 +76,7 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
   setOnceGet<D>(getterFn: () => D): IAtom<D>
   /**
    * Создать атом, с контейнерем не запоминающием значение.
-   * {@link ProxyAtom.setStateless}.
+   * {@link IAtom.setStateless}.
    * @remarks
    * Сокращённая запись `A().setStateless()`
    */
