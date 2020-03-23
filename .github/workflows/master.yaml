@@ -1,8 +1,8 @@
-name: build
+name: master
 
 on:
   push:
-    branches: [ travis ]
+    branches: [ master ]
 
 jobs:
   build:

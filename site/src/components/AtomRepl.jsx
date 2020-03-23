@@ -2,58 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { MirrorRepl } from './Mirror'
 import { installAtomDebuggerTool } from 'alak/debug'
 import A from 'alak'
+import ABox from './Abox'
 import { DebugTable } from './DebugTable'
-function ABox() {
-  const values = {}
-  const all = []
-  return {
-    each(key, iterator) {
-      let ar = values[key]
-      if (ar) {
-        ar.forEach(iterator)
-      }
-    },
-    mapValues(iterator) {
-      return Object.values(values).map(iterator)
-    },
-    mapAll(iterator) {
-      return all.map(iterator)
-    },
-    push(key, value) {
-      all.push(value)
-      let ar = values[key]
-      if (ar) {
-        ar.push(value)
-      } else {
-        values[key] = [value]
-      }
-    },
-    removeAll(key) {
-      delete values[key]
-    },
-    has(key) {
-      return !!values[key]
-    },
-    get(key) {
-      return values[key]
-    },
-    size() {
-      return [all.length, Object.keys(values).length]
-    },
-    all() {
-      return Object.keys(values).length
-    },
-    remove(key, value) {
-      let ar = values[key]
-      if (ar && ar.length) {
-        ar.splice(ar.indexOf(value), 1)
-      }
-      if (!ar.length) {
-        delete values[key]
-      }
-    },
-  }
-}
+
+
 
 const debugTool = installAtomDebuggerTool.instance()
 global.A = A
@@ -73,7 +25,8 @@ let lastChange
 function useRpl(startCode) {
   const [log, setLog] = useState()
   const [debugBox, setDebug] = useState()
-   function runCode(code) {
+  useEffect(() => useRunCode(startCode), [startCode])
+   function useRunCode(code) {
     setLog('')
     setDebug(null)
     clearTimeout(lastChange)
@@ -100,15 +53,17 @@ function useRpl(startCode) {
 
     }, 200)
   }
-  useEffect(() => runCode(startCode), [startCode])
-  return [log, debugBox, runCode]
+
+  return [log, debugBox, useRunCode]
 }
 
 export function AtomRepl(props) {
   const [log, debugBox, codeChange] = useRpl(props.code)
+
   return (
     <>
       <div className='overflow-mirror'>
+
         <div className='mirror'>
           <MirrorRepl code={props.code} onCodeChange={codeChange} />
         </div>
