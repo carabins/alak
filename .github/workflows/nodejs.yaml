@@ -3,10 +3,6 @@ name: Node.js CI
 on:
   push:
     branches: [ travis ]
-#  pull_request:
-#    branches: [ master ]
-
-env:
 
 jobs:
   build:
