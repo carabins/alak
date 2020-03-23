@@ -32,8 +32,8 @@ trace(a.value)`,
     title: 'Комбинации',
     code: `const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 200))
 const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))    
-const atomA = A.id('a').useGetter(asyncHello)
-const atomB = A.id('b').useGetter(asyncWorld)
+const atomA = A.id('a').setGetter(asyncHello)
+const atomB = A.id('b').setGetter(asyncWorld)
 const atomAB = A.id('c')
   .from(atomA, atomB) 
   .strong((valueA, valueB) => {  
