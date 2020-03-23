@@ -12,7 +12,7 @@ function asyncFn() {
 
 test('async proxy', async () => {
   let a = A.proxy(startValue)
-  a.useGetter(asyncFn)
+  a.setGetter(asyncFn)
   expect(a.isAsync).toBeFalsy()
   await a()
   expect(a.isAsync).toBeTruthy()
@@ -20,7 +20,7 @@ test('async proxy', async () => {
 
 test('async getter', async () => {
   let a = A(startValue)
-  a.useGetter(asyncFn)
+  a.setGetter(asyncFn)
   expect(a.isAsync).toBeFalsy()
   a()
   expect(a.value).toBe(startValue)
@@ -32,7 +32,7 @@ test('async getter', async () => {
 
 test('async onAwait', async () => {
   let a = A(startValue)
-  a.useGetter(asyncFn)
+  a.setGetter(asyncFn)
   let isWait = true
   a.onAwait(isAwaiting=>{
     expect(isAwaiting).toBe(isWait)

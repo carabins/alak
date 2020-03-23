@@ -31,8 +31,11 @@ const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500)
 const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
 const a = A()
+a.setStateless()
+a(1)
+console.log(a.value)
 
-
+// console.log("yyssss")
 
 
 // const atomA = A.id('a').useGetter(asyncHello)

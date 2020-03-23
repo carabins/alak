@@ -53,28 +53,34 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
   id<T>(id: string | number, startValue?:T): IAtom<MaybeAny<T>>
 
   /**
-   * Создать атом c функцией обёртки {@link IAtom.useWrapper}.
+   * Создать атом c функцией обёртки {@link IAtom.setWrapper}.
    * @remarks
-   * Сокращённая запись `A().useWrapper(wrapperFun)`
+   * Сокращённая запись `A().setWrapper(wrapperFun)`
    * @param wrapperFun - функция-обёртка
    */
-  useWrapper<T>(wrapperFun: (v:D) => T): IAtom<MaybeAny<T>>
+  setWrapper<T>(wrapperFun: (v:D) => T): IAtom<MaybeAny<T>>
   /**
-   * Создать атом c функцией добытчика {@link IAtom.useGetter}.
+   * Создать атом c функцией добытчика {@link IAtom.setGetter}.
    * @remarks
-   * Сокращённая запись `A().useGetter(fun)`
+   * Сокращённая запись `A().setGetter(fun)`
    * @param getterFn - функция-добытчик
    */
-  useGetter<T>(getterFn: () => T): IAtom<T>
+  setGetter<T>(getterFn: () => T): IAtom<T>
 
   /**
-   * Создать атом c функцией добытчика {@link IAtom.useGetter}.
+   * Создать атом c функцией добытчика {@link IAtom.setGetter}.
    * @remarks
-   * Сокращённая запись `A().useOnceGet(fun)`
+   * Сокращённая запись `A().setOnceGet(fun)`
    * @param getterFn - функция-добытчик
    */
-  useOnceGet<D>(getterFn: () => D): IAtom<D>
-
+  setOnceGet<D>(getterFn: () => D): IAtom<D>
+  /**
+   * Создать атом, с контейнерем не запоминающием значение.
+   * {@link ProxyAtom.setStateless}.
+   * @remarks
+   * Сокращённая запись `A().setStateless()`
+   */
+  setStateless(bool?:boolean): IAtom<MaybeAny<D>>
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
    * Смотрите описание стратегий: {@link ext-computed#ComputeStrategy}.
@@ -94,20 +100,20 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
 }
 /**{@link IAtomConstructor}*/
 export const A = (Object.assign(AC, {
-  useOnceGet(getterFun) {
-    return A().useOnceGet(getterFun)
+  setOnceGet(getterFun) {
+    return A().setOnceGet(getterFun)
   },
-  useGetter(getterFun) {
-    const a = A()
-    a.useGetter(getterFun)
-    return a
+  setGetter(getterFun) {
+    return A().setGetter(getterFun)
   },
-  useWrapper(wrapperFun) {
-    return A().useWrapper(wrapperFun)
+  setWrapper(wrapperFun) {
+    return A().setWrapper(wrapperFun)
   },
   from(...atoms){
-    const a = A()
-    return (a as any).from(...atoms)
+    return (A() as any).from(...atoms)
+  },
+  setStateless() {
+    return A().setStateless()
   },
   id(id, v) {
     const a = A().setId(id)

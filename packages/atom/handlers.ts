@@ -60,6 +60,9 @@ export const proxyProps = {
   isAwaiting() {
     return !!this.isAwaiting
   },
+  isStateless() {
+    return !!this.isStateless
+  }
 }
 
 const applyValue = (a, f) => (!a.isEmpty ? (f(a.value, a), true) : false)
@@ -156,6 +159,15 @@ export const handlers = {
     Object.defineProperty(this, "name", { value });
     return this._
   },
+  setStateless(v) {
+    if (v == undefined)
+      this.isStateless = true
+    else
+      this.isStateless = v
+    if (this.isStateless)
+      this._.clearValue()
+    return this._
+  },
   // apply(context, v) {
   //   this.bind(context)
   //   setAtomValue(this, v[0])
@@ -181,12 +193,12 @@ export const handlers = {
   //   removeStateEventListener(this, stateEvent, fn)
   //   return this._
   // },
-  useGetter(getterFunction, isAsync) {
+  setGetter(getterFunction, isAsync) {
     this.getterFn = getterFunction
     this.isAsync = isAsync
     return this._
   },
-  useOnceGet(getterFunction, isAsync) {
+  setOnceGet(getterFunction, isAsync) {
     this.getterFn = () => {
       delete this.getterFn
       delete this.isAsync
@@ -195,7 +207,7 @@ export const handlers = {
     this.isAsync = isAsync
     return this._
   },
-  useWrapper(wrapperFunction, isAsync) {
+  setWrapper(wrapperFunction, isAsync) {
     this.wrapperFn = wrapperFunction
     this.isAsync = isAsync
     return this._

@@ -22,3 +22,5 @@ yarn-error.log*
 .now
 
 static/coverage
+
+yarn.lock
