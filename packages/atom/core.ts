@@ -51,8 +51,11 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
 
 export function notifyChildes(atom: Core) {
   const v = atom.value
-  atom.children.size > 0 && atom.children.forEach(f => f(v, atom._))
-  atom.grandChildren && atom.grandChildren.size > 0 && atom.grandChildren.forEach(f => f(v, atom._))
+  const apply = atom.isFlow ? f => f.call(f, ...v)
+    : f => f.length == 2 ? f(v, atom._) : f(v)
+
+  atom.children.size > 0 && atom.children.forEach(apply)
+  atom.grandChildren && atom.grandChildren.size > 0 && atom.grandChildren.forEach(apply)
 }
 
 export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction): any {
@@ -63,13 +66,13 @@ export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction
 }
 
 export const createCore = (...a) => {
-  const atom = function(value, context) {
-    // console.log(core)
+  const atom = function(...v) {
     if (!atom.children) {
       throw DECAY_ATOM_ERROR
     }
-    if (arguments.length) {
-      if (debug.enabled) return setAtomValue(atom, value, context ? context : AtomContext.direct)
+    if (v.length) {
+      const value = atom.isFlow ? v : v[0]
+      if (debug.enabled) return setAtomValue(atom, value, !atom.isFlow && v[1] ? v[1] : AtomContext.direct)
       else return setAtomValue(atom, value)
     } else {
       if (atom.isAwaiting) {

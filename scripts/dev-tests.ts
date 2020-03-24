@@ -1,12 +1,7 @@
 import { fork } from 'child_process'
-import { tsc } from './tsc'
+import { clearLib, tsc } from './tsc'
+import { executeCommand } from './helpers'
 
-var nodemon = require('nodemon')
-
-nodemon({
-  ext: 'js',
-  watch: 'tests',
-})
 
 const forked = []
 const runTests = () => {
@@ -15,12 +10,30 @@ const runTests = () => {
   forked.push(fork('node_modules/jest/bin/jest'))
 }
 
-nodemon
-  .on('start', () => {
-    console.log("---")
-    tsc().then(runTests)
+export async function dev() {
+  var nodemon
+  try {
+    nodemon = require('nodemon')
+  } catch (e) {
+    await executeCommand(`npm i nodemon --no-save`, '.')
+    nodemon = require('nodemon')
+  }
+  nodemon({
+    ext: 'js',
+    watch: 'tests',
   })
-  .on('restart', function(files) {
-    console.log('Tests restarted : ', files)
-    fork('node_modules/jest/bin/jest')
-  })
+  nodemon
+    .on('start', () => {
+      clearLib()
+      tsc().then(runTests)
+    })
+    .on('restart', function(files) {
+      console.log('Tests restarted : ', files)
+      fork('node_modules/jest/bin/jest')
+    })
+
+}
+
+export function run() {
+  fork('node_modules/jest/bin/jest')
+}

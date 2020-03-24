@@ -16,7 +16,7 @@ test('upSome', () => {
 })
 
 test('upTrue', () => {
-  let a = A()
+  let a = A(true) // +
   a.upTrue(v => {
     expect(v).toBeTruthy()
   })
@@ -25,7 +25,7 @@ test('upTrue', () => {
   a(0)
   a(null)
   a(undefined)
-  expect.assertions(1)
+  expect.assertions(2)
 })
 //
 test('upFalse', () => {
@@ -42,7 +42,7 @@ test('upFalse', () => {
 })
 
 test('upSomeFalse', () => {
-  let a = A()
+  let a = A(false) // +
   a.upSomeFalse(v => {
     expect(v).toBeFalsy()
   })
@@ -51,12 +51,12 @@ test('upSomeFalse', () => {
   a(0) // +
   a(null)
   a(undefined)
-  expect.assertions(2)
+  expect.assertions(3)
 })
 
 
 test('upNone', () => {
-  let a = A()
+  let a = A(null) // +
   a.upNone(v => {
     expect(alive(v)).toBeFalsy()
   })
@@ -65,7 +65,7 @@ test('upNone', () => {
   a(0)
   a(null)  // +
   a(undefined)  // +
-  expect.assertions(2)
+  expect.assertions(3)
 })
 
 test('grand down', () => {

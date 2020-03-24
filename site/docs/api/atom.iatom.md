@@ -28,7 +28,7 @@ export interface IAtom<T>
 |  [isAsync](./atom.iatom.md#isasync-property) | `Boolean` | Является ли уставленный добытчик [IAtom.setGetter()](./atom.iatom.md#setgetter-method) асинхронным |
 |  [isAwaiting](./atom.iatom.md#isawaiting-property) | `Boolean` | Находится ли атом в процессе получения значения от асинхронного добытчика [IAtom.setGetter()](./atom.iatom.md#setgetter-method) |
 |  [isEmpty](./atom.iatom.md#isempty-property) | `boolean` | Вернёт `true` при отсутствующем значении в контейнере |
-|  [isStateless](./atom.iatom.md#isstateless-property) | `Boolean` | `true` когда атом не запоминает значение [IAtom.setStateless()](./atom.iatom.md#setstateless-method) |
+|  [isStateless](./atom.iatom.md#isstateless-property) | `Boolean` | `true` когда атом не запоминает значение [IAtom.toStateless()](./atom.iatom.md#tostateless-method) |
 |  [name](./atom.iatom.md#name-property) | `string` | Имя заданное [IAtom.setName()](./atom.iatom.md#setname-method) |
 |  [uid](./atom.iatom.md#uid-property) | `string` | Уникальный идентификатор генерируется при создании. |
 |  [value](./atom.iatom.md#value-property) | `T` | Текущее значение контейнера |
@@ -59,8 +59,9 @@ export interface IAtom<T>
 |  [setId(id)](./atom.iatom.md#setid-method) | Установить идентификатор |
 |  [setName(name)](./atom.iatom.md#setname-method) | Установить имя |
 |  [setOnceGet(getter, isAsync)](./atom.iatom.md#setonceget-method) | Использовать функцию-добытчик только один раз |
-|  [setStateless(bool)](./atom.iatom.md#setstateless-method) |  |
 |  [setWrapper(wrapper, isAsync)](./atom.iatom.md#setwrapper-method) | Использовать функцию-обёртку Каждое новое обновление значение контейнера атома, всегда будет проходить сперва через функцию-обёртку |
+|  [toFlow(bool)](./atom.iatom.md#toflow-method) | Сделать конетейнер принимающим и передаюшим множество агрументов. Все аргументы переданные в атом, сохраняются как массив. В функции-получатели значения передаются в полном количестве. |
+|  [toStateless(bool)](./atom.iatom.md#tostateless-method) | Сделать конетейнер всегда пустым. Значение переданное в атом, доставится в функции-получатели минуя контейнер. |
 |  [up(receiver)](./atom.iatom.md#up-method) | Добавить функцию-получатель обновлений значения контейнера и передать текущее значение контейнера, если оно есть |
 |  [upDown(receiver)](./atom.iatom.md#updown-method) | Добавить функцию-получатель со вторым аргументом функцией-отмены подписки |
 |  [upFalse(receiver)](./atom.iatom.md#upfalse-method) | Добавить функцию-получатель значений равных `false` после приведения значения к типу `boolean` методом `!value` |
@@ -339,7 +340,7 @@ readonly isEmpty: boolean;
 
 ## isStateless property
 
-`true` когда атом не запоминает значение [IAtom.setStateless()](./atom.iatom.md#setstateless-method)
+`true` когда атом не запоминает значение [IAtom.toStateless()](./atom.iatom.md#tostateless-method)
 
 **Signature:**
 
@@ -619,27 +620,6 @@ setOnceGet(getter: () => T | Promise<T>, isAsync?: boolean): IAtom<T>;
 [IAtom](./atom.iatom.md)
 
 
-## setStateless() method
-
-**Signature:**
-
-```typescript
-setStateless(bool?: boolean): IAtom<T>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  bool | `boolean` |  |
-
-**Returns:**
-
-`IAtom<T>`
-
-[IAtom](./atom.iatom.md)
-
-
 ## setWrapper() method
 
 Использовать функцию-обёртку Каждое новое обновление значение контейнера атома, всегда будет проходить сперва через функцию-обёртку
@@ -656,6 +636,52 @@ setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?: boo
 |  --- | --- | --- |
 |  wrapper | `(newValue: T, prevValue: T) => T ا Promise<T>` | функция-обёртка |
 |  isAsync | `boolean` | установить значение returns [IAtom.isAsync](./atom.iatom.md#isasync-property) |
+
+**Returns:**
+
+`IAtom<T>`
+
+[IAtom](./atom.iatom.md)
+
+
+## toFlow() method
+
+Сделать конетейнер принимающим и передаюшим множество агрументов. Все аргументы переданные в атом, сохраняются как массив. В функции-получатели значения передаются в полном количестве.
+
+**Signature:**
+
+```typescript
+toFlow(bool?: boolean): IAtom<T>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  bool | `boolean` |  |
+
+**Returns:**
+
+`IAtom<T>`
+
+[IAtom](./atom.iatom.md)
+
+
+## toStateless() method
+
+Сделать конетейнер всегда пустым. Значение переданное в атом, доставится в функции-получатели минуя контейнер.
+
+**Signature:**
+
+```typescript
+toStateless(bool?: boolean): IAtom<T>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  bool | `boolean` |  |
 
 **Returns:**
 

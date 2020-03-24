@@ -76,11 +76,18 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
   setOnceGet<D>(getterFn: () => D): IAtom<D>
   /**
    * Создать атом, с контейнерем не запоминающием значение.
-   * {@link IAtom.setStateless}.
+   * {@link IAtom.toStateless}.
    * @remarks
-   * Сокращённая запись `A().setStateless()`
+   * Сокращённая запись `A().toStateless()`
    */
-  setStateless(bool?:boolean): IAtom<MaybeAny<D>>
+  stateless(): IAtom<MaybeAny<D>>
+  /**
+   * Создать атом, с аргументами передающимися в функции-добытчики в полном числе.
+   * {@link IAtom.toStateless}.
+   * @remarks
+   * Сокращённая запись `A().toFlow()`
+   */
+  flow(): IAtom<MaybeAny<D>>
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
    * Смотрите описание стратегий: {@link ext-computed#ComputeStrategy}.
@@ -112,8 +119,11 @@ export const A = (Object.assign(AC, {
   from(...atoms){
     return (A() as any).from(...atoms)
   },
-  setStateless() {
-    return A().setStateless()
+  stateless() {
+    return A().toStateless()
+  },
+  flow(){
+    return A().toFlow()
   },
   id(id, v) {
     const a = A().setId(id)

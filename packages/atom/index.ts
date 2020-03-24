@@ -62,6 +62,7 @@ export type Core = {
   haveFrom: boolean
   isEmpty: boolean
   isAsync: boolean
+  isFlow: boolean
   isAwaiting: boolean | any
   isStateless: boolean
 }
@@ -102,9 +103,11 @@ export interface IAtomCoreConstructor {
   proto<T>(value?: T): IAtom<MaybeAny<T>>
 }
 
-type ValueReceiver<T extends any> = (v: T, a:IAtom<T>) => void
-type ValueDownReceiver<T extends any> = (v: T, down:()=>void) => void
 
+type ValueDownReceiver<T extends any> = (v: T, down:()=>void) => void
+type ValueFlowReceiver<T extends any> = (...v:any[]) => void
+type ValueAtomReceiver<T extends any> = (...v:any[]) => void
+type ValueReceiver<T extends any> = ValueFlowReceiver<T> | ValueAtomReceiver<T>
 
 /** Интерфейс ядра атома.
  * @remarks
@@ -156,7 +159,7 @@ export interface IAtom<T> {
   readonly isAwaiting: Boolean
 
   /** `true` когда атом не запоминает значение
-   * {@link IAtom.setStateless}*/
+   * {@link IAtom.toStateless}*/
   readonly isStateless: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
@@ -307,11 +310,19 @@ export interface IAtom<T> {
   setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): IAtom<T>
 
   /**
-   * @param Сделать конетейнер всегда пустым.
+   * Сделать конетейнер всегда пустым.
    * Значение переданное в атом, доставится в функции-получатели минуя контейнер.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  setStateless(bool?:boolean): IAtom<T>
+  toStateless(bool?:boolean): IAtom<T>
+
+  /**
+   * Сделать конетейнер принимающим и передаюшим множество агрументов.
+   * Все аргументы переданные в атом, сохраняются как массив.
+   * В функции-получатели значения передаются в полном количестве.
+   * @param bool? - по умолчанию `true`
+   * @returns {@link IAtom} */
+  toFlow(bool?:boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей

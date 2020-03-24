@@ -27,8 +27,11 @@ switch (task) {
   case 'play':
     require('./playground/')
     break
+  case 'dt':
+    require('./scripts/dev-tests').dev()
+    break
   case 'test':
   case 'tests':
-    require('./scripts/dev-tests')
+    require('./scripts/dev-tests').run()
     break
 }

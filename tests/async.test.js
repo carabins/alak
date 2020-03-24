@@ -1,8 +1,8 @@
 const { A } = require('../facade')
 
 
-const startValue = 0
-const finalValue = 1
+const startValue = "startValue"
+const finalValue = "finalValue"
 function asyncFn() {
   return new Promise(done => {
     setTimeout(() => done(finalValue), 24)
