@@ -62,10 +62,11 @@ export const proxyProps = {
   },
   isStateless() {
     return !!this.isStateless
-  }
+  },
 }
 
-const applyValue = (a, f) => (!a.isEmpty ? (f(a.value, a), true) : false)
+const applyValue = (a, f) => a.isEmpty ? false :
+  (a.isFlow ? f.call(f, ...a.value) : f(a.value, a), true)
 
 export const handlers = {
   up(f) {
@@ -79,7 +80,7 @@ export const handlers = {
     return this._
   },
   clear(silent) {
-    !silent && notifyStateListeners(this, FState.CLEAR,  ClearState.ALL)
+    !silent && notifyStateListeners(this, FState.CLEAR, ClearState.ALL)
     delete this.value
     this.children.clear()
     this.grandChildren && this.grandChildren.clear()
@@ -88,12 +89,12 @@ export const handlers = {
     return this._
   },
   decay() {
-    notifyStateListeners(this, FState.CLEAR,  ClearState.DECAY)
+    notifyStateListeners(this, FState.CLEAR, ClearState.DECAY)
     this._.clear(true)
     deleteParams(this)
   },
   clearValue() {
-    notifyStateListeners(this, FState.CLEAR,  ClearState.VALUE)
+    notifyStateListeners(this, FState.CLEAR, ClearState.VALUE)
     delete this.value
     return this._
   },
@@ -164,10 +165,17 @@ export const handlers = {
   },
   setName(value) {
     this._name = value
-    Object.defineProperty(this, "name", { value });
+    Object.defineProperty(this, 'name', { value })
     return this._
   },
-  setStateless(v) {
+  toFlow(v?) {
+    if (v == undefined)
+      this.isFlow = true
+    else
+      this.isFlow = v
+    return this._
+  },
+  toStateless(v) {
     if (v == undefined)
       this.isStateless = true
     else

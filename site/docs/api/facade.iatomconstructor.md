@@ -33,12 +33,31 @@ const atom = A() // сокращённая запись A.proxy()
 
 |  Method | Description |
 |  --- | --- |
+|  [flow()](./facade.iatomconstructor.md#flow-method) | Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.toStateless()](./facade.iatom.md#tostateless-method). |
 |  [from(atoms)](./facade.iatomconstructor.md#from-method) | Создать атом из нескольких других атомов и стратегии вычисления. Смотрите описание стратегий: [ComputeStrategy](./ext-computed.computestrategy.md). |
 |  [id(id, startValue)](./facade.iatomconstructor.md#id-method) | Создать атом c предустановленным идентификатором [IAtom.setId()](./facade.iatom.md#setid-method). |
 |  [setGetter(getterFn)](./facade.iatomconstructor.md#setgetter-method) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.md#setgetter-method). |
 |  [setOnceGet(getterFn)](./facade.iatomconstructor.md#setonceget-method) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.md#setgetter-method). |
-|  [setStateless(bool)](./facade.iatomconstructor.md#setstateless-method) | Создать атом, с контейнерем не запоминающием значение. [IAtom.setStateless()](./facade.iatom.md#setstateless-method). |
 |  [setWrapper(wrapperFun)](./facade.iatomconstructor.md#setwrapper-method) | Создать атом c функцией обёртки [IAtom.setWrapper()](./facade.iatom.md#setwrapper-method). |
+|  [stateless()](./facade.iatomconstructor.md#stateless-method) | Создать атом, с контейнерем не запоминающием значение. [IAtom.toStateless()](./facade.iatom.md#tostateless-method). |
+
+
+## flow() method
+
+Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.toStateless()](./facade.iatom.md#tostateless-method).
+
+**Signature:**
+
+```typescript
+flow(): IAtom<MaybeAny<D>>;
+```
+**Returns:**
+
+`IAtom<MaybeAny<D>>`
+
+###### Remarks
+
+Сокращённая запись `A().toFlow()`
 
 
 ## from() method
@@ -153,31 +172,6 @@ setOnceGet<D>(getterFn: () => D): IAtom<D>;
 Сокращённая запись `A().setOnceGet(fun)`
 
 
-## setStateless() method
-
-Создать атом, с контейнерем не запоминающием значение. [IAtom.setStateless()](./facade.iatom.md#setstateless-method).
-
-**Signature:**
-
-```typescript
-setStateless(bool?: boolean): IAtom<MaybeAny<D>>;
-```
-
-#### Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  bool | `boolean` |  |
-
-**Returns:**
-
-`IAtom<MaybeAny<D>>`
-
-###### Remarks
-
-Сокращённая запись `A().setStateless()`
-
-
 ## setWrapper() method
 
 Создать атом c функцией обёртки [IAtom.setWrapper()](./facade.iatom.md#setwrapper-method).
@@ -201,4 +195,22 @@ setWrapper<T>(wrapperFun: (v: D) => T): IAtom<MaybeAny<T>>;
 ###### Remarks
 
 Сокращённая запись `A().setWrapper(wrapperFun)`
+
+
+## stateless() method
+
+Создать атом, с контейнерем не запоминающием значение. [IAtom.toStateless()](./facade.iatom.md#tostateless-method).
+
+**Signature:**
+
+```typescript
+stateless(): IAtom<MaybeAny<D>>;
+```
+**Returns:**
+
+`IAtom<MaybeAny<D>>`
+
+###### Remarks
+
+Сокращённая запись `A().toStateless()`
 

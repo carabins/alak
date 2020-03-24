@@ -1,8 +1,8 @@
 
 const { A } = require('../facade')
 
-const startValue = 0
-const finalValue = 1
+const startValue = "startValue"
+const finalValue = "finalValue"
 
 const beStart = v => expect(v).toBe(startValue)
 const beFinal = v => expect(v).toBe(finalValue)
@@ -42,27 +42,34 @@ test('once is', () => {
 })
 
 test('stateless', async () => {
-  const a = A.setStateless()
+  const a = A.stateless()
   a(startValue)
   expect(a()).toBe(undefined)
-  a.setStateless(false)
+  a.toStateless(false)
   a(finalValue)
   expect(a()).toBe(finalValue)
+  a.toStateless()
+  expect(a()).toBe(undefined)
 })
 
-
-test('context', async () => {
-  let a = A()
-  a.setId('zero')
-  expect(a.uid).toBeDefined()
-  expect(a.uid).not.toBe(a.id)
-  function fn(v, a) {
-    expect(a.id).toBe('zero')
-  }
-  a.up(fn)
+test('flow', async () => {
+  const a = A.flow().setId("-")
   a(startValue)
-  expect.assertions(3)
+  expect(a.value[0]).toBe(startValue)
+  a(startValue, finalValue)
+  expect(a.value[1]).toBe(finalValue)
+  a.up((v1, v2)=>{
+    expect(v1).toBe(startValue)
+    expect(v2).toBe(finalValue)
+  })
+  a(startValue, finalValue)
+  a.clear()
+  a.toFlow(false)
+  a.up((f,a)=>{
+    expect(a.id).toBe("-")
+  })
 })
+
 
 test('resend', async () => {
   let a = A(startValue)
@@ -71,24 +78,6 @@ test('resend', async () => {
   expect.assertions(1)
 })
 
-test('name id meta', () => {
-  let a = A.id('ground', startValue)
-  expect(a.id).toBe('ground')
-  expect(a.value).toBe(startValue)
-  a.setId('sky')
-  a.setName('bob')
-  expect(a.id).toBe('sky')
-  expect(a.name).toBe('bob')
-
-  expect(a.hasMeta('x')).toBeFalsy()
-  expect(a.getMeta('x')).toBeFalsy()
-
-  a.addMeta('m')
-  a.addMeta('k', finalValue)
-  expect(a.hasMeta('m')).toBeTruthy()
-  expect(a.getMeta('k')).toBe(finalValue)
-  expect(A.id(finalValue).id).toBe(finalValue)
-})
 
 test('fmap', () => {
   const a = A(3)
@@ -100,26 +89,9 @@ test('wrap', async () => {
   const a = A.setWrapper(v => v * v)
   a(2)
   expect(a()).toBe(4)
-
   const b = A.setWrapper(v => new Promise(done => setTimeout(() => done(v * v), 24)))
   await b(4)
   expect(a()).toBe(4)
-})
-
-test('inject', () => {
-  const a = A.id('start', finalValue)
-  const o = {}
-  a.injectOnce(o)
-  a.injectOnce(o, 'final')
-  expect(o).toHaveProperty('final', finalValue)
-  expect(o).toHaveProperty('start', finalValue)
-
-  const c = A(o)
-  const c_clone = c.cloneValue()
-  expect(c_clone.start).toBe(c.value.start)
-  c.value.final = startValue
-  expect(c_clone.final).not.toBe(c.value.final)
-  expect(() => a.injectOnce(null)).toThrowError()
 })
 
 test('clear', () => {
@@ -130,6 +102,8 @@ test('clear', () => {
   expect(a.isEmpty).toBeTruthy()
   a(finalValue)
   a.clear()
+  a(startValue)
+  a(finalValue)
   a(startValue)
   expect.assertions(3)
 })
