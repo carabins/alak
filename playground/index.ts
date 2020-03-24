@@ -23,17 +23,27 @@ declare module '../packages/facade' {
   }
 }
 
-const a = A()
-a.onClear(level=>{
-  console.log(level)
+
+const a = A.stateless()
+a.up(v=>{
+  console.log(v)
 })
+a("!")
+a("!")
+console.log("-")
 
-a.clearValue()
-a.clear()
-a.decay()
+// a.onClear(level=>{
+//   console.log(level)
+// })
+//
+// a.clearValue()
+// a.clear()
+// a.decay()
+//
+// const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
+// const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
-const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
-const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
 
+// const a = A.stateless()
 

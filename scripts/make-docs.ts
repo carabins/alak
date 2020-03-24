@@ -73,12 +73,14 @@ async function make() {
   await Promise.all([
     executeCommand(`node ../${getModuleStartPath(documenter)} markdown`, workDir),
     ])
-  log0('cleaning working directory')
   if (!existsSync('docs')) mkdirSync('docs')
   else readdirSync('docs').forEach(f=>unlinkSync(path.join('docs',f)))
   const markDir = path.resolve(workDir, 'markdown')
   readdirSync(markDir).forEach(f=>renameSync(path.join(markDir, f), path.join('docs',f)))
+  await executeCommand(`node make-doc`, path.join(homeDir, "site"))
+  log0('cleaning files')
   rm(workDir)
+  rm('docs')
   info('documentation ready')
 }
 make()

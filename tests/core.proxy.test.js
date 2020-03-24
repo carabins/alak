@@ -20,7 +20,7 @@ test('proxyProps ', () => {
   a.setName('bob')
   expect(a.id).toBe('skill')
   expect(a.name).toBe('bob')
-  a.toStateless()
+  a.stateless()
   expect(a.isStateless).toBeTruthy()
 })
 

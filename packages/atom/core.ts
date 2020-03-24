@@ -23,10 +23,11 @@ export function setAtomValue(atom: Core, value, context?) {
       }
       finalValue = wrappedValue
     }
-    if (!atom.isStateless)
-      atom.value = finalValue
+
+    atom.value = finalValue
     debug.enabled && debug.updateValue(atom, context)
     notifyChildes(atom)
+    if (atom.isStateless) delete atom.value
     return finalValue
   }
   if (value && value.then) {
@@ -40,12 +41,12 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
   atom.isAwaiting = promise
   atom.isAsync = true
   let v = await promise
-  if (!atom.isStateless)
-    atom.value = v
+  atom.value = v
   atom.isAwaiting = false
   notifyStateListeners(atom, FState.AWAIT, false)
   debug.enabled && debug.updateAsyncFinish(atom)
   notifyChildes(atom)
+  if (atom.isStateless) delete atom.value
   return v
 }
 

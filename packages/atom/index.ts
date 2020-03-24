@@ -159,7 +159,7 @@ export interface IAtom<T> {
   readonly isAwaiting: Boolean
 
   /** `true` когда атом не запоминает значение
-   * {@link IAtom.toStateless}*/
+   * {@link IAtom.stateless}*/
   readonly isStateless: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
@@ -314,7 +314,7 @@ export interface IAtom<T> {
    * Значение переданное в атом, доставится в функции-получатели минуя контейнер.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  toStateless(bool?:boolean): IAtom<T>
+  stateless(bool?:boolean): IAtom<T>
 
   /**
    * Сделать конетейнер принимающим и передаюшим множество агрументов.
@@ -322,7 +322,7 @@ export interface IAtom<T> {
    * В функции-получатели значения передаются в полном количестве.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  toFlow(bool?:boolean): IAtom<T>
+  flow(bool?:boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей
