@@ -16,6 +16,6 @@ const play = () => {
 }
 
 nodemon.on('start', play).on('restart', function(files) {
-  console.log(files)
+  console.log("start")
   play()
 })

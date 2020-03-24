@@ -33,18 +33,18 @@ const atom = A() // сокращённая запись A.proxy()
 
 |  Method | Description |
 |  --- | --- |
-|  [flow()](./facade.iatomconstructor.md#flow-method) | Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.toStateless()](./facade.iatom.md#tostateless-method). |
+|  [flow()](./facade.iatomconstructor.md#flow-method) | Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.stateless()](./facade.iatom.md#stateless-method). |
 |  [from(atoms)](./facade.iatomconstructor.md#from-method) | Создать атом из нескольких других атомов и стратегии вычисления. Смотрите описание стратегий: [ComputeStrategy](./ext-computed.computestrategy.md). |
 |  [id(id, startValue)](./facade.iatomconstructor.md#id-method) | Создать атом c предустановленным идентификатором [IAtom.setId()](./facade.iatom.md#setid-method). |
 |  [setGetter(getterFn)](./facade.iatomconstructor.md#setgetter-method) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.md#setgetter-method). |
 |  [setOnceGet(getterFn)](./facade.iatomconstructor.md#setonceget-method) | Создать атом c функцией добытчика [IAtom.setGetter()](./facade.iatom.md#setgetter-method). |
 |  [setWrapper(wrapperFun)](./facade.iatomconstructor.md#setwrapper-method) | Создать атом c функцией обёртки [IAtom.setWrapper()](./facade.iatom.md#setwrapper-method). |
-|  [stateless()](./facade.iatomconstructor.md#stateless-method) | Создать атом, с контейнерем не запоминающием значение. [IAtom.toStateless()](./facade.iatom.md#tostateless-method). |
+|  [stateless()](./facade.iatomconstructor.md#stateless-method) | Создать атом, с контейнерем не запоминающием значение. [IAtom.stateless()](./facade.iatom.md#stateless-method). |
 
 
 ## flow() method
 
-Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.toStateless()](./facade.iatom.md#tostateless-method).
+Создать атом, с аргументами передающимися в функции-добытчики в полном числе. [IAtom.stateless()](./facade.iatom.md#stateless-method).
 
 **Signature:**
 
@@ -57,7 +57,7 @@ flow(): IAtom<MaybeAny<D>>;
 
 ###### Remarks
 
-Сокращённая запись `A().toFlow()`
+Сокращённая запись `A().flow()`
 
 
 ## from() method
@@ -199,7 +199,7 @@ setWrapper<T>(wrapperFun: (v: D) => T): IAtom<MaybeAny<T>>;
 
 ## stateless() method
 
-Создать атом, с контейнерем не запоминающием значение. [IAtom.toStateless()](./facade.iatom.md#tostateless-method).
+Создать атом, с контейнерем не запоминающием значение. [IAtom.stateless()](./facade.iatom.md#stateless-method).
 
 **Signature:**
 
@@ -212,5 +212,5 @@ stateless(): IAtom<MaybeAny<D>>;
 
 ###### Remarks
 
-Сокращённая запись `A().toStateless()`
+Сокращённая запись `A().stateless()`
 

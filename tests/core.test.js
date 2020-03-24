@@ -44,11 +44,14 @@ test('once is', () => {
 test('stateless', async () => {
   const a = A.stateless()
   a(startValue)
+  a.up(beFinal)
   expect(a()).toBe(undefined)
-  a.toStateless(false)
+  a(finalValue)
+  expect(a()).toBe(undefined)
+  a.stateless(false)
   a(finalValue)
   expect(a()).toBe(finalValue)
-  a.toStateless()
+  a.stateless()
   expect(a()).toBe(undefined)
 })
 
@@ -64,7 +67,7 @@ test('flow', async () => {
   })
   a(startValue, finalValue)
   a.clear()
-  a.toFlow(false)
+  a.flow(false)
   a.up((f,a)=>{
     expect(a.id).toBe("-")
   })

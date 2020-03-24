@@ -25,6 +25,7 @@ switch (task) {
     require('./scripts/tsc').clearLib()
     break
   case 'play':
+
     require('./playground/')
     break
   case 'dt':

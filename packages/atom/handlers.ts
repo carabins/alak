@@ -168,14 +168,14 @@ export const handlers = {
     Object.defineProperty(this, 'name', { value })
     return this._
   },
-  toFlow(v?) {
+  flow(v?) {
     if (v == undefined)
       this.isFlow = true
     else
       this.isFlow = v
     return this._
   },
-  toStateless(v) {
+  stateless(v) {
     if (v == undefined)
       this.isStateless = true
     else
