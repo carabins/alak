@@ -8,7 +8,6 @@ import { installAtomExtension } from '../atom/create'
  * @packageDocumentation
  */
 
-
 // @ts-ignore
 declare module 'alak/core' {
   interface IAtom<T> {
@@ -16,7 +15,7 @@ declare module 'alak/core' {
   }
 }
 
-export function installMatchingExtension(){
+export function installMatchingExtension() {
   installAtomExtension({
     handlers: {
       match,
@@ -103,7 +102,7 @@ function matching(...args) {
             runFns.push(pattern[l - 1])
           }
         }
-        runFns.forEach(f => f.apply(fn, value))
+        runFns.forEach((f) => f.apply(fn, value))
       }
     }
   }

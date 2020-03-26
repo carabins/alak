@@ -4,7 +4,6 @@ import { executeCommand } from './helpers'
 import { clearLib } from './tsc'
 import * as http from 'http'
 
-
 function pumpVersion() {
   const packageJSON = JSON.parse(readFileSync('./package.json', 'utf-8'))
   const versionParts = packageJSON.version.split('.')
@@ -16,7 +15,7 @@ function pumpVersion() {
 async function publish() {
   const packageJSON = JSON.parse(readFileSync('./package.json', 'utf-8'))
   let v = await executeCommand('npm show alak version')
-  const remoteVer = v.toString().split("\n").shift()
+  const remoteVer = v.toString().split('\n').shift()
   if (packageJSON.version != remoteVer) {
     await executeCommand('npm publish')
   }

@@ -40,7 +40,7 @@ module.exports = {
             {
               label: 'Начало',
               to: 'docs/start',
-            }
+            },
           ],
         },
         {
@@ -49,7 +49,7 @@ module.exports = {
             {
               label: 'Telegram',
               href: 'http://gleb.pw/',
-            }
+            },
             //{
             //  label: 'Discord',
             //  href: 'https://discordapp.com/invite/docusaurus',
@@ -79,11 +79,11 @@ module.exports = {
   },
   scripts: [
     //"/alak.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/codemirror.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/mode/javascript/javascript.min.js",
-    "https://unpkg.com/jshint@2.9.6/dist/jshint.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/lint.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/javascript-lint.min.js",
+    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/codemirror.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/mode/javascript/javascript.min.js',
+    'https://unpkg.com/jshint@2.9.6/dist/jshint.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/lint.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/lint/javascript-lint.min.js',
   ],
   //themes: ['@docusaurus/theme-live-codeblock'],
   presets: [

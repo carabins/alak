@@ -12,9 +12,8 @@ import { terser } from 'rollup-plugin-terser'
 import { rollup } from 'rollup'
 import { tsc } from './tsc'
 
-
 const packUmd = (packName, outName) =>
-  new Promise(done =>
+  new Promise((done) =>
     rollup({
       input: `${packName}/${outName}.js`,
 
@@ -25,21 +24,21 @@ const packUmd = (packName, outName) =>
           sourceMap: false,
         }),
       ],
-    }).then(build =>
+    }).then((build) =>
       build
         .write({
           file: `./${outName}.js`,
           format: 'umd',
           name: 'A',
         })
-        .then(()=>{
+        .then(() => {
           rm(`./${outName}.d.ts`)
           done()
         }),
     ),
   )
 
-export async function lib(){
+export async function lib() {
   info('make library...')
   await tsc()
   await packUmd('umd', 'atom')

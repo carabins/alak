@@ -72,7 +72,8 @@ type AnyFunction = {
 /** @internal */
 export type MaybeAny<T> = unknown extends T ? any : T
 
-type Level = "value" | "all" | "decay"
+type Level = 'value' | 'all' | 'decay'
+
 /**
  * Создание прокси-атома и атома
  * @example
@@ -82,8 +83,10 @@ type Level = "value" | "all" | "decay"
  * ```
  */
 export interface IAtomCoreConstructor {
-  /** Создать {@link IAtom} с необязательным аргументом как стартовое значение*/
-  <T>(value?: T): IAtom<MaybeAny<T>>
+  /** Создать {@link IAtom} с необязательным аргументом как стартовое значение*/ <T>(
+    value?: T,
+  ): IAtom<MaybeAny<T>>
+
   /**
    * Создать {@link IAtom} с необязательным аргументом как стартовое значение
    * @remarks
@@ -93,6 +96,7 @@ export interface IAtomCoreConstructor {
    * @readonly
    */
   proxy<T>(value?: T): IAtom<MaybeAny<T>>
+
   /**
    * Создать {@link IAtom} с необязательным аргументом как стартовое значение
    * @remarks
@@ -103,11 +107,10 @@ export interface IAtomCoreConstructor {
   proto<T>(value?: T): IAtom<MaybeAny<T>>
 }
 
-
-type ValueDownReceiver<T extends any> = (v: T, down:()=>void) => void
-type ValueFlowReceiver<T extends any> = (...v:any[]) => void
-type ValueAtomReceiver<T extends any> = (...v:any[]) => void
-type ValueReceiver<T extends any> = ValueFlowReceiver<T> | ValueAtomReceiver<T>
+type ValueDownReceiver<T extends any> = (v: T, down: () => void) => void
+type ValueFlowReceiver = (...a: any[]) => void
+type ValueAtomReceiver<T extends any> = (v: T, a: IAtom<T>) => void
+type ValueReceiver<T> = unknown extends T ? ValueFlowReceiver : ValueAtomReceiver<T>
 
 /** Интерфейс ядра атома.
  * @remarks
@@ -118,6 +121,7 @@ export interface IAtom<T> {
    * Вернуть текущее значение контейнера
    */
   (): Promise<T> | T
+
   /**
    * Доставить значение всем дочерним слушателям и установить новое значение в контейнер.
    * @param value устанавливаемое значние
@@ -227,6 +231,7 @@ export interface IAtom<T> {
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
   onAwait(listener: (isAwaiting: boolean) => void): IAtom<T>
+
   /** Добавить слушатель отчистки значения
    * @remarks
    *  Значение глубины отчистки
@@ -238,15 +243,18 @@ export interface IAtom<T> {
    * - decay рапад {@link IAtom.decay}
    * @param listener - функция-слушатель принимающая строку - значение глубины отчистки
    * @returns {@link IAtom}*/
-  onClear(listener: (deep:Level) => void): IAtom<T>
+  onClear(listener: (deep: Level) => void): IAtom<T>
+
   /** Удалить слушатель отчистки зачения {@link IAtom.clearValue}
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
   offClear(listener: () => void): IAtom<T>
+
   /** Удалить слушатель изменения асинхронного состояния
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
   offAwait(listener: AnyFunction): void
+
   /** Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
    * @returns {@link IAtom}*/
   clear(): IAtom<T>
@@ -294,12 +302,13 @@ export interface IAtom<T> {
    * @param getter - функция-добытчик
    * @param isAsync - установить значение {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  setGetter(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setGetter(getter: () => T | Promise<T>, isAsync?: boolean): IAtom<T>
+
   /** Использовать функцию-добытчик только один раз
    * @param getter - функция-добытчик
    * @param isAsync - установить значение {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  setOnceGet(getter: () => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setOnceGet(getter: () => T | Promise<T>, isAsync?: boolean): IAtom<T>
 
   /** Использовать функцию-обёртку
    * Каждое новое обновление значение контейнера атома,
@@ -307,14 +316,14 @@ export interface IAtom<T> {
    * @param wrapper - функция-обёртка
    * @param isAsync - установить значение returns {@link IAtom.isAsync}
    * @returns {@link IAtom} */
-  setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?:boolean): IAtom<T>
+  setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?: boolean): IAtom<T>
 
   /**
    * Сделать конетейнер всегда пустым.
    * Значение переданное в атом, доставится в функции-получатели минуя контейнер.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  stateless(bool?:boolean): IAtom<T>
+  stateless(bool?: boolean): IAtom<T>
 
   /**
    * Сделать конетейнер принимающим и передаюшим множество агрументов.
@@ -322,7 +331,7 @@ export interface IAtom<T> {
    * В функции-получатели значения передаются в полном количестве.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  flow(bool?:boolean): IAtom<T>
+  flow(bool?: boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей

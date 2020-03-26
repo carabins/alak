@@ -2,7 +2,6 @@ require('ts-node').register()
 
 const task = process.argv[2]
 
-
 switch (task) {
   case 'doc':
   case 'docs':
@@ -25,7 +24,6 @@ switch (task) {
     require('./scripts/tsc').clearLib()
     break
   case 'play':
-
     require('./playground/')
     break
   case 'dt':

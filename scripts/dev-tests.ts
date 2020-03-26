@@ -2,7 +2,6 @@ import { fork } from 'child_process'
 import { clearLib, tsc } from './tsc'
 import { executeCommand } from './helpers'
 
-
 const forked = []
 const runTests = () => {
   while (forked.length) forked.pop().kill()
@@ -27,11 +26,10 @@ export async function dev() {
       clearLib()
       tsc().then(runTests)
     })
-    .on('restart', function(files) {
+    .on('restart', function (files) {
       console.log('Tests restarted : ', files)
       fork('node_modules/jest/bin/jest')
     })
-
 }
 
 export function run() {

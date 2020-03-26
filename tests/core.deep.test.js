@@ -1,8 +1,7 @@
 const { A } = require('../facade')
 
-const startValue = "startValue"
-const finalValue = "finalValue"
-
+const startValue = 'startValue'
+const finalValue = 'finalValue'
 
 test('name id meta', () => {
   let a = A.id('ground', startValue)
@@ -23,7 +22,6 @@ test('name id meta', () => {
   expect(A.id(finalValue).id).toBe(finalValue)
 })
 
-
 test('inject', () => {
   const a = A.id('start', finalValue)
   const o = {}
@@ -40,7 +38,6 @@ test('inject', () => {
   expect(() => a.injectOnce(null)).toThrowError()
 })
 
-
 test('context', async () => {
   let a = A()
   a.setId('zero')
@@ -53,4 +50,3 @@ test('context', async () => {
   a(startValue)
   expect.assertions(3)
 })
-

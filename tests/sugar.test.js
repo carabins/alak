@@ -1,14 +1,14 @@
 const { A } = require('../facade')
 
-const alive = v => (v !== undefined && v !== null)
+const alive = (v) => v !== undefined && v !== null
 
 test('upSome', () => {
   let a = A()
-  a.upSome(v => {
+  a.upSome((v) => {
     expect(alive(v)).toBeTruthy()
   })
   a(false) // +
-  a(1)  // +
+  a(1) // +
   a(0) // +
   a(null)
   a(undefined)
@@ -17,11 +17,11 @@ test('upSome', () => {
 
 test('upTrue', () => {
   let a = A(true) // +
-  a.upTrue(v => {
+  a.upTrue((v) => {
     expect(v).toBeTruthy()
   })
   a(false)
-  a(1)  // +
+  a(1) // +
   a(0)
   a(null)
   a(undefined)
@@ -30,7 +30,7 @@ test('upTrue', () => {
 //
 test('upFalse', () => {
   let a = A()
-  a.upFalse(v => {
+  a.upFalse((v) => {
     expect(v).toBeFalsy()
   })
   a(false) // +
@@ -43,7 +43,7 @@ test('upFalse', () => {
 
 test('upSomeFalse', () => {
   let a = A(false) // +
-  a.upSomeFalse(v => {
+  a.upSomeFalse((v) => {
     expect(v).toBeFalsy()
   })
   a(false) // +
@@ -54,17 +54,16 @@ test('upSomeFalse', () => {
   expect.assertions(3)
 })
 
-
 test('upNone', () => {
   let a = A(null) // +
-  a.upNone(v => {
+  a.upNone((v) => {
     expect(alive(v)).toBeFalsy()
   })
   a(false)
   a(1)
   a(0)
-  a(null)  // +
-  a(undefined)  // +
+  a(null) // +
+  a(undefined) // +
   expect.assertions(3)
 })
 
@@ -85,9 +84,9 @@ test('grand down', () => {
   expect(fn).toHaveBeenCalledTimes(3)
 })
 
-test('upDown', ()=>{
+test('upDown', () => {
   const a = A()
-  a.upDown((v, down)=>{
+  a.upDown((v, down) => {
     expect(v).toBeTruthy()
     down()
   })

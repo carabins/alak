@@ -1,7 +1,5 @@
 // import './benchmark'
 
-
-
 import A from '../packages/facade'
 import chalk from 'chalk'
 import { ComputeStrategy, installComputedExtension } from '../packages/ext-computed'
@@ -23,15 +21,6 @@ declare module '../packages/facade' {
   }
 }
 
-
-const a = A.stateless()
-a.up(v=>{
-  console.log(v)
-})
-a("!")
-a("!")
-console.log("-")
-
 // a.onClear(level=>{
 //   console.log(level)
 // })
@@ -43,7 +32,4 @@ console.log("-")
 // const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
 // const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
 
-
-
 // const a = A.stateless()
-

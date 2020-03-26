@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "8"
+  - '8'
 
 install:
   - npm install typescript -g
@@ -16,4 +16,4 @@ deploy:
   skip_cleanup: true
   email: 'dev@gleb.pw'
   api_key: $NPM_TOKEN
-  file: "dist/**/*"
+  file: 'dist/**/*'

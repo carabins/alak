@@ -18,10 +18,6 @@ module.exports = {
       'api/atom.extensionoptions',
     ],
 
-    Extensions: [
-      'api/ext-computed',
-      'api/ext-computed.computestrategy',
-      'api/ext-matching',
-    ],
+    Extensions: ['api/ext-computed', 'api/ext-computed.computestrategy', 'api/ext-matching'],
   },
 }

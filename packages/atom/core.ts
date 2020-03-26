@@ -14,7 +14,7 @@ export const debug = {} as {
 }
 
 export function setAtomValue(atom: Core, value, context?) {
-  const setValue = finalValue => {
+  const setValue = (finalValue) => {
     if (atom.wrapperFn) {
       let wrappedValue = atom.wrapperFn(finalValue, atom.value)
       if (wrappedValue.then) {
@@ -52,8 +52,7 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
 
 export function notifyChildes(atom: Core) {
   const v = atom.value
-  const apply = atom.isFlow ? f => f.call(f, ...v)
-    : f => f.length == 2 ? f(v, atom._) : f(v)
+  const apply = atom.isFlow ? (f) => f.call(f, ...v) : (f) => (f.length == 2 ? f(v, atom._) : f(v))
 
   atom.children.size > 0 && atom.children.forEach(apply)
   atom.grandChildren && atom.grandChildren.size > 0 && atom.grandChildren.forEach(apply)
@@ -67,13 +66,14 @@ export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction
 }
 
 export const createCore = (...a) => {
-  const atom = function(...v) {
+  const atom = function (...v) {
     if (!atom.children) {
       throw DECAY_ATOM_ERROR
     }
     if (v.length) {
       const value = atom.isFlow ? v : v[0]
-      if (debug.enabled) return setAtomValue(atom, value, !atom.isFlow && v[1] ? v[1] : AtomContext.direct)
+      if (debug.enabled)
+        return setAtomValue(atom, value, !atom.isFlow && v[1] ? v[1] : AtomContext.direct)
       else return setAtomValue(atom, value)
     } else {
       if (atom.isAwaiting) {

@@ -127,7 +127,7 @@ function Home() {
             </div>
 
             <div className='full-width'>
-              <AtomRepl code={code}/>
+              <AtomRepl code={code} />
             </div>
           </div>
         </div>

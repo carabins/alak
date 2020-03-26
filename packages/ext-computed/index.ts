@@ -103,8 +103,8 @@ export function from(...fromAtoms: IAtom<any>[]) {
     atom.haveFrom = true
   }
   let someoneIsWaiting = []
-  const addWaiter = () => new Promise(_ => someoneIsWaiting.push(_))
-  const freeWaiters = v => {
+  const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))
+  const freeWaiters = (v) => {
     while (someoneIsWaiting.length) {
       someoneIsWaiting.pop()(v)
     }
@@ -112,7 +112,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
 
   function applyValue(mixedValue) {
     if (isPromise(mixedValue)) {
-      mixedValue.then(v => {
+      mixedValue.then((v) => {
         freeWaiters(v)
         setAtomValue(atom, v, computedContext)
       })
@@ -123,11 +123,11 @@ export function from(...fromAtoms: IAtom<any>[]) {
     atom.isAwaiting && delete atom.isAwaiting
     return mixedValue
   }
-  const makeMix = mixFn => {
+  const makeMix = (mixFn) => {
     const inAwaiting: IAtom<any>[] = []
     const { strong, some } = mixFn
     const needFull = strong || some
-    let values = fromAtoms.map(a => {
+    let values = fromAtoms.map((a) => {
       if (a.isAwaiting) {
         inAwaiting.push(a)
       } else if (needFull && !alive(a.value)) {
@@ -151,7 +151,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
         linkedValues[a.id] = v
       }
     }
-    fromAtoms.forEach(a => {
+    fromAtoms.forEach((a) => {
       if (a !== atom._) {
         linkedValues[a.id] = a.value
         a.next(mixer)
@@ -173,15 +173,15 @@ export function from(...fromAtoms: IAtom<any>[]) {
       // console.log('---------')
       // console.log('getting', getting)
       const waiters = {}
-      const isWaiting = ()=> Object.keys(waiters).length
-      const values = fromAtoms.map(a => {
+      const isWaiting = () => Object.keys(waiters).length
+      const values = fromAtoms.map((a) => {
         let v: any = getting[a.uid]
         if (v) return v
         else v = a()
         if (isPromise(v)) {
           waiters[a.uid] = true
           // console.log(a.id, 'is promise', isWaiting())
-          v.then(v => {
+          v.then((v) => {
             getting[a.uid] = v
             linkedValues[a.uid] = v
             delete waiters[a.uid]
@@ -215,7 +215,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
         linkedValues[a.id] = v
       }
     }
-    fromAtoms.forEach(a => {
+    fromAtoms.forEach((a) => {
       if (a !== atom._) {
         a.next(mixer)
       }
