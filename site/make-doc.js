@@ -10,8 +10,16 @@ const {
 } = require('fs-extra')
 const path = require('path')
 
-const { mkdirSync, readdirSync, readFileSync, readSync, renameSync, rmdirSync, unlinkSync, writeFileSync } = require(
-  'fs')
+const {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  readSync,
+  renameSync,
+  rmdirSync,
+  unlinkSync,
+  writeFileSync,
+} = require('fs')
 
 const { log } = console
 
@@ -67,7 +75,6 @@ function ABox() {
   }
 }
 
-
 const homeDir = path.resolve('.')
 const titleCode = /\##.*/
 
@@ -83,7 +90,7 @@ const deleteLines = (string, n = 1) => {
 const mergeTypes = {
   variable: true,
   type: true,
-  'function': true,
+  function: true,
 }
 
 async function make() {
@@ -95,7 +102,7 @@ async function make() {
   let topics = {}
   let subTopics = ABox()
   let subRedirect = []
-  readdirSync(docDir).forEach(f => {
+  readdirSync(docDir).forEach((f) => {
     let body = readFileSync(path.join(docDir, f), {
       encoding: 'Utf8',
     })
@@ -104,10 +111,10 @@ async function make() {
     body = body.replace(/&lt;/g, '<')
     body = body.replace(/&gt;/g, '>')
     body = body.replace(/&#124;/g, 'ا')
-    body = body.replace(/<b>/g, "**")
-    body = body.replace(/<\/b>/g, "**")
-    body = body.replace(/<!-- -->/g, "")
-    body = body.replace(/<br\/>/g, "\n")
+    body = body.replace(/<b>/g, '**')
+    body = body.replace(/<\/b>/g, '**')
+    body = body.replace(/<!-- -->/g, '')
+    body = body.replace(/<br\/>/g, '\n')
 
     const parts = f.split('.')
     const title = titleCode.exec(body)[0].slice(3)
@@ -125,37 +132,31 @@ async function make() {
         t.shift()
         let subTitle = t.join('.')
         body = body.replace('## ' + title, '## ' + subTitle)
-        subRedirect.push([
-          new RegExp(f, 'g'),
-          topicName + '#' + f.split('.')[2] + '-' + type,
-        ])
+        subRedirect.push([new RegExp(f, 'g'), topicName + '#' + f.split('.')[2] + '-' + type])
       } else {
-        subRedirect.push([
-          new RegExp(f, 'g'),
-          topicName + '#' + f.split('.')[1] + '-' + type
-        ])
+        subRedirect.push([new RegExp(f, 'g'), topicName + '#' + f.split('.')[1] + '-' + type])
       }
       subTopics.push(topicName, body)
     } else {
       topics[f] = dinoTitle(title, f.replace('.md', '')) + body
     }
   })
-  Object.keys(topics).forEach(topic => {
-    subTopics.each(topic, subBody => {
+  Object.keys(topics).forEach((topic) => {
+    subTopics.each(topic, (subBody) => {
       topics[topic] = topics[topic] + subBody
     })
   })
 
   await emptyDir(outApiDir)
-  Object.keys(topics).forEach(topic => {
+  Object.keys(topics).forEach((topic) => {
     let body = topics[topic]
-    subRedirect.forEach(p => {
+    subRedirect.forEach((p) => {
       body = body.replace(p[0], p[1])
     })
-    console.log("api\\"+topic.split(".").slice(0,-1).join(".")+",")
+    console.log('api\\' + topic.split('.').slice(0, -1).join('.') + ',')
     writeFileSync(path.join(outApiDir, topic), body)
   })
-  writeFileSync(path.join(outApiDir, ".gitignore"), "*")
+  writeFileSync(path.join(outApiDir, '.gitignore'), '*')
   log('documentation ready')
 }
 

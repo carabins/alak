@@ -1,6 +1,6 @@
 import { AtomSnap, atomSnapshot } from './receiveTools'
 
-export type AtomLog = [number, string, number, any, string, string,  string[], number, string?]
+export type AtomLog = [number, string, number, any, string, string, string[], number, string?]
 const logsHead = ['time', 'event', 'uid', 'name', 'id', 'meta', 'value', 'children', 'context']
 export function debugInstance() {
   let isCollecting = false
@@ -36,7 +36,7 @@ export function debugInstance() {
     controller,
     receiver(event: string, atom, ...context) {
       const snap = atomSnapshot(atom)
-      context.length>0 && snap.push(...context)
+      context.length > 0 && snap.push(...context)
       const record = [Date.now() - timeStart, event, ...snap] as AtomLog
       isCollecting && collection.push(record)
       records.push(record)

@@ -21,9 +21,9 @@ export const installAtomDebuggerTool = {
 function pathCore() {
   debug.enabled = true
   Object.keys(DebugEvent).forEach(
-    eventName => (debug[eventName] = (...a) => routeEvent(eventName, ...a)),
+    (eventName) => (debug[eventName] = (...a) => routeEvent(eventName, ...a)),
   )
 }
 function routeEvent(...args) {
-  receivers.forEach(r => r(...args))
+  receivers.forEach((r) => r(...args))
 }

@@ -17,9 +17,10 @@ export class MirrorRepl extends React.Component {
       //},
     })
     this.code && repl.setValue(this.code)
-    this.onCodeChange && CodeMirror.on(repl, 'change', ()=>{
-      this.onCodeChange(repl.getValue())
-    })
+    this.onCodeChange &&
+      CodeMirror.on(repl, 'change', () => {
+        this.onCodeChange(repl.getValue())
+      })
     this.repls = repl
   }
 
@@ -27,7 +28,6 @@ export class MirrorRepl extends React.Component {
     //this.$el.somePlugin('destroy');
   }
   shouldComponentUpdate(nextProps, nextState) {
-
     if (nextProps.code !== this.code) {
       this.code = nextProps.code
       this.repls.setValue(this.code)
@@ -35,6 +35,6 @@ export class MirrorRepl extends React.Component {
     return false
   }
   render() {
-    return<textarea ref={el => (this.el = el)} />
+    return <textarea ref={(el) => (this.el = el)} />
   }
 }

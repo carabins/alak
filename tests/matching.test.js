@@ -3,7 +3,7 @@ const { A } = require('../facade')
 const startValue = 0
 const finalValue = 1
 function asyncFn() {
-  return new Promise(done => {
+  return new Promise((done) => {
     setTimeout(() => done(finalValue), 24)
   })
 }

@@ -1,6 +1,7 @@
 import { debug, grandUpFn, notifyChildes, setAtomValue } from './core'
 import {
-  addStateEventListener, ClearState,
+  addStateEventListener,
+  ClearState,
   FState,
   notifyStateListeners,
   removeStateEventListener,
@@ -13,7 +14,8 @@ import {
   noneFilter,
   someFalseFilter,
   someFilter,
-  trueFilter, upDownFilter,
+  trueFilter,
+  upDownFilter,
 } from './utils'
 
 const valueProp = 'value'
@@ -65,8 +67,8 @@ export const proxyProps = {
   },
 }
 
-const applyValue = (a, f) => a.isEmpty ? false :
-  (a.isFlow ? f.call(f, ...a.value) : f(a.value, a), true)
+const applyValue = (a, f) =>
+  a.isEmpty ? false : (a.isFlow ? f.call(f, ...a.value) : f(a.value, a), true)
 
 export const handlers = {
   up(f) {
@@ -120,7 +122,7 @@ export const handlers = {
   },
   once(f) {
     if (!applyValue(this._, f)) {
-      const once = v => {
+      const once = (v) => {
         this.children.delete(once)
         f(v)
       }
@@ -169,19 +171,14 @@ export const handlers = {
     return this._
   },
   flow(v?) {
-    if (v == undefined)
-      this.isFlow = true
-    else
-      this.isFlow = v
+    if (v == undefined) this.isFlow = true
+    else this.isFlow = v
     return this._
   },
   stateless(v) {
-    if (v == undefined)
-      this.isStateless = true
-    else
-      this.isStateless = v
-    if (this.isStateless)
-      this._.clearValue()
+    if (v == undefined) this.isStateless = true
+    else this.isStateless = v
+    if (this.isStateless) this._.clearValue()
     return this._
   },
   // apply(context, v) {

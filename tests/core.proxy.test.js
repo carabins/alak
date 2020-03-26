@@ -2,12 +2,12 @@ const { A } = require('../facade')
 const startValue = 'startValue'
 const finalValue = 'finalValue'
 
-const beStart = v => expect(v).toBe(startValue)
-const beFinal = v => expect(v).toBe(finalValue)
-const neverBe = v => expect(v).toThrow
+const beStart = (v) => expect(v).toBe(startValue)
+const beFinal = (v) => expect(v).toBe(finalValue)
+const neverBe = (v) => expect(v).toThrow
 
 function asyncFn() {
-  return new Promise(done => {
+  return new Promise((done) => {
     setTimeout(() => done(finalValue), 24)
   })
 }
@@ -47,9 +47,8 @@ test('clear', () => {
   a.offClear(clearResolver)
   a.clearValue()
   expect(a.isEmpty).toBeTruthy()
-  a.from(A(finalValue)).weak(v => v)
+  a.from(A(finalValue)).weak((v) => v)
   a.clear()
   a(startValue)
   expect(clearResolver).toHaveBeenCalledTimes(1)
 })
-

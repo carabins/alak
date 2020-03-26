@@ -1,4 +1,4 @@
 export const DebugEvent = {
-  updateValue: "updateValue",
-  updateAsyncFinish: "updateAsyncFinish"
+  updateValue: 'updateValue',
+  updateAsyncFinish: 'updateAsyncFinish',
 }

@@ -15,8 +15,6 @@ import { tsc } from './tsc'
 const chalk = require('chalk')
 const { log } = console
 
-
-
 const dirName = 'TEMPleDocs'
 const homeDir = path.resolve('.')
 const workDir = path.resolve('TEMPleDocs')
@@ -24,7 +22,7 @@ const extractor = 'extractor'
 const documenter = 'documenter'
 const cfgFile = 'api-extractor.json'
 
-const getModuleStartPath = name => `node_modules/@microsoft/api-${name}/lib/start.js`
+const getModuleStartPath = (name) => `node_modules/@microsoft/api-${name}/lib/start.js`
 async function checkModule(name) {
   const modulePath = getModuleStartPath(name)
   if (!existsSync(modulePath)) {
@@ -70,14 +68,12 @@ async function make() {
     extractApi('ext-computed'),
   ])
   info('making documentation...')
-  await Promise.all([
-    executeCommand(`node ../${getModuleStartPath(documenter)} markdown`, workDir),
-    ])
+  await Promise.all([executeCommand(`node ../${getModuleStartPath(documenter)} markdown`, workDir)])
   if (!existsSync('docs')) mkdirSync('docs')
-  else readdirSync('docs').forEach(f=>unlinkSync(path.join('docs',f)))
+  else readdirSync('docs').forEach((f) => unlinkSync(path.join('docs', f)))
   const markDir = path.resolve(workDir, 'markdown')
-  readdirSync(markDir).forEach(f=>renameSync(path.join(markDir, f), path.join('docs',f)))
-  await executeCommand(`node make-doc`, path.join(homeDir, "site"))
+  readdirSync(markDir).forEach((f) => renameSync(path.join(markDir, f), path.join('docs', f)))
+  await executeCommand(`node make-doc`, path.join(homeDir, 'site'))
   log0('cleaning files')
   rm(workDir)
   rm('docs')

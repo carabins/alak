@@ -1,14 +1,12 @@
 const { A } = require('../facade')
 
-
-const startValue = "startValue"
-const finalValue = "finalValue"
+const startValue = 'startValue'
+const finalValue = 'finalValue'
 function asyncFn() {
-  return new Promise(done => {
+  return new Promise((done) => {
     setTimeout(() => done(finalValue), 24)
   })
 }
-
 
 test('async proxy', async () => {
   let a = A.proxy(startValue)
@@ -34,7 +32,7 @@ test('async onAwait', async () => {
   let a = A(startValue)
   a.setGetter(asyncFn)
   let isWait = true
-  a.onAwait(isAwaiting=>{
+  a.onAwait((isAwaiting) => {
     expect(isAwaiting).toBe(isWait)
     isWait = !isWait
   })
@@ -43,7 +41,7 @@ test('async onAwait', async () => {
   a.clear()
   const fn = jest.fn()
   a.onAwait(fn)
-  a.onAwait(()=>null)
+  a.onAwait(() => null)
   await a()
   a.offAwait(fn)
   await a()
@@ -51,4 +49,3 @@ test('async onAwait', async () => {
   expect(fn).toHaveBeenCalledTimes(2)
   expect.assertions(3)
 })
-

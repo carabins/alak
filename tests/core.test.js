@@ -1,12 +1,11 @@
-
 const { A } = require('../facade')
 
-const startValue = "startValue"
-const finalValue = "finalValue"
+const startValue = 'startValue'
+const finalValue = 'finalValue'
 
-const beStart = v => expect(v).toBe(startValue)
-const beFinal = v => expect(v).toBe(finalValue)
-const neverBe = v => expect(v).toThrow
+const beStart = (v) => expect(v).toBe(startValue)
+const beFinal = (v) => expect(v).toBe(finalValue)
+const neverBe = (v) => expect(v).toThrow
 
 test('mini', () => {
   let a = A()
@@ -56,23 +55,22 @@ test('stateless', async () => {
 })
 
 test('flow', async () => {
-  const a = A.flow().setId("-")
+  const a = A.flow().setId('-')
   a(startValue)
   expect(a.value[0]).toBe(startValue)
   a(startValue, finalValue)
   expect(a.value[1]).toBe(finalValue)
-  a.up((v1, v2)=>{
+  a.up((v1, v2) => {
     expect(v1).toBe(startValue)
     expect(v2).toBe(finalValue)
   })
   a(startValue, finalValue)
   a.clear()
   a.flow(false)
-  a.up((f,a)=>{
-    expect(a.id).toBe("-")
+  a.up((f, a) => {
+    expect(a.id).toBe('-')
   })
 })
-
 
 test('resend', async () => {
   let a = A(startValue)
@@ -81,18 +79,17 @@ test('resend', async () => {
   expect.assertions(1)
 })
 
-
 test('fmap', () => {
   const a = A(3)
-  a.fmap(v => v + 2)
+  a.fmap((v) => v + 2)
   expect(a()).toBe(5)
 })
 
 test('wrap', async () => {
-  const a = A.setWrapper(v => v * v)
+  const a = A.setWrapper((v) => v * v)
   a(2)
   expect(a()).toBe(4)
-  const b = A.setWrapper(v => new Promise(done => setTimeout(() => done(v * v), 24)))
+  const b = A.setWrapper((v) => new Promise((done) => setTimeout(() => done(v * v), 24)))
   await b(4)
   expect(a()).toBe(4)
 })
@@ -131,8 +128,8 @@ test('close', () => {
   expect(() => a()).toThrowError()
   expect(a.uid).toBeUndefined()
   let b = A.proxy(startValue)
-  expect(()=> b.wow).toThrowError()
+  expect(() => b.wow).toThrowError()
   b.decay()
   expect(() => b()).toThrowError()
-  expect(()=> b.uid).toThrowError()
+  expect(() => b.uid).toThrowError()
 })

@@ -16,7 +16,7 @@ const iId = 3
 const iName = 2
 const iValue = 6
 const iChildren = 7
-const getName = l => {
+const getName = (l) => {
   const uid = l[iUid]
   const id = l[iId]
   const name = l[iName]
@@ -37,7 +37,7 @@ export function DebugTable({ box }) {
         </tr>
       </thead>
       <tbody>
-        {box.mapValues(tail => {
+        {box.mapValues((tail) => {
           const l = tail[tail.length - 1]
           const uid = l[iUid]
           console.log(tail)

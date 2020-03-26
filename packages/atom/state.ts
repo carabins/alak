@@ -1,18 +1,16 @@
-
-
 export const FState = {
   AWAIT: 'await',
   CLEAR: 'clear',
 }
 export const ClearState = {
-  VALUE: "value",
-  ALL: "all",
-  DECAY: "decay"
+  VALUE: 'value',
+  ALL: 'all',
+  DECAY: 'decay',
 }
 
-export function notifyStateListeners(atom, state:string, ...value) {
+export function notifyStateListeners(atom, state: string, ...value) {
   if (atom.stateListeners && atom.stateListeners.has(state)) {
-    atom.stateListeners.get(state).forEach(f => f.apply(f, value))
+    atom.stateListeners.get(state).forEach((f) => f.apply(f, value))
   }
 }
 
@@ -25,10 +23,9 @@ export function addStateEventListener(atom, state, fun) {
   } else atom.stateListeners.get(state).add(fun)
 }
 
-export function removeStateEventListener(atom, state:string, fun) {
+export function removeStateEventListener(atom, state: string, fun) {
   if (atom.stateListeners && atom.stateListeners.has(state)) {
     let ase = atom.stateListeners.get(state)
     if (ase.has(fun)) ase.delete(fun)
   }
 }
-

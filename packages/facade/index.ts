@@ -16,7 +16,6 @@ import { installMatchingExtension } from '../ext-matching/index'
 installComputedExtension()
 installMatchingExtension()
 
-
 // // @ts-ignore
 // declare module 'alak/core' {
 //   // @ts-ignore
@@ -50,7 +49,7 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
    * @param id - идентификатор
    * @param startValue - стартовое значение
    */
-  id<T>(id: string | number, startValue?:T): IAtom<MaybeAny<T>>
+  id<T>(id: string | number, startValue?: T): IAtom<MaybeAny<T>>
 
   /**
    * Создать атом c функцией обёртки {@link IAtom.setWrapper}.
@@ -58,7 +57,7 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
    * Сокращённая запись `A().setWrapper(wrapperFun)`
    * @param wrapperFun - функция-обёртка
    */
-  setWrapper<T>(wrapperFun: (v:D) => T): IAtom<MaybeAny<T>>
+  setWrapper<T>(wrapperFun: (v: D) => T): IAtom<MaybeAny<T>>
   /**
    * Создать атом c функцией добытчика {@link IAtom.setGetter}.
    * @remarks
@@ -116,23 +115,22 @@ export const A = (Object.assign(AC, {
   setWrapper(wrapperFun) {
     return A().setWrapper(wrapperFun)
   },
-  from(...atoms){
+  from(...atoms) {
     return (A() as any).from(...atoms)
   },
   stateless() {
     return A().stateless()
   },
-  flow(){
+  flow() {
     return A().flow()
   },
   id(id, v) {
     const a = A().setId(id)
     alive(v) && a(v)
-    return  a
-  }
+    return a
+  },
 }) as any) as IAtomConstructor<any>
 
 export default A
-
 
 export { IAtom } from '../atom/index'

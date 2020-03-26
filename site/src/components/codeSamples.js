@@ -1,4 +1,3 @@
-
 export const codeSamples = [
   {
     id: 1,
@@ -30,7 +29,8 @@ trace(a.value)`,
   },
   {
     title: 'Комбинации',
-    code: `const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 200))
+    code:
+      `const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 200))
 const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))    
 const atomA = A.id('a').setGetter(asyncHello)
 const atomB = A.id('b').setGetter(asyncWorld)
@@ -38,7 +38,9 @@ const atomAB = A.id('c')
   .from(atomA, atomB) 
   .strong((valueA, valueB) => {  
     trace("дожидаемся заполнения атомов a и b")    
-`+"    return `${valueA} ${valueB}`"+`
+` +
+      '    return `${valueA} ${valueB}`' +
+      `
   })
 trace(atomAB())
 await atomAB()
@@ -57,4 +59,3 @@ a(2)
 a(["."])`,
   },
 ]
-

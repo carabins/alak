@@ -1,6 +1,6 @@
 const { A } = require('../facade')
 
-const inAwaiting = atom => expect(typeof atom().then === 'function').toBeTruthy()
+const inAwaiting = (atom) => expect(typeof atom().then === 'function').toBeTruthy()
 
 test('some strategy', () => {
   const a = A(1)
@@ -26,7 +26,7 @@ test('some async strategy', async () => {
   const aGetter = jest.fn()
   const a = A.setGetter(() => {
     aGetter()
-    return new Promise(done => setTimeout(() => done(Math.random()), 24))
+    return new Promise((done) => setTimeout(() => done(Math.random()), 24))
   })
   const b = A(0)
   a()
@@ -34,7 +34,7 @@ test('some async strategy', async () => {
   const someMix = jest.fn()
   const c = A.from(a, b).some((aV, bV) => {
     someMix()
-    return new Promise(done => setTimeout(() => done(aV + bV), 24))
+    return new Promise((done) => setTimeout(() => done(aV + bV), 24))
   })
   inAwaiting(c)
   a()
@@ -73,7 +73,7 @@ test('strong async strategy', async () => {
   const bOnceGetter = jest.fn()
   const a = A.setGetter(() => {
     aGetter()
-    return new Promise(done => setTimeout(() => done(Math.random()), 24))
+    return new Promise((done) => setTimeout(() => done(Math.random()), 24))
   })
   const b = A.setOnceGet(() => {
     bOnceGetter()
@@ -91,8 +91,8 @@ test('strong async strategy', async () => {
 })
 
 test('strong async wait', async () => {
-  const asyncFn = () => new Promise(fin => setTimeout(fin, 1))
-  const asyncWait = () => new Promise(fin => setTimeout(fin, 24))
+  const asyncFn = () => new Promise((fin) => setTimeout(fin, 1))
+  const asyncWait = () => new Promise((fin) => setTimeout(fin, 24))
   const atomA = A.setGetter(asyncFn)
   const atomB = A.setGetter(asyncFn)
   A.from(atomA, atomB).strong(() => expect.anything())
@@ -102,6 +102,6 @@ test('strong async wait', async () => {
 
 test('error strategy', async () => {
   const a = A()
-  const c = A.from(a).weak(a_V => a_V)
+  const c = A.from(a).weak((a_V) => a_V)
   expect(() => c.from(a).weak).toThrowError()
 })

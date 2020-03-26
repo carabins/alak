@@ -15,7 +15,7 @@ const play = () => {
   forked.push(fork('run.js', ['play']))
 }
 
-nodemon.on('start', play).on('restart', function(files) {
-  console.log("start")
+nodemon.on('start', play).on('restart', function (files) {
+  console.log('start')
   play()
 })

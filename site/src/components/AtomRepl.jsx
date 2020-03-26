@@ -5,16 +5,14 @@ import A from 'alak'
 import ABox from './Abox'
 import { DebugTable } from './DebugTable'
 
-
-
 const debugTool = installAtomDebuggerTool.instance()
 global.A = A
 const traceAtom = A()
-traceAtom.setId("tracer")
-global.trace = function(...a) {
+traceAtom.setId('tracer')
+global.trace = function (...a) {
   traceAtom(`> ${a.join(' ')}`)
 }
-const wrapCode = code=>`async function run(){
+const wrapCode = (code) => `async function run(){
 try {
 ${code}
 } catch(e){
@@ -26,23 +24,22 @@ function useRpl(startCode) {
   const [log, setLog] = useState()
   const [debugBox, setDebug] = useState()
   useEffect(() => useRunCode(startCode), [startCode])
-   function useRunCode(code) {
+  function useRunCode(code) {
     setLog('')
     setDebug(null)
     clearTimeout(lastChange)
     lastChange = setTimeout(() => {
       traceAtom.clear()
       const traceLogs = []
-      traceAtom.up(string=>{
+      traceAtom.up((string) => {
         traceLogs.push(string)
         setLog(traceLogs.join('\n'))
       })
       debugTool.startCollect()
-      function complete(){
+      function complete() {
         const box = ABox()
-        debugTool.stopCollect().forEach(c => {
-          if (c[3] !== "tracer")
-            box.push(c[2], c)
+        debugTool.stopCollect().forEach((c) => {
+          if (c[3] !== 'tracer') box.push(c[2], c)
         })
         setDebug(box)
       }
@@ -50,7 +47,6 @@ function useRpl(startCode) {
         setLog(`${e.toString()}`)
       }
       eval(wrapCode(code))
-
     }, 200)
   }
 
@@ -63,7 +59,6 @@ export function AtomRepl(props) {
   return (
     <>
       <div className='overflow-mirror'>
-
         <div className='mirror'>
           <MirrorRepl code={props.code} onCodeChange={codeChange} />
         </div>
