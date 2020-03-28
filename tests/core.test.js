@@ -54,8 +54,8 @@ test('stateless', async () => {
   expect(a()).toBe(undefined)
 })
 
-test('flow', async () => {
-  const a = A.flow().setId('-')
+test('holistic', async () => {
+  const a = A.holistic().setId('-')
   a(startValue)
   expect(a.value[0]).toBe(startValue)
   a(startValue, finalValue)
@@ -66,7 +66,7 @@ test('flow', async () => {
   })
   a(startValue, finalValue)
   a.clear()
-  a.flow(false)
+  a.holistic(false)
   a.up((f, a) => {
     expect(a.id).toBe('-')
   })
