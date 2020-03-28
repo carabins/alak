@@ -62,7 +62,7 @@ export type Core = {
   haveFrom: boolean
   isEmpty: boolean
   isAsync: boolean
-  isFlow: boolean
+  isHoly: boolean
   isAwaiting: boolean | any
   isStateless: boolean
 }
@@ -79,7 +79,7 @@ type Level = 'value' | 'all' | 'decay'
  * @example
  * ```javascript
  * import {AC} from 'alak/atom'
- * const flow = AC() // сокращённая запись AC.proxy()
+ * const holistic = AC() // сокращённая запись AC.proxy()
  * ```
  */
 export interface IAtomCoreConstructor {
@@ -331,7 +331,7 @@ export interface IAtom<T> {
    * В функции-получатели значения передаются в полном количестве.
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  flow(bool?: boolean): IAtom<T>
+  holistic(bool?: boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей

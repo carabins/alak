@@ -50,3 +50,23 @@ test('context', async () => {
   a(startValue)
   expect.assertions(3)
 })
+
+test('tail', async () => {
+  let a = A()
+  let b = A()
+  a.up(b)
+  a(startValue)
+  expect(b.value).toBe(startValue)
+})
+
+test('up holistic', async () => {
+  let a = A.holistic()
+  let b = A.holistic()
+  a.up(b)
+  a(startValue, finalValue)
+  b.up( (v1, v2)=>{
+    expect(v1).toBe(startValue)
+    expect(v2).toBe(finalValue)
+  })
+  expect.assertions(2)
+})

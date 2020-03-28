@@ -68,7 +68,7 @@ export const proxyProps = {
 }
 
 const applyValue = (a, f) =>
-  a.isEmpty ? false : (a.isFlow ? f.call(f, ...a.value) : f(a.value, a), true)
+  a.isEmpty ? false : (a.isHoly ? f.call(f, ...a.value) : f(a.value, a), true)
 
 export const handlers = {
   up(f) {
@@ -170,9 +170,9 @@ export const handlers = {
     Object.defineProperty(this, 'name', { value })
     return this._
   },
-  flow(v?) {
-    if (v == undefined) this.isFlow = true
-    else this.isFlow = v
+  holistic(v?) {
+    if (v == undefined) this.isHoly = true
+    else this.isHoly = v
     return this._
   },
   stateless(v) {
@@ -184,6 +184,9 @@ export const handlers = {
   // apply(context, v) {
   //   this.bind(context)
   //   setAtomValue(this, v[0])
+  // },
+  // call(context, ...v) {
+  //   this._(...v)
   // },
   addMeta(metaName, value?) {
     if (!this.metaMap) this.metaMap = new Map<string, any>()

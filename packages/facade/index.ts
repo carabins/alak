@@ -84,9 +84,9 @@ export interface IAtomConstructor<D> extends IAtomCoreConstructor {
    * Создать атом, с аргументами передающимися в функции-добытчики в полном числе.
    * {@link IAtom.stateless}.
    * @remarks
-   * Сокращённая запись `A().flow()`
+   * Сокращённая запись `A().holistic()`
    */
-  flow(): IAtom<MaybeAny<D>>
+  holistic(): IAtom<MaybeAny<D>>
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
    * Смотрите описание стратегий: {@link ext-computed#ComputeStrategy}.
@@ -121,8 +121,8 @@ export const A = (Object.assign(AC, {
   stateless() {
     return A().stateless()
   },
-  flow() {
-    return A().flow()
+  holistic() {
+    return A().holistic()
   },
   id(id, v) {
     const a = A().setId(id)
