@@ -20,19 +20,31 @@ export interface ComputeStrategy<T, IN extends any[]>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [some](./ext-computed.computestrategy.md#some-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при наличии значения всех атомов исключая `null` и `undefined`. |
+|  [some](./ext-computed.computestrategy.md#some-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при наличии значений всех атомов исключая `null` и `undefined`. |
+|  [someSafe](./ext-computed.computestrategy.md#somesafe-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\] |
 |  [strong](./ext-computed.computestrategy.md#strong-property) | `ComputedIn<T, IN>` | Вызвать функцию-добытчик у асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов любыми значениями. |
 |  [weak](./ext-computed.computestrategy.md#weak-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается обновлением любого атома-источника. |
+|  [weakSafe](./ext-computed.computestrategy.md#weaksafe-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается уникальным обновлением любого атома-источника. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\] |
 
 
 ## some property
 
-Функция-обработчик вызывается при наличии значения всех атомов исключая `null` и `undefined`.
+Функция-обработчик вызывается при наличии значений всех атомов исключая `null` и `undefined`.
 
 **Signature:**
 
 ```typescript
 some: ComputedIn<T, IN>;
+```
+
+## someSafe property
+
+Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\]
+
+**Signature:**
+
+```typescript
+someSafe: ComputedIn<T, IN>;
 ```
 
 ## strong property
@@ -53,4 +65,14 @@ strong: ComputedIn<T, IN>;
 
 ```typescript
 weak: ComputedIn<T, IN>;
+```
+
+## weakSafe property
+
+Функция-обработчик вызывается уникальным обновлением любого атома-источника. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\]
+
+**Signature:**
+
+```typescript
+weakSafe: ComputedIn<T, IN>;
 ```
