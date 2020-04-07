@@ -21,15 +21,17 @@ declare module '../packages/facade' {
   }
 }
 
-// a.onClear(level=>{
-//   console.log(level)
-// })
-//
-// a.clearValue()
-// a.clear()
-// a.decay()
-//
-// const asyncHello = () => new Promise(fin => setTimeout(() => fin('hello'), 2500))
-// const asyncWorld = () => new Promise(fin => setTimeout(() => fin('word'), 500))
+const a = A(1)
+const b = A({id:2})
 
-// const a = A.stateless()
+console.log('----')
+
+const mm = A.from(a,b).someSafe((a,b)=>{
+  console.log(a,b)
+})
+
+
+b.fmap(d=>{
+  d.id = 3
+  return d
+})

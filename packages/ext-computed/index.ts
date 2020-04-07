@@ -66,13 +66,23 @@ type ComputedIn<T, IN extends any[]> = {
  */
 export interface ComputeStrategy<T, IN extends any[]> {
   /**
-   * Функция-обработчик вызывается при наличии значения всех атомов исключая `null` и `undefined`.
+   * Функция-обработчик вызывается при наличии значений всех атомов исключая `null` и `undefined`.
    */
   some: ComputedIn<T, IN>
+  /**
+   * Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`.
+   * Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и [...value]
+   */
+  someSafe: ComputedIn<T, IN>
   /**
    * Функция-обработчик вызывается обновлением любого атома-источника.
    */
   weak: ComputedIn<T, IN>
+  /**
+   * Функция-обработчик вызывается уникальным обновлением любого атома-источника.
+   * Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и [...value]
+   */
+  weakSafe: ComputedIn<T, IN>
   /**
    * Вызвать функцию-добытчик у асинхронных атомов-источников.
    * Функция-обработчик вызывается при заполнении всех атомов любыми значениями.
@@ -143,12 +153,16 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
-  function weak(mixFn) {
+  function weak(mixFn, safe) {
     function mixer(v, a) {
-      const linkedValue = linkedValues[a.id]
-      if (v !== linkedValue) {
+      if (safe) {
+        const linkedValue = linkedValues[a.id]
+        if (v !== linkedValue) {
+          makeMix(mixFn)
+          linkedValues[a.id] = v
+        }
+      } else {
         makeMix(mixFn)
-        linkedValues[a.id] = v
       }
     }
     fromAtoms.forEach((a) => {
@@ -163,7 +177,11 @@ export function from(...fromAtoms: IAtom<any>[]) {
 
   function some(mixFn) {
     mixFn.some = true
-    return weak(mixFn)
+    return weak(mixFn, false)
+  }
+  function someSafe(mixFn) {
+    mixFn.some = true
+    return weak(mixFn, true)
   }
 
   function strong(mixFn) {
@@ -228,7 +246,10 @@ export function from(...fromAtoms: IAtom<any>[]) {
 
   return {
     some,
+    someSafe,
     weak,
+    weakSafe:f=>
+      weak(f, true),
     strong,
   }
 }
