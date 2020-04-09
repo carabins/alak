@@ -32,6 +32,6 @@ export async function dev() {
     })
 }
 
-export function run() {
-  fork('node_modules/jest/bin/jest')
-}
+// export function run() {
+//   fork('node_modules/jest/bin/jest')
+// }

@@ -24,6 +24,9 @@ export function setAtomValue(atom: Core, value, context?) {
       finalValue = wrappedValue
     }
 
+    if (atom.isSafe && atom.value == finalValue){
+        return
+    }
     atom.value = finalValue
     debug.enabled && debug.updateValue(atom, context)
     notifyChildes(atom)
@@ -41,6 +44,9 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
   atom.isAwaiting = promise
   atom.isAsync = true
   let v = await promise
+  if (atom.isSafe && atom.value == v){
+    return
+  }
   atom.value = v
   atom.isAwaiting = false
   notifyStateListeners(atom, FState.AWAIT, false)
@@ -67,6 +73,7 @@ export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction
 
 export const createCore = (...a) => {
   const atom = function (...v) {
+
     if (!atom.children) {
       throw DECAY_ATOM_ERROR
     }

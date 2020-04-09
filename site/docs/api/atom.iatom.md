@@ -56,6 +56,7 @@ export interface IAtom<T>
 |  [once(receiver)](./atom.iatom.md#once-method) | Передать один раз в функцию-получатель значение контейнера, текущее если оно есть или как появится |
 |  [onClear(listener)](./atom.iatom.md#onclear-method) | Добавить слушатель отчистки значения |
 |  [resend()](./atom.iatom.md#resend-method) | Повторно отправить значение всем функциям-получателям |
+|  [safe(bool)](./atom.iatom.md#safe-method) | Обновление фукнций-приёмников происходит только при уникальных значениях |
 |  [setGetter(getter, isAsync)](./atom.iatom.md#setgetter-method) | Использовать функцию-добытчик значения контейнера |
 |  [setId(id)](./atom.iatom.md#setid-method) | Установить идентификатор |
 |  [setName(name)](./atom.iatom.md#setname-method) | Установить имя |
@@ -538,6 +539,29 @@ onClear(listener: (deep: Level) => void): IAtom<T>;
 ```typescript
 resend(): IAtom<T>;
 ```
+**Returns:**
+
+`IAtom<T>`
+
+[IAtom](./atom.iatom.md)
+
+
+## safe() method
+
+Обновление фукнций-приёмников происходит только при уникальных значениях
+
+**Signature:**
+
+```typescript
+safe(bool?: boolean): IAtom<T>;
+```
+
+#### Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  bool | `boolean` | ? - по умолчанию `true` |
+
 **Returns:**
 
 `IAtom<T>`

@@ -56,6 +56,9 @@ export const proxyProps = {
   name() {
     return this._name
   },
+  isSafe() {
+    return this.isSafe
+  },
   isAsync() {
     return this.isAsync
   },
@@ -165,9 +168,15 @@ export const handlers = {
     this.id = id
     return this._
   },
+
   setName(value) {
     this._name = value
     Object.defineProperty(this, 'name', { value })
+    return this._
+  },
+  safe(v?) {
+    if (v == undefined) this.isSafe = true
+    else this.isSafe = v
     return this._
   },
   holistic(v?) {

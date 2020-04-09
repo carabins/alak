@@ -79,6 +79,7 @@ export declare type Core = {
     haveFrom: boolean;
     isEmpty: boolean;
     isAsync: boolean;
+    isSafe: boolean;
     isHoly: boolean;
     isAwaiting: boolean | any;
     isStateless: boolean;
