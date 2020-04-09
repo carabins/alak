@@ -43,6 +43,7 @@ export function installComputedExtension() {
     },
   })
 }
+
 // @ts-ignore
 declare module 'alak/core' {
   interface IAtom<T> {
@@ -121,9 +122,11 @@ export function from(...fromAtoms: IAtom<any>[]) {
   let someoneIsWaiting = []
   const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))
   const freeWaiters = (v) => {
+    // console.log("freeWaiters")
     while (someoneIsWaiting.length) {
       someoneIsWaiting.pop()(v)
     }
+    atom.isAwaiting && delete atom.isAwaiting
   }
 
   function applyValue(mixedValue) {
@@ -139,6 +142,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     atom.isAwaiting && delete atom.isAwaiting
     return mixedValue
   }
+
   const makeMix = (mixFn) => {
     const inAwaiting: IAtom<any>[] = []
     const { strong, some } = mixFn
@@ -159,21 +163,23 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
+
   function weak(mixFn, safe) {
     function mixer(v, a) {
       if (safe) {
-        const linkedValue = linkedValues[a.id]
+        const linkedValue = linkedValues[a.uid]
         if (v !== linkedValue) {
           makeMix(mixFn)
-          linkedValues[a.id] = v
+          linkedValues[a.uid] = v
         }
       } else {
         makeMix(mixFn)
       }
     }
+
     fromAtoms.forEach((a) => {
       if (a !== atom._) {
-        linkedValues[a.id] = a.value
+        linkedValues[a.uid] = a.value
         a.next(mixer)
       }
     })
@@ -185,6 +191,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     mixFn.some = true
     return weak(mixFn, false)
   }
+
   function someSafe(mixFn) {
     mixFn.some = true
     return weak(mixFn, true)
@@ -193,15 +200,24 @@ export function from(...fromAtoms: IAtom<any>[]) {
   function strong(mixFn, safe) {
     // let firstRun = true
     let getting = {}
-    function getterFn() {
-      // console.log('---------')
-      // console.log('getting', getting)
+    let traced = false
+    atom._.safe(safe)
+    function getterFn(callerUid?) {
+      // console.log('getterFn()')
+      // if (!isChanged() && !atom.isEmpty)
+      //   return atom.value
+      // console.log("deep")
       const waiters = {}
       const isWaiting = () => Object.keys(waiters).length
       const values = fromAtoms.map((a) => {
         let v: any = getting[a.uid]
         if (v) return v
-        else v = a()
+        let lv = linkedValues[a.uid]
+        if (callerUid && callerUid == a.uid) {
+          v = lv ? lv : a()
+        } else {
+          v = a.isStateless ? a() : lv ? lv : a()
+        }
         if (isPromise(v)) {
           waiters[a.uid] = true
           // console.log(a.id, 'is promise', isWaiting())
@@ -217,7 +233,8 @@ export function from(...fromAtoms: IAtom<any>[]) {
               }
             }
           })
-        } else {
+        }
+        {
           linkedValues[a.uid] = v
         }
         return v
@@ -229,28 +246,58 @@ export function from(...fromAtoms: IAtom<any>[]) {
       }
       atom.getterFn = getterFn
       getting = {}
-      // console.log('mix')
-      return mixFn(...values)
+      const nv = mixFn(...values)
+      if (!traced) {
+        traced = true
+        // console.log("traced", values)
+        atom(nv)
+      }
+      return nv
+    }
+
+    const lastLinks = {}
+
+    function isChanged() {
+      let yes = false
+      const keys = Object.keys(linkedValues)
+      keys.forEach(k => {
+        // console.log("->", linkedValues[k] , lastLinks[k])
+        if (linkedValues[k] !== lastLinks[k]) {
+          yes = true
+        }
+        lastLinks[k] = linkedValues[k]
+      })
+      // console.log("isChanged", yes && fromAtoms.length == keys.length)
+      return yes && fromAtoms.length == keys.length
     }
 
     function mixer(v, a) {
-      if (safe) {
-        const linkedValue = linkedValues[a.id]
-        if (v !== linkedValue) {
-          linkedValues[a.id] = v
+      const linkedValue = linkedValues[a.uid]
+      // console.log("mixer")
+
+      if (!safe || v !== linkedValue) {
+        linkedValues[a.uid] = v
+        if (safe && !isChanged()) {
+          return
         }
-      } else {
-        linkedValues[a.id] = v
+        if (traced) {
+          // console.log("calling ::: ->")
+          const args = getterFn(a.uid)
+          if (isPromise(args)) args.then(atom)
+          else atom(args)
+        }
       }
     }
+
     fromAtoms.forEach((a) => {
-      if (a !== atom._) {
+      if (a.uid !== atom._.uid) {
         a.next(mixer)
       }
     })
     atom.getterFn = () => {
       return getterFn()
     }
+    getterFn()
     return atom._
   }
 
@@ -258,10 +305,10 @@ export function from(...fromAtoms: IAtom<any>[]) {
     some,
     someSafe,
     weak,
-    weakSafe:f=>
+    weakSafe: f =>
       weak(f, true),
     strong,
-    strongSafe:f=>
+    strongSafe: f =>
       strong(f, true),
   }
 }

@@ -47,10 +47,29 @@ test('some async strategy', async () => {
   expect(someMix).toHaveBeenCalledTimes(1)
 })
 
-test('strong sync strategy', () => {
+test('strongSafe sync strategy', () => {
+  const aGetter = jest.fn()
+  const a = A.setGetter(() => {
+    aGetter()
+    return Math.random()
+  })
+  const z = A(0)
+  const c = A.from(a, z).strongSafe((...v) => v.toString())
+  const cUpReceiver = jest.fn()
+  c.up(cUpReceiver) // +
+  c() // +
+  c() // +
+  z(1) // +
+  z(1) // -
+  z(1) // -
+  expect(cUpReceiver).toHaveBeenCalledTimes(2)
+  expect(aGetter).toHaveBeenCalledTimes(1)
+})
+
+test('strong sync stateless safe strategy', () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
-  const a = A.setGetter(() => {
+  const a = A.stateless().setGetter(() => {
     aGetter()
     return Math.random()
   })
@@ -58,20 +77,28 @@ test('strong sync strategy', () => {
     bOnceGetter()
     return '-'
   })
-  const c = A.from(a, b).strong((aV, bV) => aV + bV)
+  const z = A(0)
+  const c = A.from(a, b, z).strongSafe((...v) => v.toString())
   const cUpReceiver = jest.fn()
   c.up(cUpReceiver)
+  expect(cUpReceiver).toHaveBeenCalledTimes(1)
+  expect(aGetter).toHaveBeenCalledTimes(1)
   c()
-  c()
-  expect(bOnceGetter).toHaveBeenCalledTimes(1)
-  expect(aGetter).toHaveBeenCalledTimes(2)
   expect(cUpReceiver).toHaveBeenCalledTimes(2)
+  expect(aGetter).toHaveBeenCalledTimes(2)
+  z(1)
+  z(1)
+  z(1)
+  z(1)
+  expect(cUpReceiver).toHaveBeenCalledTimes(3)
+  expect(aGetter).toHaveBeenCalledTimes(3)
+  expect(bOnceGetter).toHaveBeenCalledTimes(1)
 })
 
 test('strong async strategy', async () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
-  const a = A.setGetter(() => {
+  const a = A.stateless().setGetter(() => {
     aGetter()
     return new Promise((done) => setTimeout(() => done(Math.random()), 24))
   })
@@ -95,7 +122,7 @@ test('strong async wait', async () => {
   const asyncWait = () => new Promise((fin) => setTimeout(fin, 24))
   const atomA = A.setGetter(asyncFn)
   const atomB = A.setGetter(asyncFn)
-  A.from(atomA, atomB).strong(() => expect.anything())
+  A.from(atomA, atomB).strongSafe(() => expect.anything())
   await asyncWait()
   expect.assertions(0)
 })

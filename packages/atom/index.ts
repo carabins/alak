@@ -62,6 +62,7 @@ export type Core = {
   haveFrom: boolean
   isEmpty: boolean
   isAsync: boolean
+  isSafe: boolean
   isHoly: boolean
   isAwaiting: boolean | any
   isStateless: boolean
@@ -332,6 +333,12 @@ export interface IAtom<T> {
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
   holistic(bool?: boolean): IAtom<T>
+
+  /**
+   * Обновление  фукнций-приёмников происходит только при уникальных значениях
+   * @param bool? - по умолчанию `true`
+   * @returns {@link IAtom} */
+  safe(bool?: boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей

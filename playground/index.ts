@@ -6,6 +6,8 @@ import { ComputeStrategy, installComputedExtension } from '../packages/ext-compu
 // import { AC } from '../packages/core'
 import { installMatchingExtension } from '../packages/ext-matching'
 import { installAtomDebuggerTool } from '../packages/debug'
+import { constants } from 'crypto'
+
 // const inAwaiting = atom =>
 //   typeof atom().then === 'function'
 //     ? console.log(chalk.green('async'))
@@ -21,17 +23,74 @@ declare module '../packages/facade' {
   }
 }
 
-const a = A(1)
-const b = A({id:2})
+// const a = A(1)
+// const b = A({id:2})
+//
+// // console.log('play')
+//
+// const mm = A.from(a,b).strong((a,b)=>{
+//   console.log("::", a,b)
+// })
+// // mm()
+//
+// // a(2)
+//
+// b.fmap(d=>{
+//   d.id = 3
+//   return d
+// })
 
-console.log('----')
+// const a = A.stateless().setGetter(() => {
+//   // aGetter()
+//   return Math.random()
+// })
+// const b = A.setOnceGet(() => {
+//   // bOnceGetter()
+//   return '-'
+// })
+// const z = A(0)
+// const c = A.from(z, a, b).strong((...v) => v.toString())
+// c.up(v=>{
+//   console.log(":::", v)
+// })
+// c()
+// c()
+// z(1)
+// z(1)
 
-const mm = A.from(a,b).someSafe((a,b)=>{
-  console.log(a,b)
-})
+// const aGetter = jest.fn()
+// const bOnceGetter = jest.fn()
+// const a = A.stateless().setGetter(() => {
+//   aGetter()
+//   return Math.random()
+// })
+// const b = A.setOnceGet(() => {
+//   bOnceGetter()
+//   return '-'
+// })
+// const z = A(0)
+// const c = A.from(a, b, z).strongSafe((...v) => v.toString())
+// const cUpReceiver = jest.fn()
+// c.up(cUpReceiver)
+// c()
+// c()
+// z(1)
+// z(1)
+// z(1)
+
+// c()
+// c()
+// z.up(v=>{
+//     console.log("x",v )
+//   }
+// )
+// z.safe(true)
+// z(1)
+// z(2)
+// z(0)
+// z(0)
+// c()
+// z(2)
+// console.log(Math.random())
 
 
-b.fmap(d=>{
-  d.id = 3
-  return d
-})
