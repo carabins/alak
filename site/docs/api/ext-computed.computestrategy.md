@@ -21,8 +21,9 @@ export interface ComputeStrategy<T, IN extends any[]>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [some](./ext-computed.computestrategy.md#some-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при наличии значений всех атомов исключая `null` и `undefined`. |
-|  [someSafe](./ext-computed.computestrategy.md#somesafe-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\] |
-|  [strong](./ext-computed.computestrategy.md#strong-property) | `ComputedIn<T, IN>` | Вызвать функцию-добытчик у асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов любыми значениями. |
+|  [someSafe](./ext-computed.computestrategy.md#somesafe-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается при отличным от предыдущего отбновлении значений всех атомов, исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\] |
+|  [strong](./ext-computed.computestrategy.md#strong-property) | `ComputedIn<T, IN>` | При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов любыми значениями. |
+|  [strongSafe](./ext-computed.computestrategy.md#strongsafe-property) | `ComputedIn<T, IN>` | При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов значениями отличными от предыдущего. |
 |  [weak](./ext-computed.computestrategy.md#weak-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается обновлением любого атома-источника. |
 |  [weakSafe](./ext-computed.computestrategy.md#weaksafe-property) | `ComputedIn<T, IN>` | Функция-обработчик вызывается уникальным обновлением любого атома-источника. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\] |
 
@@ -39,7 +40,7 @@ some: ComputedIn<T, IN>;
 
 ## someSafe property
 
-Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\]
+Функция-обработчик вызывается при отличным от предыдущего отбновлении значений всех атомов, исключая `null` и `undefined`. Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и \[...value\]
 
 **Signature:**
 
@@ -49,12 +50,22 @@ someSafe: ComputedIn<T, IN>;
 
 ## strong property
 
-Вызвать функцию-добытчик у асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов любыми значениями.
+При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов любыми значениями.
 
 **Signature:**
 
 ```typescript
 strong: ComputedIn<T, IN>;
+```
+
+## strongSafe property
+
+При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников. Функция-обработчик вызывается при заполнении всех атомов значениями отличными от предыдущего.
+
+**Signature:**
+
+```typescript
+strongSafe: ComputedIn<T, IN>;
 ```
 
 ## weak property

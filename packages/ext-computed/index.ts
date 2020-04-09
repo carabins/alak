@@ -33,7 +33,7 @@
 import { setAtomValue } from '../atom/core'
 import { alive, isPromise } from '../atom/utils'
 import { Core, installAtomExtension, IAtom } from '../atom/index'
-import { createPrivateKey } from 'crypto'
+
 
 /** Установить расширение вычисления множеств прокси-атома*/
 export function installComputedExtension() {
@@ -70,7 +70,7 @@ export interface ComputeStrategy<T, IN extends any[]> {
    */
   some: ComputedIn<T, IN>
   /**
-   * Функция-обработчик вызывается при наличии уникальных значений всех атомов исключая `null` и `undefined`.
+   * Функция-обработчик вызывается при отличным от предыдущего отбновлении значений всех атомов, исключая `null` и `undefined`.
    * Для мутации объектов и массивов посредством fmap, возвращайте Object.assign({}, value}) и [...value]
    */
   someSafe: ComputedIn<T, IN>
@@ -84,10 +84,16 @@ export interface ComputeStrategy<T, IN extends any[]> {
    */
   weakSafe: ComputedIn<T, IN>
   /**
-   * Вызвать функцию-добытчик у асинхронных атомов-источников.
+   * При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников.
    * Функция-обработчик вызывается при заполнении всех атомов любыми значениями.
    */
   strong: ComputedIn<T, IN>
+  /**
+   * При вызове целевого атома, будет вызвана функци-добытчик у всех асинхронных атомов-источников.
+   * Функция-обработчик вызывается при заполнении всех атомов значениями отличными от предыдущего.
+   *
+   */
+  strongSafe: ComputedIn<T, IN>
 }
 
 type ComputeInOut<IN extends any[], OUT> = {
@@ -184,7 +190,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return weak(mixFn, true)
   }
 
-  function strong(mixFn) {
+  function strong(mixFn, safe) {
     // let firstRun = true
     let getting = {}
     function getterFn() {
@@ -228,8 +234,12 @@ export function from(...fromAtoms: IAtom<any>[]) {
     }
 
     function mixer(v, a) {
-      const linkedValue = linkedValues[a.id]
-      if (v !== linkedValue) {
+      if (safe) {
+        const linkedValue = linkedValues[a.id]
+        if (v !== linkedValue) {
+          linkedValues[a.id] = v
+        }
+      } else {
         linkedValues[a.id] = v
       }
     }
@@ -251,5 +261,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     weakSafe:f=>
       weak(f, true),
     strong,
+    strongSafe:f=>
+      strong(f, true),
   }
 }
