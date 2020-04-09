@@ -58,6 +58,6 @@
     "pre": "pretty-quick"
   },
   "dependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.3"
   }
 }
