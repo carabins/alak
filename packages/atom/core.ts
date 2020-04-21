@@ -17,15 +17,15 @@ export function setAtomValue(atom: Core, value, context?) {
   const setValue = (finalValue) => {
     if (atom.wrapperFn) {
       let wrappedValue = atom.wrapperFn(finalValue, atom.value)
-      if (wrappedValue.then) {
+      if (wrappedValue && wrappedValue.then) {
         debug.enabled && debug.updateAsyncStart(atom, context)
         return setAsyncValue(atom, wrappedValue)
       }
       finalValue = wrappedValue
     }
 
-    if (atom.isSafe && atom.value == finalValue){
-        return
+    if (atom.isSafe && atom.value == finalValue) {
+      return
     }
     atom.value = finalValue
     debug.enabled && debug.updateValue(atom, context)
@@ -44,7 +44,7 @@ async function setAsyncValue(atom: Core, promise: PromiseLike<any>) {
   atom.isAwaiting = promise
   atom.isAsync = true
   let v = await promise
-  if (atom.isSafe && atom.value == v){
+  if (atom.isSafe && atom.value == v) {
     return
   }
   atom.value = v
@@ -73,7 +73,6 @@ export function grandUpFn(atom: Core, keyFun: AnyFunction, grandFun: AnyFunction
 
 export const createCore = (...a) => {
   const atom = function (...v) {
-
     if (!atom.children) {
       throw DECAY_ATOM_ERROR
     }
