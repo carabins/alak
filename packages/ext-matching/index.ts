@@ -14,6 +14,11 @@ declare module 'alak/core' {
     match(...pattern: any[]): IAtom<T>
   }
 }
+declare module 'alak' {
+  interface IAtom<T> {
+    match<A extends IAtom<any>[]>(...a: any): any
+  }
+}
 
 export function installMatchingExtension() {
   installAtomExtension({
