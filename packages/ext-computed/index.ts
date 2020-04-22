@@ -49,6 +49,11 @@ declare module 'alak/core' {
     from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
+declare module 'alak' {
+  interface IAtom<T> {
+    from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
+  }
+}
 
 type UnpackedPromise<T> = T extends Promise<infer U> ? U : T
 type UnpackedFlow<T> = T extends (...args: any[]) => infer U ? U : T
