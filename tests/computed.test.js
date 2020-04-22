@@ -47,6 +47,31 @@ test('some async strategy', async () => {
   expect(someMix).toHaveBeenCalledTimes(1)
 })
 
+test('some safe async strategy', async () => {
+  const aGetter = jest.fn()
+  const a = A.setGetter(() => {
+    aGetter()
+    return new Promise((done) => setTimeout(() => done(Math.random()), 24))
+  })
+  const b = A(0)
+  a()
+  inAwaiting(a)
+  const someMix = jest.fn()
+  const c = A.from(a, b).someSafe((aV, bV) => {
+    someMix()
+    return new Promise((done) => setTimeout(() => done(aV + bV), 24))
+  })
+  inAwaiting(c)
+  b(0)
+  b(0)
+  b(0)
+  c()
+  c()
+  await c()
+  expect(aGetter).toHaveBeenCalledTimes(1)
+  expect(someMix).toHaveBeenCalledTimes(1)
+})
+
 test('strongSafe sync strategy', () => {
   const aGetter = jest.fn()
   const a = A.setGetter(() => {
@@ -131,4 +156,19 @@ test('error strategy', async () => {
   const a = A()
   const c = A.from(a).weak((a_V) => a_V)
   expect(() => c.from(a).weak).toThrowError()
+})
+
+test('decay strategy', async () => {
+  const a = A(1)
+  const b = A()
+  const cUpReceiver = jest.fn()
+  const c = A.from(a, b).some((aV, bV) => {
+    cUpReceiver()
+    return aV + bV
+  })
+  b(1)
+  expect(c.value).toBe(2)
+  c.decay()
+  a(10)
+  expect(cUpReceiver).toHaveBeenCalledTimes(1)
 })

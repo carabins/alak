@@ -19,15 +19,30 @@ import { constants } from 'crypto'
 declare module '../packages/facade' {
   interface IAtom<T> {
     match(...pattern: any[]): IAtom<T>
+
     from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
   }
 }
 
-// const a = A(1)
-// const b = A({id:2})
-//
-// // console.log('play')
-//
+const a = A(1)
+const b = A({ id: 2 })
+const c = A()
+
+console.log('play')
+c.from(a, b).strong((v, vv) => {
+  return { v, vv }
+})
+
+c.decay()
+
+console.log(a(2))
+// console.log(c())
+
+// A.from(c, a).strong( (v,vv)=>{
+//   console.log(v, vv)
+//   return 0
+// })
+
 // const mm = A.from(a,b).strong((a,b)=>{
 //   console.log("::", a,b)
 // })
@@ -92,5 +107,3 @@ declare module '../packages/facade' {
 // c()
 // z(2)
 // console.log(Math.random())
-
-

@@ -34,7 +34,6 @@ import { setAtomValue } from '../atom/core'
 import { alive, isPromise } from '../atom/utils'
 import { Core, installAtomExtension, IAtom } from '../atom/index'
 
-
 /** Установить расширение вычисления множеств прокси-атома*/
 export function installComputedExtension() {
   installAtomExtension({
@@ -163,7 +162,11 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
-
+  const listen = (a: IAtom<any>, fn: any) => {
+    a.next(fn)
+    if (!atom.decays) atom.decays = []
+    atom.decays.push(() => a.down(fn))
+  }
   function weak(mixFn, safe) {
     function mixer(v, a) {
       if (safe) {
@@ -180,7 +183,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     fromAtoms.forEach((a) => {
       if (a !== atom._) {
         linkedValues[a.uid] = a.value
-        a.next(mixer)
+        listen(a, mixer)
       }
     })
     makeMix(mixFn)
@@ -260,7 +263,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     function isChanged() {
       let yes = false
       const keys = Object.keys(linkedValues)
-      keys.forEach(k => {
+      keys.forEach((k) => {
         // console.log("->", linkedValues[k] , lastLinks[k])
         if (linkedValues[k] !== lastLinks[k]) {
           yes = true
@@ -291,7 +294,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
 
     fromAtoms.forEach((a) => {
       if (a.uid !== atom._.uid) {
-        a.next(mixer)
+        listen(a, mixer)
       }
     })
     atom.getterFn = () => {
@@ -305,10 +308,8 @@ export function from(...fromAtoms: IAtom<any>[]) {
     some,
     someSafe,
     weak,
-    weakSafe: f =>
-      weak(f, true),
+    weakSafe: (f) => weak(f, true),
     strong,
-    strongSafe: f =>
-      strong(f, true),
+    strongSafe: (f) => strong(f, true),
   }
 }

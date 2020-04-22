@@ -96,6 +96,7 @@ export const handlers = {
   decay() {
     notifyStateListeners(this, FState.CLEAR, ClearState.DECAY)
     this._.clear(true)
+    this.decays && this.decays.forEach((f) => f())
     deleteParams(this)
   },
   clearValue() {
