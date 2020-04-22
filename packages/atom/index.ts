@@ -66,6 +66,7 @@ export type Core = {
   isHoly: boolean
   isAwaiting: boolean | any
   isStateless: boolean
+  decays: any[]
 }
 type AnyFunction = {
   (...v: any[]): any

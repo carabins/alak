@@ -1,6 +1,6 @@
 {
   "name": "alak",
-  "version": "2.0.1-rc9",
+  "version": "2.0.1-rc10",
   "description": "Alak Reactive Atom",
   "main": "./facade/index.js",
   "typings": "./facade/index.d.ts",
