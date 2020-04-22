@@ -1,7 +1,7 @@
 const { A } = require('../facade')
 
 const inAwaiting = (atom) => expect(typeof atom().then === 'function').toBeTruthy()
-
+//
 test('some strategy', () => {
   const a = A(1)
   const b = A()
@@ -46,7 +46,7 @@ test('some async strategy', async () => {
   expect(aGetter).toHaveBeenCalledTimes(1)
   expect(someMix).toHaveBeenCalledTimes(1)
 })
-
+//
 test('some safe async strategy', async () => {
   const aGetter = jest.fn()
   const a = A.setGetter(() => {
@@ -71,7 +71,7 @@ test('some safe async strategy', async () => {
   expect(aGetter).toHaveBeenCalledTimes(1)
   expect(someMix).toHaveBeenCalledTimes(1)
 })
-
+//
 test('strongSafe sync strategy', () => {
   const aGetter = jest.fn()
   const a = A.setGetter(() => {
@@ -90,7 +90,7 @@ test('strongSafe sync strategy', () => {
   expect(cUpReceiver).toHaveBeenCalledTimes(2)
   expect(aGetter).toHaveBeenCalledTimes(1)
 })
-
+//
 test('strong sync stateless safe strategy', () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
@@ -119,7 +119,7 @@ test('strong sync stateless safe strategy', () => {
   expect(aGetter).toHaveBeenCalledTimes(3)
   expect(bOnceGetter).toHaveBeenCalledTimes(1)
 })
-
+//
 test('strong async strategy', async () => {
   const aGetter = jest.fn()
   const bOnceGetter = jest.fn()
@@ -140,16 +140,6 @@ test('strong async strategy', async () => {
   expect(bOnceGetter).toHaveBeenCalledTimes(1)
   expect(aGetter).toHaveBeenCalledTimes(2)
   expect(cUpReceiver).toHaveBeenCalledTimes(2)
-})
-
-test('strong async wait', async () => {
-  const asyncFn = () => new Promise((fin) => setTimeout(fin, 1))
-  const asyncWait = () => new Promise((fin) => setTimeout(fin, 24))
-  const atomA = A.setGetter(asyncFn)
-  const atomB = A.setGetter(asyncFn)
-  A.from(atomA, atomB).strongSafe(() => expect.anything())
-  await asyncWait()
-  expect.assertions(0)
 })
 
 test('error strategy', async () => {
