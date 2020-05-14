@@ -3,7 +3,7 @@
  * @remarks
  * импорт модуля расширяет интерфейс `Atom`
  * ```typescript
- * declare module 'alak/atom' {
+ * declare module 'alak/core' {
  *   interface IAtom<T> {
  *     from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
  *   }

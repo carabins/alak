@@ -26,17 +26,6 @@ export const coreProps = {
       return !this.hasOwnProperty(valueProp)
     },
   },
-  // id: {
-  //   get() {
-  //     if (this._id) return this._id
-  //     else return this.uid
-  //   },
-  // },
-  // name: {
-  //   get() {
-  //     return this._name
-  //   },
-  // },
 }
 
 export const proxyProps = {

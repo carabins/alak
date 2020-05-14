@@ -30,9 +30,6 @@ function get(atom: Core, prop: string, receiver: any): any {
 
 export function createProtoAtom<T>(value?: T) {
   const atom = createCore(...arguments)
-  // const atom = {
-  //   core
-  // } as any
   atom.__proto__ = protoHandlers
   atom._ = atom
   return atom

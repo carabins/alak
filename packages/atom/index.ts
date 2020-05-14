@@ -80,7 +80,7 @@ type Level = 'value' | 'all' | 'decay'
  * Создание прокси-атома и атома
  * @example
  * ```javascript
- * import {AC} from 'alak/atom'
+ * import {AC} from 'alak/core'
  * const holistic = AC() // сокращённая запись AC.proxy()
  * ```
  */
@@ -109,10 +109,8 @@ export interface IAtomCoreConstructor {
   proto<T>(value?: T): IAtom<MaybeAny<T>>
 }
 
-type ValueDownReceiver<T extends any> = (v: T, down: () => void) => void
-type ValueFlowReceiver = (...a: any[]) => void
-type ValueAtomReceiver<T extends any> = (v: T, a: IAtom<T>) => void
-type ValueReceiver<T> = unknown extends T ? ValueFlowReceiver : ValueAtomReceiver<T>
+type ValueDownReceiver<T extends any> = (v: T, down?: () => void) => void
+type ValueReceiver<T extends any> = (v: T, atom: IAtom<T>, ...flow: any[]) => void;
 
 /** Интерфейс ядра атома.
  * @remarks
