@@ -1,15 +1,21 @@
 {
   "compilerOptions": {
-    "sourceMap": false,
+    //    "lib": ["ES2017", "DOM"],
     "module": "commonjs",
     "target": "es6",
-    "removeComments": false,
+    "outDir": "dist",
+    "declaration": true,
     "esModuleInterop": true,
-    "types": ["node"],
+    "sourceMap": false,
+    "rootDir": ".",
     "baseUrl": ".",
+
     "paths": {
-      "~/*": ["packages/"],
-      "alak/*": ["lib/"]
-    }
-  }
+      //      "@la/*": ["packages/*/src"],
+      "alak": ["packages/"]
+    },
+    "types": ["node"],
+    "typeRoots": ["packages/atom/index.d.ts"]
+  },
+  "include": ["packages/global.d.ts", "packages/*/*.d.ts", "packages/*/src", "packages/*/__tests__"]
 }

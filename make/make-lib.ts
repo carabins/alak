@@ -1,12 +1,12 @@
 import { executeCommand, info, prepare, rm } from './helpers'
-
+//
 import * as path from 'path'
 import { copyFileSync, readFileSync, writeFileSync } from 'fs'
 import { removeSync } from 'fs-extra'
 import { fork } from 'child_process'
 const { log } = console
 const chalk = require('chalk')
-
+//
 import commonjs from 'rollup-plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
 import { rollup } from 'rollup'
@@ -41,8 +41,8 @@ const packUmd = (packName, outName) =>
 export async function lib() {
   info('make library...')
   await tsc()
-  await packUmd('umd', 'atom')
-  await packUmd('umd', 'atom.core')
+  // // await packUmd('umd', 'atom')
+  // // await packUmd('umd', 'atom.core')
   info('library created')
 }
 
@@ -50,3 +50,5 @@ export async function lib() {
 // executeCommand(`node ${path.resolve('node_modules/jest/bin/jest')}`, path.resolve('.'))
 
 // info('done')
+
+console.log('_')

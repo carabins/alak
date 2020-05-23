@@ -30,9 +30,9 @@
  * @packageDocumentation
  */
 
-import { setAtomValue } from '../atom/core'
-import { alive, isPromise } from '../atom/utils'
-import { Core, installAtomExtension, IAtom } from '../atom/index'
+import { setAtomValue } from '../atom/src/core'
+import { alive, isPromise } from '../atom/src/utils'
+import { Core, installAtomExtension, IAtom } from '../atom/src'
 
 /** Установить расширение вычисления множеств прокси-атома*/
 export function installComputedExtension() {

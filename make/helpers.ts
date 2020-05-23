@@ -19,18 +19,27 @@ export const rm = (name) =>
     recursive: true,
   })
 
+export const executeProcess = (command, cwd?) => {
+  log(chalk.grey('execute process'), chalk.yellow(command))
+  if (!cwd) cwd = path.resolve('.')
+  let proc = exec(command, { cwd: cwd }, (error, stdout) => {})
+
+  return proc
+}
 export const executeCommand = (command, cwd?) =>
   new Promise(async (done) => {
     if (!cwd) cwd = path.resolve('.')
-    exec(command, { cwd: cwd }, (error, stdout) => {
+    log(chalk.yellow('execute'), chalk.grey(command + ' in ' + cwd))
+    const proc = exec(command, { cwd: cwd }, (error, stdout) => {
       if (error) {
         log(chalk.grey('Error:'), chalk.yellow(cwd))
         log(chalk.redBright(error))
         log(chalk.redBright(stdout))
         process.exit()
       }
-      console.log('stdout', stdout)
-      log(chalk.green('done'), chalk.grey(command))
+      log(chalk.green('execute finish'), chalk.grey(command))
       done(stdout)
     })
+    proc.stdout.pipe(process.stdout)
+    proc.stderr.pipe(process.stderr)
   })

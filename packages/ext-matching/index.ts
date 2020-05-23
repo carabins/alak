@@ -1,4 +1,4 @@
-import { installAtomExtension } from '../atom/create'
+import { installAtomExtension } from '../atom/src/create'
 // import { installExtension } from '../core'
 
 /**

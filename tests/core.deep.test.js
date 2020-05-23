@@ -64,7 +64,7 @@ test('up holistic', async () => {
   let b = A.holistic()
   a.up(b)
   a(startValue, finalValue)
-  b.up( (v1, v2)=>{
+  b.up((v1, v2) => {
     expect(v1).toBe(startValue)
     expect(v2).toBe(finalValue)
   })
