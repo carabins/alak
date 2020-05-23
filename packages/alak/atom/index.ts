@@ -13,11 +13,34 @@
  */
 
 import { createProtoAtom, createAtom } from './create'
+import { alive } from './utils'
 
 export { installAtomExtension } from './create'
 
-/** {@link IAtomCoreConstructor} */
-export const AC: IAtomCoreConstructor = Object.assign(createProtoAtom, {
+export const A = Object.assign(createProtoAtom, {
   proxy: createAtom,
   proto: createProtoAtom,
-})
+  setOnceGet(getterFun) {
+    return createProtoAtom().setOnceGet(getterFun)
+  },
+  setGetter(getterFun) {
+    return createProtoAtom().setGetter(getterFun)
+  },
+  setWrapper(wrapperFun) {
+    return createProtoAtom().setWrapper(wrapperFun)
+  },
+  from(...atoms) {
+    return createProtoAtom().from(...atoms)
+  },
+  stateless() {
+    return createProtoAtom().stateless()
+  },
+  holistic() {
+    return createProtoAtom().holistic()
+  },
+  id(id, v) {
+    const a = createProtoAtom().setId(id)
+    alive(v) && a(v)
+    return a
+  },
+}) as IAtomConstructor<any>

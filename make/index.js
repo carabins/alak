@@ -14,10 +14,14 @@ switch (task) {
     chokidar.watch('./make/').on('all', (event, path) => {
       clearInterval(t)
       t = setTimeout(() => {
-        console.log(__dirname)
-        executeCommand('node ./make')
+        // console.log(__dirname)
+        executeCommand('node make')
       }, 24)
     })
+    break
+  case 'publish':
+    console.log('publish')
+    require('./publish').publish(process.argv[3])
     break
   default:
     console.log('make lib')
