@@ -46,24 +46,25 @@ export const tsc = async () => {
     }
   }
   const defPacks = {}
-  // readDef(true, defPacks, distPath, 'packages')
-  // console.log('dist generics defined')
-  // //writeFileSync(path.join(distPath, 'packages', 'global.d.ts'), globalTDS)
-  // for (let key in defPacks) {
-  //   let defs = defPacks[key]
-  //   const sourceDefPacks = {}
-  //   readDef(false, sourceDefPacks, path.resolve('packages'), key)
-  //   console.log(`source generics for package "${key}" defined`)
-  //
-  //   // let indexDTS = '/// <reference path="global.d.ts" />'
-  //   let inModuleGlobalDTS = globalTDS
-  //   for (let def in sourceDefPacks) {
-  //     inModuleGlobalDTS += '\n' + sourceDefPacks[def]
-  //   }
-  //   writeFileSync(path.join(distPath, 'packages', key, 'global.d.ts'), inModuleGlobalDTS)
-  //   let indexDtsPath = path.join(distPath, 'packages', key, 'src', 'index.d.ts')
-  //   let indexDts = readFileSync(indexDtsPath).toString()
-  //   writeFileSync(indexDtsPath, '/// <reference path="../global.d.ts" />\n' + indexDts)
-  //   console.log(`generation defs for module "${key}" is complete`)
-  // }
+  readDef(true, defPacks, distPath, 'packages')
+  console.log('dist generics defined')
+  //writeFileSync(path.join(distPath, 'packages', 'global.d.ts'), globalTDS)
+  for (let key in defPacks) {
+    let defs = defPacks[key]
+    const sourceDefPacks = {}
+    readDef(false, sourceDefPacks, path.resolve('packages'), key)
+    console.log(`source generics for package "${key}" defined`)
+
+    // let indexDTS = '/// <reference path="global.d.ts" />'
+    let inModuleGlobalDTS = globalTDS
+    for (let def in sourceDefPacks) {
+      inModuleGlobalDTS += '\n' + sourceDefPacks[def]
+    }
+    writeFileSync(path.join(distPath, 'packages', key, 'global.d.ts'), inModuleGlobalDTS)
+    //TODO
+    let indexDtsPath = path.join(distPath, 'packages', key, 'atom', 'index.d.ts')
+    let indexDts = readFileSync(indexDtsPath).toString()
+    writeFileSync(indexDtsPath, '/// <reference path="../global.d.ts" />\n' + indexDts)
+    console.log(`generation defs for module "${key}" is complete`)
+  }
 }

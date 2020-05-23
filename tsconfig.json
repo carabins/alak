@@ -3,7 +3,7 @@
     //    "lib": ["ES2017", "DOM"],
     "module": "commonjs",
     "target": "es6",
-    "outDir": "distz",
+    "outDir": "dist",
     "declaration": true,
     "esModuleInterop": true,
     "sourceMap": false,
@@ -17,5 +17,11 @@
     "types": ["node"],
     "typeRoots": ["packages/alak/index.d.ts"]
   },
-  "include": ["packages/global.d.ts", "packages/*/*.d.ts", "packages/*/src", "packages/*/__tests__"]
+  "include": [
+    "packages/global.d.ts",
+    "packages/*/*.d.ts",
+    "packages/*/src",
+    "packages/alak/atom",
+    "packages/*/__tests__"
+  ]
 }
