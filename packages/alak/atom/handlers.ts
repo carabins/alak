@@ -245,5 +245,11 @@ export const handlers = {
   cloneValue() {
     return JSON.parse(JSON.stringify(this.value))
   },
+  toString() {
+    return `atom:${this._.uid}`
+  },
+  valueOf() {
+    return `atom:${this._.uid}`
+  },
   from,
 }

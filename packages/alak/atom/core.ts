@@ -87,7 +87,7 @@ export const createCore = (...a) => {
     }
   } as Core
   atom.children = new Set<AnyFunction>()
-  atom.uid = Math.random()
+  atom.uid = 10000000000000000 * (Math.ceil(Math.random() * 9) + Math.random())
   if (a.length) {
     atom(...a)
   }
