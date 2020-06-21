@@ -37,10 +37,10 @@ const computedContext = 'computed'
 /** @internal */
 export function from(...fromAtoms: IAtom<any>[]) {
   const atom: Core = this
-  if (atom.haveFrom) {
+  if (atom.parents) {
     throw `from atoms already has a assigned`
   } else {
-    atom.haveFrom = fromAtoms
+    atom.parents = fromAtoms
   }
   let someoneIsWaiting = []
   const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))

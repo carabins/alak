@@ -58,6 +58,9 @@ export const proxyProps = {
   isStateless() {
     return !!this.isStateless
   },
+  parents() {
+    return this._.parents ? this._.parents : []
+  },
 }
 
 const applyValue = (a, f) =>
@@ -251,9 +254,6 @@ export const handlers = {
   },
   cloneValue() {
     return JSON.parse(JSON.stringify(this.value))
-  },
-  parents() {
-    return this._.haveFrom ? this._.haveFrom : []
   },
   toString() {
     return `atom:${this._.uid}`
