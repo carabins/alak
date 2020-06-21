@@ -40,7 +40,7 @@ type Core = {
   wrapperFn: any
   meta: any
   metaMap?: Map<string, any>
-  haveFrom: boolean
+  haveFrom: IAtom<any>[]
   isEmpty: boolean
   isAsync: boolean
   isSafe: boolean

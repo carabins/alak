@@ -265,4 +265,10 @@ interface IAtom<T> {
    * @returns {@link ext-computed#ComputeStrategy}
    */
   from<IN extends IAtom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
+
+  /**
+   * Список производных атомов {@link from}
+   * @returns IAtom<any>[]
+   */
+  parents: IAtom<any>[]
 }

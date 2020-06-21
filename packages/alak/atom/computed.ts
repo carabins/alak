@@ -40,7 +40,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
   if (atom.haveFrom) {
     throw `from atoms already has a assigned`
   } else {
-    atom.haveFrom = true
+    atom.haveFrom = fromAtoms
   }
   let someoneIsWaiting = []
   const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))
