@@ -181,13 +181,16 @@ export const handlers = {
     if (this.isStateless) this._.clearValue()
     return this._
   },
-  // apply(context, v) {
-  //   this.bind(context)
-  //   setAtomValue(this, v[0])
-  // },
-  // call(context, ...v) {
-  //   this._(...v)
-  // },
+  bind(context) {
+    this.bind(context)
+  },
+  apply(context, v) {
+    this.bind(context)
+    setAtomValue(this, v[0])
+  },
+  call(context, ...v) {
+    this._(...v)
+  },
   addMeta(metaName, value?) {
     if (!this.metaMap) this.metaMap = new Map<string, any>()
     this.metaMap.set(metaName, value ? value : null)
@@ -201,14 +204,18 @@ export const handlers = {
     if (!this.metaMap) return null
     return this.metaMap.get(metaName)
   },
-  // on(stateEvent, fn) {
-  //   addStateEventListener(this, stateEvent, fn)
-  //   return this._
-  // },
-  // off(stateEvent, fn) {
-  //   removeStateEventListener(this, stateEvent, fn)
-  //   return this._
-  // },
+  dispatch(event, ...value: any) {
+    notifyStateListeners(this, event, ...value)
+    return this._
+  },
+  on(stateEvent, fn) {
+    addStateEventListener(this, stateEvent, fn)
+    return this._
+  },
+  off(stateEvent, fn) {
+    removeStateEventListener(this, stateEvent, fn)
+    return this._
+  },
   setGetter(getterFunction, isAsync) {
     this.getterFn = getterFunction
     this.isAsync = isAsync

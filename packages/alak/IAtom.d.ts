@@ -113,6 +113,21 @@ interface IAtom<T> {
    * @returns положительно при соответствии заданного значения значению контейнера*/
   is(compareValue: T): boolean
 
+  /** Сгенерировать событие
+   * @param value - необязательное значение
+   * @returns {@link IAtom}*/
+  dispatch(event: string, ...value: any): IAtom<T>
+
+  /** Удалить слушатель события {@link IAtom.on}
+   * @param listener - функция-слушатель
+   * @returns {@link IAtom}*/
+  off(event: string, listener: (...value: any) => void): IAtom<T>
+
+  /** Добавить слушатель события
+   * @param listener - функция-слушатель
+   * @returns {@link IAtom}*/
+  on(event: string, listener: (...value: any) => void): IAtom<T>
+
   /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link IAtom.setGetter}
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
@@ -243,4 +258,11 @@ interface IAtom<T> {
    * @param key - ключ доступа к значению в объекте
    */
   injectOnce(targetObject: any, key?: string): IAtom<T>
+
+  /**
+   * Создать атом из нескольких других атомов и стратегии вычисления.
+   * @param atoms - набор входных атомов для вычисления значения
+   * @returns {@link ext-computed#ComputeStrategy}
+   */
+  from<IN extends IAtom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
 }
