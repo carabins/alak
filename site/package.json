@@ -15,7 +15,7 @@
     "@docusaurus/preset-classic": "^2.0.0-alpha.48",
     "alak": "^2.0.1-next.10",
     "classnames": "^2.2.6",
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^9.0.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "snyk": "^1.316.1"
