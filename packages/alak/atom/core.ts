@@ -65,6 +65,7 @@ export const createCore = (...a) => {
     if (!core.children) {
       throw DECAY_ATOM_ERROR
     }
+
     if (v.length) {
       const value = core.isHoly ? v : v[0]
       if (debug.enabled)

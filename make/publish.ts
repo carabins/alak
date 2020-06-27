@@ -12,19 +12,27 @@ function pumpVersion() {
 
 export async function publish(pkgName?) {
   await tsc()
-  const packageJSON = JSON.parse(
-    readFileSync(path.resolve(`./packages/${pkgName}/package.json`)).toString(),
-  )
-  const versionParts = packageJSON.version.split('.')
-  versionParts.push(parseInt(versionParts.pop()) + 1)
-  packageJSON.version = versionParts.join('.')
+  const sourcePath = `./packages/${pkgName}/package.json`
+  const packageJSON = JSON.parse(readFileSync(sourcePath, 'utf-8'))
+  // let v = await executeCommand(`npm show ${packageJSON.pkgName} version`)
+  // const remoteVer = v.toString().split('\n').shift()
+  const newVerParts = packageJSON.version.split('.')
+  let step = newVerParts.length - 1
+  newVerParts[step] = (parseInt(newVerParts[step]) + 1).toString()
+  const newVer = newVerParts.join('.')
+  if (packageJSON.version != newVer) {
+    packageJSON.version = newVer
+    writeFileSync(sourcePath, JSON.stringify(packageJSON, null, 4))
+  }
+  // console.log({ v }, { remoteVer })
+
   writeFileSync(
     path.resolve(`./dist/packages/${pkgName}/package.json`),
-    JSON.stringify(packageJSON),
+    JSON.stringify(packageJSON, null, 2),
   )
 
-  let v = await executeCommand('npm publish', path.resolve(`./dist/packages/${pkgName}`))
-  // console.log(v)
+  await executeCommand('npm publish', path.resolve(`./dist/packages/${pkgName}`))
+
   // const remoteVer = v.toString().split('\n').shift()
   // if (packageJSON.version != remoteVer) {
   //   await executeCommand('npm publish')

@@ -255,6 +255,9 @@ export const handlers = {
   cloneValue() {
     return JSON.parse(JSON.stringify(this.value))
   },
+  [Symbol.toPrimitive]() {
+    this.toString()
+  },
   toString() {
     return `atom:${this._.uid}`
   },

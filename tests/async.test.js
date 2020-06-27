@@ -1,5 +1,7 @@
-const { A } = require('../dist/packages/alak/atom')
+const { debug } = require('../dist/packages/alak/atom/debug')
+debug.activate('localhost:10946')
 
+const { A } = require('../dist/packages/alak/atom')
 const startValue = 'startValue'
 const finalValue = 'finalValue'
 function asyncFn() {
@@ -7,14 +9,6 @@ function asyncFn() {
     setTimeout(() => done(finalValue), 24)
   })
 }
-
-test('async proxy', async () => {
-  let a = A.proxy(startValue)
-  a.setGetter(asyncFn)
-  expect(a.isAsync).toBeFalsy()
-  await a()
-  expect(a.isAsync).toBeTruthy()
-})
 
 test('async getter', async () => {
   let a = A(startValue)

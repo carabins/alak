@@ -1,5 +1,6 @@
 const { A } = require('../dist/packages/alak/atom')
-
+const { debug } = require('../dist/packages/alak/atom/debug')
+debug.activate('localhost:10946')
 const startValue = 'startValue'
 const finalValue = 'finalValue'
 
@@ -122,14 +123,9 @@ test('onClear', () => {
 })
 
 test('close', () => {
-  let a = A.proto(startValue)
+  let a = A(startValue)
   expect(!!a.uid).toBeTruthy()
   a.decay()
   expect(() => a()).toThrowError()
   expect(a.uid).toBeUndefined()
-  let b = A.proxy(startValue)
-  expect(() => b.wow).toThrowError()
-  b.decay()
-  expect(() => b()).toThrowError()
-  expect(() => b.uid).toThrowError()
 })

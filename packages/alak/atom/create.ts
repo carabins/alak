@@ -29,23 +29,14 @@ function get(core: Core, prop: string, receiver: any): any {
   throw PROPERTY_ATOM_ERROR
 }
 
-export function createProtoAtom<T>(value?: T) {
+export function createAtom<T>(value?: T) {
   const core = createCore(...arguments)
   core.__proto__ = protoHandlers
+  // if (debug.enabled) {
+  //   let _ = new Proxy(core, proxyDebugHandler)
+  //   core._ = _
+  //   return _
+  // }
   core._ = core
-  return core
-}
-
-const proxyHandler: ProxyHandler<Core> = { get }
-export function createProxyAtom<T>(value?: T) {
-  const core = createCore(...arguments)
-  let _
-  if (debug.enabled) {
-    core.__proto__ = protoHandlers
-    _ = new Proxy(core, proxyDebugHandler)
-  } else {
-    _ = new Proxy(core, proxyHandler)
-  }
-  _._ = _
-  return _
+  return debug.enabled ? new Proxy(core, proxyDebugHandler) : core
 }
