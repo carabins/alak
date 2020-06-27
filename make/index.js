@@ -1,4 +1,6 @@
-require('ts-node').register()
+require('ts-node').register({
+  transpileOnly: true,
+})
 const task = process.argv[2]
 
 const { executeCommand } = require('./helpers')
@@ -10,17 +12,20 @@ switch (task) {
   case 'dev':
     let t
     let p
-    console.log('dev script?')
-    chokidar.watch('./make/').on('all', (event, path) => {
+    chokidar.watch(['./make/', './packages']).on('all', (event, path) => {
       clearInterval(t)
       t = setTimeout(() => {
-        executeCommand('node make')
+        executeCommand('node make play')
       }, 24)
     })
     break
   case 'publish':
     console.log('publish')
     require('./publish').publish(process.argv[3])
+    break
+  case 'play':
+    console.log('play')
+    require('./dev-play')
     break
   default:
     console.log('make lib')

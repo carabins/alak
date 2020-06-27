@@ -8,24 +8,24 @@ export const ClearState = {
   DECAY: 'decay',
 }
 
-export function notifyStateListeners(atom, state: string, ...value) {
-  if (atom.stateListeners && atom.stateListeners.has(state)) {
-    atom.stateListeners.get(state).forEach((f) => f.apply(f, value))
+export function notifyStateListeners(core, state: string, ...value) {
+  if (core.stateListeners && core.stateListeners.has(state)) {
+    core.stateListeners.get(state).forEach((f) => f.apply(f, value))
   }
 }
 
-export function addStateEventListener(atom, state, fun) {
-  if (!atom.stateListeners) atom.stateListeners = new Map()
-  if (!atom.stateListeners.has(state)) {
+export function addStateEventListener(core, state, fun) {
+  if (!core.stateListeners) core.stateListeners = new Map()
+  if (!core.stateListeners.has(state)) {
     let set = new Set()
     set.add(fun)
-    atom.stateListeners.set(state, set)
-  } else atom.stateListeners.get(state).add(fun)
+    core.stateListeners.set(state, set)
+  } else core.stateListeners.get(state).add(fun)
 }
 
-export function removeStateEventListener(atom, state: string, fun) {
-  if (atom.stateListeners && atom.stateListeners.has(state)) {
-    let ase = atom.stateListeners.get(state)
+export function removeStateEventListener(core, state: string, fun) {
+  if (core.stateListeners && core.stateListeners.has(state)) {
+    let ase = core.stateListeners.get(state)
     if (ase.has(fun)) ase.delete(fun)
   }
 }

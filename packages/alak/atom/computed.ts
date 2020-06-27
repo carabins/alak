@@ -36,11 +36,11 @@ const computedContext = 'computed'
 
 /** @internal */
 export function from(...fromAtoms: IAtom<any>[]) {
-  const atom: Core = this
-  if (atom.parents) {
+  const core: Core = this
+  if (core.parents) {
     throw `from atoms already has a assigned`
   } else {
-    atom.parents = fromAtoms
+    core.parents = fromAtoms
   }
   let someoneIsWaiting = []
   const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))
@@ -49,20 +49,20 @@ export function from(...fromAtoms: IAtom<any>[]) {
     while (someoneIsWaiting.length) {
       someoneIsWaiting.pop()(v)
     }
-    atom.isAwaiting && delete atom.isAwaiting
+    core.isAwaiting && delete core.isAwaiting
   }
 
   function applyValue(mixedValue) {
     if (isPromise(mixedValue)) {
       mixedValue.then((v) => {
         freeWaiters(v)
-        setAtomValue(atom, v, computedContext)
+        setAtomValue(core, v, computedContext)
       })
     } else {
       freeWaiters(mixedValue)
-      setAtomValue(atom, mixedValue, computedContext)
+      setAtomValue(core, mixedValue, computedContext)
     }
-    atom.isAwaiting && delete atom.isAwaiting
+    core.isAwaiting && delete core.isAwaiting
     return mixedValue
   }
 
@@ -79,17 +79,17 @@ export function from(...fromAtoms: IAtom<any>[]) {
       return a.value
     })
     if (inAwaiting.length > 0) {
-      atom.getterFn = addWaiter
-      return (atom.isAwaiting = addWaiter())
+      core.getterFn = addWaiter
+      return (core.isAwaiting = addWaiter())
     }
-    atom.getterFn = () => mixFn(...values)
+    core.getterFn = () => mixFn(...values)
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
   const listen = (a: IAtom<any>, fn: any) => {
     a.next(fn)
-    if (!atom.decays) atom.decays = []
-    atom.decays.push(() => a.down(fn))
+    if (!core.decays) core.decays = []
+    core.decays.push(() => a.down(fn))
   }
   function weak(mixFn, safe) {
     function mixer(v, a) {
@@ -105,13 +105,13 @@ export function from(...fromAtoms: IAtom<any>[]) {
     }
 
     fromAtoms.forEach((a) => {
-      if (a !== atom._) {
+      if (a !== core._) {
         linkedValues[a.uid] = a.value
         listen(a, mixer)
       }
     })
     makeMix(mixFn)
-    return atom._
+    return core._
   }
 
   function some(mixFn) {
@@ -128,7 +128,7 @@ export function from(...fromAtoms: IAtom<any>[]) {
     // let firstRun = true
     let getting = {}
     let traced = false
-    atom._.safe(safe)
+    core._.safe(safe)
     function getterFn(callerUid?) {
       // console.log('getterFn()')
       // if (!isChanged() && !atom.isEmpty)
@@ -168,16 +168,16 @@ export function from(...fromAtoms: IAtom<any>[]) {
       })
 
       if (isWaiting()) {
-        atom.getterFn = addWaiter
-        return (atom.isAwaiting = addWaiter())
+        core.getterFn = addWaiter
+        return (core.isAwaiting = addWaiter())
       }
-      atom.getterFn = getterFn
+      core.getterFn = getterFn
       getting = {}
       const nv = mixFn(...values)
       if (!traced) {
         traced = true
         // console.log("traced", values)
-        atom(nv)
+        core(nv)
       }
       return nv
     }
@@ -210,22 +210,22 @@ export function from(...fromAtoms: IAtom<any>[]) {
         if (traced) {
           // console.log("calling ::: ->")
           const args = getterFn(a.uid)
-          if (isPromise(args)) args.then(atom)
-          else atom(args)
+          if (isPromise(args)) args.then(core)
+          else core(args)
         }
       }
     }
 
     fromAtoms.forEach((a) => {
-      if (a.uid !== atom._.uid) {
+      if (a.uid !== core._.uid) {
         listen(a, mixer)
       }
     })
-    atom.getterFn = () => {
+    core.getterFn = () => {
       return getterFn()
     }
     getterFn()
-    return atom._
+    return core._
   }
 
   return {

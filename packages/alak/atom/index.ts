@@ -12,35 +12,40 @@
  * @packageDocumentation
  */
 
-import { createProtoAtom, createAtom } from './create'
+import { createProtoAtom, createProxyAtom } from './create'
 import { alive } from './utils'
 
 export { installAtomExtension } from './create'
 
-export const A = Object.assign(createProtoAtom, {
-  proxy: createAtom,
-  proto: createProtoAtom,
-  setOnceGet(getterFun) {
-    return createProtoAtom().setOnceGet(getterFun)
-  },
-  setGetter(getterFun) {
-    return createProtoAtom().setGetter(getterFun)
-  },
-  setWrapper(wrapperFun) {
-    return createProtoAtom().setWrapper(wrapperFun)
-  },
-  from(...atoms) {
-    return createProtoAtom().from(...atoms)
-  },
-  stateless() {
-    return createProtoAtom().stateless()
-  },
-  holistic() {
-    return createProtoAtom().holistic()
-  },
-  id(id, v) {
-    const a = createProtoAtom().setId(id)
-    alive(v) && a(v)
-    return a
-  },
-}) as IAtomConstructor<any>
+const init = (o) =>
+  Object.assign(o, {
+    proxy: createProxyAtom,
+    proto: createProtoAtom,
+    setOnceGet(getterFun) {
+      return o().setOnceGet(getterFun)
+    },
+    setGetter(getterFun) {
+      return o().setGetter(getterFun)
+    },
+    setWrapper(wrapperFun) {
+      return o().setWrapper(wrapperFun)
+    },
+    from(...atoms) {
+      return o().from(...atoms)
+    },
+    stateless() {
+      return o().stateless()
+    },
+    holistic() {
+      return o().holistic()
+    },
+    id(id, v) {
+      const a = o().setId(id)
+      alive(v) && a(v)
+      return a
+    },
+  }) as IAtomConstructor<any>
+
+export const AlakProxyMode = () => (A = init(createProxyAtom))
+export let A: IAtomConstructor<any> = init(createProtoAtom)
+export default A

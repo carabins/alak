@@ -35,3 +35,5 @@ export function isPromise(obj) {
     typeof obj.then === 'function'
   )
 }
+
+export const isBrowser = new Function('try {return this===window;}catch(e){ return false;}')

@@ -15,7 +15,13 @@
       "alak": ["packages/"]
     },
     "types": ["node"],
-    "typeRoots": ["packages/alak/index.d.ts"]
+    "typeRoots": [
+      "packages/alak/index.d.ts",
+      "packages/alak/IAtomConstructor.d.ts",
+      "packages/alak/ComputeStrategy.d.ts",
+      "packages/alak/IAtom.d.ts",
+      "packages/global.d.ts"
+    ]
   },
   "include": [
     "packages/global.d.ts",

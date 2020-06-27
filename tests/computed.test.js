@@ -1,4 +1,4 @@
-const { A } = require('../facade')
+const { A } = require('../dist/packages/alak/atom')
 
 const inAwaiting = (atom) => expect(typeof atom().then === 'function').toBeTruthy()
 //

@@ -1,4 +1,4 @@
-import { debug, grandUpFn, notifyChildes, setAtomValue } from './core'
+import { grandUpFn, notifyChildes, setAtomValue } from './core'
 import {
   addStateEventListener,
   ClearState,
@@ -30,6 +30,7 @@ export const coreProps = {
 }
 
 export const proxyProps = {
+  apply(context, v) {},
   value() {
     return this.value
   },
@@ -238,9 +239,8 @@ export const handlers = {
     this.isAsync = isAsync
     return this._
   },
-  fmap(fun) {
+  fmap(fun, context?) {
     const v = fun(this.value)
-    const context = debug.enabled ? [AtomContext.fmap, fun.name()] : undefined
     setAtomValue(this, v, context)
     return this._
   },
@@ -262,4 +262,5 @@ export const handlers = {
     return `atom:${this._.uid}`
   },
   from,
+  isAtom: () => true,
 }
