@@ -5,7 +5,15 @@ debug.activate('localhost:10946')
 
 const startValue = 'startValue'
 const finalValue = 'finalValue'
-
-let a = A(startValue)
-console.log(!!a.uid)
-a.decay()
+const beStart = (v) => console.log(v == startValue)
+const beFinal = (v) => console.log(v == finalValue)
+const neverBe = (v) => console.log('neverBe')
+let a = A()
+a.up(beStart)
+a(startValue)
+a.down(beStart)
+a.next(beFinal)
+a(finalValue)
+a.clear()
+a.up(neverBe)
+console.log('::', a.value)
