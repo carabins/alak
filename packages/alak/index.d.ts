@@ -31,6 +31,7 @@ type Core = {
   _: IAtom<any>
   _name: string
   value: any
+  prev: any
   uid: number
   id: string
   children: Set<AnyFunction>

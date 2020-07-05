@@ -122,10 +122,19 @@ test('onClear', () => {
   expect(decayResolver).toHaveBeenCalledTimes(1)
 })
 
+test('prev', () => {
+  let a = A(startValue)
+  a.next((v, a) => {
+    a.prev
+    expect(a.prev).toBe(startValue)
+    expect(v).toBe(finalValue)
+  })
+  a(finalValue)
+})
 test('close', () => {
   let a = A(startValue)
   expect(!!a.uid).toBeTruthy()
   a.decay()
   expect(() => a()).toThrowError()
-  expect(a.uid).toBeUndefined()
+  // expect(a.uid).toBeUndefined()
 })

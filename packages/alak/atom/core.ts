@@ -16,10 +16,12 @@ export function setAtomValue(core: Core, value, context?) {
     if (core.isSafe && core.value == finalValue) {
       return
     }
+    core.prev = core.value
     core.value = finalValue
     debug.enabled && debug.updateValue(core, context)
     notifyChildes(core)
     if (core.isStateless) delete core.value
+    delete core.prev
     return finalValue
   }
   if (value && value.then) {
@@ -36,12 +38,14 @@ async function setAsyncValue(core: Core, promise: PromiseLike<any>) {
   if (core.isSafe && core.value == v) {
     return
   }
+  core.prev = core.value
   core.value = v
   core.isAwaiting = false
   notifyStateListeners(core, FState.AWAIT, false)
   debug.enabled && debug.updateAsyncFinish(core)
   notifyChildes(core)
   if (core.isStateless) delete core.value
+  delete core.prev
   return v
 }
 
