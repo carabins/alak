@@ -16,4 +16,12 @@ a.next(beFinal)
 a(finalValue)
 a.clear()
 a.up(neverBe)
-console.log('::', a.value)
+
+
+a(finalValue)
+a(finalValue)
+a(finalValue)
+a(finalValue)
+a(finalValue)
+a(finalValue)
+a(finalValue)

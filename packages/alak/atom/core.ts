@@ -1,5 +1,5 @@
 import { FState, notifyStateListeners } from './state'
-import { AtomContext, DECAY_ATOM_ERROR } from './utils'
+import { AtomContext, DECAY_ATOM_ERROR, rnd } from './utils'
 import debug from './debug'
 
 export function setAtomValue(core: Core, value, context?) {
@@ -18,7 +18,7 @@ export function setAtomValue(core: Core, value, context?) {
     }
     core.prev = core.value
     core.value = finalValue
-    debug.enabled && debug.updateValue(core, context)
+    debug.enabled && debug.updateValue(core,  context)
     notifyChildes(core)
     if (core.isStateless) delete core.value
     delete core.prev
@@ -52,7 +52,6 @@ async function setAsyncValue(core: Core, promise: PromiseLike<any>) {
 export function notifyChildes(core: Core) {
   const v = core.value
   const apply = core.isHoly ? (f) => f(...v) : (f) => (f.length == 2 ? f(v, core._) : f(v))
-
   core.children.size > 0 && core.children.forEach(apply)
   core.grandChildren && core.grandChildren.size > 0 && core.grandChildren.forEach(apply)
 }
@@ -86,9 +85,10 @@ export const createCore = (...a) => {
     }
   } as Core
   core.children = new Set<AnyFunction>()
-  core.uid = 10000000000000000 * (Math.ceil(Math.random() * 9) + Math.random())
+  core.uid = rnd()
   if (a.length) {
     core(...a)
   }
   return core as any
 }
+

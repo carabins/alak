@@ -1,7 +1,8 @@
 import { handlers, proxyProps } from './handlers'
-import { DECAY_ATOM_ERROR, isBrowser, PROPERTY_ATOM_ERROR } from './utils'
+import { DECAY_ATOM_ERROR,  PROPERTY_ATOM_ERROR, rnd } from './utils'
 
 let atomBase = {}
+export const isBrowser = new Function('try {return this===window;}catch(e){ return false;}')
 
 export const debug = {
   enabled: false,
@@ -21,9 +22,10 @@ export const debug = {
     const front = isBrowser()
     let cl
     let queue = []
+    let sid = rnd()
     const method = 'POST'
-    const push = () => {
-      let body = JSON.stringify(queue)
+    const send = data => {
+      let body = JSON.stringify(data)
       if (front) {
         fetch(url, {
           method,
@@ -41,6 +43,22 @@ export const debug = {
       }
       queue = []
       cl = null
+    }
+    send({
+      sid,
+      app: {
+        front,
+        ua:front ? window.navigator.userAgent : {
+          argv:process.argv,
+          version:process.version
+        }
+      }
+    })
+    const push = () => {
+      send({
+        sid,
+        queue
+      })
     }
     this.log = (core: Core, type, data) => {
       let t = Date.now()
@@ -105,5 +123,5 @@ const aids = (m) => {
 function detectFnContext(fn) {
   let isAtom = !!fn.isAtom
   let id = fn.id || fn.uid || fn.name || fn.toString()
-  return { isAtom, id }
+  return { isAtom, uid:fn.uid, id }
 }

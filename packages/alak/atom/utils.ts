@@ -21,6 +21,7 @@ export const AtomContext = {
   fmap: 'fmap',
 }
 
+
 export const deleteParams = (o) => {
   Object.keys(o).forEach((k) => {
     if (o[k]) o[k] = null
@@ -36,4 +37,5 @@ export function isPromise(obj) {
   )
 }
 
-export const isBrowser = new Function('try {return this===window;}catch(e){ return false;}')
+
+export const rnd = ()=> 10000000000000000 * (Math.ceil(Math.random() * 9) + Math.random())
