@@ -91,9 +91,9 @@ export function from(...fromAtoms: IAtom<any>[]) {
     if (!core.decays) core.decays = []
     core.decays.push(() => a.down(fn))
   }
-  function weak(mixFn, safe) {
+  function weak(mixFn, finiteLoop) {
     function mixer(v, a) {
-      if (safe) {
+      if (finiteLoop) {
         const linkedValue = linkedValues[a.uid]
         if (v !== linkedValue) {
           makeMix(mixFn)
@@ -124,11 +124,11 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return weak(mixFn, true)
   }
 
-  function strong(mixFn, safe) {
+  function strong(mixFn, finiteLoop) {
     // let firstRun = true
     let getting = {}
     let traced = false
-    core._.safe(safe)
+    core._.setFiniteLoop(finiteLoop)
     function getterFn(callerUid?) {
       // console.log('getterFn()')
       // if (!isChanged() && !atom.isEmpty)
@@ -202,9 +202,9 @@ export function from(...fromAtoms: IAtom<any>[]) {
       const linkedValue = linkedValues[a.uid]
       // console.log("mixer")
 
-      if (!safe || v !== linkedValue) {
+      if (!finiteLoop || v !== linkedValue) {
         linkedValues[a.uid] = v
-        if (safe && !isChanged()) {
+        if (finiteLoop && !isChanged()) {
           return
         }
         if (traced) {
