@@ -1,3 +1,9 @@
+type AContext = string | IAtom<any>
+type KV<T> = {
+  [key: string]: T
+}
+type UnpackKV<T> = T[keyof T]
+
 /** Интерфейс ядра атома.
  * @remarks
  * Функция-контейнер.
@@ -243,12 +249,17 @@ interface IAtom<T> {
    * Обновление  фукнций-приёмников происходит только при уникальных значениях
    * @param bool? - по умолчанию `true`
    * @returns {@link IAtom} */
-  safe(bool?: boolean): IAtom<T>
+  setFiniteLoop(bool?: boolean): IAtom<T>
 
   /** Применить функцию к значению в контейнере
    * @param fun - функция принимающая текущее значение и возвращающей
    * новое значение в контейнер и дочерним функциям-получателям
    * @returns {@link IAtom} */
+  mix(fun: (v: T) => T): IAtom<T>
+
+  /**
+   * @deprecated
+   */
   fmap(fun: (v: T) => T): IAtom<T>
 
   /**
@@ -262,7 +273,7 @@ interface IAtom<T> {
    * @param targetObject - целевой объект
    * @param key - ключ доступа к значению в объекте
    */
-  injectOnce(targetObject: any, key?: string): IAtom<T>
+  injectTo(targetObject: any, key?: string): IAtom<T>
 
   /**
    * Создать атом из нескольких других атомов и стратегии вычисления.
@@ -276,4 +287,29 @@ interface IAtom<T> {
    * @returns IAtom<any>[]
    */
   parents: IAtom<any>[]
+
+  /**
+   * Объеденить массив с объектом ключу
+   * @param key по умолчанию "id"
+   */
+  boxAssign(object: T, key?: keyof T, context?: IAtom<any>): IAtom<T>
+  boxJoin(array: UnpackKV<T>, key?: string, context?: IAtom<any>): IAtom<T>
+
+  boxGet(key: keyof T): UnpackKV<T>
+
+  boxDelete(key: keyof T): IAtom<T>
+
+  boxAdd(key: keyof T, value: UnpackKV<T>, context?: string): IAtom<T>
+  boxEach(fun: (value: UnpackKV<T>) => void): IAtom<T>
+  unboxToMap<U>(fun: (value: UnpackKV<T>) => U): KV<U>
+  unboxToList(): UnpackKV<T>[]
+
+  boxToMap<U>(fun: (value: UnpackKV<T>) => U): IAtom<KV<U>>
+  boxToList(): IAtom<UnpackKV<T>[]>
+
+  tuneTo(atom: IAtom<T>): IAtom<T>
 }
+
+// type KV<T> = {
+//   [key:string]:T
+// }

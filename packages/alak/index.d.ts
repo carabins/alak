@@ -48,6 +48,7 @@ type Core = {
   isHoly: boolean
   isAwaiting: boolean | any
   isStateless: boolean
+  tunedTarget: IAtom<any>
   decays: any[]
 }
 

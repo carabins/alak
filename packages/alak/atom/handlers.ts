@@ -18,6 +18,7 @@ import {
   upDownFilter,
 } from './utils'
 import { from } from './computed'
+import { createAtom } from './create'
 
 const valueProp = 'value'
 
@@ -47,6 +48,9 @@ export const proxyProps = {
   name() {
     return this._name
   },
+  isFiniteLoop() {
+    return this.isSafe
+  },
   isSafe() {
     return this.isSafe
   },
@@ -59,6 +63,7 @@ export const proxyProps = {
   isStateless() {
     return !!this.isStateless
   },
+
   parents() {
     return this._.parents ? this._.parents : []
   },
@@ -174,6 +179,9 @@ export const handlers = {
     else this.isSafe = v
     return this._
   },
+  setFiniteLoop(v) {
+    this.safe(v)
+  },
   holistic(v?) {
     if (v == undefined) this.isHoly = true
     else this.isHoly = v
@@ -244,7 +252,68 @@ export const handlers = {
     setAtomValue(this, v, context)
     return this._
   },
-  injectOnce(o, key) {
+
+  mix(...a) {
+    return this.fmap(...a)
+  },
+  boxJoin(array, key = 'id', context = 'boxJoin') {
+    let v = this.value || {}
+    array.forEach((i) => (v[i[key]] = i))
+    setAtomValue(this, v, context)
+    return this._
+  },
+  boxAssign(object, context = 'boxAssign') {
+    let v = this.value || {}
+    setAtomValue(this, Object.assign(v, object), context)
+    return this._
+  },
+  boxKey(key) {
+    let v = this.value || {}
+    return v[key]
+  },
+  boxDelete(key) {
+    let v = this.value || {}
+    delete v[key]
+    return this._
+  },
+  boxAdd(key, value, context = 'boxAdd') {
+    let v = this.value || {}
+    v[key] = value
+    setAtomValue(this, v, context)
+    return this._
+  },
+  boxEach(fun) {
+    this.value && Object.values(this.value).forEach(fun)
+    return this._
+  },
+  unboxToMap(fun) {
+    return this.value ? Object.keys(this.value).map(fun) : {}
+  },
+  unboxToList() {
+    return this.value ? Object.values(this.value) : []
+  },
+  boxToMap(fun) {
+    const a = createAtom()
+    this.up((v) => a(this.unboxToMap(fun), this._))
+    return a
+  },
+  boxToList() {
+    const a = createAtom()
+    this.up((v) => a(this.unboxToList(), this._))
+    return a
+  },
+
+  tuneTo(a: IAtom<any>) {
+    this.tuneOff()
+    this.tunedTarget = a
+    a.up(this._)
+  },
+
+  tuneOff() {
+    this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
+  },
+
+  injectTo(o, key) {
     if (!key) {
       key = this._name ? this._name : this.id ? this.id : this.uid
     }
@@ -255,6 +324,7 @@ export const handlers = {
   cloneValue() {
     return JSON.parse(JSON.stringify(this.value))
   },
+
   [Symbol.toPrimitive]() {
     this.toString()
   },
