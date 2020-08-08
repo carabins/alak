@@ -293,21 +293,24 @@ interface IAtom<T> {
    * @param key по умолчанию "id"
    */
   boxAssign(object: T, key?: keyof T, context?: IAtom<any>): IAtom<T>
-  boxJoin(array: UnpackKV<T>, key?: string, context?: IAtom<any>): IAtom<T>
-
-  boxGet(key: keyof T): UnpackKV<T>
-
-  boxDelete(key: keyof T): IAtom<T>
-
+  boxMerge(array: UnpackKV<T>, key?: string, context?: IAtom<any>): IAtom<T>
+  boxGet(key: string): UnpackKV<T>
+  boxDelete(key: string): IAtom<T>
   boxAdd(key: keyof T, value: UnpackKV<T>, context?: string): IAtom<T>
   boxEach(fun: (value: UnpackKV<T>) => void): IAtom<T>
+  boxMap<U>(fun: (value: UnpackKV<T>) => U): IAtom<KV<U>>
+  boxToList(): IAtom<UnpackKV<T>[]>
   unboxToMap<U>(fun: (value: UnpackKV<T>) => U): KV<U>
   unboxToList(): UnpackKV<T>[]
 
-  boxToMap<U>(fun: (value: UnpackKV<T>) => U): IAtom<KV<U>>
-  boxToList(): IAtom<UnpackKV<T>[]>
-
   tuneTo(atom: IAtom<T>): IAtom<T>
+  tuneTo(): void
+
+  listSize(): number
+  listAdd(value: UnpackKV<T>, context?: any): IAtom<T>
+  listMerge(list: T, context?: any): IAtom<T>
+  listMap<R>(fun: (value: UnpackKV<T>) => R): IAtom<R[]>
+  listToBox(key?: string): IAtom<KV<UnpackKV<T>>>
 }
 
 // type KV<T> = {

@@ -256,7 +256,7 @@ export const handlers = {
   mix(...a) {
     return this.fmap(...a)
   },
-  boxJoin(array, key = 'id', context = 'boxJoin') {
+  boxMerge(array, key = 'id', context = 'boxJoin') {
     let v = this.value || {}
     array.forEach((i) => (v[i[key]] = i))
     setAtomValue(this, v, context)
@@ -292,7 +292,7 @@ export const handlers = {
   unboxToList() {
     return this.value ? Object.values(this.value) : []
   },
-  boxToMap(fun) {
+  boxMap(fun) {
     const a = createAtom()
     this.up((v) => a(this.unboxToMap(fun), this._))
     return a
@@ -311,6 +311,29 @@ export const handlers = {
 
   tuneOff() {
     this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
+  },
+
+  listSize() {
+    return this.value?.length
+  },
+  listAdd(value, context = 'listAdd') {
+    this.value.push(value)
+    setAtomValue(this, this.value, context)
+    return this._
+  },
+  listMerge(list, context = 'listMerge') {
+    this.value.push(...list)
+    setAtomValue(this, this.value, context)
+  },
+  listMap(fun) {
+    const a = createAtom()
+    this.up((v) => a(v.map(fun), this._))
+    return a
+  },
+  listToBox(key) {
+    const a = createAtom()
+    this.up((v) => a.boxMerge(v, key, this._))
+    return a
   },
 
   injectTo(o, key) {

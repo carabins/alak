@@ -13,7 +13,7 @@ let a = A({
   a2: 'ac',
 })
 
-let c = a.boxToMap((v) => 'c::' + v)
+let c = a.boxMap((v) => 'c::' + v)
 let d = a.boxToList()
 
 c.up((v) => console.log(v))
@@ -23,21 +23,16 @@ z.up((v) => console.log('z', v))
 z.tuneTo(c)
 a.boxAssign({ a3: 'aa' })
 z.tuneTo(d)
-a.boxJoin([{ id: 'a4', v: 'aa' }])
+a.boxAssign([{ id: 'a4', v: 'aa' }])
 
-// a.up(beStart)
-// a(startValue)
-// a.down(beStart)
-// a.next(beFinal)
-// a(finalValue)
-// a.clear()
-// a.up(neverBe)
-//
-//
-// a(finalValue)
-// a(finalValue)
-// a(finalValue)
-// a(finalValue)
-// a(finalValue)
-// a(finalValue)
-// a(finalValue)
+let ar = A([1, 2, 3, 4, 5])
+let ar2 = A([
+  { id: 1, v: 'a' },
+  { id: 2, v: 'v' },
+])
+
+ar.up((v) => console.log('ar:', v))
+ar.listAdd(6)
+
+let o2 = ar2.listToBox()
+console.log(o2.value)
