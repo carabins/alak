@@ -276,7 +276,7 @@ export const handlers = {
     delete v[key]
     return this._
   },
-  boxAdd(key, value, context = 'boxAdd') {
+  boxSet(key, value, context = 'boxAdd') {
     let v = this.value || {}
     v[key] = value
     setAtomValue(this, v, context)
