@@ -267,9 +267,11 @@ export const handlers = {
     setAtomValue(this, Object.assign(v, object), context)
     return this._
   },
-  boxKey(key) {
-    let v = this.value || {}
-    return v[key]
+  boxGet(key, insert = {}) {
+    let o = (this.value = {})
+    let v = o[key]
+    if (v) return v
+    return (o[key] = v)
   },
   boxDelete(key) {
     let v = this.value || {}
