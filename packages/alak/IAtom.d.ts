@@ -294,7 +294,7 @@ interface IAtom<T> {
    */
   boxAssign(object: T, key?: keyof T, context?: IAtom<any>): IAtom<T>
   boxMerge(array: UnpackKV<T>, key?: string, context?: IAtom<any>): IAtom<T>
-  boxGet(key: string, orInsert: T): UnpackKV<T>
+  boxGet(key: string, orInsert?: T): UnpackKV<T>
   boxDelete(key: string): IAtom<T>
   boxSet(key: keyof T, value: UnpackKV<T>, context?: string): IAtom<T>
   boxEach(fun: (value: UnpackKV<T>) => void): IAtom<T>
