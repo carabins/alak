@@ -59,6 +59,8 @@ interface IAtom<T> {
    * {@link IAtom.setGetter}*/
   readonly isAwaiting: Boolean
 
+  readonly isPrivate: Boolean
+
   /** `true` когда атом не запоминает значение
    * {@link IAtom.stateless}*/
   readonly isStateless: Boolean

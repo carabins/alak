@@ -8,15 +8,20 @@ export const debug = {
   enabled: false,
 
   updateAsyncStart(core: Core, context?: string) {
+    if (core.isPrivate) return
     this.log(core, 'updateAsyncFinish', { context, value: core.value })
   },
   updateAsyncFinish(core: Core) {
+    if (core.isPrivate) return
     this.log(core, 'updateAsyncFinish')
   },
   updateValue(core: Core, context: string) {
+    if (core.isPrivate) return
     this.log(core, 'updateValue', { context, value: core.value })
   },
-  log(core: Core, type, info?) {},
+  log(core: Core, type, info?) {
+    if (core.isPrivate) return
+  },
   activate(url?) {
     this.enabled = true
     const front = isBrowser()
@@ -65,6 +70,7 @@ export const debug = {
       })
     }
     this.log = (core: Core, type, data) => {
+      if (core.isPrivate) return
       let t = Date.now()
       let a = JSON.stringify({
         uid: core.uid,

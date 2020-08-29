@@ -46,6 +46,7 @@ type Core = {
   isAsync: boolean
   isSafe: boolean
   isHoly: boolean
+  isPrivate: boolean
   isAwaiting: boolean | any
   isStateless: boolean
   tunedTarget: IAtom<any>
