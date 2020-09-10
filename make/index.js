@@ -6,7 +6,7 @@ const task = process.argv[2]
 const { executeCommand } = require('./helpers')
 const chokidar = require('chokidar')
 
-console.log('make')
+console.log('make', task)
 
 switch (task) {
   case 'dev':

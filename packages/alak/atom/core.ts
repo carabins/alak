@@ -18,7 +18,7 @@ export function setAtomValue(core: Core, value, context?) {
     }
     core.prev = core.value
     core.value = finalValue
-    debug.enabled && debug.updateValue(core,  context)
+    debug.enabled && debug.updateValue(core, context)
     notifyChildes(core)
     if (core.isStateless) delete core.value
     delete core.prev
@@ -68,13 +68,13 @@ export const createCore = (...a) => {
     if (!core.children) {
       throw DECAY_ATOM_ERROR
     }
-
     if (v.length) {
       const value = core.isHoly ? v : v[0]
       if (debug.enabled)
         return setAtomValue(core, value, !core.isHoly && v[1] ? v[1] : AtomContext.direct)
       else return setAtomValue(core, value)
     } else {
+      if (core.isStateless) return
       if (core.isAwaiting) {
         return core.isAwaiting
       }
@@ -91,4 +91,3 @@ export const createCore = (...a) => {
   }
   return core as any
 }
-
