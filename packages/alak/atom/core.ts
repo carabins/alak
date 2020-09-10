@@ -74,7 +74,10 @@ export const createCore = (...a) => {
         return setAtomValue(core, value, !core.isHoly && v[1] ? v[1] : AtomContext.direct)
       else return setAtomValue(core, value)
     } else {
-      if (core.isStateless) return
+      if (core.isStateless) {
+        notifyChildes(core)
+        return
+      }
       if (core.isAwaiting) {
         return core.isAwaiting
       }
@@ -86,8 +89,6 @@ export const createCore = (...a) => {
   } as Core
   core.children = new Set<AnyFunction>()
   core.uid = rnd()
-  if (a.length) {
-    core(...a)
-  }
+  a.length && core(...a)
   return core as any
 }
