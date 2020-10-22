@@ -104,7 +104,7 @@ export const handlers:any = {
     return this._
   },
 
-  link(f, link) {
+  link(link, f) {
     this._.up(f)
     let links = this.links as Map<any, any>
     if (!links) this.links = links = new Map<any, any>()

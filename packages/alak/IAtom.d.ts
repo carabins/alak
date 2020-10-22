@@ -76,7 +76,7 @@ interface IAtom<T> {
    * @param receiver - функция-получатель
    * @param linkObject - любой объект для вызова {@link IAtom.downLink}
    * @returns {@link atom#IAtom}*/
-  link(receiver: ValueReceiver<T>, linkObject:any): IAtom<T>
+  link(linkObject:any, receiver: ValueReceiver<T>): IAtom<T>
 
   /** Отписать функцию-получатель по объекту ссылки установленную в {@link IAtom.link}
    * @param linkObject - функция-получатель
