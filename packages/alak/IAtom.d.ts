@@ -71,6 +71,18 @@ interface IAtom<T> {
    * @returns {@link atom#IAtom}*/
   up(receiver: ValueReceiver<T>): IAtom<T>
 
+  /** Добавить функцию-получатель обновлений значения контейнера
+   * с возможностью отписаться {@link IAtom.downLink} по объёкту-ссылке
+   * @param receiver - функция-получатель
+   * @param linkObject - любой объект для вызова {@link IAtom.downLink}
+   * @returns {@link atom#IAtom}*/
+  link(receiver: ValueReceiver<T>, linkObject:any): IAtom<T>
+
+  /** Отписать функцию-получатель по объекту ссылки установленную в {@link IAtom.link}
+   * @param linkObject - функция-получатель
+   * @returns {@link IAtom}*/
+  downLink(linkObject:any): IAtom<T>
+
   /** Добавить функцию-получатель и передать значение со следующего обновления
    * @param receiver - функция-получатель
    * @returns {@link IAtom}*/
@@ -127,19 +139,22 @@ interface IAtom<T> {
   is(compareValue: T): boolean
 
   /** Сгенерировать событие
+   * @param event - имя события
    * @param value - необязательное значение
    * @returns {@link IAtom}*/
-  dispatch(event: string, ...value: any): IAtom<T>
+  dispatch(event: string, ...value: any[]): IAtom<T>
 
   /** Удалить слушатель события {@link IAtom.on}
+   * @param event - имя события
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
-  off(event: string, listener: (...value: any) => void): IAtom<T>
+  off(event: string, listener: (...value: any[]) => void): IAtom<T>
 
   /** Добавить слушатель события
+   * @param event - имя события
    * @param listener - функция-слушатель
    * @returns {@link IAtom}*/
-  on(event: string, listener: (...value: any) => void): IAtom<T>
+  on(event: string, listener: (...value: any[]) => void): IAtom<T>
 
   /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link IAtom.setGetter}
    * @param listener - функция-слушатель

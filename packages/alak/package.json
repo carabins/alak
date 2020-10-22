@@ -1,19 +1,19 @@
 {
-  "name": "alak",
-  "version": "3.0.0-alpha.40",
-  "description": "Alak Atom",
-  "main": "./atom/index.js",
-  "typings": "./atom/index.d.ts",
-  "keywords": [
-    "alak",
-    "reactive",
-    "atom",
-    "streams",
-    "channels",
-    "dataflow",
-    "flow"
-  ],
-  "author": "Gleb Panteleev <dev@gleb.pw> (http://gleb.pw/)",
-  "license": "MIT",
-  "repository": "https://github.com/carabins/alak"
+    "name": "alak",
+    "version": "3.0.0-alpha.42",
+    "description": "Alak Atom",
+    "main": "./atom/index.js",
+    "typings": "./atom/index.d.ts",
+    "keywords": [
+        "alak",
+        "reactive",
+        "atom",
+        "streams",
+        "channels",
+        "dataflow",
+        "flow"
+    ],
+    "author": "Gleb Panteleev <dev@gleb.pw> (http://gleb.pw/)",
+    "license": "MIT",
+    "repository": "https://github.com/carabins/alak"
 }

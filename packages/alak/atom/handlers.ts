@@ -72,7 +72,7 @@ export const proxyProps = {
 const applyValue = (a, f) =>
   a.isEmpty ? false : (a.isHoly ? f.call(f, ...a.value) : f(a.value, a), true)
 
-export const handlers = {
+export const handlers:any = {
   up(f) {
     this.children.add(f)
     applyValue(this._, f)
@@ -103,6 +103,23 @@ export const handlers = {
     delete this.value
     return this._
   },
+
+  link(f, link) {
+    this._.up(f)
+    let links = this.links as Map<any, any>
+    if (!links) this.links = links = new Map<any, any>()
+    links.set(link, f)
+    return this._
+  },
+
+  downLink(linkObject: any) {
+    let links:Map<any, any> = this.links as Map<any, any>
+    if (links && links.has(linkObject)){
+      this._.down(links.get(linkObject))
+      links.delete(linkObject)
+    }
+  },
+
   onClear(fun) {
     addStateEventListener(this, FState.CLEAR, fun)
   },
@@ -216,7 +233,7 @@ export const handlers = {
     if (!this.metaMap) return null
     return this.metaMap.get(metaName)
   },
-  dispatch(event, ...value: any) {
+  dispatch(event, ...value) {
     notifyStateListeners(this, event, ...value)
     return this._
   },
