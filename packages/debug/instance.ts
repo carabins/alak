@@ -34,8 +34,8 @@
 //   const timeStart = Date.now()
 //   return {
 //     controller,
-//     receiver(event: string, atom, ...context) {
-//       const snap = atomSnapshot(atom)
+//     receiver(event: string, core, ...context) {
+//       const snap = atomSnapshot(core)
 //       context.length > 0 && snap.push(...context)
 //       const record = [Date.now() - timeStart, event, ...snap] as AtomLog
 //       isCollecting && collection.push(record)

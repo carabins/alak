@@ -9,23 +9,26 @@ interface ExtensionOptions {
   handlers: {
     [key: string]: (this: Core, ...a: any[]) => any
   }
+  proxy: (atom: Core) => IAtom<any>
   // /** {@link ExtensionOptionsHandlers | обработчики свойств атома}*/
-  // properties?: ExtensionOptionsHandlers
+  props: {
+    [key: string]: {
+      get: () => any
+      set: (v: any) => void
+    }
+  }
 }
 
 /** @internal */
 type MaybeAny<T> = unknown extends T ? any : T
 
+type AnyFunction = {
+  (...v: any[]): any
+}
+
 type Level = 'value' | 'all' | 'decay'
 
-// /** Функция с контекстом {@link Core | атома}*/
-// type ExtensionHandler = {
-//   (this: Core, ...a: any[]): any
-// }
-// /** Объект с обработчиками {@link ExtensionHandler}*/
-// type ExtensionOptionsHandlers = {
-//   [key: string]: ExtensionHandler
-// }
+
 type Core = {
   (...a: any[]): void
   _: IAtom<any>
@@ -62,7 +65,7 @@ type Core = {
  * ```
  */
 interface IAtomCoreConstructor {
-  /** Создать {@link IAtom} с необязательным аргументом как стартовое значение*/ <T>(
+  /** Создать {@link IAtom} с необязательным аргументом как стартовое значение*/<T>(
     value?: T,
   ): IAtom<MaybeAny<T>>
 

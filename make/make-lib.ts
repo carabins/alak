@@ -38,11 +38,11 @@ const packUmd = (packName, outName) =>
     ),
   )
 
-export async function lib() {
-  info('make library...')
-  await tsc()
-  // // await packUmd('umd', 'atom')
-  // // await packUmd('umd', 'atom.core')
+export async function lib(name) {
+  info('make library ' + name +"...")
+  await tsc(name)
+  // // await packUmd('umd', 'core')
+  // // await packUmd('umd', 'core.core')
   info('library created')
 }
 

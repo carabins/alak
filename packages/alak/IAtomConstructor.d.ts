@@ -1,25 +1,11 @@
-// // @ts-ignore
-// declare module 'alak/core' {
-//   // @ts-ignore
-//   import { ComputeStrategy } from 'alak/ext-computed'
-//   interface Atom<T> {
-//     match(...pattern: any[]): Atom<T>
-//     from<A extends Atom<any>[]>(...a: A): ComputeStrategy<T, A>
-//   }
-// }
-// installExtension({
-//   handlers: {
-//     from: fromFlows,
-//   },
-// })
 
 /** Конструктор атома
  * @remarks
- * Функция-константа, расширяет {@link atom#IAtomCoreConstructor}
+ * Функция-константа, расширяет {@link src#IAtomCoreConstructor}
  * @example
  * ```javascript
  * import A from 'alak'
- * const atom = A() // сокращённая запись A.proxy()
+ * const core = A() // сокращённая запись A.proxy()
  * ```
  * */
 interface IAtomConstructor<D> extends IAtomCoreConstructor {
@@ -86,4 +72,6 @@ interface IAtomConstructor<D> extends IAtomCoreConstructor {
    * @returns {@link ext-computed#ComputeStrategy}
    */
   from<IN extends IAtom<any>[]>(...atoms: IN): ComputeStrategicAtom<IN>
+
+
 }

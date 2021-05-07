@@ -1,0 +1,8 @@
+{
+    "name": "avuef",
+    "version": "0.12.6",
+    "description": "vue3 extension for alak atoms",
+    "main": "index.js",
+    "typings": "index.d.ts",
+    "dependencies": {}
+}

@@ -4,7 +4,7 @@ module.exports = {
 
   coverageReporters: ['html', 'lcov', 'text'],
   //collectCoverageFrom: [
-  //  'packages/*/src/**/*.ts',
+  //  'packages/*/core/**/*.ts',
   //],
   coveragePathIgnorePatterns: ['/packages/', '/scripts/', '/playground/'],
   //preset: 'ts-jest',

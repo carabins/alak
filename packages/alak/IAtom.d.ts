@@ -1,3 +1,7 @@
+type Ref<T> = T | {
+  value: T
+}
+
 type AContext = string | IAtom<any>
 type KV<T> = {
   [key: string]: T
@@ -32,6 +36,10 @@ interface IAtom<T> {
    * Текущее значение контейнера
    */
   readonly value: T
+  cast: T
+  ref: T
+  refWatch: T
+  _: T
   /**
    * Только в функциях-приёмниках возвращает предидущее значение
    */
@@ -68,20 +76,28 @@ interface IAtom<T> {
   /** Добавить функцию-получатель обновлений значения контейнера
    * и передать текущее значение контейнера, если оно есть
    * @param receiver - функция-получатель
-   * @returns {@link atom#IAtom}*/
+   * @returns {@link core#IAtom}*/
   up(receiver: ValueReceiver<T>): IAtom<T>
+
+  /** Добавить атом-получатель обновлений значения контейнера
+   * и отписать другие поставщики значений на канале
+   * атом-поставшик данных на канале может быть только один
+   * @param a:{@link core#IAtom} - атом-получатель
+   * @param name:string? - опциональное имя канала
+   * @returns {@link core#IAtom}*/
+  channel(atom: IAtom<T>, name?: string): IAtom<T>
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * с возможностью отписаться {@link IAtom.downLink} по объёкту-ссылке
    * @param receiver - функция-получатель
    * @param linkObject - любой объект для вызова {@link IAtom.downLink}
-   * @returns {@link atom#IAtom}*/
-  link(linkObject:any, receiver: ValueReceiver<T>): IAtom<T>
+   * @returns {@link core#IAtom}*/
+  link(linkObject: any, receiver: ValueReceiver<T>): IAtom<T>
 
   /** Отписать функцию-получатель по объекту ссылки установленную в {@link IAtom.link}
    * @param linkObject - функция-получатель
    * @returns {@link IAtom}*/
-  downLink(linkObject:any): IAtom<T>
+  downLink(linkObject: any): IAtom<T>
 
   /** Добавить функцию-получатель и передать значение со следующего обновления
    * @param receiver - функция-получатель
@@ -90,7 +106,7 @@ interface IAtom<T> {
 
   /** Удалить функцию-получатель
    * @param receiver - функция-получатель
-   * @returns {@link atom#IAtom}*/
+   * @returns {@link core#IAtom}*/
   down(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Передать один раз в функцию-получатель значение контейнера,
@@ -189,7 +205,7 @@ interface IAtom<T> {
   clear(): IAtom<T>
 
   /** Очистить значение контейнера
-   * @returns {@link atom#IAtom} */
+   * @returns {@link core#IAtom} */
   clearValue(): IAtom<T>
 
   /** Распад атома, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.*/
@@ -310,26 +326,36 @@ interface IAtom<T> {
    * @param key по умолчанию "id"
    */
   boxAssign(object: T, key?: keyof T, context?: IAtom<any>): IAtom<T>
+
   boxMerge(array: UnpackKV<T>, key?: string, context?: IAtom<any>): IAtom<T>
+
   boxGet(key: string, orInsert?: T): UnpackKV<T>
+
   boxDelete(key: string): IAtom<T>
+
   boxSet(key: keyof T, value: UnpackKV<T>, context?: string): IAtom<T>
+
   boxEach(fun: (value: UnpackKV<T>) => void): IAtom<T>
+
   boxMap<U>(fun: (value: UnpackKV<T>) => U): IAtom<KV<U>>
+
   boxToList(): IAtom<UnpackKV<T>[]>
+
   unboxToMap<U>(fun: (value: UnpackKV<T>) => U): KV<U>
+
   unboxToList(): UnpackKV<T>[]
 
   tuneTo(atom: IAtom<T>): IAtom<T>
+
   tuneTo(): void
 
   listSize(): number
+
   listAdd(value: UnpackKV<T>, context?: any): IAtom<T>
+
   listMerge(list: T, context?: any): IAtom<T>
+
   listMap<R>(fun: (value: UnpackKV<T>) => R): IAtom<R[]>
+
   listToBox(key?: string): IAtom<KV<UnpackKV<T>>>
 }
-
-// type KV<T> = {
-//   [key:string]:T
-// }

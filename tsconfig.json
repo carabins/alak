@@ -11,7 +11,7 @@
     "baseUrl": ".",
 
     "paths": {
-      //      "@la/*": ["packages/*/src"],
+      //      "@la/*": ["packages/*/core"],
       "alak": ["packages/"]
     },
     "types": ["node"],
@@ -26,8 +26,7 @@
   "include": [
     "packages/global.d.ts",
     "packages/*/*.d.ts",
-    "packages/*/src",
-    "packages/alak/atom",
+    "packages/*/src/*.ts",
     "packages/*/__tests__"
   ]
 }

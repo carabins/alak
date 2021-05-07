@@ -1,4 +1,4 @@
-// import { installAtomExtension } from '../alak/atom/create'
+// import { installAtomExtension } from '../alak/core/create'
 // // import { installExtension } from '../core'
 //
 // /**

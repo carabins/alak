@@ -28,10 +28,16 @@ export const coreProps = {
       return !this.hasOwnProperty(valueProp)
     },
   },
+  cast: {
+    get() {
+      return this._
+    }
+  },
 }
 
 export const proxyProps = {
-  apply(context, v) {},
+  apply(context, v) {
+  },
   value() {
     return this.value
   },
@@ -72,7 +78,7 @@ export const proxyProps = {
 const applyValue = (a, f) =>
   a.isEmpty ? false : (a.isHoly ? f.call(f, ...a.value) : f(a.value, a), true)
 
-export const handlers:any = {
+export const handlers: any = {
   up(f) {
     this.children.add(f)
     applyValue(this._, f)
@@ -104,17 +110,28 @@ export const handlers:any = {
     return this._
   },
 
+  channel(atom:IAtom<any>, name) {
+    let channels = atom.getMeta("channels")
+    if (!channels) {
+      channels = {}
+      atom.addMeta("channels", channels)
+    }
+    let trueName = name | 1
+    let prevAtom = channels[trueName]
+    prevAtom && prevAtom.down(atom)
+    channels[trueName] = this._
+    this._.up(atom)
+  },
   link(link, f) {
     this._.up(f)
-    let links = this.links as Map<any, any>
-    if (!links) this.links = links = new Map<any, any>()
-    links.set(link, f)
+    if (!this.links) this.links = new Map<any, any>()
+    this.links.set(link, f)
     return this._
   },
 
   downLink(linkObject: any) {
-    let links:Map<any, any> = this.links as Map<any, any>
-    if (links && links.has(linkObject)){
+    let links: Map<any, any> = this.links as Map<any, any>
+    if (links && links.has(linkObject)) {
       this._.down(links.get(linkObject))
       links.delete(linkObject)
     }
@@ -284,17 +301,25 @@ export const handlers:any = {
     setAtomValue(this, Object.assign(v, object), context)
     return this._
   },
-  boxGet(key, insert = {}) {
-    let o = (this.value = {})
-    let v = o[key]
-    if (v) return v
-    return (o[key] = v)
+  boxGet(key) {
+    if (this.value) {
+      return this.value[key]
+    } else {
+      return undefined
+    }
   },
   boxDelete(key) {
     let v = this.value || {}
     delete v[key]
     return this._
   },
+  boxUpdate(key, value, context = 'boxAdd') {
+    let v = this.value || {}
+    v[key] = value
+    setAtomValue(this, v, context)
+    return this._
+  },
+
   boxSet(key, value, context = 'boxAdd') {
     let v = this.value || {}
     v[key] = value
@@ -359,7 +384,7 @@ export const handlers:any = {
     if (!key) {
       key = this._name ? this._name : this.id ? this.id : this.uid
     }
-    if (!o) throw 'trying inject atom to null object'
+    if (!o) throw 'trying inject core to null object'
     o[key] = this.value
     return this._
   },

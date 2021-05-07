@@ -62,7 +62,7 @@ async function make() {
   prepare(workDir)
 
   await Promise.all([
-    extractApi('atom'),
+    extractApi('src'),
     extractApi('facade'),
     extractApi('ext-matching'),
     extractApi('ext-computed'),

@@ -131,8 +131,8 @@ export function from(...fromAtoms: IAtom<any>[]) {
     core._.setFiniteLoop(finiteLoop)
     function getterFn(callerUid?) {
       // console.log('getterFn()')
-      // if (!isChanged() && !atom.isEmpty)
-      //   return atom.value
+      // if (!isChanged() && !core.isEmpty)
+      //   return core.value
       // console.log("deep")
       const waiters = {}
       const isWaiting = () => Object.keys(waiters).length

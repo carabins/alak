@@ -1,4 +1,4 @@
-// import { debug } from '../alak/atom/core'
+// import { debug } from '../alak/core/core'
 //
 // import { DebugEvent } from './events'
 // import { debugInstance } from './instance'

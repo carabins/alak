@@ -2,19 +2,21 @@ import { createCore } from './core'
 import { coreProps, handlers, proxyProps } from './handlers'
 
 import { DECAY_ATOM_ERROR, PROPERTY_ATOM_ERROR } from './utils'
-import debug, { proxyDebugHandler } from './debug'
 
 let protoHandlers
 function makeProtoHandlers() {
   protoHandlers = Object.defineProperties(Object.assign({}, handlers), coreProps)
 }
 makeProtoHandlers()
+let proxyExtensions = []
 /**
  * Установить расширения атома
  * @param options - {@link ExtensionOptions}
  */
 export function installAtomExtension(options) {
   options.handlers && Object.assign(handlers, options.handlers)
+  options.proxy && proxyExtensions.push(options.proxy)
+  options.props && Object.assign(coreProps, options.props)
   makeProtoHandlers()
 }
 
@@ -30,13 +32,11 @@ function get(core: Core, prop: string, receiver: any): any {
 }
 
 export function createAtom<T>(value?: T) {
-  const core = createCore(...arguments)
+  let core = createCore(...arguments)
   core.__proto__ = protoHandlers
-  // if (debug.enabled) {
-  //   let _ = new Proxy(core, proxyDebugHandler)
-  //   core._ = _
-  //   return _
-  // }
   core._ = core
-  return debug.enabled ? new Proxy(core, proxyDebugHandler) : core
+  proxyExtensions.forEach(proxy=>
+    core = proxy(core)
+  )
+  return core
 }

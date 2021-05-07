@@ -1,24 +1,25 @@
 import { executeCommand, info, rm } from './helpers'
 import path from 'path'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
+import * as fs from 'fs'
 
 export function clearLib() {
   info('clear js...')
-  rm('atom')
+  rm('src')
   rm('facade')
   rm('ext-matching')
   rm('ext-computed')
   rm('debug')
   rm('umd')
-  rm('atom.core.js')
-  rm('atom.js')
+  rm('core.core.js')
+  rm('core.js')
 }
 
 const chalk = require('chalk')
 const { log } = console
 const distPath = path.resolve('dist')
 
-export const tsc = async () => {
+export const tsc = async (libName) => {
   info('compiling typescript packages...')
   rm(distPath)
   await executeCommand(
@@ -28,7 +29,15 @@ export const tsc = async () => {
     console.warn(e)
   })
 
-  let globalTDS = readFileSync(path.resolve('packages/global.d.ts')).toString()
+
+  const libPath = path.join('dist', 'packages', libName)
+  const libSrcPath = path.join(libPath,'src')
+  // fs.renameSync(path.join(libPath, 'src'), path.join(libPath, 'lib'))
+  readdirSync(libSrcPath).forEach(f=>
+    fs.renameSync(path.join(libSrcPath, f), path.join(libPath,f))
+  )
+  rm(libSrcPath)
+
 
   const readDef = (remove, pack, p, name) => {
     let fp = path.join(p, name)
@@ -46,25 +55,27 @@ export const tsc = async () => {
     }
   }
   const defPacks = {}
-  readDef(true, defPacks, distPath, 'packages')
-  console.log('dist generics defined')
-  //writeFileSync(path.join(distPath, 'packages', 'global.d.ts'), globalTDS)
+  readDef(true, defPacks, distPath, path.join('packages', libName))
+  // console.log('dist generics defined')
+  // writeFileSync(path.join(distPath, 'packages', 'global.d.ts'), globalTDS)
   for (let key in defPacks) {
     let defs = defPacks[key]
     const sourceDefPacks = {}
     readDef(false, sourceDefPacks, path.resolve('packages'), key)
     console.log(`source generics for package "${key}" defined`)
 
-    // let indexDTS = '/// <reference path="global.d.ts" />'
-    let inModuleGlobalDTS = globalTDS
+
+    let indexDefs = ''
     for (let def in sourceDefPacks) {
-      inModuleGlobalDTS += '\n' + sourceDefPacks[def]
+      indexDefs += '\n' + sourceDefPacks[def]
     }
-    writeFileSync(path.join(distPath, 'packages', key, 'global.d.ts'), inModuleGlobalDTS)
+    writeFileSync(path.join(distPath, 'packages', key, 'definitions.d.ts'), indexDefs)
+
+
     //TODO
-    let indexDtsPath = path.join(distPath, 'packages', key, 'atom', 'index.d.ts')
+    let indexDtsPath = path.join(distPath, 'packages', key, 'index.d.ts')
     let indexDts = readFileSync(indexDtsPath).toString()
-    writeFileSync(indexDtsPath, '/// <reference path="../global.d.ts" />\n' + indexDts)
+    writeFileSync(indexDtsPath, '/// <reference path="definitions.d.ts" />\n' + indexDts)
     console.log(`generation defs for module "${key}" is complete`)
   }
 }

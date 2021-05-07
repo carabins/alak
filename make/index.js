@@ -2,11 +2,12 @@ require('ts-node').register({
   transpileOnly: true,
 })
 const task = process.argv[2]
-
+const libName = process.argv[3]
 const { executeCommand } = require('./helpers')
 const chokidar = require('chokidar')
 
-console.log('make', task)
+console.log('task:', task)
+console.log('name:', libName)
 
 switch (task) {
   case 'dev':
@@ -21,15 +22,14 @@ switch (task) {
     break
   case 'publish':
     console.log('publish')
-    require('./publish').publish(process.argv[3])
+    require('./publish').publish(libName)
     break
   case 'play':
     console.log('play')
     require('./dev-play')
     break
   default:
-    console.log('make lib')
-    require('./make-lib').lib()
+    require('./make-lib').lib(libName)
     break
   // case 'doc':
   // case 'docs':

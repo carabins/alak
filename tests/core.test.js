@@ -1,6 +1,6 @@
-const { A } = require('../dist/packages/alak/atom')
-const { debug } = require('../dist/packages/alak/atom/debug')
-debug.activate('localhost:10946')
+// const { A } = require('../dist/packages/alak/atom')
+// const { debug } = require('../dist/packages/alak/atom/debug')
+// debug.activate('localhost:10946')
 const startValue = 'startValue'
 const finalValue = 'finalValue'
 

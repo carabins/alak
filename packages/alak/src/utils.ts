@@ -12,8 +12,8 @@ export const upDownFilter = (fun) => (f) => {
   }
 }
 
-export const DECAY_ATOM_ERROR = 'Attempt to pass into the decayed atom'
-export const PROPERTY_ATOM_ERROR = 'undefined atom property'
+export const DECAY_ATOM_ERROR = 'Attempt to pass into the decayed core'
+export const PROPERTY_ATOM_ERROR = 'undefined core property'
 
 export const AtomContext = {
   direct: 'direct',

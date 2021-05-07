@@ -1,9 +1,9 @@
 {
     "name": "alak",
-    "version": "3.0.0-alpha.42",
+    "version": "3.0.0-alpha.54",
     "description": "Alak Atom",
-    "main": "./atom/index.js",
-    "typings": "./atom/index.d.ts",
+    "main": "index.js",
+    "typings": "index.d.ts",
     "keywords": [
         "alak",
         "reactive",
