@@ -23,7 +23,6 @@ export const executeProcess = (command, cwd?) => {
   log(chalk.grey('execute process'), chalk.yellow(command))
   if (!cwd) cwd = path.resolve('.')
   let proc = exec(command, { cwd: cwd }, (error, stdout) => {})
-
   return proc
 }
 export const executeCommand = (command, cwd?) =>

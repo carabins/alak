@@ -14,7 +14,7 @@
       //      "@la/*": ["packages/*/core"],
       "alak": ["packages/"]
     },
-    "types": ["node"],
+    "types": ["node", "alak"],
     "typeRoots": [
       "packages/alak/index.d.ts",
       "packages/alak/IAtomConstructor.d.ts",
@@ -25,7 +25,7 @@
   },
   "include": [
     "packages/global.d.ts",
-    "packages/*/*.d.ts",
+    "packages/**/*.d.ts",
     "packages/*/src/*.ts",
     "packages/*/__tests__"
   ]

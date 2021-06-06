@@ -1,27 +1,35 @@
+/// <reference path="../packages/alak/index.d.ts" />
+/// <reference path="../packages/alak/IAtom.d.ts" />
 import { A, installAtomExtension } from '../packages/alak/src'
+///
 import debug from '../packages/alak/src/debug'
 // import avue from '../packages/vue/src'
 
 
-
-const a = A()
+const a = A() as IAtom<any>
 const b = A()
 const c = A()
 
-a.up(v=>{
- console.log("a updated", v)
+a.up(v => {
+  console.log('a updated', v)
 })
 
-b.channel(a)
-b("b1")
-c.channel(a)
-b("b2")
-c("c2")
-b("b3")
+
+a()
+
+a.emit()
+
+a.parentFor(b)
+
+// b.channel(a)
+// b("b1")
+// c.channel(a)
+// b("b2")
+// c("c2")
+// b("b3")
 
 
-
- // console.log("{avue}")
+// console.log("{avue}")
 
 // installAtomExtension(avue)
 

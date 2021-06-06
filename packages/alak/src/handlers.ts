@@ -110,16 +110,16 @@ export const handlers: any = {
     return this._
   },
 
-  channel(atom:IAtom<any>, name) {
-    let channels = atom.getMeta("channels")
-    if (!channels) {
-      channels = {}
-      atom.addMeta("channels", channels)
+  parentFor(atom:IAtom<any>, name) {
+    let parents = atom.getMeta("parents")
+    if (!parents) {
+      parents = {}
+      atom.addMeta("parents", parents)
     }
     let trueName = name | 1
-    let prevAtom = channels[trueName]
+    let prevAtom = parents[trueName]
     prevAtom && prevAtom.down(atom)
-    channels[trueName] = this._
+    parents[trueName] = this._
     this._.up(atom)
   },
   link(link, f) {
@@ -151,6 +151,10 @@ export const handlers: any = {
   },
   resend() {
     notifyChildes(this)
+    return this._
+  },
+  emit() {
+    this.resend()
     return this._
   },
   next(f) {

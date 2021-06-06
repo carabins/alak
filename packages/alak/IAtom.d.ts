@@ -80,12 +80,12 @@ interface IAtom<T> {
   up(receiver: ValueReceiver<T>): IAtom<T>
 
   /** Добавить атом-получатель обновлений значения контейнера
-   * и отписать другие поставщики значений на канале
-   * атом-поставшик данных на канале может быть только один
+   * и отписать другого родителя по имени
+   * атом-поставшик данных для имени может быть только один
    * @param a:{@link core#IAtom} - атом-получатель
    * @param name:string? - опциональное имя канала
    * @returns {@link core#IAtom}*/
-  channel(atom: IAtom<T>, name?: string): IAtom<T>
+  parentFor(atom: IAtom<T>, parentName?: string): IAtom<T>
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * с возможностью отписаться {@link IAtom.downLink} по объёкту-ссылке
@@ -214,6 +214,10 @@ interface IAtom<T> {
   /** Повторно отправить значение всем функциям-получателям
    * @returns {@link IAtom} */
   resend(): IAtom<T>
+
+  /** Вызвать всех слушателей
+   * @returns {@link IAtom} */
+  emit(): IAtom<T>
 
   /** Установить идентификатор
    * @param id - идентификатор
