@@ -18,7 +18,7 @@
     "fs-extra": "^9.0.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "snyk": "^1.316.2"
+    "snyk": "^1.465.0"
   },
   "browserslist": {
     "production": [
