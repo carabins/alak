@@ -1,0 +1,7 @@
+packages/*/CHANGELOG.md
+artifacts
+LICENSE.md
+.prettierignore
+pnpm-lock.yaml
+pnpm-workspace.yaml
+tsconfig.json

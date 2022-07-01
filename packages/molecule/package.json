@@ -1,0 +1,11 @@
+{
+  "name": "@alaq/molecule",
+  "version": "0.0.0-omega.5",
+  "main": "index.js",
+  "type": "index.d.ts",
+  "author": "Gleb Panteleev",
+  "license": "MIT & TRU",
+  "dependencies": {
+    "alak": "3.0.0-beta.16"
+  }
+}
