@@ -1,15 +1,55 @@
 {
   "compilerOptions": {
-    "sourceMap": false,
-    "module": "commonjs",
-    "target": "es6",
-    "removeComments": false,
+    "outDir": ".middle",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "module": "esnext",
+    "target": "esnext",
     "esModuleInterop": true,
-    "types": ["node"],
+    "sourceMap": false,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "strictNullChecks": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["packages/"],
-      "alak/*": ["lib/"]
+      "alak/*": [
+        "packages/atom/src/*"
+      ],
+      "@alaq/molecule/*": [
+        "packages/molecule/src/*"
+      ],
+      "~/*": [
+        "*"
+      ]
+    },
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext",
+      "WebWorker"
+    ],
+    "types": [
+      "@types/node",
+      "typescript"
+    ]
+  },
+  "include": [
+    "packages/atom/**/*.ts",
+    "packages/atom/**/*.d.ts",
+    "**/*.d.ts",
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "artifacts"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS"
     }
   }
 }
