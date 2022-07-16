@@ -1,4 +1,3 @@
-// @ts-nocheck
 export const alive = (v) => (v !== undefined && v !== null) as boolean
 export const isTruth = (v) => !!v
 export const noneFilter = (f) => (v) => !alive(v) ? f(v) : null
@@ -13,15 +12,8 @@ export const upDownFilter = (fun) => (f) => {
   }
 }
 
-export const DECAY_ATOM_ERROR = 'Attempt to pass into the decayed core'
-export const PROPERTY_ATOM_ERROR = 'undefined core property'
-
-export const AtomContext = {
-  direct: 'direct',
-  getter: 'getter',
-  fmap: 'fmap',
-  currying: 'currying',
-}
+export const DECAY_ATOM_ERROR = 'Attempt to pass into the decayed quark'
+export const PROPERTY_ATOM_ERROR = 'undefined quark property'
 
 export const deleteParams = (o) => {
   Object.keys(o).forEach((k) => {

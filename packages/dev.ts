@@ -1,7 +1,7 @@
 import fs from 'fs'
 import chokidar from 'chokidar'
 import path from 'path'
-import { runTest, testAll } from '~/packages/index'
+import { runTest, testAll } from './index'
 
 const projects = {}
 fs.readdirSync('packages').forEach((p) => (projects[p] = true))

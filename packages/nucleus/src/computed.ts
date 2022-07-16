@@ -1,47 +1,13 @@
-// @ts-nocheck
-/**
- * Расширение вычисления множеств
- * @remarks
- * импорт модуля расширяет интерфейс `Atom`
- * ```typescript
- * declare module 'alak/core' {
- *   interface IAtom<T> {
- *     from<A extends IAtom<any>[]>(...a: A): ComputeStrategy<T, A>
- *   }
- * }
- * ```
- * Алгоритм использования:
- *
- * - аргументами функции задаются атомы-источники вычисления
- *
- * - выбирается стратегия вычисления
- *
- * - задаётся функция-вычислитель, принимающая значения атомов-источников
- *
- * - вычисленное значение функции-вычислителя устанавливается в атом контекста
- * @example
- * ```javascript
- * const a1 = A(1)
- * const a2 = A(2)
- * const computedAtom = A()
- * computedAtom.from(a1, a2).some((v1, v2) => v1 + v2)
- * console.log(computedAtom()) //output:3
- * ```
- * @public
- * @packageDocumentation
- */
-import { setAtomValue } from './core'
+import { setNucleonValue } from './quark'
 import { alive, isPromise } from './utils'
 
-const computedContext = 'computed'
-
 /** @internal */
-export function from(...fromAtoms: IAtom<any>[]) {
-  const core: Core = this
-  if (core.parents) {
-    throw `from atoms already has a assigned`
+export function from(...fromNucleons: INucleon<any>[]) {
+  const quark: Quark = this
+  if (quark.parents) {
+    throw `from nucleons already has a assigned`
   } else {
-    core.parents = fromAtoms
+    quark.parents = fromNucleons
   }
   const someoneIsWaiting = []
   const addWaiter = () => new Promise((_) => someoneIsWaiting.push(_))
@@ -50,28 +16,28 @@ export function from(...fromAtoms: IAtom<any>[]) {
     while (someoneIsWaiting.length) {
       someoneIsWaiting.pop()(v)
     }
-    core.isAwaiting && delete core.isAwaiting
+    quark.isAwaiting && delete quark.isAwaiting
   }
 
   function applyValue(mixedValue) {
     if (isPromise(mixedValue)) {
       mixedValue.then((v) => {
         freeWaiters(v)
-        setAtomValue(core, v, computedContext)
+        setNucleonValue(quark, v)
       })
     } else {
       freeWaiters(mixedValue)
-      setAtomValue(core, mixedValue, computedContext)
+      setNucleonValue(quark, mixedValue)
     }
-    core.isAwaiting && delete core.isAwaiting
+    quark.isAwaiting && delete quark.isAwaiting
     return mixedValue
   }
 
   const makeMix = (mixFn) => {
-    const inAwaiting: IAtom<any>[] = []
+    const inAwaiting: INucleon<any>[] = []
     const { strong, some } = mixFn
     const needFull = strong || some
-    const values = fromAtoms.map((a) => {
+    const values = fromNucleons.map((a) => {
       if (a.isAwaiting) {
         inAwaiting.push(a)
       } else if (needFull && !alive(a.value)) {
@@ -80,17 +46,17 @@ export function from(...fromAtoms: IAtom<any>[]) {
       return a.value
     })
     if (inAwaiting.length > 0) {
-      core.getterFn = addWaiter
-      return (core.isAwaiting = addWaiter())
+      quark.getterFn = addWaiter
+      return (quark.isAwaiting = addWaiter())
     }
-    core.getterFn = () => mixFn(...values)
+    quark.getterFn = () => mixFn(...values)
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
-  const listen = (a: IAtom<any>, fn: any) => {
+  const listen = (a: INucleon<any>, fn: any) => {
     a.next(fn)
-    if (!core.decays) core.decays = []
-    core.decays.push(() => a.down(fn))
+    if (!quark.decays) quark.decays = []
+    quark.decays.push(() => a.down(fn))
   }
   function weak(mixFn, finiteLoop) {
     function mixer(v, a) {
@@ -105,14 +71,14 @@ export function from(...fromAtoms: IAtom<any>[]) {
       }
     }
 
-    fromAtoms.forEach((a) => {
-      if (a !== core._) {
+    fromNucleons.forEach((a) => {
+      if (a !== quark._) {
         linkedValues[a.uid] = a.value
         listen(a, mixer)
       }
     })
     makeMix(mixFn)
-    return core._
+    return quark._
   }
 
   function some(mixFn) {
@@ -125,19 +91,19 @@ export function from(...fromAtoms: IAtom<any>[]) {
     return weak(mixFn, true)
   }
 
-  function strong(mixFn, finiteLoop) {
+  function strong(mixFn, safe) {
     // let firstRun = true
     let getting = {}
     let traced = false
-    core._.setFiniteLoop(finiteLoop)
+    quark._.safe(safe)
     function getterFn(callerUid?) {
       // console.log('getterFn()')
-      // if (!isChanged() && !core.isEmpty)
-      //   return core.value
+      // if (!isChanged() && !quark.isEmpty)
+      //   return quark.value
       // console.log("deep")
       const waiters = {}
       const isWaiting = () => Object.keys(waiters).length
-      const values = fromAtoms.map((a) => {
+      const values = fromNucleons.map((a) => {
         let v: any = getting[a.uid]
         if (v) return v
         const lv = linkedValues[a.uid]
@@ -169,16 +135,16 @@ export function from(...fromAtoms: IAtom<any>[]) {
       })
 
       if (isWaiting()) {
-        core.getterFn = addWaiter
-        return (core.isAwaiting = addWaiter())
+        quark.getterFn = addWaiter
+        return (quark.isAwaiting = addWaiter())
       }
-      core.getterFn = getterFn
+      quark.getterFn = getterFn
       getting = {}
       const nv = mixFn(...values)
       if (!traced) {
         traced = true
         // console.log("traced", values)
-        core(nv)
+        quark(nv)
       }
       return nv
     }
@@ -195,38 +161,38 @@ export function from(...fromAtoms: IAtom<any>[]) {
         }
         lastLinks[k] = linkedValues[k]
       })
-      // console.log("isChanged", yes && fromAtoms.length == keys.length)
-      return yes && fromAtoms.length == keys.length
+      // console.log("isChanged", yes && fromNucleons.length == keys.length)
+      return yes && fromNucleons.length == keys.length
     }
 
     function mixer(v, a) {
       const linkedValue = linkedValues[a.uid]
       // console.log("mixer")
 
-      if (!finiteLoop || v !== linkedValue) {
+      if (!safe || v !== linkedValue) {
         linkedValues[a.uid] = v
-        if (finiteLoop && !isChanged()) {
+        if (safe && !isChanged()) {
           return
         }
         if (traced) {
           // console.log("calling ::: ->")
           const args = getterFn(a.uid)
-          if (isPromise(args)) args.then(core)
-          else core(args)
+          if (isPromise(args)) args.then(quark)
+          else quark(args)
         }
       }
     }
 
-    fromAtoms.forEach((a) => {
-      if (a.uid !== core._.uid) {
+    fromNucleons.forEach((a) => {
+      if (a.uid !== quark._.uid) {
         listen(a, mixer)
       }
     })
-    core.getterFn = () => {
+    quark.getterFn = () => {
       return getterFn()
     }
     getterFn()
-    return core._
+    return quark._
   }
 
   return {

@@ -1,76 +1,98 @@
-// Copyright (c) Gleb Panteleev. All rights reserved. Licensed under the MIT license.
-
 /**
  * Расширение атома для vue
  * @remarks
  * @packageDocumentation
  */
 
-import { ref, Ref, watch } from 'vue'
+import { ref, Ref, watch, onMounted, onUnmounted } from 'vue'
 
-import { A, installAtomExtension } from 'alak/index'
-
-const isNCall = {
-  toJSON: true,
-  _rawValue: true,
-  _shallow: true,
-  __v_isRef: true,
-  _value: true,
-  value: true,
-  bind: true,
-  call: true,
-  apply: true,
+export function useNucleon<T = any>(n: INucleon<T>) {
+  const l = ref()
+  if (n.value) {
+    l.value = n.value
+  }
+  const listener = (v) => {
+    l.value = v
+  }
+  onMounted(() => {
+    n.up(listener)
+  })
+  onUnmounted(() => {
+    n.down(listener)
+  })
+  return l as Ref<T>
 }
 
-installAtomExtension({
-  proxy(core) {
-    let link
-    let watched = false
+export function useWatchNucleon<T = any>(n: INucleon<T>) {
+  const l = useNucleon(n)
+  watch(l, (v) => {
+    n(v)
+  })
+  return l
+}
 
-    function cast() {
-      link = ref()
-      core._.up((v) => (link.value = v))
+export const vueNucleonExtension: NucleonExtension = {
+  ref() {
+    if (!this.vueRef) {
+      this.vueRef = ref()
+      this._.up((v) => (this.vueRef.value = v))
     }
-
-    function castWatch() {
-      watched = true
-      watch(link, (v) => {
-        core(v)
-      })
-    }
-
-    return new Proxy(core, {
-      set(o, key, value) {
-        if (isNCall[key] && link) {
-          link[key] = value
-          if (key === 'value') {
-            o(value)
-          }
-        } else {
-          o[key] = value
-        }
-        return true
-      },
-      get(target, key) {
-        if (link && isNCall[key]) {
-          return link[key]
-        }
-        switch (key) {
-          case 'ref':
-            if (!link) cast()
-            return link
-          case 'refWatch':
-            if (!link) cast()
-            castWatch()
-            return link
-          case 'rv':
-          case 'vv':
-            if (!link) cast()
-            return link.value
-          default:
-            return core[key]
-        }
-      },
-    })
+    return this.vueRef
   },
-})
+  refWatch() {
+    watch(this.vueRef, (v) => {
+      console.log('+++', v)
+      this(v)
+    })
+    return this.vueRef
+  },
+  vv() {
+    return this._.ref.value
+  },
+  vw() {
+    return this._.refWatch.value
+  },
+}
+//   // handlers:
+//   proxy(quark) {
+//     let link
+//     let watched = false
+//
+//     function cast() {
+//       link = ref()
+//       quark._.up((v) => (link.value = v))
+//     }
+//
+//     function castWatch() {
+//       watched = true
+//       watch(link, (v) => {
+//         quark(v)
+//       })
+//     }
+//
+//     return new Proxy(quark, {
+//       get(target, key) {
+//         switch (key) {
+//           case 'ref':
+//             if (!link) cast()
+//             return link
+//           case 'refWatch':
+//             if (!link) cast()
+//             castWatch()
+//             return link
+//           case 'rv':
+//             if (!link) cast()
+//             if (!watched) castWatch()
+//             return link.value
+//           case 'vv':
+//             if (!link) cast()
+//             return link.value
+//           default:
+//             return quark[key]
+//         }
+//       },
+//     })
+//   },
+// }
+
+export default vueNucleonExtension

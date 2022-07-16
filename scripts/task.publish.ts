@@ -1,5 +1,5 @@
 import { Project } from './common/project'
-import { FileLog } from './log'
+import { FileLog, Log } from './log'
 import { writeFile, writeJSONSync } from 'fs-extra'
 import { writeFileSync } from 'fs'
 import * as path from 'path'
@@ -11,13 +11,15 @@ export function upver(project: Project) {
   const trace = FileLog(project.packageJson.name + ' version')
   const v = project.packageJson.version
   const parts = v.split('.')
-  let build = parts.pop()
+  let build = parseInt(parts.pop())
   // @ts-ignore
   build++
   if (isNaN(build as any)) {
+    Log.error(build + 'build is Not A Number')
+    Log.error('wrong version number', parts)
     throw 'wrong version number'
   }
-  parts.push(build)
+  parts.push(build.toString())
   const nv = parts.join('.')
   trace('next version', nv)
   project.packageJson.version = nv

@@ -1,13 +1,13 @@
-import { Log } from './log'
+import {Log} from './log'
 import * as fs from 'fs'
-import { Const } from './common/constants'
-import { initProject } from './common/project'
-import { compile } from './task.compile'
+import {Const} from './common/constants'
+import {initProject} from './common/project'
+import {compile} from './task.compile'
 
 import * as color from 'colorette'
-import { publish, upver } from './task.publish'
-import { test } from './task.test'
-import { syncDeps } from '~/scripts/task.syncDeps'
+import {publish, upver} from './task.publish'
+import {test} from './task.test'
+import {syncDeps} from '~/scripts/task.syncDeps'
 
 const task = process.argv[3] || 'pre'
 
@@ -37,6 +37,7 @@ if (!taskCommand) {
 (╯°□°)╯︵ ${task}
 `)
   Log.error(`not found task`, `${task}`.toUpperCase())
+  Log("Commands", Object.keys(task))
   throw 'wrong command'
 }
 
