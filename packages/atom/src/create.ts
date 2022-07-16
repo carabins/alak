@@ -1,40 +1,141 @@
-import { createCore } from './core'
-import { coreProps, handlers, proxyProps } from './handlers'
+// import {installNucleonExtension} from "@alaq/nucleus/create";
+import { storage } from './storage'
+import { isDefined } from './extra'
+import N from '@alaq/nucleus/index'
 
-import { DECAY_ATOM_ERROR, PROPERTY_ATOM_ERROR } from './utils'
+const space = {
+  N,
+  plugins: [],
+  stabilized: 0,
+} as any
 
-let protoHandlers
-function makeProtoHandlers() {
-  protoHandlers = Object.defineProperties(Object.assign({}, handlers), coreProps)
-}
-makeProtoHandlers()
-const proxyExtensions = []
-/**
- * Установить расширения атома
- * @param options - {@link ExtensionOptions}
- */
-export function installAtomExtension(options) {
-  options.handlers && Object.assign(handlers, options.handlers)
-  options.proxy && proxyExtensions.push(options.proxy)
-  options.props && Object.assign(coreProps, options.props)
-  makeProtoHandlers()
+export function setupNucleonForAtoms(n: INucleonConstructor<any>) {
+  space.N = n
 }
 
-function get(core: Core, prop: string, receiver: any): any {
-  if (!core.children) {
-    throw DECAY_ATOM_ERROR
+export default function create<T>(model?: T) {
+  let memorize
+  let name
+  let proxy
+
+  if (space.plugins.length !== space.stabilized) {
+    // space.plugins.forEach(installNucleonExtension)
+    space.plugins.length = space.stabilized
   }
-  let keyFn = handlers[prop]
-  if (keyFn) return keyFn.bind(core)
-  keyFn = proxyProps[prop]
-  if (keyFn) return keyFn.call(core)
-  throw PROPERTY_ATOM_ERROR
+
+  function one(secondName?: string, extendObject?: Record<string, INucleon<any>>) {
+    const nucleons = extendObject ? extendObject : {}
+    let superModel
+    if (typeof model === 'function') {
+      //@ts-ignore
+      superModel = new model()
+    } else {
+      superModel = model
+    }
+    proxy = new Proxy(
+      {},
+      {
+        apply(target: {}, thisArg: any, argArray: any[]): any {
+          return nucleons
+        },
+        get(t, key): any {
+          return synthNucleon(nucleons, key, superModel, secondName || name, memorize)
+        },
+      },
+    )
+    return proxy as PureAtom<T>
+  }
+
+  function many() {
+    const atoms = {} as Record<string, PureAtom<T>>
+
+    function make(atomId) {
+      const m = atoms[atomId]
+      if (m) {
+        return m
+      } else {
+        return (atoms[atomId] = one())
+      }
+    }
+
+    const cast = new Proxy(
+      {},
+      {
+        get(target: {}, key: string) {
+          return (value) => {
+            Object.values(atoms).forEach((m) => {
+              return m[key](value)
+            })
+          }
+        },
+      },
+    ) as Record<string, PureAtom<T>>
+
+    function decay(atomId) {
+      const m = atoms[atomId] as any
+      if (m) {
+        Object.values(m()).forEach((nucleons) => {
+          Object.values(nucleons).forEach((a) => {
+            a.decay()
+          })
+        })
+      }
+    }
+
+    const decayAll = () => {
+      Object.keys(atoms).forEach(decay)
+    }
+    const getKeys = () => Object.keys(atoms)
+    return {
+      new: make,
+      cast,
+      decay,
+      decayAll,
+      getKeys,
+    }
+  }
+
+  return {
+    one,
+    many,
+    name(lastName) {
+      name = lastName
+      return {
+        one,
+        many,
+        eternals(...onlyNucleons: PureAtom<T>[]) {
+          memorize = onlyNucleons.length ? onlyNucleons : true
+          return {
+            one,
+            many,
+          }
+        },
+      }
+    },
+  }
 }
 
-export function createAtom<T>(value?: T) {
-  let core = createCore(...arguments)
-  core.__proto__ = protoHandlers
-  core._ = core
-  proxyExtensions.forEach((proxy) => (core = proxy(core)))
-  return core
+function synthNucleon(nucleons, key, model, name, memorize) {
+  let nucleon: INucleon<any> = nucleons[key]
+  if (!nucleon) {
+    const id = name ? `${name}.${key}` : key
+    let modelValue = model ? model[key] : undefined,
+      mem
+    if (typeof memorize === 'boolean') {
+      mem = true
+    } else {
+      mem = memorize && memorize.indexOf(key) !== -1
+    }
+    nucleons[key] = nucleon = space.N()
+    nucleon.setId(id)
+    if (mem) {
+      storage.init(nucleon)
+      nucleon.isEmpty && isDefined(modelValue) && nucleon(modelValue)
+    } else {
+      if (isDefined(modelValue)) {
+        nucleon(modelValue)
+      }
+    }
+  }
+  return nucleon
 }

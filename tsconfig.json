@@ -16,13 +16,19 @@
     "baseUrl": ".",
     "paths": {
       "alak/*": [
-        "packages/atom/src/*"
+        "packages/alak/src/*"
       ],
       "@alaq/molecule/*": [
         "packages/molecule/src/*"
       ],
-      "~/*": [
-        "*"
+      "@alaq/atom/*": [
+        "packages/atom/src/*"
+      ],
+      "@alaq/nucleus/*": [
+        "packages/nucleus/src/*"
+      ],
+      "~/scripts/*": [
+        "scripts/*"
       ]
     },
     "lib": [
@@ -37,10 +43,15 @@
     ]
   },
   "include": [
-    "packages/atom/**/*.ts",
-    "packages/atom/**/*.d.ts",
-    "**/*.d.ts",
-    "**/*.ts"
+    "packages/atom/types/*.d.ts",
+    "packages/molecule/types/*.d.ts",
+    "packages/nucleus/types/*.d.ts",
+    "packages/alak/types/*.d.ts",
+    "packages/vue/types/*.d.ts",
+
+    "packages/**/*.ts",
+    "scripts/**/*.d.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -6,10 +6,11 @@ import {
   ScriptTarget,
 } from 'typescript'
 import * as ts from 'typescript'
-import { FileLog } from '~/scripts/log'
+import { FileLog, Log } from '~/scripts/log'
 import { scanAllSrc } from '~/scripts/common/scan'
 import { Const } from '~/scripts/common/constants'
 import path from 'path'
+import * as fs from 'fs-extra'
 
 const state = {
   sources: {} as UnpackedFlow<typeof scanAllSrc>,
@@ -17,6 +18,7 @@ const state = {
   declarations: {} as KV<any>,
 }
 
+const tsconfig = fs.readJSONSync('tsconfig.json')
 export async function runTsc(): Promise<typeof state> {
   const trace = FileLog('tsc')
   if (state.ready) {
@@ -40,10 +42,7 @@ export async function runTsc(): Promise<typeof state> {
       moduleResolution: ModuleResolutionKind.NodeNext,
       target: ScriptTarget.ESNext,
       baseUrl: '.',
-      paths: {
-        'alak/*': ['packages/atom/src/*'],
-        '@alaq/molecule/*': ['packages/molecule/src/*'],
-      },
+      paths: tsconfig.compilerOptions.paths,
     }
     const host = createCompilerHost(tscOptions)
     host.writeFile = (outFile, content, b, a, z) => {
@@ -67,8 +66,14 @@ export async function runTsc(): Promise<typeof state> {
           diagnostic.start!,
         )
         let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
-        trace.error(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
-        throw 'compile declarations fail'
+
+        console.log(`
+(╯°□°)╯︵ ${message}
+`)
+        trace.error(`${diagnostic.file.fileName} (${line + 1},${character + 1})`)
+        trace.error(`ts.getPreEmitDiagnostics`)
+
+        process.exit()
       } else {
         trace.warn(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
       }

@@ -16,8 +16,6 @@ import { runTsc } from '~/scripts/common/tsc'
 import { readFileSync, writeFileSync } from 'fs'
 import { transformSync } from '@swc-node/core'
 
-const tsconfig = fs.readJSONSync('tsconfig.json')
-
 export async function compile(project: Project) {
   const trace = FileLog(project.packageJson.name + ' compiler')
   trace('prepare...')
@@ -34,11 +32,19 @@ export async function compile(project: Project) {
   const declarationsPath = project.resolveInPackage('types')
   const declarationsMix = fs.existsSync(declarationsPath)
   if (declarationsMix) {
+    let declarationSource = ''
     trace('mixin declarations...')
-    const artDeclaration = path.join(project.artPatch, 'index.d.ts')
     fs.readdirSync(declarationsPath).forEach((f) => {
-      fs.appendFileSync(artDeclaration, fs.readFileSync(path.resolve(declarationsPath, f)))
+      declarationSource += fs.readFileSync(path.resolve(declarationsPath, f))
     })
+    fs.writeFileSync(path.join(project.artPatch, 'types.d.ts'), declarationSource)
+    fs.appendFileSync(
+      path.join(project.artPatch, 'index.d.ts'),
+      declarationSource
+        .replaceAll('type', 'export type')
+        .replaceAll('interface', 'export interface'),
+    )
+    declarationSource = ''
   }
 
   const srcFiles = sources.projects[project.dir]
@@ -51,11 +57,13 @@ export async function compile(project: Project) {
         sourcemap: false,
         // paths: tsconfig.compilerOptions.paths
       })
+      // console.log(srcFile, Z.code.length)
       totalSize += Z.code.length
       writeFileSync(path.join(project.artPatch, src.name + '.js'), Z.code)
     }
   })
   trace('unminified source size', (totalSize / 1024).toFixed(2), 'kb')
   fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
+  project.savePackageJsonTo.art()
   trace('complete')
 }
