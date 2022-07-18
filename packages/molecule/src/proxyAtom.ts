@@ -27,6 +27,13 @@ export function proxyAtom(constructor, id?, t?) {
         case 'eventBus':
           quantum[p] = value
           return true
+        case 'injectBus':
+          if (quantum.atom) {
+            value.up(quantum.atom.emitEvent)
+          } else {
+            quantum.eventBus = value
+          }
+          return true
       }
       return false
     },

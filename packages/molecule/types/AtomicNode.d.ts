@@ -55,6 +55,8 @@ type QuantumAtom = {
   id?: any
   target?: any
   eventBus?: INucleon<any>
+  // parentBus?: INucleon<any>
+  // modelBus?: INucleon<any>
   name?: string
   atom?: AtomicNode<any, any>
   activateListeners: AnyFunction[]

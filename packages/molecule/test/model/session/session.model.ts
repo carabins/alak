@@ -1,5 +1,8 @@
 export default class {
-  time  = Date.now()
+  time = Date.now()
+  sessionHandlerDone: boolean
 
-  sessionHandler() {}
+  sessionHandler() {
+    this.sessionHandlerDone = true
+  }
 }
