@@ -11,16 +11,17 @@ test('install', (t) => {
   const n = Nucleus(startValue)
   installNucleonExtensions(vueNucleonExtension)
   const r = n.ref
-  const rv = n.refWatch
   t.equal(r.value, n.value)
-  t.equal(rv.value, n.value)
-  n(24)
-  t.equal(r.value, n.value)
-  t.equal(rv.value, n.value)
-  rv.value = 3
+  t.equal(r.value, n.vv)
+  // const rv = n.refWatch
+  // t.equal(rv.value, n.value)
+  // n(24)
+  // t.equal(r.value, n.value)
+  // t.equal(rv.value, n.value)
+  // rv.value = 3
   setTimeout(() => {
-    t.equal(r.value, n.value)
-    t.equal(rv.value, n.value)
+    // t.equal(r.value, n.value)
+    // t.equal(rv.value, n.value)
     t.end()
   }, 1)
 })

@@ -41,7 +41,6 @@ export const vueNucleonExtension: NucleonExtension = {
   },
   refWatch() {
     watch(this.vueRef, (v) => {
-      console.log('+++', v)
       this(v)
     })
     return this.vueRef
@@ -53,46 +52,5 @@ export const vueNucleonExtension: NucleonExtension = {
     return this._.refWatch.value
   },
 }
-//   // handlers:
-//   proxy(quark) {
-//     let link
-//     let watched = false
-//
-//     function cast() {
-//       link = ref()
-//       quark._.up((v) => (link.value = v))
-//     }
-//
-//     function castWatch() {
-//       watched = true
-//       watch(link, (v) => {
-//         quark(v)
-//       })
-//     }
-//
-//     return new Proxy(quark, {
-//       get(target, key) {
-//         switch (key) {
-//           case 'ref':
-//             if (!link) cast()
-//             return link
-//           case 'refWatch':
-//             if (!link) cast()
-//             castWatch()
-//             return link
-//           case 'rv':
-//             if (!link) cast()
-//             if (!watched) castWatch()
-//             return link.value
-//           case 'vv':
-//             if (!link) cast()
-//             return link.value
-//           default:
-//             return quark[key]
-//         }
-//       },
-//     })
-//   },
-// }
 
 export default vueNucleonExtension

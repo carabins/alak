@@ -34,6 +34,6 @@ const proxy = {
 export function createNucleon<T>(value?: T) {
   const quark = createQuark(...arguments)
   quark.__proto__ = quaint.proto
-  quark._ = quark
-  return new Proxy(quark, proxy)
+  quark._ = new Proxy(quark, proxy)
+  return quark._
 }
