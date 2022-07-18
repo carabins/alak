@@ -2,7 +2,6 @@ import N from '@alaq/nucleus/index'
 
 import CloudElectrons from './cloud.electrons'
 function awakeNucleon(n, getNucleon, thisContext, computeFn, finalListener) {
-  console.log('awake', n.id)
   const upDateOn = {}
   const proxyContext = new Proxy(thisContext, {
     get(target: {}, p: string | symbol, receiver: any): any {

@@ -1,11 +1,12 @@
 {
-    "name": "@alaq/atom",
-    "version": "0.0.0-omega.0",
+    "name": "@alaq/molecule",
+    "version": "4.0.0-omega.2",
     "main": "index.js",
     "type": "index.d.ts",
     "author": "Gleb Panteleev",
     "license": "MIT & TRU",
     "dependencies": {
-
+        "@alaq/nucleus": "4.0.0-omega.7",
+        "@alaq/atom": "4.0.0-omega.2"
     }
 }

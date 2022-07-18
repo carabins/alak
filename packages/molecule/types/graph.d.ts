@@ -3,7 +3,7 @@ type Edge<Values, Actions> = {
   from: Values | Values[]
   warp?: Actions
   to: Actions | Actions[] | Values
-  strategy?: 'ANY' | 'ALL'
+  strategy?: 'SOME' | 'WEAK'| "STRONG"
 }
 
 type EdgesBuilder<Model, CNS> = Edges<GetValues<Model>, GetActions<Model>>
@@ -14,6 +14,8 @@ type GraphBuilderN<Model, N extends Record<string, AtomicNode<any, any>>> = Edge
   GetValues<Model> | ChildNodesState<N>,
   GetActions<Model> | ChildNodesActions<N>
 >
+
+
 
 interface GraphSubNodes<Nodes> {
   nodes?: {

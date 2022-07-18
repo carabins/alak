@@ -8,8 +8,8 @@ test('core and state', async (t) => {
 
   t.equal(bid.core.everCount.value, eth.everCount)
   t.equal(bid.state.everCount, eth.everCount)
-  bid.core.addEverCount()
-  eth.addEverCount()
+  bid.core.addEverCount(1)
+  eth.addEverCount(1)
   // console.log(bid.core.everCount.value)
   // console.log(eth.everCount)
   t.equal(bid.core.everCount.value, eth.everCount)
@@ -20,4 +20,5 @@ test('core and state', async (t) => {
   t.equal(m.multiCount, bid.state.multiCount)
   t.equal(m.multiCount, bid.core.multiCount.value)
   t.end()
+
 })

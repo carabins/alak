@@ -15,7 +15,7 @@ import * as fs from 'fs-extra'
 const state = {
   sources: {} as UnpackedFlow<typeof scanAllSrc>,
   ready: false,
-  declarations: {} as KV<any>,
+  declarations: {} as Record<string, any>,
 }
 
 const tsconfig = fs.readJSONSync('tsconfig.json')
