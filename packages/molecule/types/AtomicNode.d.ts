@@ -2,30 +2,15 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-
 type CanBeArray<T> = T | Array<T>
 type ActionsAndN<T> = CanBeArray<GetValues<T> | GetActions<T>>
 
-type AtomLifeCycle = "ACTIVATE_ON_CALL"
-
-type AtomicInstance<M, E, N, Events extends readonly string[]> = N extends Record<string, AtomicNode<any, Events>>
+type AtomicInstance<M, E, N, Events extends readonly string[]> = N extends Record<
+  string,
+  AtomicNode<any, Events>
+>
   ? MixClass<AtomicNode<MixClass<E, M>, Events>, GraphSubNodes<N>>
   : AtomicNode<MixClass<E, M>, Events>
-
-interface AtomicConstructor<Model, E, N, EV extends readonly string[]> {
-  name?: string
-  model?: Model
-  eternal?: E
-
-  edges?: N extends Record<string, AtomicNode<any, any>>
-    ? GraphBuilderN<MixClass<Model, E>, N>
-    : GraphBuilder<MixClass<Model, E>>
-  events?: EV
-  listen?: PartialRecord<Uppercase<EV[number]>, keyof Instance<Model>>
-  nodes?: N
-
-  activate?(this: ModelState<Model>, core: Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>, nodes: N): void
-}
 
 type ModelCore<Model> = Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>
 type ModelState<Model> = PureModel<Instance<Model>>
@@ -39,7 +24,6 @@ interface AtomicNode<Model, Events extends readonly string[]> {
 
   onActivate(listiner: (node: AtomicNode<Model, Events>) => void)
 }
-
 
 interface MultiAtomicNode<M, E, N, Events extends readonly string[]> {
   get(id): AtomicInstance<M, E, N, Events>
@@ -60,13 +44,16 @@ interface MultiAtomicConstructor<Model, E, N> {
   listen?: PartialRecord<string, keyof Instance<Model>>
   nodes?: N
 
-  activate?(this: ModelState<Model>, core: Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>, nodes: N): void
+  activate?(
+    this: ModelState<Model>,
+    core: Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>,
+    nodes: N,
+  ): void
 }
 
-
 type QuantumAtom = {
-  id?: any,
-  target?: any,
+  id?: any
+  target?: any
   eventBus?: INucleon<any>
   name?: string
   atom?: AtomicNode<any, any>
