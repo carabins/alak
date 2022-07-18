@@ -19,14 +19,11 @@ export default function (electrons: CloudElectrons, cloud, name) {
   const sleepingNucleons = cloudGetters(electrons, name)
 
   Object.assign(cloud.sleepingNucleons, sleepingNucleons)
-  // const thisActions = {}
 
-  // console.log(':::cloud.orbit', name, Object.keys(parts.actions))
   Object.keys(electrons.actions).forEach((key) => {
-    // console.log(':::: actions', name, key)
     cloud.actions[key] = (...args) => {
       const fn = electrons.actions[key] as Function
-      fn.apply(thisContext, ...args)
+      fn.apply(thisContext, args)
     }
   })
   return { atom, state, sleepingNucleons, parts: electrons }

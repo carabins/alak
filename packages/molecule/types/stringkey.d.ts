@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2022. Only the truth - liberates.
- */
+
 
 type Join<K, P> = K extends string | number
   ? P extends string | number

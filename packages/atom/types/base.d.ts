@@ -18,8 +18,13 @@ type PureAtom<T> = Atomized<PureModel<T>>
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
 
+type AtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
+type AtomState<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
+
 interface IAtom<T> {
-  state: PureModel<Instance<T>>
+  state: AtomState<Instance<T>>
   actions: OnlyFunc<Instance<T>>
-  core: Atomized<Instance<T>>
+  core: AtomCore<Instance<T>>
 }
+
+

@@ -1,6 +1,6 @@
 {
     "name": "alak",
-    "version": "3.0.0",
+    "version": "4.0.0-omega.1",
     "description": "Alak Last Atom",
     "main": "index.js",
     "types": "index.d.ts",
@@ -15,5 +15,10 @@
     ],
     "author": "Gleb Panteleev",
     "license": "MIT & TRU",
-    "repository": "https://github.com/carabins/alak"
+    "repository": "https://github.com/carabins/alak",
+    "dependencies": {
+        "@alaq/molecule": "4.0.0-omega.2",
+        "@alaq/nucleus": "4.0.0-omega.7",
+        "@alaq/atom": "4.0.0-omega.2"
+    }
 }

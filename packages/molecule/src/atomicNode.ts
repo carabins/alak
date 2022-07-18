@@ -2,30 +2,49 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { Atom } from '@alaq/atom/index'
+import {Atom} from '@alaq/atom/index'
+import {Nucleus} from "@alaq/nucleus/index";
+import {proxyAtom} from "./proxyAtom";
 
-export default function atomicNode<M, E, N, Events extends readonly string[]>(
+
+
+
+
+
+export function atomicNode<M, E, N, Events extends readonly string[]>(
   constructor: AtomicConstructor<M, E, N, Events>,
 ) {
-  const newAtom = (constructor) => {
-    const { model, eternal, name } = constructor
-    return Atom({
-      model,
-      eternal,
-      name,
-    })
-  }
 
-  const atom = newAtom(constructor)
-  const nodes = {}
-  constructor.nodes &&
-    Object.keys(constructor.nodes).forEach((key) => {
-      nodes[key] = newAtom(constructor.nodes[key])
-    })
-
-  const an = { nodes }
-
-  return Object.assign(an, atom) as N extends Record<string, AtomicNode<any, Events>>
-    ? MixClass<AtomicNode<MixClass<E, M>, Events>, GraphSubNodes<N>>
-    : AtomicNode<MixClass<E, M>, Events>
+  return proxyAtom(constructor) as AtomicInstance<M, E, N, Events>
 }
+
+
+
+
+export function atomicNodes<M, E, N>(
+  constructor: MultiAtomicConstructor<M, E, N>,
+) {
+  const nodes = {}
+
+  const broadCast = new Proxy({}, {
+    get(target: {}, p: string | symbol, receiver: any): any {
+      return v => Object.values(nodes).forEach(n => n[p](v))
+    }
+  }) as AtomicInstance<M, E, N, any>["core"]
+
+
+  return {
+    get(id, target?) {
+      let npa = nodes[id]
+      if (!npa) {
+        npa = nodes[id] = proxyAtom(constructor, id, target)
+      }
+      return npa as AtomicInstance<M, E, N, any>
+    },
+    delete(id) {
+      delete nodes[id]
+    },
+    broadCast
+  }
+}
+

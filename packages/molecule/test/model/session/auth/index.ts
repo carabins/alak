@@ -1,7 +1,7 @@
 import model from './auth.model'
 import eternal from './auth.eternal'
 import { events } from './../../events'
-import atomicNode from '@alaq/molecule/atomicNode'
+import {atomicNode} from '@alaq/molecule/atomicNode'
 
 export default atomicNode({
   model,

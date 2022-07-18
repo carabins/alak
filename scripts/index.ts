@@ -12,6 +12,7 @@ import {syncDeps} from '~/scripts/task.syncDeps'
 const task = process.argv[3] || 'pre'
 
 async function pre(target) {
+  await syncDeps(target)
   await test(target)
   await compile(target)
   upver(target)

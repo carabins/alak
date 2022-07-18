@@ -11,8 +11,7 @@ export async function syncDeps(project: Project) {
       if (nowVersion && deps[name] != nowVersion) {
         trace(`up ${name} to ${nowVersion}`)
         deps[name] = nowVersion
-        project.savePackageJsonTo.source()
       }
     })
-  trace('updated')
 }
+

@@ -1,5 +1,5 @@
 export default class {
-  time: number
+  time  = Date.now()
 
   sessionHandler() {}
 }

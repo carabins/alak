@@ -1,5 +1,5 @@
-import { setNucleonValue } from './quark'
-import { alive, isPromise } from './utils'
+import {setNucleonValue} from './quark'
+import {alive, isPromise} from './utils'
 
 /** @internal */
 export function from(...fromNucleons: INucleon<any>[]) {
@@ -35,7 +35,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
 
   const makeMix = (mixFn) => {
     const inAwaiting: INucleon<any>[] = []
-    const { strong, some } = mixFn
+    const {strong, some} = mixFn
     const needFull = strong || some
     const values = fromNucleons.map((a) => {
       if (a.isAwaiting) {
@@ -58,6 +58,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
     if (!quark.decays) quark.decays = []
     quark.decays.push(() => a.down(fn))
   }
+
   function weak(mixFn, finiteLoop) {
     function mixer(v, a) {
       if (finiteLoop) {
@@ -96,6 +97,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
     let getting = {}
     let traced = false
     quark._.safe(safe)
+
     function getterFn(callerUid?) {
       // console.log('getterFn()')
       // if (!isChanged() && !quark.isEmpty)
@@ -196,11 +198,8 @@ export function from(...fromNucleons: INucleon<any>[]) {
   }
 
   return {
-    some,
-    someSafe,
-    weak,
-    weakSafe: (f) => weak(f, true),
-    strong,
-    strongSafe: (f) => strong(f, true),
+    some: someSafe,
+    weak: (f) => weak(f, true),
+    strong: (f) => strong(f, true),
   }
 }
