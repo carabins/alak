@@ -4,7 +4,7 @@ import eternal from './session.eternal'
 import auth from './auth'
 import view from './view'
 import profile from './profile'
-import {atomicNode} from '@alaq/molecule/atomicNode'
+import { atomicNode } from '@alaq/molecule/atomicNode'
 
 const sessionModel = atomicNode({
   model,
@@ -15,6 +15,7 @@ const sessionModel = atomicNode({
     view,
     profile,
   },
+  // startup: 'IMMEDIATELY',
   edges: [
     {
       from: 'auth.granted',
@@ -24,13 +25,9 @@ const sessionModel = atomicNode({
   listen: {
     PROFILE_UPDATE: 'sessionHandler',
   },
-  activate({time},q){
+  activate({ time }, q) {
     // console.log("session activate", )
-  }
+  },
 })
 
-
-
 export default sessionModel
-
-

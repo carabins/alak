@@ -13,15 +13,15 @@ test('install', (t) => {
   const r = n.ref
   t.equal(r.value, n.value)
   t.equal(r.value, n.vv)
-  // const rv = n.refWatch
-  // t.equal(rv.value, n.value)
-  // n(24)
-  // t.equal(r.value, n.value)
-  // t.equal(rv.value, n.value)
-  // rv.value = 3
+  const rv = n.refWatch
+  t.equal(rv.value, n.value)
+  n(24)
+  t.equal(r.value, n.value)
+  t.equal(rv.value, n.value)
+  rv.value = 3
   setTimeout(() => {
-    // t.equal(r.value, n.value)
-    // t.equal(rv.value, n.value)
+    t.equal(r.value, n.value)
+    t.equal(rv.value, n.value)
     t.end()
   }, 1)
 })
