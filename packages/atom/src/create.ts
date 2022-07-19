@@ -17,6 +17,7 @@ export default function create<T>(model?: T) {
   let memorize
   let name
   let proxy
+  let listenerFn
 
   if (space.plugins.length !== space.stabilized) {
     // space.plugins.forEach(installNucleonExtension)
@@ -32,6 +33,7 @@ export default function create<T>(model?: T) {
     } else {
       superModel = model
     }
+    const listeners = []
     proxy = new Proxy(
       {},
       {
@@ -39,7 +41,9 @@ export default function create<T>(model?: T) {
           return nucleons
         },
         get(t, key): any {
-          return synthNucleon(nucleons, key, superModel, secondName || name, memorize)
+          const n = synthNucleon(nucleons, key, superModel, secondName || name, memorize)
+          listenerFn && n.up((v) => listenerFn(key, v))
+          return n
         },
       },
     )
@@ -95,7 +99,7 @@ export default function create<T>(model?: T) {
     }
   }
 
-  return {
+  const ways = {
     one,
     many,
     name(lastName) {
@@ -112,6 +116,16 @@ export default function create<T>(model?: T) {
         },
       }
     },
+  }
+
+  function listener(fn: (key, value) => void) {
+    listenerFn = fn
+    return ways
+  }
+
+  return {
+    listener,
+    ...ways,
   }
 }
 

@@ -1,11 +1,22 @@
 import { isDefined } from './extra'
+import { eternalSym } from '@alaq/atom/property'
 
 export default function (model) {
   const isClass = typeof model === 'function'
   const getters = {}
   const actions = {}
-  const instaNucleons = []
+  const eternals = []
   const instaValues = {}
+  function checkValue(key, startValue) {
+    if (isDefined(startValue)) {
+      if (startValue.sym === eternalSym) {
+        eternals.push(key)
+        instaValues[key] = startValue.startValue
+      } else {
+        instaValues[key] = startValue
+      }
+    }
+  }
   if (isClass) {
     const instance = new model()
     let protoOfInstance = Object.getPrototypeOf(instance)
@@ -22,11 +33,7 @@ export default function (model) {
       }
     })
     Object.keys(instance).forEach((key) => {
-      const startValue = instance[key]
-      if (isDefined(startValue)) {
-        instaValues[key] = startValue
-      }
-      instaNucleons.push(key)
+      checkValue(key, instance[key])
     })
   } else {
     Object.keys(model).forEach((key) => {
@@ -34,15 +41,14 @@ export default function (model) {
       if (typeof someValue === 'function') {
         actions[key] = someValue
       } else {
-        instaValues[key] = someValue
-        instaNucleons.push(key)
+        checkValue(key, someValue)
       }
     })
   }
   return {
     getters,
     actions,
-    instaNucleons,
+    eternals,
     instaValues,
   }
 }

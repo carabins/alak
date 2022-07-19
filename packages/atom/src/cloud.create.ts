@@ -5,20 +5,25 @@
 import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
+import { is } from 'tap'
 
 export default function <Model, Ethernal>(config: {
   name: string
   model?: Model
-  eternal?: Ethernal | Array<keyof PureModel<Model>>
+  eternal?: Ethernal | Array<keyof PureModel<Model>> | string
 }) {
   const cloud = {
     nucleons: {},
     actions: {},
     sleepingNucleons: {},
+    superEternal: false,
   }
 
   const electrons = new CloudElectrons(getNucleon, cloud)
 
+  if (config.eternal === '*') {
+    cloud.superEternal = true
+  }
   if (config.eternal && typeof config.eternal[0] === 'string') {
     electrons.eternalKeys = config.eternal as string[]
   }
@@ -28,8 +33,9 @@ export default function <Model, Ethernal>(config: {
     Object.assign(electrons.actions, parts.actions)
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
+    electrons.addEternals(parts.eternals)
     if (isEternal) {
-      electrons.eternalKeys = parts.instaNucleons
+      electrons.addEternals(Object.keys(parts.instaValues))
     }
   }
 
