@@ -13,7 +13,7 @@ type ClassToKV<T> = T extends ClassInstance ? InstanceType<T> : T
 type PureModel<T> = RemoveKeysByType<T, AnyFunction>
 type Atomized<T> = { readonly [K in keyof T]: INucleon<T[K]> }
 
-type PureAtom<T> = Atomized<PureModel<T>>
+type PureAtom<T> = Atomized<PureModel<Instance<T>>>
 
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
@@ -26,5 +26,3 @@ interface IAtom<T> {
   actions: OnlyFunc<Instance<T>>
   core: AtomCore<Instance<T>>
 }
-
-

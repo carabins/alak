@@ -11,7 +11,12 @@ import CloudElectrons from './cloud.electrons'
 
 export default function (electrons: CloudElectrons, cloud, name) {
   const l1 = create(electrons.instaValues).name(name)
-  const l2 = electrons.eternalKeys?.length ? l1.eternals(...electrons.eternalKeys) : l1
+  // prettier-ignore
+  const l2 = cloud.superEternal
+    ? l1.eternals()
+    : electrons.eternalKeys?.length
+      ? l1.eternals(...electrons.eternalKeys)
+      : l1
   const atom = l2.one()
 
   const state = cloudProxy.state(atom)

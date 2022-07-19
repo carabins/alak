@@ -36,4 +36,8 @@ export default class CloudElectrons {
       },
     ) as any
   }
+
+  addEternals(keys: String[]) {
+    this.eternalKeys.push(...keys)
+  }
 }
