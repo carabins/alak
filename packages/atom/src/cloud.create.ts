@@ -5,12 +5,12 @@
 import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
-import { is } from 'tap'
 
-export default function <Model, Ethernal>(config: {
+export default function <Model, Eternal>(config: {
   name: string
   model?: Model
-  eternal?: Ethernal | Array<keyof PureModel<Model>> | string
+  eternal?: Eternal | Array<keyof PureModel<Model>> | '*'
+  nucleusStrategy?: NucleusStrategy
 }) {
   const cloud = {
     nucleons: {},
@@ -21,10 +21,13 @@ export default function <Model, Ethernal>(config: {
 
   const electrons = new CloudElectrons(getNucleon, cloud)
 
-  if (config.eternal === '*') {
+  if (config.nucleusStrategy === 'eternal' || config.eternal === '*') {
     cloud.superEternal = true
-  }
-  if (config.eternal && typeof config.eternal[0] === 'string') {
+  } else if (
+    typeof config.eternal !== 'string' &&
+    config.eternal &&
+    typeof config.eternal[0] === 'string'
+  ) {
     electrons.eternalKeys = config.eternal as string[]
   }
 

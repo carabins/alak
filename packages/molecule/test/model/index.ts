@@ -1,14 +1,11 @@
-import molecule from "@alaq/molecule/index";
-
+import molecule from '@alaq/molecule/index'
+import account from './account'
 
 const topModel = molecule({
   atoms: {
+    account,
   },
-  multi: {
-
-  }
+  multi: {},
 })
 
-
 export default topModel
-

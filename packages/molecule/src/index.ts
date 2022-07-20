@@ -2,7 +2,7 @@ import { Nucleus } from '@alaq/nucleus/index'
 import { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
 
 export function molecule<
-  Atoms extends Record<string, AtomicNode<any, any>>,
+  Atoms extends Record<string, AtomicNode<any>>,
   MultiAtoms extends Record<string, MultiAtomicNode<any, any, any, any>>,
 >(consturctor: { atoms?: Atoms; multi?: MultiAtoms }) {
   const eventBus = Nucleus.stateless().holistic()

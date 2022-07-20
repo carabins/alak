@@ -13,11 +13,11 @@ export function setupNucleonForAtoms(n: INucleonConstructor<any>) {
   space.N = n
 }
 
-export default function create<T>(model?: T) {
-  let memorize
-  let name
-  let proxy
-  let listenerFn
+export default function create<T>(model?: T, options = {} as AtomOptions) {
+  const core = {
+    eternal: options.nucleusStrategy === 'eternal',
+    ...options,
+  } as DeepAtomCore
 
   if (space.plugins.length !== space.stabilized) {
     // space.plugins.forEach(installNucleonExtension)
@@ -25,7 +25,7 @@ export default function create<T>(model?: T) {
   }
 
   function one(secondName?: string, extendObject?: Record<string, INucleon<any>>) {
-    const nucleons = extendObject ? extendObject : {}
+    core.nucleons = extendObject ? extendObject : {}
     let superModel
     if (typeof model === 'function') {
       //@ts-ignore
@@ -34,20 +34,20 @@ export default function create<T>(model?: T) {
       superModel = model
     }
     const listeners = []
-    proxy = new Proxy(
+    core.proxy = new Proxy(
       {},
       {
         apply(target: {}, thisArg: any, argArray: any[]): any {
-          return nucleons
+          return core.nucleons
         },
-        get(t, key): any {
-          const n = synthNucleon(nucleons, key, superModel, secondName || name, memorize)
-          listenerFn && n.up((v) => listenerFn(key, v))
+        get(t, key: string): any {
+          const n = synthNucleon(key, superModel, core)
+          core.listener && n.up((v) => core.listener(key, v))
           return n
         },
       },
     )
-    return proxy as PureAtom<T>
+    return core.proxy as PureAtom<T>
   }
 
   function many() {
@@ -103,12 +103,12 @@ export default function create<T>(model?: T) {
     one,
     many,
     name(lastName) {
-      name = lastName
+      core.name = lastName
       return {
         one,
         many,
-        eternals(...onlyNucleons: PureAtom<T>[]) {
-          memorize = onlyNucleons.length ? onlyNucleons : true
+        eternal(...onlyNucleons: string[]) {
+          core.eternal = onlyNucleons.length ? onlyNucleons : true
           return {
             one,
             many,
@@ -119,7 +119,7 @@ export default function create<T>(model?: T) {
   }
 
   function listener(fn: (key, value) => void) {
-    listenerFn = fn
+    core.listener = fn
     return ways
   }
 
@@ -129,18 +129,30 @@ export default function create<T>(model?: T) {
   }
 }
 
-function synthNucleon(nucleons, key, model, name, memorize) {
-  let nucleon: INucleon<any> = nucleons[key]
+function synthNucleon(key, model, core: DeepAtomCore) {
+  let nucleon: INucleon<any> = core.nucleons[key]
   if (!nucleon) {
-    const id = name ? `${name}.${key}` : key
+    const id = core.name ? `${core.name}.${key}` : key
     let modelValue = model ? model[key] : undefined,
       mem
-    if (typeof memorize === 'boolean') {
-      mem = true
+    if (typeof core.eternal === 'boolean') {
+      mem = core.eternal
     } else {
-      mem = memorize && memorize.indexOf(key) !== -1
+      mem = core.eternal && core.eternal.indexOf(key) !== -1
     }
-    nucleons[key] = nucleon = space.N()
+    core.nucleons[key] = nucleon = space.N()
+    switch (core.nucleusStrategy) {
+      case 'holistic':
+        nucleon.holistic()
+        break
+      case 'stateless':
+        nucleon.stateless()
+        break
+      case 'holystate':
+        nucleon.holistic()
+        nucleon.stateless()
+        break
+    }
     nucleon.setId(id)
     if (mem) {
       storage.init(nucleon)

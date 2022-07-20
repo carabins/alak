@@ -21,8 +21,21 @@ type GetActions<T> = keyof OnlyFunc<T>
 type AtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
 type AtomState<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
 
+type NucleusStrategy = 'core' | 'eternal' | 'holistic' | 'stateless' | 'holystate'
+
 interface IAtom<T> {
   state: AtomState<Instance<T>>
   actions: OnlyFunc<Instance<T>>
   core: AtomCore<Instance<T>>
+}
+
+type AtomOptions = {
+  name?: NucleusStrategy
+  nucleusStrategy?: NucleusStrategy
+  listener?: (key: string, v: any) => void
+}
+type DeepAtomCore = AtomOptions & {
+  proxy?: any
+  eternal?: boolean | string[]
+  nucleons?: Record<string, INucleon<any>>
 }

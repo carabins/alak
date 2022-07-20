@@ -2,16 +2,17 @@ import { Nucleus } from '@alaq/nucleus/index'
 import { Atom } from '@alaq/atom/index'
 
 const newAtom = (constructor) => {
-  const { model, eternal, name } = constructor
+  const { model, name } = constructor
+
   return Atom({
     model,
-    eternal,
     name,
+    eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
   })
 }
 
-export function atomicConstructor<M, E, N, Events extends readonly string[]>(
-  constructor: AtomicConstructor<M, E, N, Events>,
+export function atomicConstructor<M, E, N>(
+  constructor: AtomicConstructor<M, E, N>,
   quantum: QuantumAtom,
 ) {
   let name = constructor.name || quantum.name || 'atom'
@@ -32,13 +33,13 @@ export function atomicConstructor<M, E, N, Events extends readonly string[]>(
       nodes[key] = subAtom
     })
 
-  const getFromNode = ([nodeKey, targerKey]: string[]) => {
+  const getFromNode = ([nodeKey, targetKey]: string[]) => {
     const node = nodes[nodeKey]
     !node &&
       console.error(
-        `empty sub-node [${nodeKey + '.' + targerKey}] in atomic node ${name.toUpperCase()} `,
+        `empty sub-node [${nodeKey + '.' + targetKey}] in atomic node ${name.toUpperCase()} `,
       )
-    return node.core[targerKey]
+    return node.core[targetKey]
   }
   const getNode = (n: string) => {
     const parts = n.split('.')
@@ -48,20 +49,25 @@ export function atomicConstructor<M, E, N, Events extends readonly string[]>(
       return atom.core[n]
     }
   }
+
   constructor.edges &&
     constructor.edges.forEach((e) => {
       const listiners = []
       if (typeof e.to === 'string') {
         listiners.push(getNode(e.to))
+        //@ts-ignore
       } else if (e.to?.length) {
+        //@ts-ignore
         listiners.push(...e.to.map(getNode))
       }
       if (!listiners.length) {
         console.error(`empty listener in atomic node ${name.toUpperCase()} for edge`, e)
       }
       if (typeof e.from === 'string') {
+        //@ts-ignore
         listiners.forEach((l) => getNode(e.from).up(l))
       } else {
+        //@ts-ignore
         const fromNodes = e.from.map(getNode)
         const n = Nucleus.stateless()
         const strategy = e.strategy.toLocaleLowerCase() || 'some'
@@ -88,6 +94,7 @@ export function atomicConstructor<M, E, N, Events extends readonly string[]>(
         if (typeof listenerName === 'string') {
           apply(listenerName)
         } else {
+          //@ts-ignore
           listenerName.forEach(apply)
         }
       }
