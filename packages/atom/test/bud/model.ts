@@ -3,7 +3,11 @@ import Eternal from './eternal'
 export default class extends Eternal {
   tasks = ['a', 'b']
   multiplex = 10
+  everCount = 12
 
+  addEverCount(v) {
+    this.everCount += v
+  }
   get taskCount() {
     return this.tasks ? this.tasks.length : 0
   }

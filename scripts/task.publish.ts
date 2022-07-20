@@ -6,6 +6,7 @@ import * as path from 'path'
 import { Const } from './common/constants'
 import * as fs from 'fs'
 import { exec } from 'child_process'
+import { versions } from '~/scripts/index'
 
 export function upver(project: Project) {
   const trace = FileLog(project.packageJson.name + ' version')
@@ -21,8 +22,9 @@ export function upver(project: Project) {
   }
   parts.push(build.toString())
   const nv = parts.join('.')
-  trace('next version', nv)
+  trace('set version', nv)
   project.packageJson.version = nv
+  versions[project.packageJson.name] = nv
   project.savePackageJsonTo.art()
 }
 

@@ -17,10 +17,8 @@ export const isDefined = (v) => v !== undefined && v !== null
 export function eternalNucleon(nucleon: INucleon<any>, nucleonId: string) {
   const id = nucleonId || nucleon.id
   const v = JSON.parse(localStorage.getItem(id))
-  // console.log(typeof v, id, v)
   isDefined(v) && nucleon(v)
   nucleon.up((v) => {
     localStorage.setItem(id, JSON.stringify(v))
   })
 }
-

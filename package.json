@@ -4,6 +4,7 @@
   "keywords": [],
   "scripts": {
     "format": "prettier --write --ignore-unknown .",
+    "reload": "ncu -t minor -u && npm i && npm run dev",
     "Z": "ts-node-dev --respawn --quiet --transpile-only -r tsconfig-paths/register ./scripts ",
     "start": "node -r @swc-node/register -r tsconfig-paths/register scripts",
     "test": "node -r @swc-node/register -r tsconfig-paths/register packages ",
