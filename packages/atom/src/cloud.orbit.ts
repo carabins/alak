@@ -10,14 +10,10 @@ import { eternalAtom } from '@alaq/atom/index'
 import CloudElectrons from './cloud.electrons'
 
 export default function (electrons: CloudElectrons, cloud, name) {
-  const l1 = create(electrons.instaValues).name(name)
-  // prettier-ignore
-  const l2 = cloud.superEternal
-    ? l1.eternals()
-    : electrons.eternalKeys?.length
-      ? l1.eternals(...electrons.eternalKeys)
-      : l1
-  const atom = l2.one()
+  const atom = create(electrons.instaValues, {
+    name,
+    nucleusStrategy: cloud.superEternal || electrons.eternalKeys,
+  }).one()
 
   const state = cloudProxy.state(atom)
   const thisContext = cloudProxy.warp(cloud.actions, state)

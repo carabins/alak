@@ -9,3 +9,4 @@ temp
 *.local
 *.cpuprofile
 /.vscode/
+.nuclearStore

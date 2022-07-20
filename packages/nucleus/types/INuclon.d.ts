@@ -1,14 +1,10 @@
 type UnpackKV<T> = T[keyof T]
 
-
-
-
 /** Интерфейс ядра нуклона.
  * @remarks
  * Функция-контейнер.
  */
-interface INucleon<T>  {
-
+interface INucleon<T> {
   /**
    * Вернуть текущее значение контейнера
    */
@@ -68,6 +64,10 @@ interface INucleon<T>  {
   /** `true` когда нуклон не запоминает значение
    * {@link INucleon.stateless}*/
   readonly isStateless: Boolean
+
+  /** `true` когда нуклон передаёт все аргументы функциям-слушателям
+   * {@link INucleon.stateless}*/
+  readonly isHoly: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * и передать текущее значение контейнера, если оно есть
@@ -336,8 +336,6 @@ interface INucleon<T>  {
   /**
    * Отключить нуклон от подключенных ранее через tuneTo
    */
-
-
 
   // private toString():string
 }

@@ -1,6 +1,4 @@
-import Eternal from './eternal'
-
-export default class extends Eternal {
+export default class {
   tasks = ['a', 'b']
   multiplex = 10
   everCount = 12

@@ -5,6 +5,7 @@ import model from './bud/model'
 test('core and state', async (t) => {
   const eth = new model()
 
+  // console.log(bid.core.everCount.value, eth.everCount)
   t.equal(bid.core.everCount.value, eth.everCount)
   t.equal(bid.state.everCount, eth.everCount)
   bid.core.addEverCount(1)

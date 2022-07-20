@@ -13,7 +13,6 @@ export default class extends aEternal {
   afterListen: string
 
   balanceListener(v) {
-    console.log('balanceListener', v)
-    // this.afterListen = v
+    this.afterListen = v
   }
 }
