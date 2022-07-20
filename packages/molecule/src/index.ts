@@ -20,4 +20,13 @@ export function molecule<
     },
   }
 }
+
 export default molecule
+
+export class PartOfMolecule {
+  _: {
+    dispatchEvent(name: MoleculeEvents, data?: any)
+    atoms: MoleculeAtoms
+  }
+  q: any
+}

@@ -14,7 +14,11 @@ export function atomicConstructor<M, E, N, Events extends readonly string[]>(
   constructor: AtomicConstructor<M, E, N, Events>,
   quantum: QuantumAtom,
 ) {
-  const name = constructor.name || quantum.name || 'root'
+  let name = constructor.name || quantum.name || 'atom'
+  if (quantum.id) {
+    name = name + '.' + quantum.id
+    constructor = Object.assign({ name }, constructor)
+  }
   const atom = newAtom(constructor)
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()

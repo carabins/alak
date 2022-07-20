@@ -28,7 +28,7 @@ export default function (electrons: CloudElectrons, cloud, name) {
   Object.keys(electrons.actions).forEach((key) => {
     cloud.actions[key] = (...args) => {
       const fn = electrons.actions[key] as Function
-      fn.apply(thisContext, args)
+      return fn.apply(thisContext, args)
     }
   })
   return { atom, state, sleepingNucleons, parts: electrons }
