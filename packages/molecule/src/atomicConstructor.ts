@@ -1,15 +1,7 @@
 import { Nucleus } from '@alaq/nucleus/index'
 import { Atom } from '@alaq/atom/index'
-
-const newAtom = (constructor) => {
-  const { model, name } = constructor
-
-  return Atom({
-    model,
-    name,
-    eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
-  })
-}
+import moleculeExtension from '@alaq/molecule/moleculeExtension'
+import atomicListeners from '@alaq/molecule/atomicListeners'
 
 export function atomicConstructor<M, E, N>(
   constructor: AtomicConstructor<M, E, N>,
@@ -20,7 +12,13 @@ export function atomicConstructor<M, E, N>(
     name = name + '.' + quantum.id
     constructor = Object.assign({ name }, constructor)
   }
-  const atom = newAtom(constructor)
+  const atom = Atom({
+    model: constructor.model,
+    name: constructor.name,
+    eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
+    thisExtension: moleculeExtension(quantum),
+  }) as any
+
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()
   quantum.id && atom.core.id(quantum.id)
@@ -82,14 +80,17 @@ export function atomicConstructor<M, E, N>(
         strategyMethod(listiners[0])
       }
     })
+  const an = { nodes, emitEvent: eventBus } as any
+  quantum.atom = Object.assign(an, atom)
 
-  if (constructor.listen) {
+  const al = atomicListeners(quantum)
+  if (constructor.listen || al) {
     const eventListener = (event, data) => {
       const apply = (where) => {
         const fn = getNode(where)
         fn && fn(data)
       }
-      const listenerName = constructor.listen[event]
+      const listenerName = al[event] || constructor.listen[event]
       if (listenerName) {
         if (typeof listenerName === 'string') {
           apply(listenerName)
@@ -102,8 +103,6 @@ export function atomicConstructor<M, E, N>(
     eventBus.up(eventListener)
     quantum.eventBus?.up(eventListener)
   }
-  const an = { nodes, emitEvent: eventBus } as any
 
   constructor.activate && constructor.activate.apply(atom.state, [atom.core, nodes])
-  quantum.atom = Object.assign(an, atom)
 }

@@ -9,15 +9,18 @@ import { cloudProxy } from './cloud.proxy'
 import { eternalAtom } from '@alaq/atom/index'
 import CloudElectrons from './cloud.electrons'
 
-export default function (electrons: CloudElectrons, cloud, name) {
+export default function (electrons: CloudElectrons, cloud, config) {
   const atom = create(electrons.instaValues, {
-    name,
+    name: config.name,
     nucleusStrategy: cloud.superEternal || electrons.eternalKeys,
   }).one()
 
   const state = cloudProxy.state(atom)
-  const thisContext = cloudProxy.warp(cloud.actions, state)
-  const sleepingNucleons = cloudGetters(electrons, name)
+  const thisState = cloudProxy.warp(cloud.actions, state)
+  const thisContext = config.thisExtension
+    ? cloudProxy.warp(config.thisExtension, thisState)
+    : thisState
+  const sleepingNucleons = cloudGetters(electrons, config.name)
 
   Object.assign(cloud.sleepingNucleons, sleepingNucleons)
 

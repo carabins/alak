@@ -1,3 +1,5 @@
+import { isDefined } from '@alaq/atom/extra'
+
 export const isString = (p) => typeof p === 'string'
 
 export const cloudProxy = {
@@ -20,7 +22,7 @@ export const cloudProxy = {
       {
         get(target: any, p: string | symbol, receiver: any): any {
           const s = target.shell[p]
-          return s ? s : target.core[p]
+          return isDefined(s) ? s : target.core[p]
         },
         set(target, p, value) {
           target.core[p] = value

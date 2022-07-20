@@ -7,10 +7,11 @@ import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
 
 export default function <Model, Eternal>(config: {
-  name: string
+  name?: string
   model?: Model
   eternal?: Eternal | Array<keyof PureModel<Model>> | '*'
   nucleusStrategy?: NucleusStrategy
+  thisExtension?: any
 }) {
   const cloud = {
     nucleons: {},
@@ -45,7 +46,7 @@ export default function <Model, Eternal>(config: {
   config.model && findElectrons(config.model)
   config.eternal && findElectrons(config.eternal, true)
 
-  const orbital = cloudOrbit(electrons, cloud, config.name)
+  const orbital = cloudOrbit(electrons, cloud, config)
 
   function getNucleon(key) {
     let nucleon = cloud.sleepingNucleons[key]
