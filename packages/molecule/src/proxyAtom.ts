@@ -24,6 +24,7 @@ export function proxyAtom(constructor, id?, t?) {
     set(target: QuantumAtom, p: string | symbol, value: any, receiver: any): boolean {
       switch (p) {
         case 'name':
+        case 'molecule':
         case 'eventBus':
           quantum[p] = value
           return true

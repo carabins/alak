@@ -7,18 +7,21 @@ export function molecule<
 >(consturctor: { atoms?: Atoms; multi?: MultiAtoms }) {
   const eventBus = Nucleus.stateless().holistic()
 
-  Object.keys(consturctor.atoms).forEach((key) => {
-    consturctor.atoms[key]['name'] = key
-    consturctor.atoms[key]['injectBus'] = eventBus
-  })
-
-  return {
+  const molecule = {
     atoms: consturctor.atoms,
     multi: consturctor.multi,
     emitEvent: eventBus as {
       (name: Uppercase<string>, data?: any): void
     },
   }
+
+  Object.keys(consturctor.atoms).forEach((key) => {
+    consturctor.atoms[key]['name'] = key
+    consturctor.atoms[key]['injectBus'] = eventBus
+    consturctor.atoms[key]['molecule'] = molecule
+  })
+
+  return molecule
 }
 
 export default molecule
