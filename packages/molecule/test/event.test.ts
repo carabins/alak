@@ -1,12 +1,12 @@
 import molecule from '@alaq/molecule/index'
 import { test } from 'tap'
-import session from './model/session'
-
-const m = molecule({
-  atoms: {
-    session,
-  },
-})
+// import session from './model/session'
+//
+// const m = molecule({
+//   atoms: {
+//     session,
+//   },
+// })
 
 // test('sameEventBus', (t) => {
 //   t.equal(m.emitEvent['uid'], session.emitEvent['uid'])

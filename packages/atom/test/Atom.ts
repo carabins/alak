@@ -1,10 +1,9 @@
 import { test } from 'tap'
 
 import bid from './bud'
-import eternal from './bud/eternal'
 import model from './bud/model'
 test('core and state', async (t) => {
-  const eth = new eternal()
+  const eth = new model()
 
   t.equal(bid.core.everCount.value, eth.everCount)
   t.equal(bid.state.everCount, eth.everCount)
@@ -20,5 +19,4 @@ test('core and state', async (t) => {
   t.equal(m.multiCount, bid.state.multiCount)
   t.equal(m.multiCount, bid.core.multiCount.value)
   t.end()
-
 })

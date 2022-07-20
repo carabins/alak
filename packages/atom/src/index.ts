@@ -14,3 +14,8 @@ export const createAtom = create
 export const Atom = cloudCreate
 
 export const A = cloudCreate
+
+export class MultiAtomic {
+  private id: string | any
+  // private _:
+}

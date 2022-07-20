@@ -60,7 +60,7 @@ export function atomicConstructor<M, E, N, Events extends readonly string[]>(
       } else {
         const fromNodes = e.from.map(getNode)
         const n = Nucleus.stateless()
-        const strategy = e.strategy || 'some'
+        const strategy = e.strategy.toLocaleLowerCase() || 'some'
         const strategyMethod = n.from(...fromNodes)[strategy]
         if (!strategyMethod) {
           console.error(
