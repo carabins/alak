@@ -1,4 +1,5 @@
 import { atomicConstructor } from '@alaq/molecule/atomicConstructor'
+import { Nucleus } from '@alaq/nucleus/index'
 
 const publicKeys = {
   state: 1,
@@ -13,6 +14,7 @@ export function proxyAtom(constructor, id?, t?) {
     target: t,
     id,
     activateListeners: [],
+    onMoleculeReady: Nucleus(),
   }
   switch (constructor.startup) {
     case 'IMMEDIATELY':
@@ -23,8 +25,11 @@ export function proxyAtom(constructor, id?, t?) {
   return new Proxy(quantum, {
     set(target: QuantumAtom, p: string | symbol, value: any, receiver: any): boolean {
       switch (p) {
-        case 'name':
         case 'molecule':
+          quantum[p] = value
+          quantum.onMoleculeReady(true)
+          return true
+        case 'name':
         case 'eventBus':
           quantum[p] = value
           return true

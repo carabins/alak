@@ -125,7 +125,7 @@ interface INucleon<T> {
   /** Добавить функцию-получатель со вторым аргументом функцией-отмены подписки
    * @param receiver - функция-получатель
    */
-  upDown(receiver: ValueDownReceiver<T>): INucleon<T>
+  c(receiver: ValueDownReceiver<T>): INucleon<T>
 
   /** Добавить функцию-получатель значений не равных `null` и `undefined`
    * @param receiver - функция-получатель

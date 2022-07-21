@@ -1,6 +1,6 @@
 {
     "name": "@alaq/vue",
-    "version": "4.0.0-omega.6",
+    "version": "4.0.0-omega.8",
     "description": "vue3 extension for alak atoms",
     "main": "index.js",
     "type": "index.d.ts",

@@ -30,7 +30,7 @@ interface IAtom<T> {
 }
 
 type AtomOptions = {
-  name?: NucleusStrategy
+  name?: string
   nucleusStrategy?: NucleusStrategy
   listener?: (key: string, v: any) => void
 }

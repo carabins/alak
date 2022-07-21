@@ -5,31 +5,45 @@
  */
 
 import { ref, Ref, watch, onMounted, onUnmounted, reactive } from 'vue'
+import { Atom, createAtom } from '@alaq/atom/index'
+import { UnwrapNestedRefs } from '@vue/reactivity'
 
-export function createReactiveVueAtomListener<T>(inital = {}) {
-  const r = reactive(inital)
-  const watched = {}
-  function atomListener(key, value) {
+export function vueAtom<Model extends object>(atomConfig: {
+  name?: string
+  model?: Model
+  nucleusStrategy?: NucleusStrategy
+}) {
+  const r = reactive(atomConfig.model)
+
+  function listener(key, value) {
     r[key] = value
   }
+
+  const a = createAtom(atomConfig.model, {
+    name: atomConfig.name,
+    nucleusStrategy: atomConfig.nucleusStrategy,
+    listener,
+  }).one()
+  const watched = {}
+
   const proxy = new Proxy(r, {
     get(o, k) {
       if (!watched[k]) {
         watch(
-          () => r[k],
+          () => o[k],
           (v) => {
-            if (r[k] !== r[k].value) {
-              r[k](v)
+            if (o[k] !== a[k].value) {
+              a[k](v)
             }
           },
         )
-        r[k]
+        a[k]
         watched[k] = true
       }
       return o[k]
     },
   })
-  return [r, atomListener]
+  return [proxy, a] as [UnwrapNestedRefs<Model>, Atomized<Model>]
 }
 
 export function useNucleon<T = any>(n: INucleon<T>) {
