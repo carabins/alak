@@ -18,23 +18,6 @@ export function atomicConstructor<M, E, N>(
     eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
     thisExtension: moleculeExtension(quantum),
   }) as any
-
-  quantum.atom = atom
-
-  if (atom.state._isPartOfMolecule) {
-    quantum.onMoleculeReady.once(() => {
-      wakeUp(constructor, quantum, atom)
-    })
-  } else {
-    wakeUp(constructor, quantum, atom)
-  }
-}
-
-function wakeUp(
-  constructor: AtomicConstructor<any, any, any>,
-  quantum: QuantumAtom,
-  atom: IAtom<any>,
-) {
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()
   quantum.id && atom.core.id(quantum.id)

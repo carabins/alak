@@ -32,14 +32,6 @@ class model {
 const a = atomicNode({
   model,
 })
-test('up & event listeners', (t) => {
-  a.actions.addOne()
-  t.equal(a.state.two, 2)
-  a.emitEvent('NEW_EVENT', 100)
-  t.equal(a.state.one, 100)
-  t.end()
-})
-
 const b = atomicNode({
   model: class extends PartOfMolecule {
     two: number = 2
@@ -50,6 +42,14 @@ const b = atomicNode({
 })
 const m = molecule({
   atoms: { a, b },
+})
+//
+test('up & event listeners', (t) => {
+  a.actions.addOne()
+  t.equal(a.state.two, 2)
+  a.emitEvent('NEW_EVENT', 100)
+  t.equal(a.state.one, 100)
+  t.end()
 })
 
 test('inner atoms edges', (t) => {

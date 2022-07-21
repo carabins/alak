@@ -16,11 +16,15 @@ export function molecule<
     },
   }
 
-  Object.keys(consturctor.atoms).forEach((key) => {
-    consturctor.atoms[key]['name'] = key
-    consturctor.atoms[key]['injectBus'] = eventBus
-    consturctor.atoms[key]['molecule'] = molecule
-  })
+  consturctor.atoms &&
+    Object.keys(consturctor.atoms).forEach((key) => {
+      consturctor.atoms[key]['patch']({ key, eventBus, molecule })
+    })
+
+  consturctor.multi &&
+    Object.keys(consturctor.multi).forEach((key) => {
+      consturctor.multi[key]['patch']({ key, eventBus, molecule })
+    })
 
   return molecule
 }

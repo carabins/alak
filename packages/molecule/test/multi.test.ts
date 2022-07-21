@@ -5,6 +5,7 @@
 import { atomicNodes } from '@alaq/molecule/atomicNode'
 import { MultiAtomic } from '@alaq/atom/index'
 import { test } from 'tap'
+import molecule from '@alaq/molecule/index'
 
 class model extends MultiAtomic {
   one = 1
@@ -25,6 +26,13 @@ const baseAtom = atomicNodes({
 const eAtom = atomicNodes({
   model,
   nucleusStrategy: 'eternal',
+})
+
+const m = molecule({
+  multi: {
+    eAtom,
+    baseAtom,
+  },
 })
 test('multiAtoms', (t) => {
   const a = baseAtom.get(100)

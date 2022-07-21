@@ -39,5 +39,6 @@ type QuantumAtom = {
   atom?: AtomicNode<any>
   activateListeners: AnyFunction[]
   eventListeners?: string[]
-  onMoleculeReady: INucleon<any>
+  ready: boolean
+  patched: boolean
 }

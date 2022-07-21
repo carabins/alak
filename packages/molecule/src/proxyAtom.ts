@@ -9,49 +9,44 @@ const publicKeys = {
   emitEvent: 1,
 }
 
-export function proxyAtom(constructor, id?, t?) {
+export function proxyAtom(constructor, id?, patch?, t?) {
   const quantum: QuantumAtom = {
     target: t,
     id,
     activateListeners: [],
-    onMoleculeReady: Nucleus(),
+    ready: false,
+    patched: false,
   }
-  switch (constructor.startup) {
-    case 'IMMEDIATELY':
-      atomicConstructor(constructor, quantum)
-      break
+  if (patch) {
+    Object.assign(quantum, patch)
+    quantum.patched = true
   }
-
-  return new Proxy(quantum, {
-    set(target: QuantumAtom, p: string | symbol, value: any, receiver: any): boolean {
-      switch (p) {
-        case 'molecule':
-          quantum[p] = value
-          quantum.onMoleculeReady(true)
-          return true
-        case 'name':
-        case 'eventBus':
-          quantum[p] = value
-          return true
-        case 'injectBus':
-          if (quantum.atom) {
-            value.up(quantum.atom.emitEvent)
-          } else {
-            quantum.eventBus = value
-          }
-          return true
-      }
-      return false
-    },
+  const up = () => {
+    atomicConstructor(constructor, quantum)
+    quantum.ready = true
+  }
+  const proxy = new Proxy(quantum, {
     get(target: any, p: string | symbol, receiver: any): any {
       if (publicKeys[p]) {
-        if (!quantum.atom) {
-          atomicConstructor(constructor, quantum)
+        if (quantum.ready) {
+          return quantum.atom[p]
+        } else if (quantum.patched) {
+          quantum.ready = true
+          up()
+          return quantum.atom[p]
+        } else {
+          console.error('atom out of molecule', quantum)
         }
-        return quantum.atom[p]
       }
-
       switch (p) {
+        case 'patch':
+          return (o) => {
+            Object.assign(quantum, o)
+            quantum.patched = true
+            if (constructor.startup === 'immediately') {
+              up()
+            }
+          }
         case 'onActivate':
           return (listener) => {
             target.activateListeners.push(listener)
@@ -59,4 +54,6 @@ export function proxyAtom(constructor, id?, t?) {
       }
     },
   })
+
+  return proxy
 }

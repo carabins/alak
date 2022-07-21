@@ -21,12 +21,12 @@ export function atomicNodes<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
       },
     },
   ) as AtomicInstance<M, E, N>['core']
-
+  const mole = {} as any
   return {
     get(id, target?) {
       let npa = nodes[id]
       if (!npa) {
-        npa = nodes[id] = proxyAtom(constructor, id, target)
+        npa = nodes[id] = proxyAtom(constructor, id, mole.patch, target)
       }
       return npa as AtomicInstance<M, E, N>
     },
@@ -34,5 +34,8 @@ export function atomicNodes<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
       delete nodes[id]
     },
     broadCast,
+    patch(o) {
+      mole.patch = o
+    },
   }
 }
