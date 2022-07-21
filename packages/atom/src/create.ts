@@ -2,6 +2,7 @@
 import { storage } from './storage'
 import { isDefined } from './extra'
 import N from '@alaq/nucleus/index'
+import { eternalSym, flightySym } from '@alaq/atom/property'
 
 const space = {
   N,
@@ -41,7 +42,7 @@ export default function create<T>(model?: T, options = {} as AtomOptions) {
           return core.nucleons
         },
         get(t, key: string): any {
-          const n = synthNucleon(key, superModel, core)
+          const n = core.nucleons[key] || synthNucleon(key, superModel, core)
           core.listener && n.up((v) => core.listener(key, v))
           return n
         },
@@ -141,6 +142,19 @@ function synthNucleon(key, model, core: DeepAtomCore) {
       mem = core.eternal && core.eternal.indexOf(key) !== -1
     }
     core.nucleons[key] = nucleon = space.N()
+
+    if (isDefined(modelValue)) {
+      switch (modelValue.sym) {
+        case eternalSym:
+          modelValue = modelValue.startValue
+          mem = true
+          break
+        case flightySym:
+          modelValue = modelValue.startValue
+          mem = false
+          break
+      }
+    }
     switch (core.nucleusStrategy) {
       case 'holistic':
         nucleon.holistic()
@@ -163,5 +177,6 @@ function synthNucleon(key, model, core: DeepAtomCore) {
       }
     }
   }
+
   return nucleon
 }

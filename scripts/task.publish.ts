@@ -39,19 +39,15 @@ export function publish(project: Project) {
     {
       cwd: project.artPatch,
     },
-    (error, stdout, stderr) => {
+    (error, stdout, std) => {
       if (error) {
-        trace.error(`${error.message}`)
+        trace.error(`\n${error.message}`)
         return
       }
-      if (stderr) {
-        if (stderr.length > 30) {
-          trace.error(`${stderr}`)
-        }
-        return
+      if (std) {
+        trace.warn(`${std}`)
       }
-      trace(`result\n`, stdout)
-      trace('done')
+      trace(`complete\n`, stdout)
     },
   )
 }
