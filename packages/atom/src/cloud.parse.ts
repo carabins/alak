@@ -7,16 +7,7 @@ export default function (model) {
   const actions = {}
   const eternals = []
   const instaValues = {}
-  function checkValue(key, startValue) {
-    if (isDefined(startValue)) {
-      if (startValue.sym === eternalSym) {
-        eternals.push(key)
-        instaValues[key] = startValue.startValue
-      } else {
-        instaValues[key] = startValue
-      }
-    }
-  }
+
   if (isClass) {
     const instance = new model()
     let protoOfInstance = Object.getPrototypeOf(instance)
@@ -33,7 +24,8 @@ export default function (model) {
       }
     })
     Object.keys(instance).forEach((key) => {
-      checkValue(key, instance[key])
+      // checkValue(key, instance[key])
+      instaValues[key] = instance[key]
     })
   } else {
     Object.keys(model).forEach((key) => {
@@ -41,7 +33,8 @@ export default function (model) {
       if (typeof someValue === 'function') {
         actions[key] = someValue
       } else {
-        checkValue(key, someValue)
+        instaValues[key] = someValue
+        // checkValue(key, someValue)
       }
     })
   }
