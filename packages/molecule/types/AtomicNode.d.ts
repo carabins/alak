@@ -32,12 +32,13 @@ interface MultiAtomicNode<M, E, N> {
 
 type QuantumAtom = {
   id?: any
+  name: string
   target?: any
   eventBus?: INucleon<any>
-  molecule?: any
-  name?: string
+  molecule: {
+    atoms: any
+    eventBus: any
+  }
   atom?: AtomicNode<any>
-  activateListeners: AnyFunction[]
   eventListeners?: string[]
-  onMoleculeReady: INucleon<any>
 }

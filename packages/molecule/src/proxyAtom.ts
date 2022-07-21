@@ -1,57 +1,60 @@
 import { atomicConstructor } from '@alaq/molecule/atomicConstructor'
 import { Nucleus } from '@alaq/nucleus/index'
+import { getMolecule } from '@alaq/molecule/index'
 
-const publicKeys = {
-  state: 1,
-  core: 1,
-  nodes: 1,
-  actions: 1,
-  emitEvent: 1,
-}
+export function proxyAtom(constructor, id?, target?) {
+  // constructor = Object.assign({}, constructor)
 
-export function proxyAtom(constructor, id?, t?) {
+  if (!constructor.name) {
+    console.warn('отсутствует имя атома')
+  }
+
+  const name = id ? constructor.name + '.' + id : constructor.name
   const quantum: QuantumAtom = {
-    target: t,
-    id,
-    activateListeners: [],
-    onMoleculeReady: Nucleus(),
+    name,
+    molecule: constructor.molecule ? getMolecule(constructor.molecule) : getMolecule(),
   }
-  switch (constructor.startup) {
-    case 'IMMEDIATELY':
-      atomicConstructor(constructor, quantum)
-      break
+  if (id) {
+    quantum.id = id
+  }
+  if (target) {
+    quantum.target = target
+  }
+  quantum.eventBus = quantum.molecule.eventBus
+  const up = () => {
+    atomicConstructor(constructor, quantum)
   }
 
-  return new Proxy(quantum, {
-    set(target: QuantumAtom, p: string | symbol, value: any, receiver: any): boolean {
-      switch (p) {
-        case 'molecule':
-          quantum[p] = value
-          quantum.onMoleculeReady(true)
-          return true
-        case 'name':
-        case 'eventBus':
-          quantum[p] = value
-          return true
-        case 'injectBus':
-          if (quantum.atom) {
-            value.up(quantum.atom.emitEvent)
-          } else {
-            quantum.eventBus = value
-          }
-          return true
-      }
-      return false
-    },
+  if (constructor.startup === 'immediately') {
+    up()
+  }
+
+  const pk = {}
+
+  function makeProxyKey(path) {
+    return new Proxy(quantum, {
+      get(o, k) {
+        !quantum.atom && up()
+        return quantum.atom[path][k]
+      },
+    })
+  }
+
+  const proxy = new Proxy(quantum, {
     get(target: any, p: string | symbol, receiver: any): any {
-      if (publicKeys[p]) {
-        if (!quantum.atom) {
-          atomicConstructor(constructor, quantum)
-        }
-        return quantum.atom[p]
-      }
-
       switch (p) {
+        case 'state':
+        case 'core':
+        case 'nodes':
+        case 'actions':
+          let pp = pk[p]
+          if (!pp) {
+            pp = pk[pp] = makeProxyKey(p)
+          }
+          return pp
+        case 'emitEvent':
+          !quantum.atom && up()
+          return quantum.atom.emitEvent
         case 'onActivate':
           return (listener) => {
             target.activateListeners.push(listener)
@@ -59,4 +62,6 @@ export function proxyAtom(constructor, id?, t?) {
       }
     },
   })
+  quantum.molecule.atoms[quantum.name] = proxy
+  return proxy
 }

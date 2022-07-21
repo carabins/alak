@@ -2,7 +2,7 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-type StartupStrategy = 'LAZY' | 'IMMEDIATELY'
+type StartupStrategy = 'lazy' | 'immediately'
 
 interface AtomicConstructor<Model, E, N> {
   name?: string

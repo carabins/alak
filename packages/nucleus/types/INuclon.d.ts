@@ -336,6 +336,7 @@ interface INucleon<T> {
   /**
    * Отключить нуклон от подключенных ранее через tuneTo
    */
+  tuneOff(nucleon: INucleon<T>): void
 
   // private toString():string
 }

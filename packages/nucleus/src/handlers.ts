@@ -255,6 +255,9 @@ export const handlers: any = {
     this.tunedTarget = a
     a.up(this._)
   },
+  tuneOff() {
+    this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
+  },
 
   injectTo(o, key) {
     if (!key) {
