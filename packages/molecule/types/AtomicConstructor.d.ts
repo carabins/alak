@@ -10,7 +10,7 @@ interface AtomicConstructor<Model, E, N> {
   nucleusStrategy?: NucleusStrategy
   startup?: StartupStrategy
 
-  edges?: N extends Record<string, AtomicNode<any, any>>
+  edges?: N extends Record<string, AtomicNode<any>>
     ? GraphBuilderN<Instance<Model>, N>
     : GraphBuilder<Instance<Model>>
   listen?: PartialRecord<MoleculeEvents, keyof Instance<Model>>

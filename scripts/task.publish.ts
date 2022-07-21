@@ -35,17 +35,19 @@ export function publish(project: Project) {
   trace('run npm publish --access public')
 
   exec(
-    'npm publish',
+    'npm publish --access public',
     {
       cwd: project.artPatch,
     },
     (error, stdout, stderr) => {
       if (error) {
-        trace.error(`error: ${error.message}`)
+        trace.error(`${error.message}`)
         return
       }
       if (stderr) {
-        trace.error(`stderr: ${stderr}`)
+        if (stderr.length > 30) {
+          trace.error(`${stderr}`)
+        }
         return
       }
       trace(`result\n`, stdout)
