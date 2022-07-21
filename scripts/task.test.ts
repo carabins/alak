@@ -33,7 +33,7 @@ export async function test(project: Project) {
         // worker.on('message', (...e) => trace.error("e", e))
         // worker.on('error', (...e) => trace.error("e", e))
         worker.on('exit', (fall) => {
-          trace('exit', f)
+          trace('+', f)
           if (fall) {
             trace.error(f, 'FALL')
             // console.log(chunks)

@@ -19,15 +19,15 @@ interface AtomicNode<Model> {
 
   emitEvent(name: MoleculeEvents, data?: any)
 
-  onActivate(listiner: (node: AtomicNode<Model, Events>) => void)
+  onActivate(listiner: (node: AtomicNode<Model>) => void)
 }
 
-interface MultiAtomicNode<M, E, N, Events extends readonly string[]> {
-  get(id): AtomicInstance<M, E, N, Events>
+interface MultiAtomicNode<M, E, N> {
+  get(id): AtomicInstance<M, E, N>
 
   delete(id): void
 
-  broadCast: AtomicInstance<M, E, N, Events>['core']
+  broadCast: AtomicInstance<M, E, N>['core']
 }
 
 type QuantumAtom = {
@@ -36,7 +36,7 @@ type QuantumAtom = {
   eventBus?: INucleon<any>
   molecule?: any
   name?: string
-  atom?: AtomicNode<any, any>
+  atom?: AtomicNode<any>
   activateListeners: AnyFunction[]
   eventListeners?: string[]
 }

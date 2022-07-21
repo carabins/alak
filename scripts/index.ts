@@ -84,7 +84,10 @@ if (z.length) {
   job.projects.push(getProject(target))
 }
 
-job.pipeLine.forEach(async (task) => {
-  Log(color.bold('NEXT TASK'), task.name)
-  await job.projects.map((p) => task(p))
-})
+async function runPipeLine() {
+  for (const task of job.pipeLine) {
+    Log(color.bold('NEXT TASK'), task.name)
+    await Promise.all(job.projects.map((p) => task(p)))
+  }
+}
+runPipeLine()
