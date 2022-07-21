@@ -1,5 +1,6 @@
 import { Nucleus } from '@alaq/nucleus/index'
 import { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
+import { flightySym } from '@alaq/atom/property'
 
 export function molecule<
   Atoms extends Record<string, AtomicNode<any>>,
@@ -32,4 +33,8 @@ export class PartOfMolecule {
     atoms: MoleculeAtoms
   }
   q: any
+  private _isPartOfMolecule = {
+    sym: flightySym,
+    startValue: true,
+  }
 }

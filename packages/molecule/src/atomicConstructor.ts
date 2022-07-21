@@ -19,6 +19,22 @@ export function atomicConstructor<M, E, N>(
     thisExtension: moleculeExtension(quantum),
   }) as any
 
+  quantum.atom = atom
+
+  if (atom.state._isPartOfMolecule) {
+    quantum.onMoleculeReady.once(() => {
+      wakeUp(constructor, quantum, atom)
+    })
+  } else {
+    wakeUp(constructor, quantum, atom)
+  }
+}
+
+function wakeUp(
+  constructor: AtomicConstructor<any, any, any>,
+  quantum: QuantumAtom,
+  atom: IAtom<any>,
+) {
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()
   quantum.id && atom.core.id(quantum.id)
@@ -33,10 +49,6 @@ export function atomicConstructor<M, E, N>(
 
   const getFromNode = ([nodeKey, targetKey]: string[]) => {
     const node = nodes[nodeKey]
-    !node &&
-      console.error(
-        `empty sub-node [${nodeKey + '.' + targetKey}] in atomic node ${name.toUpperCase()} `,
-      )
     return node.core[targetKey]
   }
   const getNode = (n: string) => {
@@ -58,9 +70,6 @@ export function atomicConstructor<M, E, N>(
         //@ts-ignore
         listiners.push(...e.to.map(getNode))
       }
-      if (!listiners.length) {
-        console.error(`empty listener in atomic node ${name.toUpperCase()} for edge`, e)
-      }
       if (typeof e.from === 'string') {
         //@ts-ignore
         listiners.forEach((l) => getNode(e.from).up(l))
@@ -72,7 +81,7 @@ export function atomicConstructor<M, E, N>(
         const strategyMethod = n.from(...fromNodes)[strategy]
         if (!strategyMethod) {
           console.error(
-            `unsupported strategy [ ${e.strategy.toUpperCase()}  ]in atomic node ${name.toString()} for edge`,
+            `unsupported strategy [ ${e.strategy.toUpperCase()}  ]in atomic node ${constructor.name.toString()} for edge`,
             e,
           )
           throw 'unsupported strategy'
