@@ -10,18 +10,34 @@ export default function (q: QuantumAtom) {
     }
     return a
   }
-  return {
-    _: {
-      dispatchEvent: q.molecule.eventBus,
-      atoms: q.molecule.atoms,
-      set(atom: string, nuclon: string, data: any) {
-        const a = getA(atom)
-        a && a.core[nuclon](data)
-      },
-      get(atom: string, nuclon) {
-        const a = getA(atom)
-        return a ? a.core[nuclon].value : new Error('atom not found')
-      },
+  // const proxy = new Proxy({_}, {})
+
+  const under = {
+    id: q.id,
+    name: q.name,
+    dispatchEvent: q.molecule.eventBus,
+    molecule: q.molecule.atoms,
+    set(atom: string, nuclon: string, data: any) {
+      const a = getA(atom)
+      a && a.core[nuclon](data)
     },
+    get(atom: string, nuclon) {
+      const a = getA(atom)
+      return a ? a.core[nuclon].value : new Error('atom not found')
+    },
+  }
+  return {
+    _: new Proxy(under, {
+      get(t, k) {
+        if (k === 'core') {
+          return q.atom.core
+        }
+        const v = t[k]
+        if (v) {
+          return v
+        }
+        return undefined
+      },
+    }),
   }
 }

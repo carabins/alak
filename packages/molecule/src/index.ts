@@ -20,7 +20,10 @@ export function getMolecule(id: string = 'molecule'): ActiveMolecule {
 
 export abstract class PartOfMolecule {
   _: {
-    atoms: MoleculeAtoms
+    id: any
+    name: string
+    core: Record<string, INucleon<any>>
+    molecule: Record<string, AtomicNode<any>>
     dispatchEvent(name: MoleculeEvents, data?): void
     set(atom: string, nuclon: string, data: any): void
     get(atom: string, nuclon): void
