@@ -2,12 +2,10 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { Atom } from '@alaq/atom/index'
-import { Nucleus } from '@alaq/nucleus/index'
 import { proxyAtom } from './proxyAtom'
 
 export function atomicNode<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
-  return proxyAtom(constructor) as AtomicInstance<M, E, N>
+  return proxyAtom(constructor) as AtomicNode<M>
 }
 
 export function atomicNodes<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
@@ -20,22 +18,19 @@ export function atomicNodes<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
         return (v) => Object.values(nodes).forEach((n) => n[p](v))
       },
     },
-  ) as AtomicInstance<M, E, N>['core']
+  ) as AtomicNode<M>['core']
   const mole = {} as any
   return {
     get(id, target?) {
       let npa = nodes[id]
       if (!npa) {
-        npa = nodes[id] = proxyAtom(constructor, id, mole.patch, target)
+        npa = nodes[id] = proxyAtom(constructor, id, target)
       }
-      return npa as AtomicInstance<M, E, N>
+      return npa as AtomicNode<M>
     },
     delete(id) {
       delete nodes[id]
     },
     broadCast,
-    patch(o) {
-      mole.patch = o
-    },
   }
 }

@@ -7,14 +7,9 @@ export function atomicConstructor<M, E, N>(
   constructor: AtomicConstructor<M, E, N>,
   quantum: QuantumAtom,
 ) {
-  let name = constructor.name || quantum.name || 'atom'
-  if (quantum.id) {
-    name = name + '.' + quantum.id
-    constructor = Object.assign({ name }, constructor)
-  }
   const atom = Atom({
     model: constructor.model,
-    name: constructor.name,
+    name: quantum.name,
     eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
     thisExtension: moleculeExtension(quantum),
   }) as any
@@ -74,7 +69,7 @@ export function atomicConstructor<M, E, N>(
     })
   const an = { nodes, emitEvent: eventBus } as any
   quantum.atom = Object.assign(an, atom)
-
+  // quantum.molecule.atoms[quantum.name] = quantum.atom
   const al = atomicListeners(quantum)
   if (constructor.listen || al) {
     const eventListener = (event, data) => {

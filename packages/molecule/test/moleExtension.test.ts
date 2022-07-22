@@ -3,9 +3,9 @@
  */
 
 import { test } from 'tap'
-import { createAtom } from '@alaq/atom/index'
 import { atomicNode } from '@alaq/molecule/atomicNode'
-import molecule, { PartOfMolecule } from '@alaq/molecule/index'
+import { getMolecule, PartOfMolecule } from '@alaq/molecule/index'
+import { createAtom } from '@alaq/atom/index'
 
 abstract class Animal {
   abstract dispatchEvent(name: string, data?: any): void
@@ -13,8 +13,8 @@ abstract class Animal {
 
 class model {
   one = 1
-
   two: number
+  z: number
 
   addOne() {
     this.one++
@@ -30,20 +30,26 @@ class model {
 }
 
 const a = atomicNode({
+  name: 'a',
   model,
 })
 const b = atomicNode({
-  model: class extends PartOfMolecule {
+  name: 'b',
+  model: class {
     two: number = 2
     inAOneUp(v) {
       this.two = v
     }
   },
 })
-const m = molecule({
-  atoms: { a, b },
+
+const mole = getMolecule()
+test('molecule name', (t) => {
+  mole.atoms.a.core.z(12)
+  t.equal(a.state.z, 12)
+  t.end()
 })
-//
+
 test('up & event listeners', (t) => {
   a.actions.addOne()
   t.equal(a.state.two, 2)

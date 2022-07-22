@@ -22,7 +22,7 @@ export default function (q: QuantumAtom) {
 function checkIn(q, nn, name) {
   const parts = camelToSnakeCase(nn).split('_')
   const module = parts[1].toLowerCase()
-  const atom = q.molecule.atoms[module]
+  const atom = q.molecule?.atoms[module]
   if (atom) {
     for (const up of upEnds) {
       const c = cap(up)

@@ -10,8 +10,8 @@ export default function (model) {
 
   if (isClass) {
     const instance = new model()
-    let protoOfInstance = Object.getPrototypeOf(instance)
-    let methods = Object.getOwnPropertyNames(protoOfInstance)
+    const protoOfInstance = Object.getPrototypeOf(instance)
+    const methods = Object.getOwnPropertyNames(protoOfInstance)
     methods.forEach((key) => {
       let opd = Object.getOwnPropertyDescriptor(protoOfInstance, key)
       if (key === 'constructor') {

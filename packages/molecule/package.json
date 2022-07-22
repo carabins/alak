@@ -1,6 +1,6 @@
 {
     "name": "@alaq/molecule",
-    "version": "4.0.0-omega.19",
+    "version": "4.0.0-omega.22",
     "main": "index.js",
     "type": "index.d.ts",
     "author": "Gleb Panteleev",

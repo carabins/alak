@@ -3,10 +3,10 @@
  */
 
 export default function (q: QuantumAtom) {
-  return new Proxy(q, {
-    get(q, mayBeQ): any {
-      // console.log({ mayBeQ })
-      return undefined
+  return {
+    _: {
+      dispatchEvent: q.molecule.eventBus,
+      atoms: q.molecule.atoms,
     },
-  })
+  }
 }
