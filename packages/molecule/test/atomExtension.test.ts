@@ -3,7 +3,7 @@
  */
 
 import { test } from 'tap'
-import { atomicNode } from '@alaq/molecule/atomicNode'
+import { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
 import { getMolecule, PartOfMolecule } from '@alaq/molecule/index'
 import { createAtom } from '@alaq/atom/index'
 
@@ -43,10 +43,24 @@ const b = atomicNode({
   },
 })
 
+const multiA = atomicNodes({
+  name: 'aa',
+  model,
+})
+
 const mole = getMolecule()
 test('molecule name', (t) => {
   mole.atoms.a.core.z(12)
   t.equal(a.state.z, 12)
+
+  const aInstance = multiA.get('A')
+  aInstance.core.z(24)
+  const aInstanceFromMole = mole.atoms['aa.A'] as any
+  t.equal(aInstance.state.z, aInstanceFromMole.state.z)
+  aInstance.actions.addOne()
+  t.equal(aInstance.state.one, aInstanceFromMole.state.one)
+  aInstanceFromMole.actions.addOne()
+  t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   t.end()
 })
 
