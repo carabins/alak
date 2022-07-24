@@ -1,5 +1,4 @@
 import { Nucleus } from '@alaq/nucleus/index'
-import { flightySym } from '@alaq/atom/property'
 
 export class ActiveMolecule {
   atoms = {} as Record<string, AtomicNode<any>>

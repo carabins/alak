@@ -1,9 +1,9 @@
 import { Const } from './constants'
 import * as path from 'path'
 import * as fs from 'fs'
+import { copyFileSync, writeFileSync } from 'fs'
 import { FileLog } from '../log'
 import { PackageJson } from 'type-fest'
-import { copyFileSync, writeFileSync } from 'fs'
 
 export type Project = {
   packageJson: PackageJson
@@ -27,7 +27,7 @@ export function initProject(dir) {
     return false
   } else {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson
-    // trace(packageJson.version)
+    trace(packageJson.name, packageJson.version)
     const artPatch = path.join(Const.ARTIFACTS, dir)
     return {
       dir,

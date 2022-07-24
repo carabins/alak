@@ -1,4 +1,4 @@
-import { QState, notifyStateListeners } from './state'
+import { notifyStateListeners, QState } from './state'
 import { DECAY_ATOM_ERROR, rnd } from './utils'
 
 export function setNucleonValue(quark: Quark, value?) {

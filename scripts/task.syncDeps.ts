@@ -14,4 +14,3 @@ export async function syncDeps(project: Project) {
       }
     })
 }
-

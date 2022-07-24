@@ -3,7 +3,7 @@
  */
 
 import { test } from 'tap'
-import { Atom, createAtom } from '@alaq/atom/index'
+import { Atom } from '@alaq/atom/index'
 
 class model {
   v: string

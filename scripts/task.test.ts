@@ -1,4 +1,4 @@
-const { Worker, isMainThread, parentPort, workerData } = require('node:worker_threads')
+const { Worker } = require('node:worker_threads')
 import { Project } from './common/project'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -51,7 +51,7 @@ export async function test(project: Project) {
   const result = await Promise.all(pool)
   const fine = result.filter((v) => !v).length === 0
   if (fine) {
-    trace.info('all tests PASS')
+    trace.info('PASS')
     return true
   } else {
     trace.error(files)

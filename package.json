@@ -7,7 +7,7 @@
     "reload": "ncu -t minor -u && npm i && npm run dev",
     "Z": "ts-node-dev --respawn --quiet --transpile-only -r tsconfig-paths/register ./scripts ",
     "start": "node -r @swc-node/register -r tsconfig-paths/register scripts",
-    "test": "node -r @swc-node/register -r tsconfig-paths/register packages ",
+    "test": "npm run start",
     "dev": "ts-node-dev --respawn --transpile-only --quiet --rs -r tsconfig-paths/register packages/dev.ts"
   },
   "dependencies": {

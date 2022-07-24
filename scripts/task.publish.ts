@@ -1,10 +1,5 @@
 import { Project } from './common/project'
 import { FileLog, Log } from './log'
-import { writeFile, writeJSONSync } from 'fs-extra'
-import { writeFileSync } from 'fs'
-import * as path from 'path'
-import { Const } from './common/constants'
-import * as fs from 'fs'
 import { exec } from 'child_process'
 import { versions } from '~/scripts/index'
 
@@ -25,17 +20,18 @@ export function upver(project: Project) {
   trace('set version', nv)
   project.packageJson.version = nv
   versions[project.packageJson.name] = nv
-  project.savePackageJsonTo.art()
+  // project.savePackageJsonTo.art()
 }
 
 export function publish(project: Project) {
   const trace = FileLog('publish:' + project.packageJson.name)
   project.savePackageJsonTo.source()
 
-  trace('run npm publish --access public')
+  const cmd = 'npm publish --access public'
+  trace('run ' + cmd)
 
   exec(
-    'npm publish --access public',
+    cmd,
     {
       cwd: project.artPatch,
     },

@@ -12,10 +12,9 @@
  * @packageDocumentation
  */
 
-import { createNucleon } from './create'
+import { createNucleon, nucleonExtensions } from './create'
 import { alive } from './utils'
 
-import { nucleonExtensions } from './create'
 export const installNucleonExtensions = nucleonExtensions
 
 export const N = Object.assign(createNucleon, {

@@ -2,12 +2,11 @@ import { grandUpFn, notifyListeners, setNucleonValue } from './quark'
 import {
   addStateEventListener,
   ClearState,
-  QState,
   notifyStateListeners,
+  QState,
   removeStateEventListener,
 } from './state'
 import {
-  alive,
   deleteParams,
   falseFilter,
   noneFilter,

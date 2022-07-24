@@ -3,13 +3,8 @@
  */
 
 import { test } from 'tap'
-import { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
-import { getMolecule, PartOfMolecule } from '@alaq/molecule/index'
-import { createAtom } from '@alaq/atom/index'
-
-abstract class Animal {
-  abstract dispatchEvent(name: string, data?: any): void
-}
+import { atomicModel, atomicFactory } from '@alaq/molecule/atomicModel'
+import { getMolecule } from '@alaq/molecule/index'
 
 class model {
   one = 1
@@ -29,11 +24,11 @@ class model {
   }
 }
 
-const a = atomicNode({
+const a = atomicModel({
   name: 'a',
   model,
 })
-const b = atomicNode({
+const b = atomicModel({
   name: 'b',
   model: class {
     two: number = 2
@@ -43,7 +38,7 @@ const b = atomicNode({
   },
 })
 
-const multiA = atomicNodes({
+const multiA = atomicFactory({
   name: 'aa',
   model,
 })
@@ -61,18 +56,10 @@ test('molecule name', (t) => {
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   aInstanceFromMole.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
-  t.end()
-})
-
-test('up & event listeners', (t) => {
   a.actions.addOne()
   t.equal(a.state.two, 2)
   a.emitEvent('NEW_EVENT', 100)
   t.equal(a.state.one, 100)
-  t.end()
-})
-
-test('inner atoms edges', (t) => {
   t.equal(a.state.one, b.state.two)
   t.end()
 })

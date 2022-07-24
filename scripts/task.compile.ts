@@ -1,17 +1,7 @@
 import { Project } from './common/project'
 import { FileLog } from './log'
 import * as path from 'path'
-import { Const } from './common/constants'
 import * as fs from 'fs-extra'
-import { scanAllSrc, startScan } from './common/scan'
-import * as ts from 'typescript'
-import {
-  CompilerOptions,
-  createCompilerHost,
-  createProgram,
-  ModuleResolutionKind,
-  ScriptTarget,
-} from 'typescript'
 import { runTsc } from '~/scripts/common/tsc'
 import { readFileSync, writeFileSync } from 'fs'
 import { transformSync } from '@swc-node/core'
@@ -28,10 +18,9 @@ function tsc() {
   if (tscState.result) {
     return tscState.result
   }
-  const p = (tscState.promise = runTsc().then((r) => {
+  return (tscState.promise = runTsc().then((r) => {
     tscState.result = r
   }))
-  return p
 }
 
 export async function compile(project: Project) {

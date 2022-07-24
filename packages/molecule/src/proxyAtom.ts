@@ -1,5 +1,4 @@
 import { atomicConstructor } from '@alaq/molecule/atomicConstructor'
-import { Nucleus } from '@alaq/nucleus/index'
 import { getMolecule } from '@alaq/molecule/index'
 
 export function proxyAtom(constructor, id?, target?) {
@@ -41,7 +40,7 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const proxy = new Proxy(quantum, {
-    get(target: any, p: string | symbol, receiver: any): any {
+    get(target: any, p: string | symbol): any {
       switch (p) {
         case 'state':
         case 'core':

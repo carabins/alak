@@ -23,18 +23,18 @@ export default class CloudElectrons {
         },
       },
     )
-    this.state = new Proxy(
-      {},
-      {
-        get(target: {}, p: any, receiver: any): any {
-          // console.log('state', Object.keys(cluster.nucleons))
-
-          let nucleon = cloud.nucleons[p]
-          if (!nucleon) nucleon = getNucleon(p)
-          return nucleon.value
-        },
-      },
-    ) as any
+    // this.state = new Proxy(
+    //   {},
+    //   {
+    //     get(target: {}, p: any, receiver: any): any {
+    //       // console.log('state', Object.keys(cluster.nucleons))
+    //
+    //       let nucleon = cloud.nucleons[p]
+    //       if (!nucleon) nucleon = getNucleon(p)
+    //       return nucleon.value
+    //     },
+    //   },
+    // ) as any
   }
 
   addEternals(keys: String[]) {
