@@ -1,6 +1,3 @@
-import { isDefined } from './extra'
-import { eternalSym } from '@alaq/atom/property'
-
 export default function (model) {
   const isClass = typeof model === 'function'
   const getters = {}
@@ -10,9 +7,6 @@ export default function (model) {
 
   if (isClass) {
     const instance = new model()
-    // const protoOfInstance = Object.getPrototypeOf(instance)
-    const methods = [] //Object.getOwnPropertyNames(protoOfInstance)
-
     const findExtends = (prototype) => {
       const n = Object.getOwnPropertyNames(prototype)
       if (n.indexOf('__proto__') === -1) {
@@ -35,7 +29,6 @@ export default function (model) {
     findExtends(model.prototype)
 
     Object.keys(instance).forEach((key) => {
-      // checkValue(key, instance[key])
       instaValues[key] = instance[key]
     })
   } else {
@@ -45,7 +38,6 @@ export default function (model) {
         actions[key] = someValue
       } else {
         instaValues[key] = someValue
-        // checkValue(key, someValue)
       }
     })
   }

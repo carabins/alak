@@ -3,7 +3,7 @@
  */
 import { test } from 'tap'
 
-import { Nucleus, installNucleonExtensions } from '@alaq/nucleus/index'
+import { installNucleonExtensions, Nucleus } from '@alaq/nucleus/index'
 import vueNucleonExtension from '../src'
 
 test('install', (t) => {

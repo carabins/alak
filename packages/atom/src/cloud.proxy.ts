@@ -3,24 +3,25 @@ import { isDefined } from '@alaq/atom/extra'
 export const isString = (p) => typeof p === 'string'
 
 export const cloudProxy = {
-  superState(supers, atom) {
-    return new Proxy(atom, {
-      get(target: any, p: string | symbol, receiver: any): any {
-        const superValue = supers[p]
-        if (superValue) {
-          return superValue
-        } else {
-          return atom[p]
-        }
+  warpNucleonGetter: (getter, core) =>
+    new Proxy(
+      { getter, core },
+      {
+        get(o, key) {
+          const v = o.getter(key)
+          return v ? v.value : o.core[key]
+        },
+        set(o, k, v) {
+          o.core[k] = v
+          return true
+        },
       },
-    })
-  },
-
+    ),
   warp: (shell, core) =>
     new Proxy(
       { shell, core },
       {
-        get(target: any, p: string | symbol, receiver: any): any {
+        get(target: any, p: string | symbol): any {
           const s = target.shell[p]
           return isDefined(s) ? s : target.core[p]
         },
@@ -48,33 +49,6 @@ export const cloudProxy = {
         },
       },
     ),
-
-  // awakeProxy: (sleepingAtoms) =>
-  //   new Proxy(sleepingAtoms, {
-  //     get(target: any, p: string | symbol, receiver: any): any {
-  //       const atom = target[p]
-  //       console.log('awakeProxy', atom, p)
-  //       if (atom) {
-  //         if (atom.hasMeta('sleep')) {
-  //           const wakeup = atom.getMeta('sleep')
-  //           wakeup()
-  //           atom.removeMeta('sleep')
-  //         }
-  //         return atom
-  //       }
-  //       return undefined
-  //     },
-  //   }),
-  // warpState: (atoms, proxyState) =>
-  //   new Proxy(
-  //     { atoms, proxyState },
-  //     {
-  //       get(target: any, p: string | symbol, receiver: any): any {
-  //         const atom = target.atoms[p]
-  //         return atom ? atom.value : target.proxyState[p]
-  //       },
-  //     },
-  //   ),
 }
 /*
  * Copyright (c) 2022. Only the truth - liberates.

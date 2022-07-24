@@ -1,6 +1,6 @@
 import { test } from 'tap'
 
-import { pureAtoms, pureAtom, createAtom } from '../src'
+import { createAtom, pureAtom, pureAtoms } from '../src'
 
 const model = {
   other: 30,
@@ -18,11 +18,6 @@ function baseTest(t, m) {
   m.state(10)
   t.equal(m.other.value, 30)
 }
-
-test('pure one atom: class', async (t) => {
-  // const m = Atom.create(Model).one()
-  // baseTest(t, m)
-})
 
 test('pure one atom: object ', async (t) => {
   const m = createAtom(model).one()

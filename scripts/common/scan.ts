@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import { existsSync } from 'fs'
-import { Log } from '~/scripts/log'
 
 const scan = (dir) => {
   const fromDir = path.resolve(dir)

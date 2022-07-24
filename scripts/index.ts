@@ -9,7 +9,7 @@ import { publish, upver } from './task.publish'
 import { test } from './task.test'
 import { syncDeps } from '~/scripts/task.syncDeps'
 
-const task = process.argv[3] || 'pre'
+const task = process.argv[3] || 'test'
 
 const pre = [upver, syncDeps, test, compile]
 const up = [...pre, publish]
@@ -38,7 +38,18 @@ if (!job.pipeLine?.length) {
   throw 'wrong command'
 }
 
-const target = process.argv[2]
+const packs = fs.readdirSync(Const.PACKAGES)
+const projects = {}
+export const versions = {}
+packs.forEach((f) => {
+  const p = initProject(f)
+  if (p) {
+    projects[f] = p
+    versions[p.packageJson.name] = p.packageJson.version
+  }
+})
+const arg2 = process.argv[2] || 'all'
+const target = arg2 === 'all' ? Object.keys(projects).join(',') : arg2
 
 console.log(`
       o
@@ -51,19 +62,9 @@ console.log(`
    /  o  \\
   :____o__:
   '._____.'`)
+
 console.log('  task', color.bold(task.toUpperCase()))
 console.log('target', color.bold(target))
-
-const packs = fs.readdirSync(Const.PACKAGES)
-const projects = {}
-export const versions = {}
-packs.forEach((f) => {
-  const p = initProject(f)
-  if (p) {
-    projects[f] = p
-    versions[p.packageJson.name] = p.packageJson.version
-  }
-})
 
 function getProject(target) {
   const p = projects[target]

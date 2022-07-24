@@ -3,7 +3,6 @@ import path from 'path'
 import { Worker } from 'node:worker_threads'
 
 const TSR = require('tap-mocha-reporter')
-const chokidar = require('chokidar')
 
 console.clear()
 
@@ -30,8 +29,8 @@ export function runTest(testFile) {
     // worker.on('exit', (fall) => {
     //   fall && console.log('FALL', testFile)
     // })
-  } catch (e){
-    console.log("worker error")
+  } catch (e) {
+    console.log('worker error')
   }
 }
 

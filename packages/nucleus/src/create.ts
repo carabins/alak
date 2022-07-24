@@ -1,8 +1,6 @@
 import { createQuark } from './quark'
 import { handlers, quarkProps } from './handlers'
 
-import { DECAY_ATOM_ERROR, PROPERTY_ATOM_ERROR } from './utils'
-
 const quaint = {
   proto: Object.defineProperties(Object.assign({}, handlers), quarkProps),
   proxy: {} as Record<string, AnyFunction>,

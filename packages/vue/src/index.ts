@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import { ref, Ref, watch, onMounted, onUnmounted, reactive } from 'vue'
-import { Atom, createAtom } from '@alaq/atom/index'
+import { onMounted, onUnmounted, reactive, Ref, ref, watch } from 'vue'
+import { createAtom } from '@alaq/atom/index'
 import { UnwrapNestedRefs } from '@vue/reactivity'
 
 export function vueAtom<Model extends object>(atomConfig: {

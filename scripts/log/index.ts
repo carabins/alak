@@ -5,7 +5,6 @@ import pino from 'pino'
 import * as path from 'path'
 import * as color from 'colorette'
 import pretty from 'pino-pretty'
-import { inspect } from 'util'
 
 const starTime = Date.now()
 const logInstance = pino(
@@ -16,7 +15,7 @@ const logInstance = pino(
     customPrettifiers: {
       time: (timestamp) => -1 * (starTime - timestamp), //((starTime - timestamp) - 10000000000),
     },
-    messageFormat: (log, messageKey, ...a) => {
+    messageFormat: (log) => {
       let s = ''
       if (log.module) {
         s = `${color.dim(log.module)} `
@@ -61,15 +60,14 @@ const newProxy = (i) =>
     apply(target: any, thisArg: any, argArray: any[]): any {
       target.l.info(parseMultiline(argArray))
     },
-    get(target: any, p: string | symbol, receiver: any): any {
+    get(target: any, p: string | symbol): any {
       return (...l) => target.l[p](parseMultiline(l))
     },
   }) as ProxyLoger
 
 function wrapLog(module) {
   function fn() {}
-  const child = logInstance.child({ module }, { level: 20 })
-  fn.l = child
+  fn.l = logInstance.child({ module }, { level: 20 })
   return newProxy(fn)
 }
 export const Log = wrapLog(false)

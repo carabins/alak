@@ -57,7 +57,7 @@ export default function <Model, Eternal>(config: {
       cloud.nucleons[key] = nucleon
       delete cloud.sleepingNucleons[key]
     } else {
-      nucleon = orbital.atom[key]
+      nucleon = cloud.nucleons[key] || orbital.atom[key]
     }
     return nucleon
   }

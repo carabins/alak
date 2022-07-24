@@ -1,6 +1,6 @@
 export { N, Nucleus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, eternalAtom } from '@alaq/atom/index'
-export { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
+export { atomicModel, atomicFactory } from '@alaq/molecule/atomicModel'
 export { getMolecule } from '@alaq/molecule/index'
 export { eternal, flighty } from '@alaq/atom/property'

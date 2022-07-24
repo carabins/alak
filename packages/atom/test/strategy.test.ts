@@ -4,7 +4,8 @@
 
 import { test } from 'tap'
 import { createAtom } from '@alaq/atom/index'
-// import { atomicNode } from '@alaq/atom/create'
+
+// import { atomicModel } from '@alaq/atom/create'
 
 class model {
   one = 1

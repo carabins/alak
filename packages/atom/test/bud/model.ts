@@ -11,15 +11,11 @@ export default class {
   }
 
   get multiCount() {
-    console.log('multiCount', this.multiplex, this.taskCount)
+    // console.log('multiCount', this.multiplex, this.taskCount)
     return this.multiplex * this.taskCount
   }
 
-  get globalCount() {
-    return this.everCount
-  }
-
-  global() {
-    return this.globalCount
+  multiMethod() {
+    return this.multiCount
   }
 }

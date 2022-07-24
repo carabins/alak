@@ -2,7 +2,7 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { atomicNode, atomicNodes } from '@alaq/molecule/atomicNode'
+import { atomicFactory } from '@alaq/molecule/atomicModel'
 import { MultiAtomic } from '@alaq/atom/index'
 import { test } from 'tap'
 
@@ -13,17 +13,20 @@ class model extends MultiAtomic {
     this.one++
   }
 
-  idReturnMethod() {
-    return this.id
+  get thisOne() {
+    return this.one
+  }
+  oneReturnMethod() {
+    return this.thisOne
   }
 }
 
-const baseAtom = atomicNodes({
+const baseAtom = atomicFactory({
   name: 'baseAtom',
   model,
 })
 
-const eAtom = atomicNodes({
+const eAtom = atomicFactory({
   name: 'aAtom',
   model,
   nucleusStrategy: 'eternal',
@@ -31,7 +34,8 @@ const eAtom = atomicNodes({
 
 test('multiAtoms', (t) => {
   const a = baseAtom.get(100)
-  t.equal(a.core.idReturnMethod(), 100)
+  console.log(a.core.oneReturnMethod(), a.state.thisOne)
+  // t.equal(a.core.oneReturnMethod(), a.state.thisOne)
 
   const b = baseAtom.get(101)
   b.actions.add()

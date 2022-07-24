@@ -1,3 +1,4 @@
+import * as ts from 'typescript'
 import {
   CompilerOptions,
   createCompilerHost,
@@ -5,8 +6,7 @@ import {
   ModuleResolutionKind,
   ScriptTarget,
 } from 'typescript'
-import * as ts from 'typescript'
-import { FileLog, Log } from '~/scripts/log'
+import { FileLog } from '~/scripts/log'
 import { scanAllSrc } from '~/scripts/common/scan'
 import { Const } from '~/scripts/common/constants'
 import path from 'path'
