@@ -24,12 +24,13 @@ export default function (electrons: CloudElectrons, cloud, config) {
     ? cloudProxy.warp(config.thisExtension, thisState)
     : thisState
 
+  electrons.state = thisContext
+
   Object.keys(electrons.actions).forEach((key) => {
     cloud.actions[key] = (...args) => {
       const fn = electrons.actions[key] as Function
-      // console.log(thisContext)
       return fn.apply(thisContext, args)
     }
   })
-  return { atom, sleepingNucleons, parts: electrons }
+  return { atom }
 }
