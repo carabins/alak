@@ -7,6 +7,88 @@
 import { onMounted, onUnmounted, reactive, Ref, ref, watch } from 'vue'
 import { createAtom } from '@alaq/atom/index'
 import { UnwrapNestedRefs } from '@vue/reactivity'
+import { getMolecule } from '@alaq/molecule/index'
+
+function warpVRtoA(r, a) {
+  const watched = {}
+  return new Proxy(r, {
+    get(o, k) {
+      if (!watched[k]) {
+        watch(
+          () => o[k],
+          (v) => {
+            if (o[k] !== a[k].value) {
+              a[k](v)
+            }
+          },
+        )
+        a[k]
+        watched[k] = true
+      }
+      return o[k]
+    },
+  })
+}
+
+export function useAtomFactory(options: {
+  props: any
+  watch: string
+  keys?: string[]
+  startValues?: Record<string, any>
+}) {
+  const m = getMolecule()
+  const state = {
+    atom: m.atoms[options.props[options.watch]],
+  }
+
+  const keys = options.keys || Object.keys(options.startValues)
+
+  const react = reactive(options.startValues ? Object.assign({}, options.startValues) : {})
+
+  onMounted(() => {
+    keys.forEach((rk) => {
+      watch(
+        () => react[rk],
+        (v) => {
+          state.atom.core[rk](v)
+        },
+      )
+    })
+  })
+  const listeners = []
+  const free = () => {
+    while (listeners.length) {
+      listeners.pop()()
+    }
+  }
+  onUnmounted(() => {
+    free()
+  })
+
+  watch(
+    () => options.props[options.watch],
+    (v) => {
+      free()
+      if (!m.atoms[v]) {
+        return
+      }
+      state.atom = m.atoms[v]
+      keys.forEach((rk) => {
+        const l = (rv) => {
+          react[rk] = rv
+        }
+        const n = state.atom.core[rk]
+        if (n.isEmpty) {
+          react[rk] = options.startValues[rk]
+        }
+        n.up(l)
+        listeners.push(() => n.down(l))
+      })
+    },
+  )
+
+  return react
+}
 
 export function vueAtom<Model extends object>(atomConfig: {
   name?: string
@@ -24,25 +106,7 @@ export function vueAtom<Model extends object>(atomConfig: {
     nucleusStrategy: atomConfig.nucleusStrategy,
     listener,
   }).one()
-  const watched = {}
-
-  const proxy = new Proxy(r, {
-    get(o, k) {
-      if (!watched[k]) {
-        watch(
-          () => o[k],
-          (v) => {
-            if (o[k] !== a[k].value) {
-              a[k](v)
-            }
-          },
-        )
-        a[k]
-        watched[k] = true
-      }
-      return o[k]
-    },
-  })
+  const proxy = warpVRtoA(r, a)
   return [proxy, a] as [UnwrapNestedRefs<Model>, Atomized<Model>]
 }
 
