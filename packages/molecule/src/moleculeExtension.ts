@@ -17,6 +17,7 @@ export default function (q: QuantumAtom) {
     name: q.name,
     dispatchEvent: q.molecule.eventBus,
     molecule: q.molecule.atoms,
+    target: q.target,
     set(atom: string, nuclon: string, data: any) {
       const a = getA(atom)
       a && a.core[nuclon](data)
