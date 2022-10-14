@@ -1,4 +1,4 @@
-export default function (model) {
+export default function (model, config: AtomOptions<any>) {
   const isClass = typeof model === 'function'
   const getters = {}
   const actions = {}
@@ -6,7 +6,7 @@ export default function (model) {
   const instaValues = {}
 
   if (isClass) {
-    const instance = new model()
+    const instance = new model(config.constructorArgs)
     const findExtends = (prototype) => {
       const n = Object.getOwnPropertyNames(prototype)
       if (n.indexOf('__proto__') === -1) {

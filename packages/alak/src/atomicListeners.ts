@@ -12,7 +12,7 @@ export default function (q: QuantumAtom) {
         return
       }
     }
-    if (q.molecule && name.startsWith('in')) {
+    if (q.cluster && name.startsWith('in')) {
       checkIn(q, name.replace('in', ''), name)
     }
   })
@@ -21,8 +21,11 @@ export default function (q: QuantumAtom) {
 
 function checkIn(q, nn, name) {
   const parts = camelToSnakeCase(nn).split('_')
+  if (parts.length <= 1) {
+    return false
+  }
   const module = parts[1].toLowerCase()
-  const atom = q.molecule?.atoms[module]
+  const atom = q.cluster?.atoms[module]
   if (atom) {
     for (const up of upEnds) {
       const c = cap(up)

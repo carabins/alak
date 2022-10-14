@@ -13,7 +13,7 @@ interface AtomicConstructor<Model, E, N> {
   edges?: N extends Record<string, AtomicNode<any>>
     ? GraphBuilderN<Instance<Model>, N>
     : GraphBuilder<Instance<Model>>
-  listen?: PartialRecord<MoleculeEvents, keyof Instance<Model>>
+  listen?: PartialRecord<ClusterEvents, keyof Instance<Model>>
   nodes?: N
 
   activate?(

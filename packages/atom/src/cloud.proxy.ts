@@ -1,8 +1,18 @@
 import { isDefined } from '@alaq/atom/extra'
+import nuclear from '@alaq/atom/nuclear'
 
 export const isString = (p) => typeof p === 'string'
 
 export const cloudProxy = {
+  nuclear: (valence: Record<string, any>, core: DeepAtomCore<any>) =>
+    new Proxy(
+      { valence, core },
+      {
+        get(a, key: string) {
+          return a.core.nucleons[key] || nuclear(key, valence, core)
+        },
+      },
+    ),
   warpNucleonGetter: (getter, core) =>
     new Proxy(
       { getter, core },

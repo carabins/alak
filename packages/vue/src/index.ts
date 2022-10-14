@@ -5,9 +5,9 @@
  */
 
 import { onMounted, onUnmounted, reactive, Ref, ref, watch } from 'vue'
-import { createAtom } from '@alaq/atom/index'
 import { UnwrapNestedRefs } from '@vue/reactivity'
-import { getMolecule } from '@alaq/molecule/index'
+import { Atom, coreAtom } from '@alaq/atom/index'
+import { getAtomCluster } from 'alak/index'
 
 function warpVRtoA(r, a) {
   const watched = {}
@@ -36,7 +36,7 @@ export function useAtomFactory(options: {
   keys?: string[]
   startValues?: Record<string, any>
 }) {
-  const m = getMolecule()
+  const m = getAtomCluster()
   const state = {
     atom: m.atoms[options.props[options.watch]],
   }
@@ -101,11 +101,12 @@ export function vueAtom<Model extends object>(atomConfig: {
     r[key] = value
   }
 
-  const a = createAtom(atomConfig.model, {
+  const a = coreAtom({
+    model: atomConfig.model,
     name: atomConfig.name,
     nucleusStrategy: atomConfig.nucleusStrategy,
     listener,
-  }).one()
+  })
   const proxy = warpVRtoA(r, a)
   return [proxy, a] as [UnwrapNestedRefs<Model>, Atomized<Model>]
 }

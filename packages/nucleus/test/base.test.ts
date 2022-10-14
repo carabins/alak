@@ -9,7 +9,7 @@ const beFinal = (t) => (v) => t.equal(v, finalValue)
 // const neverBe = (v) => expect(v).toThrow
 
 test('basic', (t) => {
-  t.plan(1)
+  t.plan(2)
   let n = N()
 
   // console.log(n.ref)
@@ -19,5 +19,6 @@ test('basic', (t) => {
   })
 
   n(startValue)
+  t.equal(n.value, startValue)
   t.end()
 })

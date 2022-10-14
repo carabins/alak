@@ -2,17 +2,12 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import create from './create'
-
 import cloudGetters from './cloud.getters'
 import { cloudProxy } from './cloud.proxy'
 import CloudElectrons from './cloud.electrons'
 
-export default function (electrons: CloudElectrons, cloud, config) {
-  const atom = create(electrons.instaValues, {
-    name: config.name,
-    nucleusStrategy: cloud.superEternal || electrons.eternalKeys,
-  }).one()
+export default function (electrons: CloudElectrons, cloud, config: AtomOptions<any>) {
+  const atom = cloudProxy.nuclear(electrons.instaValues, Object.assign({ nucleons: {} }, config))
 
   const sleepingNucleons = cloudGetters(electrons, config.name)
   Object.assign(cloud.sleepingNucleons, sleepingNucleons)

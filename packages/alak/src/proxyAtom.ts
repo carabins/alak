@@ -1,5 +1,5 @@
-import { atomicConstructor } from '@alaq/molecule/atomicConstructor'
-import { getMolecule } from '@alaq/molecule/index'
+import { atomicConstructor } from './atomicConstructor'
+import { getAtomCluster } from './index'
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -11,7 +11,7 @@ export function proxyAtom(constructor, id?, target?) {
   const name = id ? constructor.name + '.' + id : constructor.name
   const quantum: QuantumAtom = {
     name,
-    molecule: constructor.molecule ? getMolecule(constructor.molecule) : getMolecule(),
+    cluster: constructor.cluster ? getAtomCluster(constructor.cluster) : getAtomCluster(),
   }
   if (id) {
     quantum.id = id
@@ -19,7 +19,7 @@ export function proxyAtom(constructor, id?, target?) {
   if (target) {
     quantum.target = target
   }
-  quantum.eventBus = quantum.molecule.eventBus
+  quantum.eventBus = quantum.cluster.eventBus
   const up = () => {
     atomicConstructor(constructor, quantum)
   }
@@ -61,6 +61,6 @@ export function proxyAtom(constructor, id?, target?) {
       }
     },
   })
-  quantum.molecule.atoms[quantum.name] = proxy
+  quantum.cluster.atoms[quantum.name] = proxy
   return proxy
 }
