@@ -1,7 +1,7 @@
 import { Nucleus } from '@alaq/nucleus/index'
 import { Atom } from '@alaq/atom/index'
-import moleculeExtension from '@alaq/molecule/moleculeExtension'
-import atomicListeners from '@alaq/molecule/atomicListeners'
+import atomicListeners from './atomicListeners'
+import alakExtension from './alakExtension'
 
 export function atomicConstructor<M, E, N>(
   constructor: AtomicConstructor<M, E, N>,
@@ -11,12 +11,11 @@ export function atomicConstructor<M, E, N>(
     model: constructor.model,
     name: quantum.name,
     eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
-    thisExtension: moleculeExtension(quantum),
+    thisExtension: alakExtension(quantum),
+    constructorArgs: [quantum.id, quantum.target],
   }) as any
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()
-  quantum.id && atom.core.id(quantum.id)
-  quantum.target && atom.core.target(quantum.target)
   constructor.nodes &&
     Object.keys(constructor.nodes).forEach((key) => {
       const subAtom = constructor.nodes[key]
@@ -69,7 +68,6 @@ export function atomicConstructor<M, E, N>(
     })
   const an = { nodes, emitEvent: eventBus } as any
   quantum.atom = Object.assign(an, atom)
-  // quantum.molecule.atoms[quantum.name] = quantum.atom
   const al = atomicListeners(quantum)
   if (constructor.listen || al) {
     const eventListener = (event, data) => {
@@ -77,7 +75,8 @@ export function atomicConstructor<M, E, N>(
         const fn = getNode(where)
         fn && fn(data)
       }
-      const listenerName = al[event] || constructor.listen[event]
+
+      const listenerName = al[event] || (constructor?.listen ? constructor.listen[event] : null)
       if (listenerName) {
         if (typeof listenerName === 'string') {
           apply(listenerName)
@@ -91,5 +90,8 @@ export function atomicConstructor<M, E, N>(
     quantum.eventBus?.up(eventListener)
   }
 
+  quantum.id && atom.core.id(quantum.id)
+  quantum.target && atom.core.target(quantum.target)
+  atom.actions.onActivate && atom.actions.onActivate(quantum.id, quantum.target)
   constructor.activate && constructor.activate.apply(atom.state, [atom.core, nodes])
 }

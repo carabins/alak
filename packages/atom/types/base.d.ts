@@ -13,13 +13,11 @@ type ClassToKV<T> = T extends ClassInstance ? InstanceType<T> : T
 type PureModel<T> = RemoveKeysByType<T, AnyFunction>
 type Atomized<T> = { readonly [K in keyof T]: INucleon<T[K]> }
 
-type PureAtom<T> = Atomized<PureModel<Instance<T>>>
-
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
 
 type AtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
-type AtomState<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
+type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
 type NucleusStrategy = 'core' | 'eternal' | 'holistic' | 'stateless' | 'holystate'
 
@@ -29,13 +27,15 @@ interface IAtom<T> {
   core: AtomCore<Instance<T>>
 }
 
-type AtomOptions = {
+type AtomOptions<Model> = {
   name?: string
+  model?: Model
+  eternal?: Array<keyof PureModel<Model>> | '*' | boolean
   nucleusStrategy?: NucleusStrategy
-  listener?: (key: string, v: any) => void
+  thisExtension?: any
+  constructorArgs?: any[]
 }
-type DeepAtomCore = AtomOptions & {
+type DeepAtomCore<T> = AtomOptions<T> & {
   proxy?: any
-  eternal?: boolean | string[]
   nucleons?: Record<string, INucleon<any>>
 }

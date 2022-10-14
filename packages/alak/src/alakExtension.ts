@@ -4,7 +4,7 @@
 
 export default function (q: QuantumAtom) {
   const getA = (name) => {
-    const a = q.molecule.atoms[name]
+    const a = q.cluster.atoms[name]
     if (!a) {
       console.error(`обращение из атома [${q.name}] к отсуствующему атому [${name}]`)
     }
@@ -15,16 +15,17 @@ export default function (q: QuantumAtom) {
   const under = {
     id: q.id,
     name: q.name,
-    dispatchEvent: q.molecule.eventBus,
-    molecule: q.molecule.atoms,
+    dispatchEvent: q.cluster.eventBus,
+    cluster: q.cluster.atoms,
     target: q.target,
-    set(atom: string, nuclon: string, data: any) {
+    call(atom: string, methodName: string, args?: any[]) {},
+    set(atom: string, nucleon: string, data: any) {
       const a = getA(atom)
-      a && a.core[nuclon](data)
+      a && a.core[nucleon](data)
     },
-    get(atom: string, nuclon) {
+    get(atom: string, nucleon) {
       const a = getA(atom)
-      return a ? a.core[nuclon].value : new Error('atom not found')
+      return a ? a.core[nucleon].value : new Error('atom not found')
     },
   }
   return {

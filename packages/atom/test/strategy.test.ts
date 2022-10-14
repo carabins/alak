@@ -3,25 +3,24 @@
  */
 
 import { test } from 'tap'
-import { createAtom } from '@alaq/atom/index'
-
-// import { atomicModel } from '@alaq/atom/create'
+import { Atom } from '@alaq/atom/index'
 
 class model {
   one = 1
 }
 
 test('nucleus strategy', (t) => {
-  const statelessAtom = createAtom(model, {
+  const statelessAtom = Atom({
+    model,
     nucleusStrategy: 'stateless',
-  }).one()
-  t.equal(statelessAtom.one.isStateless, true)
-  t.equal(statelessAtom.one.value, undefined)
-
-  const holyStateAtom = createAtom(model, {
+  })
+  t.equal(statelessAtom.core.one.isStateless, true)
+  t.equal(statelessAtom.state.one, undefined)
+  const holyStateAtom = Atom({
+    model,
     nucleusStrategy: 'holystate',
-  }).one()
-  t.equal(holyStateAtom.one.isHoly, true)
-  t.equal(holyStateAtom.one.isStateless, true)
+  })
+  t.equal(holyStateAtom.core.one.isHoly, true)
+  t.equal(holyStateAtom.core.one.isStateless, true)
   t.end()
 })

@@ -17,7 +17,7 @@ interface AtomicNode<Model> {
   core: ModelCore<Model>
   actions: OnlyFunc<Instance<Model>>
 
-  emitEvent(name: MoleculeEvents, data?: any)
+  emitEvent(name: ClusterEvents, data?: any)
 
   onActivate(listiner: (node: AtomicNode<Model>) => void)
 }
@@ -35,7 +35,7 @@ type QuantumAtom = {
   name: string
   target?: any
   eventBus?: INucleon<any>
-  molecule: {
+  cluster: {
     atoms: any
     eventBus: any
   }

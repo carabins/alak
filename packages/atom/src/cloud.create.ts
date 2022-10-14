@@ -6,13 +6,7 @@ import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
 
-export default function <Model, Eternal>(config: {
-  name?: string
-  model?: Model
-  eternal?: Eternal | Array<keyof PureModel<Model>> | '*'
-  nucleusStrategy?: NucleusStrategy
-  thisExtension?: any
-}) {
+export default function <Model, Eternal>(config: AtomOptions<Model>) {
   const cloud = {
     nucleons: {},
     actions: {},
@@ -33,7 +27,7 @@ export default function <Model, Eternal>(config: {
   }
 
   const findElectrons = (model, isEternal?) => {
-    const parts = cloudParse(model)
+    const parts = cloudParse(model, config)
     Object.assign(electrons.actions, parts.actions)
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)

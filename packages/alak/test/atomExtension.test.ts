@@ -3,8 +3,8 @@
  */
 
 import { test } from 'tap'
-import { atomicModel, atomicFactory } from '@alaq/molecule/atomicModel'
-import { getMolecule } from '@alaq/molecule/index'
+import { atomicFactory, atomicModel } from 'alak/atomicModel'
+import { getAtomCluster } from 'alak/index'
 
 class model {
   one = 1
@@ -19,7 +19,11 @@ class model {
     this.two = v
   }
 
-  onNewEventListener(v) {
+  onNewOneListener(v) {
+    console.log('++')
+    this.one = v
+  }
+  onNewSomeListener(v) {
     this.one = v
   }
 }
@@ -43,11 +47,10 @@ const multiA = atomicFactory({
   model,
 })
 
-const mole = getMolecule()
-test('molecule name', (t) => {
+const mole = getAtomCluster()
+test('cluster name', (t) => {
   mole.atoms.a.core.z(12)
   t.equal(a.state.z, 12)
-
   const aInstance = multiA.get('A')
   aInstance.core.z(24)
   const aInstanceFromMole = mole.atoms['aa.A'] as any
@@ -58,7 +61,9 @@ test('molecule name', (t) => {
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   a.actions.addOne()
   t.equal(a.state.two, 2)
-  a.emitEvent('NEW_EVENT', 100)
+  a.emitEvent('NEW_ONE', 100)
+  a.emitEvent('NEW', 3)
+  a.emitEvent('SOME', 4)
   t.equal(a.state.one, 100)
   t.equal(a.state.one, b.state.two)
   t.end()

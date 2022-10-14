@@ -2,12 +2,11 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { atomicFactory } from '@alaq/molecule/atomicModel'
-import { MultiAtomic } from '@alaq/atom/index'
 import { test } from 'tap'
-import { PartOfMolecule } from '@alaq/molecule/index'
+import { AtomicModel } from 'alak/index'
+import { atomicFactory } from 'alak/atomicModel'
 
-class submodel extends PartOfMolecule {
+class submodel extends AtomicModel {
   get thisOne() {
     return this['one'] as number
   }

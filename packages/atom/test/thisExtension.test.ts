@@ -11,6 +11,10 @@ class model {
   defineZtoV() {
     this.v = this['z']
   }
+
+  constructor(a) {
+    console.log(a)
+  }
 }
 
 test('', (t) => {
