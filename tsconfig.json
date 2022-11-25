@@ -48,6 +48,7 @@
     "packages/nucleus/types/*.d.ts",
     "packages/alak/types/*.d.ts",
     "packages/vue/types/*.d.ts",
+    "packages/svg/types/*.d.ts",
 
     "packages/**/*.ts",
     "scripts/**/*.d.ts",
