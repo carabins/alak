@@ -1,0 +1,9 @@
+{
+    "name": "@alaq/svg",
+    "version": "0.0.0-omega.2",
+    "description": "svg draw",
+    "main": "index.js",
+    "type": "index.d.ts",
+    "author": "Gleb Panteleev",
+    "license": "MIT & TRU"
+}
