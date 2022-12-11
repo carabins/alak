@@ -1,11 +1,5 @@
 import { grandUpFn, notifyListeners, setNucleonValue } from './quark'
-import {
-  addStateEventListener,
-  ClearState,
-  notifyStateListeners,
-  QState,
-  removeStateEventListener,
-} from './state'
+import { addEventListener, ClearState, dispatchEvent, QState, removeEventListener } from './events'
 import {
   deleteParams,
   falseFilter,
@@ -62,7 +56,7 @@ export const handlers: any = {
     }
   },
   clearListeners(silent) {
-    !silent && notifyStateListeners(this, QState.CLEAR, ClearState.ALL)
+    !silent && dispatchEvent(this, QState.CLEAR, ClearState.ALL)
     delete this.value
     this.listeners.clear()
     this.grandListeners && this.grandListeners.clear()
@@ -71,13 +65,13 @@ export const handlers: any = {
     return this._
   },
   decay() {
-    notifyStateListeners(this, QState.CLEAR, ClearState.DECAY)
+    dispatchEvent(this, QState.CLEAR, ClearState.DECAY)
     this._.clear(true)
     this.decays && this.decays.forEach((f) => f())
     deleteParams(this)
   },
   clearValue() {
-    notifyStateListeners(this, QState.CLEAR, ClearState.VALUE)
+    dispatchEvent(this, QState.CLEAR, ClearState.VALUE)
     delete this.value
     return this._
   },
@@ -96,16 +90,16 @@ export const handlers: any = {
   },
 
   onClear(fun) {
-    addStateEventListener(this, QState.CLEAR, fun)
+    addEventListener(this, QState.CLEAR, fun)
   },
   offClear(fun) {
-    removeStateEventListener(this, QState.CLEAR, fun)
+    removeEventListener(this, QState.CLEAR, fun)
   },
   onAwait(fun) {
-    addStateEventListener(this, QState.AWAIT, fun)
+    addEventListener(this, QState.AWAIT, fun)
   },
   offAwait(fun) {
-    removeStateEventListener(this, QState.AWAIT, fun)
+    removeEventListener(this, QState.AWAIT, fun)
   },
   resend() {
     notifyListeners(this)
@@ -218,15 +212,15 @@ export const handlers: any = {
     return this.metaMap.get(metaName)
   },
   dispatch(event, ...value) {
-    notifyStateListeners(this, event, ...value)
+    dispatchEvent(this, event, ...value)
     return this._
   },
   on(stateEvent, fn) {
-    addStateEventListener(this, stateEvent, fn)
+    addEventListener(this, stateEvent, fn)
     return this._
   },
   off(stateEvent, fn) {
-    removeStateEventListener(this, stateEvent, fn)
+    removeEventListener(this, stateEvent, fn)
     return this._
   },
   setGetter(getterFunction, isAsync) {

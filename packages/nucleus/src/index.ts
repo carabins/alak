@@ -12,6 +12,12 @@
  * @packageDocumentation
  */
 
+import {
+  addEventListener,
+  removeEventListener,
+  dispatchEvent,
+  removeListener,
+} from '@alaq/nucleus/events'
 import { createNucleon, nucleonExtensions } from './create'
 import { alive } from './utils'
 
@@ -42,6 +48,42 @@ export const N = Object.assign(createNucleon, {
     return a
   },
 }) as INucleonConstructor<any>
+
+export function QuarkEventBus() {
+  const q = {} as Quark
+  const removeEverythingListener = (l) => {
+    if (q.everythingListeners?.has(l)) {
+      q.everythingListeners.delete(l)
+    }
+  }
+  return {
+    addEverythingListener(listener) {
+      if (!q.everythingListeners) q.everythingListeners = new Set()
+      q.everythingListeners.add(listener)
+    },
+    addEventListener: (event: string, listener) => addEventListener(q, event, listener),
+    removeEventListener: (listener, event) => {
+      removeEverythingListener(listener)
+      removeEventListener(q, event, listener)
+    },
+    removeListener: (listener) => {
+      removeListener(q, listener)
+      removeEverythingListener(listener)
+    },
+    dispatchEvent: (event: string, data) => {
+      if (q.everythingListeners) {
+        q.everythingListeners.forEach((f) => f(event, data))
+      }
+      dispatchEvent(q, event, data)
+    },
+    getListenersMap: () => {
+      if (!q.stateListeners) q.stateListeners = new Map()
+      return q.stateListeners
+    },
+  } as QuarkBus<any, any>
+}
+
+export const Q = QuarkEventBus
 
 export const Nucleus = N
 export default N

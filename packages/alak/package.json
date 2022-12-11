@@ -1,6 +1,6 @@
 {
     "name": "alak",
-    "version": "4.0.0-omega.159",
+    "version": "4.0.0-omega.164",
     "description": "Alak Last Atom",
     "main": "index.js",
     "types": "index.d.ts",
@@ -17,7 +17,7 @@
     "license": "MIT & TRU",
     "repository": "https://github.com/carabins/alak",
     "dependencies": {
-        "@alaq/nucleus": "4.0.0-omega.11",
-        "@alaq/atom": "4.0.0-omega.23"
+        "@alaq/nucleus": "4.0.0-omega.13",
+        "@alaq/atom": "4.0.0-omega.28"
     }
 }

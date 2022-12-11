@@ -1,7 +1,11 @@
+import { external } from '@alaq/atom/property'
+
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
   everCount = 12
+
+  someOtherVar = external('+')
 
   addEverCount(v) {
     this.everCount += v

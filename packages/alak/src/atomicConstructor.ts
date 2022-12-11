@@ -13,9 +13,11 @@ export function atomicConstructor<M, E, N>(
     eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
     thisExtension: alakExtension(quantum),
     constructorArgs: [quantum.id, quantum.target],
+    bus: quantum.bus,
   }) as any
   const nodes = {}
   const eventBus = Nucleus.stateless().holistic()
+
   constructor.nodes &&
     Object.keys(constructor.nodes).forEach((key) => {
       const subAtom = constructor.nodes[key]

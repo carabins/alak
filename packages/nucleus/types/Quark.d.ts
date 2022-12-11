@@ -18,8 +18,18 @@ type AnyFunction = {
 
 type Level = 'value' | 'all' | 'decay'
 
+interface QuarkBus<Events, DataType> {
+  addEverythingListener: (listener: (event: Events, data: DataType) => void) => void
+  addEventListener: (event: Events, listener: (data: DataType) => void) => void
+  removeEventListener: (listener, event) => void
+  removeListener: (listener) => void
+  dispatchEvent: (event: string, data?: DataType) => void
+  getListenersMap: () => Map<string, Set<AnyFunction>>
+}
+
 interface Quark {
   (...a: any[]): void
+
   _: INucleon<any>
   _name?: string
   value?: any
@@ -29,6 +39,7 @@ interface Quark {
   listeners: Set<AnyFunction>
   grandListeners?: Map<AnyFunction, AnyFunction>
   stateListeners?: Map<string, Set<AnyFunction>>
+  everythingListeners?: Set<AnyFunction>
   getterFn?: any
   wrapperFn?: any
   meta?: any

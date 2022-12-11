@@ -16,9 +16,9 @@ interface AtomicNode<Model> {
   state: ModelState<Model>
   core: ModelCore<Model>
   actions: OnlyFunc<Instance<Model>>
+  bus: QuarkBus<any, any>
 
   emitEvent(name: ClusterEvents, data?: any)
-
   onActivate(listiner: (node: AtomicNode<Model>) => void)
 }
 
@@ -35,9 +35,11 @@ type QuantumAtom = {
   name: string
   target?: any
   eventBus?: INucleon<any>
+  bus?: QuarkBus<any, any>
   cluster: {
     atoms: any
     eventBus: any
+    bus: QuarkBus<any, any>
   }
   atom?: AtomicNode<any>
   eventListeners?: string[]

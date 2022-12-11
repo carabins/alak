@@ -2,7 +2,7 @@
 import { storage } from './storage'
 import { isDefined } from './extra'
 import N from '@alaq/nucleus/index'
-import { eternalSym, flightySym } from '@alaq/atom/property'
+import { eternalSym, externalSym, flightySym } from '@alaq/atom/property'
 
 const nonNucleons = ['constructor']
 export default function (key, valence, core: DeepAtomCore<any>) {
@@ -10,7 +10,8 @@ export default function (key, valence, core: DeepAtomCore<any>) {
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
     let modelValue = valence ? valence[key] : undefined,
-      mem
+      mem,
+      external
 
     if (typeof core.eternal === 'boolean') {
       mem = core.eternal
@@ -19,9 +20,12 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       mem = core.eternal && core.eternal.indexOf(key) !== -1
     }
     core.nucleons[key] = nucleon = N()
-
     if (isDefined(modelValue)) {
       switch (modelValue.sym) {
+        case externalSym:
+          external = modelValue.external || true
+          modelValue = modelValue.startValue
+          break
         case eternalSym:
           modelValue = modelValue.startValue
           mem = true
@@ -32,6 +36,7 @@ export default function (key, valence, core: DeepAtomCore<any>) {
           break
       }
     }
+
     switch (core.nucleusStrategy) {
       case 'holistic':
         nucleon.holistic()
@@ -52,6 +57,13 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       if (isDefined(modelValue)) {
         nucleon(modelValue)
       }
+    }
+
+    if (external) {
+      core.quarkBus.dispatchEvent('init', {
+        external,
+        nucleon,
+      })
     }
   }
 

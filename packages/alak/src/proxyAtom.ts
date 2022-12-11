@@ -9,9 +9,10 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
+  const cluster = constructor.cluster ? getAtomCluster(constructor.cluster) : getAtomCluster()
   const quantum: QuantumAtom = {
     name,
-    cluster: constructor.cluster ? getAtomCluster(constructor.cluster) : getAtomCluster(),
+    cluster,
   }
   if (id) {
     quantum.id = id
@@ -20,6 +21,7 @@ export function proxyAtom(constructor, id?, target?) {
     quantum.target = target
   }
   quantum.eventBus = quantum.cluster.eventBus
+  quantum.bus = quantum.cluster.bus
   const up = () => {
     atomicConstructor(constructor, quantum)
   }
@@ -51,6 +53,8 @@ export function proxyAtom(constructor, id?, target?) {
             pp = pk[pp] = makeProxyKey(p)
           }
           return pp
+        case 'bus':
+          return cluster.bus
         case 'emitEvent':
           !quantum.atom && up()
           return quantum.atom.emitEvent

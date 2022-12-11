@@ -21,10 +21,14 @@ type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
 type NucleusStrategy = 'core' | 'eternal' | 'holistic' | 'stateless' | 'holystate'
 
+type ExternalEvents = 'init' | 'decay'
+type ExternalEventData = {}
+
 interface IAtom<T> {
   state: AtomState<Instance<T>>
   actions: OnlyFunc<Instance<T>>
   core: AtomCore<Instance<T>>
+  bus: QuarkBus<string, any>
 }
 
 type AtomOptions<Model> = {
@@ -34,8 +38,10 @@ type AtomOptions<Model> = {
   nucleusStrategy?: NucleusStrategy
   thisExtension?: any
   constructorArgs?: any[]
+  bus?: QuarkBus<any, any>
 }
 type DeepAtomCore<T> = AtomOptions<T> & {
   proxy?: any
   nucleons?: Record<string, INucleon<any>>
+  quarkBus: QuarkBus<any, any>
 }

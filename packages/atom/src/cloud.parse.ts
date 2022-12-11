@@ -14,7 +14,6 @@ export default function (model, config: AtomOptions<any>) {
           if (key === 'constructor') {
             return
           }
-          console
           const opd = Object.getOwnPropertyDescriptor(prototype, key)
           if (opd.get) {
             getters[key] = opd.get
