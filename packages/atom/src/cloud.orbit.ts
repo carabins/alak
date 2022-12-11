@@ -6,8 +6,11 @@ import cloudGetters from './cloud.getters'
 import { cloudProxy } from './cloud.proxy'
 import CloudElectrons from './cloud.electrons'
 
-export default function (electrons: CloudElectrons, cloud, config: AtomOptions<any>) {
-  const atom = cloudProxy.nuclear(electrons.instaValues, Object.assign({ nucleons: {} }, config))
+export default function (electrons: CloudElectrons, cloud, config: AtomOptions<any>, quarkBus) {
+  const atom = cloudProxy.nuclear(
+    electrons.instaValues,
+    Object.assign({ nucleons: {}, quarkBus }, config),
+  )
 
   const sleepingNucleons = cloudGetters(electrons, config.name)
   Object.assign(cloud.sleepingNucleons, sleepingNucleons)

@@ -2,6 +2,7 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
+import { QuarkEventBus } from '@alaq/nucleus/index'
 import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
@@ -40,7 +41,9 @@ export default function <Model, Eternal>(config: AtomOptions<Model>) {
   config.model && findElectrons(config.model)
   config.eternal && findElectrons(config.eternal, true)
 
-  const orbital = cloudOrbit(electrons, cloud, config)
+  const bus = config.bus || QuarkEventBus()
+
+  const orbital = cloudOrbit(electrons, cloud, config, bus)
 
   function getNucleon(key) {
     let nucleon = cloud.sleepingNucleons[key]
@@ -56,5 +59,10 @@ export default function <Model, Eternal>(config: AtomOptions<Model>) {
     return nucleon
   }
 
-  return { core: electrons.core, state: electrons.state, actions: cloud.actions } as IAtom<Model>
+  return {
+    core: electrons.core,
+    state: electrons.state,
+    actions: cloud.actions,
+    bus,
+  } as IAtom<Model>
 }

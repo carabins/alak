@@ -1,4 +1,4 @@
-import { notifyStateListeners, QState } from './state'
+import { dispatchEvent, QState } from './events'
 import { DECAY_ATOM_ERROR, rnd } from './utils'
 
 export function setNucleonValue(quark: Quark, value?) {
@@ -28,7 +28,7 @@ export function setNucleonValue(quark: Quark, value?) {
 }
 
 async function setAsyncValue(quark: Quark, promise: PromiseLike<any>) {
-  notifyStateListeners(quark, QState.AWAIT, true)
+  dispatchEvent(quark, QState.AWAIT, true)
   quark.isAwaiting = promise
   quark.isAsync = true
   const v = await promise
@@ -38,7 +38,7 @@ async function setAsyncValue(quark: Quark, promise: PromiseLike<any>) {
   quark.prev = quark.value
   quark.value = v
   quark.isAwaiting = false
-  notifyStateListeners(quark, QState.AWAIT, false)
+  dispatchEvent(quark, QState.AWAIT, false)
   notifyListeners(quark)
   if (quark.isStateless) delete quark.value
   delete quark.prev

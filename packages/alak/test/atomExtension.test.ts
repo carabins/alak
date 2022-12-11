@@ -60,6 +60,7 @@ test('cluster name', (t) => {
   aInstanceFromMole.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   a.actions.addOne()
+  // console.log(a.state.two)
   t.equal(a.state.two, 2)
   a.emitEvent('NEW_ONE', 100)
   a.emitEvent('NEW', 3)

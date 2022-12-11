@@ -5,12 +5,12 @@ export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, eternalAtom } from '@alaq/atom/index'
 export { eternal, flighty } from '@alaq/atom/property'
 
-import { Nucleus } from '@alaq/nucleus/index'
+import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 
 export class ActiveCluster {
   atoms = {} as Record<string, AtomicNode<any>>
   eventBus = Nucleus.holistic().stateless()
-
+  bus = QuarkEventBus()
   public constructor(public namespace: string) {}
 }
 
