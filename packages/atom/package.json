@@ -1,6 +1,6 @@
 {
     "name": "@alaq/atom",
-    "version": "4.0.0-omega.28",
+    "version": "4.0.0-omega.30",
     "main": "index.js",
     "type": "index.d.ts",
     "author": "Gleb Panteleev",

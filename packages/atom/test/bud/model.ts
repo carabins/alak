@@ -5,7 +5,7 @@ export default class {
   multiplex = 10
   everCount = 12
 
-  someOtherVar = external('+')
+  someOtherVar = external.some('+')
 
   addEverCount(v) {
     this.everCount += v

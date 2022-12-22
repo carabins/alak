@@ -1,3 +1,4 @@
+import { external } from '@alaq/atom/property'
 import { test } from 'tap'
 
 import bid from './bud'
@@ -31,6 +32,8 @@ test('atom events', async (t) => {
   bid.bus.addEverythingListener((event, data) => {
     switch (event) {
       case 'init':
+        t.equal(data.external, 'some')
+        t.equal(data.nucleon.value, '+')
         t.equal(data.nucleon.id, bid.core.someOtherVar.id)
         break
       case 'some':

@@ -1,6 +1,6 @@
 export { atomicFactory, atomicModel } from 'alak/atomicModel'
 
-export { N, Nucleus } from '@alaq/nucleus/index'
+export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, eternalAtom } from '@alaq/atom/index'
 export { eternal, flighty } from '@alaq/atom/property'
