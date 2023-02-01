@@ -30,6 +30,6 @@
     "tap-mocha-reporter":"^5.0.3",
     "type-fest": "^2.14.0",
     "typescript": "~4.7.4",
-    "vue": "^3.2.37"
+    "vue": "^3.2.45"
   }
 }
