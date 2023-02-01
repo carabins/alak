@@ -19,7 +19,7 @@
     "chokidar": "^3.5.3",
     "colorette": "^2.0.19",
     "fs-extra": "^10.1.0",
-    "pino": "^8.1.0",
+    "pino": "^8.8.0",
     "pino-pretty": "^8.1.0",
     "prettier": "2.7.1",
     "tap": "^16.3.0",
