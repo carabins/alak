@@ -9,8 +9,9 @@ import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 
 export class ActiveCluster {
   atoms = {} as Record<string, AtomicNode<any>>
-  eventBus = Nucleus.holistic().stateless()
+  // eventBus = Nucleus.holistic().stateless()
   bus = QuarkEventBus()
+
   public constructor(public namespace: string) {}
 }
 
@@ -32,8 +33,8 @@ export abstract class AtomicModel {
     core: Record<string, INucleon<any>>
     cluster: Record<string, AtomicNode<any>>
     dispatchEvent(name: ClusterEvents, data?): void
-    set(atom: string, nuclon: string, data: any): void
-    get(atom: string, nuclon): void
+    set(atom: string, nucleus: string, data: any): void
+    get(atom: string, nucleus: string): void
     call(atom: string, methodName: string, args?: any[])
   }
 }

@@ -15,15 +15,14 @@ class model {
     this.one++
   }
 
-  onOneUp(v) {
+  onUpdateOne(v) {
     this.two = v
   }
 
-  onNewOneListener(v) {
-    console.log('++')
+  onEventNewOne(v) {
     this.one = v
   }
-  onNewSomeListener(v) {
+  onEventNewSome(v) {
     this.one = v
   }
 }
@@ -49,6 +48,7 @@ const multiA = atomicFactory({
 
 const mole = getAtomCluster()
 test('cluster name', (t) => {
+  t.plan(7)
   mole.atoms.a.core.z(12)
   t.equal(a.state.z, 12)
   const aInstance = multiA.get('A')
@@ -60,12 +60,11 @@ test('cluster name', (t) => {
   aInstanceFromMole.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   a.actions.addOne()
-  // console.log(a.state.two)
   t.equal(a.state.two, 2)
-  a.emitEvent('NEW_ONE', 100)
-  a.emitEvent('NEW', 3)
-  a.emitEvent('SOME', 4)
+
+  a.bus.dispatchEvent('NEW_ONE', 100)
   t.equal(a.state.one, 100)
+
   t.equal(a.state.one, b.state.two)
   t.end()
 })

@@ -1,5 +1,5 @@
 import { atomicConstructor } from './atomicConstructor'
-import { getAtomCluster } from './index'
+import { getAtomCluster, QuarkEventBus } from './index'
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -13,14 +13,16 @@ export function proxyAtom(constructor, id?, target?) {
   const quantum: QuantumAtom = {
     name,
     cluster,
+    bus: QuarkEventBus(),
   }
+
   if (id) {
     quantum.id = id
   }
   if (target) {
     quantum.target = target
   }
-  quantum.eventBus = quantum.cluster.eventBus
+  // quantum.eventBus = quantum.cluster.eventBus
   quantum.bus = quantum.cluster.bus
   const up = () => {
     atomicConstructor(constructor, quantum)
@@ -54,10 +56,10 @@ export function proxyAtom(constructor, id?, target?) {
           }
           return pp
         case 'bus':
-          return cluster.bus
-        case 'emitEvent':
           !quantum.atom && up()
-          return quantum.atom.emitEvent
+          return quantum.bus
+        // case 'emitEvent':
+        //   return quantum.atom.emitEvent
         case 'onActivate':
           return (listener) => {
             target.activateListeners.push(listener)

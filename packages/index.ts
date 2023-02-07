@@ -17,6 +17,7 @@ export function testAll(projectName) {
   }
 }
 export function runTest(testFile) {
+  console.log(testFile)
   try {
     const worker = new Worker(testFile, {
       stdout: true,
