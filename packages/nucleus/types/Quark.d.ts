@@ -31,7 +31,7 @@ interface QuarkBus<Events, DataType> {
 
   getListenersMap(): Map<string, Set<AnyFunction>>
 
-  connectEventBus(event, bus: QuarkBus): void
+  connectEventBus(event, bus: QuarkBus<any, any>): void
 }
 
 interface Quark {
