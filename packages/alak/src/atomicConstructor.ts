@@ -16,13 +16,13 @@ export function atomicConstructor<M, E, N>(
     bus: quantum.bus,
   }) as any
   const nodes = {}
-  const eventBus = Nucleus.stateless().holistic()
+  // const eventBus = Nucleus.stateless().holistic()
 
   constructor.nodes &&
     Object.keys(constructor.nodes).forEach((key) => {
       const subAtom = constructor.nodes[key]
       subAtom.name = quantum.name ? quantum.name + '.' + key : key
-      subAtom.injectBus = eventBus
+      // subAtom.injectBus = eventBus
       nodes[key] = subAtom
     })
 
@@ -41,17 +41,17 @@ export function atomicConstructor<M, E, N>(
 
   constructor.edges &&
     constructor.edges.forEach((e) => {
-      const listiners = []
+      const listeners = []
       if (typeof e.to === 'string') {
-        listiners.push(getNode(e.to))
+        listeners.push(getNode(e.to))
         //@ts-ignore
       } else if (e.to?.length) {
         //@ts-ignore
-        listiners.push(...e.to.map(getNode))
+        listeners.push(...e.to.map(getNode))
       }
       if (typeof e.from === 'string') {
         //@ts-ignore
-        listiners.forEach((l) => getNode(e.from).up(l))
+        listeners.forEach((l) => getNode(e.from).up(l))
       } else {
         //@ts-ignore
         const fromNodes = e.from.map(getNode)
@@ -65,10 +65,10 @@ export function atomicConstructor<M, E, N>(
           )
           throw 'unsupported strategy'
         }
-        strategyMethod(listiners[0])
+        strategyMethod(listeners[0])
       }
     })
-  const an = { nodes, emitEvent: eventBus } as any
+  const an = { nodes } as any
   quantum.atom = Object.assign(an, atom)
   const al = atomicListeners(quantum)
   if (constructor.listen || al) {
@@ -79,6 +79,7 @@ export function atomicConstructor<M, E, N>(
       }
 
       const listenerName = al[event] || (constructor?.listen ? constructor.listen[event] : null)
+
       if (listenerName) {
         if (typeof listenerName === 'string') {
           apply(listenerName)
@@ -88,8 +89,9 @@ export function atomicConstructor<M, E, N>(
         }
       }
     }
-    eventBus.up(eventListener)
-    quantum.eventBus?.up(eventListener)
+    // eventBus.up(eventListener)
+    // quantum.eventBus?.up(eventListener)
+    quantum.bus.addEverythingListener(eventListener)
   }
 
   quantum.id && atom.core.id(quantum.id)

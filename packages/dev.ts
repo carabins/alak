@@ -1,6 +1,7 @@
 import fs from 'fs'
 import chokidar from 'chokidar'
 import { exec } from 'child_process'
+import * as color from 'colorette'
 
 const projects = {}
 fs.readdirSync('packages').forEach((p) => (projects[p] = true))
@@ -8,7 +9,9 @@ fs.readdirSync('packages').forEach((p) => (projects[p] = true))
 const marked = {}
 const TSR = require('tap-mocha-reporter')
 
+console.log(color.red('dev starts'))
 function run(f) {
+  console.log(color.blueBright(f))
   const p = exec('node -r @swc-node/register -r tsconfig-paths/register ' + f)
   // p.stdout = process.stdout
   p.stdout.pipe(TSR('classic'))
