@@ -19,7 +19,7 @@ import {
   removeListener,
 } from '@alaq/nucleus/events'
 import { createNucleon, nucleonExtensions } from './create'
-import { alive } from './utils'
+import { alive, rnd } from './utils'
 
 export const installNucleonExtensions = nucleonExtensions
 
@@ -49,7 +49,7 @@ export const N = Object.assign(createNucleon, {
   },
 }) as INucleonConstructor<any>
 
-export function QuarkEventBus() {
+export function QuarkEventBus(id?) {
   const q = {} as Quark
   const removeEverythingListener = (l) => {
     if (q.everythingListeners?.has(l)) {
@@ -57,6 +57,7 @@ export function QuarkEventBus() {
     }
   }
   return {
+    id: id | rnd(),
     addEverythingListener(listener) {
       if (!q.everythingListeners) q.everythingListeners = new Set()
       q.everythingListeners.add(listener)
@@ -79,6 +80,9 @@ export function QuarkEventBus() {
     getListenersMap: () => {
       if (!q.stateListeners) q.stateListeners = new Map()
       return q.stateListeners
+    },
+    connectEventBus(event: string, bus: QuarkBus<any, any>) {
+      addEventListener(q, event, (v) => bus.dispatchEvent(event, v))
     },
   } as QuarkBus<any, any>
 }

@@ -19,12 +19,19 @@ type AnyFunction = {
 type Level = 'value' | 'all' | 'decay'
 
 interface QuarkBus<Events, DataType> {
-  addEverythingListener: (listener: (event: Events, data: DataType) => void) => void
-  addEventListener: (event: Events, listener: (data: DataType) => void) => void
-  removeEventListener: (listener, event) => void
-  removeListener: (listener) => void
-  dispatchEvent: (event: string, data?: DataType) => void
-  getListenersMap: () => Map<string, Set<AnyFunction>>
+  addEverythingListener(listener: (event: Events, data: DataType) => void): void
+
+  addEventListener(event: Events, listener: (data: DataType) => void): void
+
+  removeEventListener(listener, event): void
+
+  removeListener(listener): void
+
+  dispatchEvent(event: string, data?: DataType): void
+
+  getListenersMap(): Map<string, Set<AnyFunction>>
+
+  connectEventBus(event, bus: QuarkBus): void
 }
 
 interface Quark {

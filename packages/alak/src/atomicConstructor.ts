@@ -1,4 +1,4 @@
-import { Nucleus } from '@alaq/nucleus/index'
+import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 import { Atom } from '@alaq/atom/index'
 import atomicListeners from './atomicListeners'
 import alakExtension from './alakExtension'
@@ -89,10 +89,11 @@ export function atomicConstructor<M, E, N>(
         }
       }
     }
-    // eventBus.up(eventListener)
-    // quantum.eventBus?.up(eventListener)
     quantum.bus.addEverythingListener(eventListener)
+    quantum.cluster.bus.addEverythingListener(eventListener)
   }
+
+  quantum.bus.connectEventBus('init', quantum.cluster.bus)
 
   quantum.id && atom.core.id(quantum.id)
   quantum.target && atom.core.target(quantum.target)

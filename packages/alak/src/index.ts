@@ -10,9 +10,11 @@ import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export class ActiveCluster {
   atoms = {} as Record<string, AtomicNode<any>>
   // eventBus = Nucleus.holistic().stateless()
-  bus = QuarkEventBus()
+  bus: QuarkBus<string, any>
 
-  public constructor(public namespace: string) {}
+  public constructor(public namespace: string) {
+    this.bus = QuarkEventBus(namespace)
+  }
 }
 
 const activeClusters = {}
