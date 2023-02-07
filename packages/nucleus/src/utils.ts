@@ -30,4 +30,4 @@ export function isPromise(obj) {
   )
 }
 
-export const rnd = () => 10000000000000000 * (Math.ceil(Math.random() * 9) + Math.random())
+export const rnd = () => 1000000000000000 * (Math.ceil(Math.random() * 9) + Math.random())

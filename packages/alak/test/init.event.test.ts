@@ -20,17 +20,17 @@ test('atom events', (t) => {
   const listener = (event, data) => {
     switch (event) {
       case 'init':
-        console.log(data)
         t.equal(data.nucleon.id, a.core.someVar.id)
         t.equal(data.nucleon.value, 'somevar')
         t.equal(data.external, 'some_id')
     }
   }
+  // console.log('?', cluster.bus.id)
   cluster.bus.addEverythingListener(listener)
   // a.bus.addEverythingListener(listener)
   a.core.someVar()
   // cluster.bus.removeListener(listener)
-  a.bus.removeListener(listener)
+  cluster.bus.removeListener(listener)
   a.core.some()
   t.end()
 })

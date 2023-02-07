@@ -1,4 +1,4 @@
-import { AtomicModel } from 'alak/index'
+import { AtomicModel, getAtomCluster } from 'alak/index'
 import { atomicModel } from 'alak/atomicModel'
 
 class submodel extends AtomicModel {
@@ -17,14 +17,18 @@ class model extends submodel {
   }
 
   getIdMethod() {
-    return this._.id
+    // return this._.id
   }
   oneReturnMethod() {
     return this.thisOne
   }
-  constructor() {
+  constructor(...a) {
     super()
-    console.log('constructor')
+    // console.log('constructor', a)
+  }
+
+  onEventHelloWorld(data) {
+    console.log(this._.name, 'hi event', data)
   }
 }
 
@@ -33,4 +37,4 @@ const a = atomicModel({
   model,
 })
 
-// a.emitEvent()
+// console.log(a.state.thisOne)

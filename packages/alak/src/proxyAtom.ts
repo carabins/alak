@@ -13,7 +13,7 @@ export function proxyAtom(constructor, id?, target?) {
   const quantum: QuantumAtom = {
     name,
     cluster,
-    bus: QuarkEventBus(),
+    bus: QuarkEventBus(name),
   }
 
   if (id) {
@@ -23,7 +23,7 @@ export function proxyAtom(constructor, id?, target?) {
     quantum.target = target
   }
   // quantum.eventBus = quantum.cluster.eventBus
-  quantum.bus = quantum.cluster.bus
+  quantum.cluster.bus
   const up = () => {
     atomicConstructor(constructor, quantum)
   }
