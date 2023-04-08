@@ -1,7 +1,7 @@
 import { createQuark } from './quark'
 import { handlers, quarkProps } from './handlers'
 
-const quaint = {
+const quant = {
   proto: Object.defineProperties(Object.assign({}, handlers), quarkProps),
   proxy: {} as Record<string, AnyFunction>,
 }
@@ -11,7 +11,7 @@ const quaint = {
  */
 export function nucleonExtensions(...extensions: NucleonExtension[]) {
   extensions.forEach((ext) => {
-    Object.assign(quaint.proxy, ext)
+    Object.assign(quant.proxy, ext)
   })
 }
 
@@ -21,7 +21,7 @@ const proxy = {
     if (r || typeof r != 'undefined' || r != null) {
       return r
     }
-    const f = quaint.proxy[key]
+    const f = quant.proxy[key]
     if (f) {
       return f.apply(q)
     }
@@ -31,7 +31,7 @@ const proxy = {
 
 export function createNucleon<T>(value?: T) {
   const quark = createQuark(...arguments)
-  quark.__proto__ = quaint.proto
+  quark.__proto__ = quant.proto
   quark._ = new Proxy(quark, proxy)
   return quark._
 }
