@@ -8,7 +8,11 @@ interface AtomicConstructor<Model, E, N> {
   name?: string
   model?: Model
   nucleusStrategy?: NucleusStrategy
+
+  emitChanges?: boolean
   startup?: StartupStrategy
+
+  // dispatchEachValues?: boolean
 
   edges?: N extends Record<string, AtomicNode<any>>
     ? GraphBuilderN<Instance<Model>, N>

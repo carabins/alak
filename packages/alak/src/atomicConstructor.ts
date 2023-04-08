@@ -10,6 +10,7 @@ export function atomicConstructor<M, E, N>(
   const atom = Atom({
     model: constructor.model,
     name: quantum.name,
+    emitChanges: constructor.emitChanges,
     eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
     thisExtension: alakExtension(quantum),
     constructorArgs: [quantum.id, quantum.target],
@@ -30,6 +31,7 @@ export function atomicConstructor<M, E, N>(
     const node = nodes[nodeKey]
     return node.core[targetKey]
   }
+
   const getNode = (n: string) => {
     const parts = n.split('.')
     if (parts.length > 1) {
@@ -93,7 +95,8 @@ export function atomicConstructor<M, E, N>(
     quantum.cluster.bus.addEverythingListener(eventListener)
   }
 
-  quantum.bus.connectEventBus('init', quantum.cluster.bus)
+  quantum.bus.connectEventBus('INIT', quantum.cluster.bus)
+  quantum.bus.connectEventBus('NUCLEON_CHANGE', quantum.cluster.bus)
 
   quantum.id && atom.core.id(quantum.id)
   quantum.target && atom.core.target(quantum.target)

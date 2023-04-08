@@ -7,7 +7,7 @@ import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
 
-export default function <Model, Eternal>(config: AtomOptions<Model>) {
+export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
   const cloud = {
     nucleons: {},
     actions: {},
@@ -17,18 +17,18 @@ export default function <Model, Eternal>(config: AtomOptions<Model>) {
 
   const electrons = new CloudElectrons(getNucleon, cloud)
 
-  if (config.nucleusStrategy === 'eternal' || config.eternal === '*') {
+  if (atomOptions.nucleusStrategy === 'eternal' || atomOptions.eternal === '*') {
     cloud.superEternal = true
   } else if (
-    typeof config.eternal !== 'string' &&
-    config.eternal &&
-    typeof config.eternal[0] === 'string'
+    typeof atomOptions.eternal !== 'string' &&
+    atomOptions.eternal &&
+    typeof atomOptions.eternal[0] === 'string'
   ) {
-    electrons.eternalKeys = config.eternal as string[]
+    electrons.eternalKeys = atomOptions.eternal as string[]
   }
 
   const findElectrons = (model, isEternal?) => {
-    const parts = cloudParse(model, config)
+    const parts = cloudParse(model, atomOptions)
     Object.assign(electrons.actions, parts.actions)
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
@@ -38,12 +38,12 @@ export default function <Model, Eternal>(config: AtomOptions<Model>) {
     }
   }
 
-  config.model && findElectrons(config.model)
-  config.eternal && findElectrons(config.eternal, true)
+  atomOptions.model && findElectrons(atomOptions.model)
+  atomOptions.eternal && findElectrons(atomOptions.eternal, true)
 
-  const bus = config.bus || QuarkEventBus()
+  const bus = atomOptions.bus || QuarkEventBus()
 
-  const orbital = cloudOrbit(electrons, cloud, config, bus)
+  const orbital = cloudOrbit(electrons, cloud, atomOptions, bus)
 
   function getNucleon(key) {
     let nucleon = cloud.sleepingNucleons[key]
