@@ -12,8 +12,6 @@ test('basic', (t) => {
   t.plan(2)
   let n = N()
 
-  console.log(n)
-  console.log(function () {})
   n.up((v) => {
     // console.log({ v })
     t.equal(v, startValue)
