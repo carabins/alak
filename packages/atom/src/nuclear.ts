@@ -71,8 +71,13 @@ export default function (key, valence, core: DeepAtomCore<any>) {
   }
 
   if (core.emitChanges) {
-    nucleon.up((v) => {
-      core.quarkBus.dispatchEvent('NUCLEON_CHANGE', nucleon)
+    nucleon.up((value) => {
+      core.quarkBus.dispatchEvent('NUCLEON_CHANGE', {
+        key,
+        value,
+        core: core.name,
+        nucleon,
+      })
     })
   }
 
