@@ -12,25 +12,40 @@ const a = atomicModel({
   name: 'a',
   model,
 })
+const b = atomicModel({
+  name: 'b',
+  model,
+  emitChanges: true,
+})
 
 const cluster = getAtomCluster()
 
-test('atom events', (t) => {
+test('atom init events', (t) => {
   t.plan(3)
   const listener = (event, data) => {
     switch (event) {
-      case 'init':
+      case 'INIT':
         t.equal(data.nucleon.id, a.core.someVar.id)
         t.equal(data.nucleon.value, 'somevar')
         t.equal(data.external, 'some_id')
     }
   }
-  // console.log('?', cluster.bus.id)
   cluster.bus.addEverythingListener(listener)
-  // a.bus.addEverythingListener(listener)
   a.core.someVar()
-  // cluster.bus.removeListener(listener)
   cluster.bus.removeListener(listener)
-  a.core.some()
+  a.core.some(3)
+  t.end()
+})
+
+test('atom change events', (t) => {
+  t.plan(2)
+  b.bus.addEventListener('NUCLEON_CHANGE', (n) => {
+    if (n.value === 'nextVar' || n.value === 'somevar') {
+      t.pass()
+    } else {
+      t.fail()
+    }
+  })
+  b.core.someVar('nextVar')
   t.end()
 })

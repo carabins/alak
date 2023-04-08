@@ -5,15 +5,16 @@
 export const eternalSym = Symbol('eternal')
 export const externalSym = Symbol('external')
 export const flightySym = Symbol('flighty')
+// export const broadcasterSum = Symbol('broadcaster')
 
 export const external = new Proxy(() => true, {
-  apply(target: any, thisArg: any, argArray: any[]): any {
+  apply(_, thisArg: any, argArray: any[]): any {
     const [startValue] = argArray
     return { sym: externalSym, startValue, external: true }
   },
-  get(target, external: string): any {
+  get(_, external: string): any {
     return (startValue) => {
-      target.startValue = startValue
+      // target.startValue = startValue
       return { sym: externalSym, startValue, external }
     }
   },
@@ -29,3 +30,6 @@ export function eternal<T>(startValue?: T): T {
 export function flighty<T>(startValue?: T): T {
   return { sym: flightySym, startValue } as any as T
 }
+// export function broadcaster<T>(startValue?: T): T {
+//   return { sym: broadcasterSum, startValue } as any as T
+// }

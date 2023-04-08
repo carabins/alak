@@ -35,6 +35,7 @@ type AtomOptions<Model> = {
   name?: string
   model?: Model
   eternal?: Array<keyof PureModel<Model>> | '*' | boolean
+  emitChanges?: boolean
   nucleusStrategy?: NucleusStrategy
   thisExtension?: any
   constructorArgs?: any[]

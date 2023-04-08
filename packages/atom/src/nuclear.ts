@@ -11,7 +11,8 @@ export default function (key, valence, core: DeepAtomCore<any>) {
     const id = core.name ? `${core.name}.${key}` : key
     let modelValue = valence ? valence[key] : undefined,
       mem,
-      external
+      external,
+      broadcast
 
     if (typeof core.eternal === 'boolean') {
       mem = core.eternal
@@ -34,6 +35,8 @@ export default function (key, valence, core: DeepAtomCore<any>) {
           modelValue = modelValue.startValue
           mem = false
           break
+        // case broadcasterSum:
+        //   broadcast = true
       }
     }
 
@@ -60,11 +63,17 @@ export default function (key, valence, core: DeepAtomCore<any>) {
     }
 
     if (external) {
-      core.quarkBus.dispatchEvent('init', {
+      core.quarkBus.dispatchEvent('INIT', {
         external,
         nucleon,
       })
     }
+  }
+
+  if (core.emitChanges) {
+    nucleon.up((v) => {
+      core.quarkBus.dispatchEvent('NUCLEON_CHANGE', nucleon)
+    })
   }
 
   return nucleon
