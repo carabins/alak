@@ -9,10 +9,15 @@ export default function (key, valence, core: DeepAtomCore<any>) {
   let nucleon: INucleon<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue = valence ? valence[key] : undefined,
-      mem,
-      external,
-      broadcast
+    let modelValue, mem, external, broadcast
+
+    if (valence) {
+      let v = valence[key]
+      if (isDefined(v)) {
+        modelValue = v
+        delete valence[key]
+      }
+    }
 
     if (typeof core.eternal === 'boolean') {
       mem = core.eternal
