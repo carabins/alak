@@ -15,6 +15,7 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
     superEternal: false,
   }
 
+  const knownKeys = {}
   const electrons = new CloudElectrons(getNucleon, cloud)
 
   if (atomOptions.nucleusStrategy === 'eternal' || atomOptions.eternal === '*') {
@@ -33,8 +34,12 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
     electrons.addEternals(parts.eternals)
+    const instaKeys = Object.keys(parts.instaValues)
+    instaKeys.forEach((k) => {
+      knownKeys[k] = true
+    })
     if (isEternal) {
-      electrons.addEternals(Object.keys(parts.instaValues))
+      electrons.addEternals(instaKeys)
     }
   }
 
@@ -56,6 +61,9 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
     } else {
       nucleon = cloud.nucleons[key] || orbital.atom[key]
     }
+    if (!knownKeys) {
+      knownKeys[key] = true
+    }
     return nucleon
   }
 
@@ -64,5 +72,7 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
     state: electrons.state,
     actions: cloud.actions,
     bus,
-  } as IAtom<Model>
+    cloud,
+    knownKeys,
+  } as any as IAtom<Model>
 }

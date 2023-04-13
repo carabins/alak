@@ -20,6 +20,8 @@ interface AtomicNode<Model> {
 
   // emitEvent(name: ClusterEvents, data?: any)
   onActivate(listiner: (node: AtomicNode<Model>) => void)
+
+  getValues(): ModelState<Model>
 }
 
 interface MultiAtomicNode<M, E, N> {
@@ -34,12 +36,9 @@ type QuantumAtom = {
   id?: any
   name: string
   target?: any
-  // eventBus?: INucleon<any>
-  // clusterBus: QuarkBus<any, any>
   bus: QuarkBus<any, any>
   cluster: {
     atoms: any
-    // eventBus: any
     bus: QuarkBus<any, any>
   }
   atom?: AtomicNode<any>
