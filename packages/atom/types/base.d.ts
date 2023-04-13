@@ -29,6 +29,8 @@ interface IAtom<T> {
   actions: OnlyFunc<Instance<T>>
   core: AtomCore<Instance<T>>
   bus: QuarkBus<string, any>
+
+  getValues(): PureModel<Instance<T>>
 }
 
 type AtomOptions<Model> = {

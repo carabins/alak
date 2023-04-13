@@ -60,6 +60,15 @@ export function proxyAtom(constructor, id?, target?) {
           return quantum.bus
         // case 'emitEvent':
         //   return quantum.atom.emitEvent
+        case 'getValues':
+          return () => {
+            !quantum.atom && up()
+            const v = {}
+            Object.keys(quantum.atom['knownKeys']).forEach((k) => {
+              v[k] = quantum.atom.state[k]
+            })
+            return v
+          }
         case 'onActivate':
           return (listener) => {
             target.activateListeners.push(listener)
