@@ -1,5 +1,6 @@
-let isBrowser = new Function('try {return this===window;}catch(e){ return false;}')
-let isServer = !isBrowser()
+const isBrowser = () => ![typeof window, typeof document].includes('undefined')
+
+const isServer = !isBrowser()
 
 export const storage = {
   init(nucleon: INucleon<any>) {

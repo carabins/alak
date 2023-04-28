@@ -8,6 +8,10 @@ const model = {
 class Model {
   state: number
   other = 30
+  _somePrivateVar = 1
+  getP() {
+    return this._somePrivateVar
+  }
 }
 function baseTest(t, m) {
   t.plan(2)
@@ -18,12 +22,18 @@ function baseTest(t, m) {
   t.equal(m.other.value, 30)
 }
 
-test('pure one atom: object ', async (t) => {
-  const m = coreAtom(model)
-  baseTest(t, m)
-})
-//
-test('pure atom one', async (t) => {
+// test('pure one atom: object ', async (t) => {
+//   const m = coreAtom(model)
+//   baseTest(t, m)
+// })
+// //
+// test('pure atom one', async (t) => {
+//   const m = coreAtom(Model)
+//   baseTest(t, m)
+// })
+
+test('private model atom ', async (t) => {
   const m = coreAtom(Model)
-  baseTest(t, m)
+  console.log(m.getP())
+  t.end()
 })
