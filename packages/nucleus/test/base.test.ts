@@ -9,16 +9,15 @@ const beFinal = (t) => (v) => t.equal(v, finalValue)
 // const neverBe = (v) => expect(v).toThrow
 
 test('basic', (t) => {
-  t.plan(2)
+  t.plan(4)
   let n = N()
-
+  t.equal(n.haveListeners, false)
   n.up((v) => {
-    // console.log({ v })
     t.equal(v, startValue)
   })
-
   n(startValue)
   t.equal(n.value, startValue)
+  t.equal(n.haveListeners, true)
   t.end()
 })
 

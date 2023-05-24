@@ -1,7 +1,7 @@
 {
-    "name": "@alaq/nucleus",
-    "version": "4.0.0-omega.16",
-    "description": "Alak Nucleus part of proactive universe",
+    "name": "@alaq/ws",
+    "version": "1.0.0-omega.2",
+    "description": "Alak websockets",
     "main": "index.js",
     "types": "index.d.ts",
     "keywords": [
