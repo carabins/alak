@@ -246,6 +246,7 @@ interface INucleon<T> {
    * @param metaName - имя мета-данных
    * @returns положительно при наличии мета-данных*/
   hasMeta(metaName: string): boolean
+
   /** Удалить мета-данных
    * @param metaName - имя мета-данных
    * @returns положительно при наличии мета-данных*/
@@ -338,5 +339,5 @@ interface INucleon<T> {
    */
   tuneOff(nucleon: INucleon<T>): void
 
-  // private toString():string
+  haveListeners: boolean
 }

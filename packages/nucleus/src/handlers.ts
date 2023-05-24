@@ -13,21 +13,18 @@ import { from } from './computed'
 
 const valueProp = 'value'
 
-export const quarkProps = {
-  isEmpty: {
-    get() {
-      return !this.hasOwnProperty(valueProp)
-    },
+export const props = {
+  isEmpty() {
+    return !this.hasOwnProperty(valueProp)
   },
-  isFilled: {
-    get() {
-      return this.hasOwnProperty(valueProp)
-    },
+  isFilled() {
+    return this.hasOwnProperty(valueProp)
   },
-  [Symbol.toPrimitive]: {
-    get() {
-      return this._.toString()
-    },
+  haveListeners() {
+    return this.listeners.size > 0
+  },
+  [Symbol.toPrimitive]() {
+    return this._.toString()
   },
 }
 
@@ -36,6 +33,7 @@ const applyValue = (q, f) =>
 
 export const handlers: any = {
   up(f) {
+    // console.log(':::: Up', f)
     this.listeners.add(f)
     applyValue(this._, f)
     return this._

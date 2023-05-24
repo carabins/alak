@@ -1,5 +1,3 @@
-import { quarkProps } from '@alaq/nucleus/handlers'
-
 const patternOnUpdate = 'onUpdate'
 const patternOnEvent = 'onEvent'
 
