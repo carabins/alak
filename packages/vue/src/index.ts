@@ -90,6 +90,15 @@ export function useAtomFactory(options: {
   return react
 }
 
+// export function ReactiveAtom<M>(atom: IAtom<M>): UnwrapNestedRefs<ClassToKV<M>> {
+//   const r = reactive({}) as UnwrapNestedRefs<ClassToKV<M>>
+//
+//   atom.bus.addEverythingListener((event, data) => {
+//     console.log(event, data)
+//   })
+//   return r
+// }
+
 export function vueAtom<Model extends object>(atomConfig: {
   name?: string
   model?: Model

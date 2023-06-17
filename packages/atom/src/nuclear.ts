@@ -2,14 +2,14 @@
 import { storage } from './storage'
 import { isDefined } from './extra'
 import N from '@alaq/nucleus/index'
-import { eternalSym, externalSym, flightySym } from '@alaq/atom/property'
+import { storedSym, tracedSym, statelessSym } from '@alaq/atom/property'
 
 const nonNucleons = ['constructor']
 export default function (key, valence, core: DeepAtomCore<any>) {
   let nucleon: INucleon<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue, mem, external, broadcast
+    let modelValue, mem, traced, broadcast
 
     if (valence) {
       let v = valence[key]
@@ -28,20 +28,18 @@ export default function (key, valence, core: DeepAtomCore<any>) {
     core.nucleons[key] = nucleon = N()
     if (isDefined(modelValue)) {
       switch (modelValue.sym) {
-        case externalSym:
-          external = modelValue.external || true
+        case tracedSym:
+          traced = modelValue.traced || true
           modelValue = modelValue.startValue
           break
-        case eternalSym:
+        case storedSym:
           modelValue = modelValue.startValue
           mem = true
           break
-        case flightySym:
+        case statelessSym:
           modelValue = modelValue.startValue
           mem = false
           break
-        // case broadcasterSum:
-        //   broadcast = true
       }
     }
 
@@ -67,23 +65,18 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       }
     }
 
-    if (external) {
-      core.quarkBus.dispatchEvent('INIT', {
-        external,
-        nucleon,
+    if (core.emitChanges) {
+      nucleon.up((value) => {
+        core.quarkBus.dispatchEvent('NUCLEON_CHANGE', {
+          key,
+          value,
+          core: core.name,
+          nucleon,
+        })
       })
     }
-  }
 
-  if (core.emitChanges) {
-    nucleon.up((value) => {
-      core.quarkBus.dispatchEvent('NUCLEON_CHANGE', {
-        key,
-        value,
-        core: core.name,
-        nucleon,
-      })
-    })
+    core.quarkBus.dispatchEvent('NUCLEON_INIT', { traced, nucleon })
   }
 
   return nucleon

@@ -1,4 +1,3 @@
-import { external } from '@alaq/atom/property'
 import { test } from 'tap'
 
 import bid from './bud'
