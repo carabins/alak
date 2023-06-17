@@ -8,6 +8,16 @@ export interface WsClientOptions {
   recConnectIntensity?: number //reconnectCount * Math.log10(recConnectIntensity))
 }
 
+export interface WsClientInstance {
+  isConnected: INucleon<boolean>
+  sendRaw(data: string): void
+  send: INucleon<any>
+  raw: INucleon<string>
+  data: INucleon<any>
+  ws: INucleon<WebSocket>
+  error: INucleon<any>
+}
+
 export default function WsClient(options: WsClientOptions = {} as WsClientOptions) {
   const o = Object.assign(
     {
@@ -29,7 +39,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
   const rawDataNucleon = N.stateless() as INucleon<string>
   const dataNucleon = N.stateless()
 
-  const instance = {
+  const instance: WsClientInstance = {
     isConnected,
     sendRaw,
     send,
@@ -69,7 +79,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
       setTimeout(() => {
         reConnectCount++
         connect()
-      }, reConnectCount * Math.log10(24))
+      }, 1000 * (reConnectCount * Math.log10(24)))
     }
   }
 
@@ -77,7 +87,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
     e.stopPropagation()
     e.stopImmediatePropagation()
     error(e)
-    console.log('websocket error')
+    console.log('websocket error', nws.value.url)
   }
 
   nws.up((ws) => {

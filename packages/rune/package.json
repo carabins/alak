@@ -1,6 +1,6 @@
 {
-  "name": "@alaq/rune",
-  "version": "0.0.1",
-  "author": "Gleb Panteleev",
-  "license": "MIT & TRU"
+    "name": "@alaq/rune",
+    "version": "0.0.2",
+    "author": "Gleb Panteleev",
+    "license": "MIT & TRU"
 }

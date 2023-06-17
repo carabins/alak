@@ -19,14 +19,22 @@ test('atom events', (t) => {
     name: 'b',
     model,
   })
-
-  b.bus.dispatchEvent('HELLO_WORLD', 'just b')
-
   const cluster = getAtomCluster()
+  cluster.bus.addEventListener('ATOM_INIT', (d) => {
+    console.log(d.atom.core.zzz)
+  })
+  b.bus.dispatchEvent('HELLO_WORLD', 'just b')
 
   cluster.bus.dispatchEvent('HELLO_WORLD', 'cluster')
   a.bus.dispatchEvent('HELLO_WORLD', 'just a')
   cluster.bus.dispatchEvent('HELLO_WORLD', 'cluster')
+
+  const c = atomicModel({
+    name: 'c',
+    model,
+  })
+
+  c.state.zzz
 
   t.end()
 })

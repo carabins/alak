@@ -11,5 +11,5 @@ test('alak atoms', async (t) => {
     name: 'a',
     model,
   })
-  console.log(a.getValues())
+  // console.log(a.getValues())
 })

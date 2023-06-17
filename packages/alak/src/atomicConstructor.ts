@@ -95,11 +95,12 @@ export function atomicConstructor<M, E, N>(
     quantum.cluster.bus.addEverythingListener(eventListener)
   }
 
-  quantum.bus.connectEventBus('INIT', quantum.cluster.bus)
+  quantum.bus.connectEventBus('NUCLEON_INIT', quantum.cluster.bus)
   quantum.bus.connectEventBus('NUCLEON_CHANGE', quantum.cluster.bus)
 
   quantum.id && atom.core.id(quantum.id)
   quantum.target && atom.core.target(quantum.target)
   atom.actions.onActivate && atom.actions.onActivate(quantum.id, quantum.target)
   constructor.activate && constructor.activate.apply(atom.state, [atom.core, nodes])
+  quantum.cluster.bus.dispatchEvent('ATOM_INIT', { name: quantum.name, atom })
 }

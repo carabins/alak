@@ -1,11 +1,11 @@
-import { external } from '@alaq/atom/property'
+import { traced } from '@alaq/atom/property'
 
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
   everCount = 12
 
-  someOtherVar = external.some('+')
+  someOtherVar = traced.some('+')
 
   addEverCount(v) {
     this.everCount += v
