@@ -19,7 +19,7 @@ type GetActions<T> = keyof OnlyFunc<T>
 type AtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
 type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
-type NucleusStrategy = 'core' | 'eternal' | 'holistic' | 'stateless' | 'holystate'
+type NucleusStrategy = 'core' | 'stored' | 'holistic' | 'stateless' | 'holystate'
 
 type ExternalEvents = 'init' | 'decay'
 type ExternalEventData = {}
@@ -36,7 +36,7 @@ interface IAtom<T> {
 type AtomOptions<Model> = {
   name?: string
   model?: Model
-  eternal?: Array<keyof PureModel<Model>> | '*' | boolean
+  stored?: Array<keyof PureModel<Model>> | '*' | boolean
   emitChanges?: boolean
   nucleusStrategy?: NucleusStrategy
   thisExtension?: any

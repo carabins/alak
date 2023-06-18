@@ -1,17 +1,17 @@
 import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 import { Atom } from '@alaq/atom/index'
-import atomicListeners from './atomicListeners'
-import alakExtension from './alakExtension'
+import alakListeners from './listeners'
+import alakExtension from './extension'
 
-export function atomicConstructor<M, E, N>(
-  constructor: AtomicConstructor<M, E, N>,
+export function alakConstructor<M, E, N>(
+  constructor: AlakConstructor<M, E, N>,
   quantum: QuantumAtom,
 ) {
   const atom = Atom({
     model: constructor.model,
     name: quantum.name,
     emitChanges: constructor.emitChanges,
-    eternal: constructor.nucleusStrategy === 'eternal' ? '*' : null,
+    stored: constructor.nucleusStrategy === 'stored' ? '*' : null,
     thisExtension: alakExtension(quantum),
     constructorArgs: [quantum.id, quantum.target],
     bus: quantum.bus,
@@ -72,7 +72,7 @@ export function atomicConstructor<M, E, N>(
     })
   const an = { nodes } as any
   quantum.atom = Object.assign(an, atom)
-  const al = atomicListeners(quantum)
+  const al = alakListeners(quantum)
   if (constructor.listen || al) {
     const eventListener = (event, data) => {
       const apply = (where) => {

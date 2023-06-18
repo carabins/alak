@@ -3,10 +3,10 @@
  */
 
 import { test } from 'tap'
-import { AtomicModel } from 'alak/index'
-import { atomicFactory } from 'alak/atomicModel'
+import { AlakModel } from 'alak/index'
+import { alakFactory } from 'alak/model'
 
-class submodel extends AtomicModel {
+class submodel extends AlakModel {
   get thisOne() {
     return this['one'] as number
   }
@@ -30,15 +30,15 @@ class model extends submodel {
   }
 }
 
-const baseAtom = atomicFactory({
+const baseAtom = alakFactory({
   name: 'baseAtom',
   model,
 })
 
-const eAtom = atomicFactory({
+const eAtom = alakFactory({
   name: 'aAtom',
   model,
-  nucleusStrategy: 'eternal',
+  nucleusStrategy: 'stored',
 })
 
 test('multiAtoms', (t) => {

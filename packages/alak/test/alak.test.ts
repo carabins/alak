@@ -1,4 +1,4 @@
-import { atomicModel } from 'alak/atomicModel'
+import { alakModel } from 'alak/model'
 import { test } from 'tap'
 
 test('alak atoms', async (t) => {
@@ -7,7 +7,7 @@ test('alak atoms', async (t) => {
     two = 2
   }
 
-  const a = atomicModel({
+  const a = alakModel({
     name: 'a',
     model,
   })

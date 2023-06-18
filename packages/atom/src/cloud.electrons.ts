@@ -6,7 +6,7 @@ export default class CloudElectrons {
   getters = {}
   actions = {}
   instaValues = {}
-  eternalKeys = []
+  storedKeys = []
   core: any
   state: any
 
@@ -26,6 +26,6 @@ export default class CloudElectrons {
   }
 
   addEternals(keys: String[]) {
-    this.eternalKeys.push(...keys)
+    this.storedKeys.push(...keys)
   }
 }

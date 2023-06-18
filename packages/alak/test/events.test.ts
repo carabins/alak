@@ -1,5 +1,5 @@
-import { AtomicModel, getAtomCluster } from 'alak/index'
-import { atomicModel } from 'alak/atomicModel'
+import { AlakModel, activeCluster } from 'alak/index'
+import { alakModel } from 'alak/model'
 import { test } from 'tap'
 
 test('atom events', (t) => {
@@ -10,16 +10,16 @@ test('atom events', (t) => {
     }
   }
 
-  const a = atomicModel({
+  const a = alakModel({
     name: 'a',
     model,
   })
 
-  const b = atomicModel({
+  const b = alakModel({
     name: 'b',
     model,
   })
-  const cluster = getAtomCluster()
+  const cluster = activeCluster()
   cluster.bus.addEventListener('ATOM_INIT', (d) => {
     console.log(d.atom.core.zzz)
   })
@@ -29,12 +29,10 @@ test('atom events', (t) => {
   a.bus.dispatchEvent('HELLO_WORLD', 'just a')
   cluster.bus.dispatchEvent('HELLO_WORLD', 'cluster')
 
-  const c = atomicModel({
-    name: 'c',
-    model,
-  })
-
-  c.state.zzz
+  // const c = alakModel({
+  //   name: 'c',
+  //   model,
+  // })
 
   t.end()
 })

@@ -19,11 +19,11 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       }
     }
 
-    if (typeof core.eternal === 'boolean') {
-      mem = core.eternal
+    if (typeof core.stored === 'boolean') {
+      mem = core.stored
     } else {
       //@ts-ignore
-      mem = core.eternal && core.eternal.indexOf(key) !== -1
+      mem = core.stored && core.stored.indexOf(key) !== -1
     }
     core.nucleons[key] = nucleon = N()
     if (isDefined(modelValue)) {

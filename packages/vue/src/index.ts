@@ -7,7 +7,7 @@
 import { onMounted, onUnmounted, reactive, Ref, ref, watch } from 'vue'
 import { UnwrapNestedRefs } from '@vue/reactivity'
 import { Atom, coreAtom } from '@alaq/atom/index'
-import { getAtomCluster } from 'alak/index'
+import { activeCluster } from 'alak/index'
 
 function warpVRtoA(r, a) {
   const watched = {}
@@ -29,75 +29,6 @@ function warpVRtoA(r, a) {
     },
   })
 }
-
-export function useAtomFactory(options: {
-  props: any
-  watch: string
-  keys?: string[]
-  startValues?: Record<string, any>
-}) {
-  const m = getAtomCluster()
-  const state = {
-    atom: m.atoms[options.props[options.watch]],
-  }
-
-  const keys = options.keys || Object.keys(options.startValues)
-
-  const react = reactive(options.startValues ? Object.assign({}, options.startValues) : {})
-
-  onMounted(() => {
-    keys.forEach((rk) => {
-      watch(
-        () => react[rk],
-        (v) => {
-          state.atom.core[rk](v)
-        },
-      )
-    })
-  })
-  const listeners = []
-  const free = () => {
-    while (listeners.length) {
-      listeners.pop()()
-    }
-  }
-  onUnmounted(() => {
-    free()
-  })
-
-  watch(
-    () => options.props[options.watch],
-    (v) => {
-      free()
-      if (!m.atoms[v]) {
-        return
-      }
-      state.atom = m.atoms[v]
-      keys.forEach((rk) => {
-        const l = (rv) => {
-          react[rk] = rv
-        }
-        const n = state.atom.core[rk]
-        if (n.isEmpty) {
-          react[rk] = options.startValues[rk]
-        }
-        n.up(l)
-        listeners.push(() => n.down(l))
-      })
-    },
-  )
-
-  return react
-}
-
-// export function ReactiveAtom<M>(atom: IAtom<M>): UnwrapNestedRefs<ClassToKV<M>> {
-//   const r = reactive({}) as UnwrapNestedRefs<ClassToKV<M>>
-//
-//   atom.bus.addEverythingListener((event, data) => {
-//     console.log(event, data)
-//   })
-//   return r
-// }
 
 export function vueAtom<Model extends object>(atomConfig: {
   name?: string

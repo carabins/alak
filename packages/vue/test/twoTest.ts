@@ -1,7 +1,6 @@
 import { test } from 'tap'
-import { Atom } from '@alaq/atom/index'
-import { ReactiveAtom } from '../src'
-import { atomicModel } from 'alak/atomicModel'
+import { alakModel } from 'alak/alakModel'
+import AReactive from '../src/areactive'
 
 class Model {
   one = 1
@@ -9,8 +8,10 @@ class Model {
 }
 
 test('reactive', (t) => {
-  // const a = atomicModel({ model: Model, name: 'one' })
-  // const r = ReactiveAtom(a)
-
+  // const a = alakModel({ model: Model, name: 'one' })
+  // const r = AReactive(a)
+  // t.equal(r.one, 1)
+  // a.core.one(10)
+  // console.log('::::>', r.one)
   t.end()
 })

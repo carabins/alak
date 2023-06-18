@@ -14,7 +14,7 @@ namespace Atom {
 
 export const isDefined = (v) => v !== undefined && v !== null
 
-export function eternalNucleon(nucleon: INucleon<any>, nucleonId: string) {
+export function storedNucleon(nucleon: INucleon<any>, nucleonId: string) {
   const id = nucleonId || nucleon.id
   const v = JSON.parse(localStorage.getItem(id))
   isDefined(v) && nucleon(v)

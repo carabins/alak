@@ -40,7 +40,7 @@ interface INucleon<T> {
   readonly isEmpty: boolean
 
   /** Вернёт `true` при наличии значения в контейнере*/
-  readonly isFilledisFilled: boolean
+  readonly isFull: boolean
 
   /** Идентификатор, вернёт `uid` если не был задан {@link INucleon.setId}*/
   readonly id: string
@@ -92,7 +92,7 @@ interface INucleon<T> {
    * @param a:{@link quark#INucleon} - нуклон-получатель
    * @param name:string? - опциональное имя канала
    * @returns {@link quark#INucleon}*/
-  parentFor(nucleon: INucleon<T>, parentName?: string): INucleon<T>
+  connect(nucleon: INucleon<T>, parentName?: string): INucleon<T>
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * с возможностью отписаться {@link INucleon.downLink} по объёкту-ссылке

@@ -2,7 +2,7 @@ export default function (model, config: AtomOptions<any>) {
   const isClass = typeof model === 'function'
   const getters = {}
   const actions = {}
-  const eternals = []
+  const storeds = []
   const instaValues = {}
 
   if (isClass) {
@@ -43,7 +43,7 @@ export default function (model, config: AtomOptions<any>) {
   return {
     getters,
     actions,
-    eternals,
+    storeds,
     instaValues,
   }
 }
