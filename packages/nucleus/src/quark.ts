@@ -1,5 +1,5 @@
 import { dispatchEvent, QState } from './events'
-import { DECAY_ATOM_ERROR, rnd } from './utils'
+import { DECAY_QUARK_ERROR, rnd } from './utils'
 
 export function setNucleonValue(quark: Quark, value?) {
   const setValue = (finalValue) => {
@@ -62,7 +62,7 @@ export function grandUpFn(quark: Quark, keyFun: AnyFunction, grandFun: AnyFuncti
 export const createQuark = (...a) => {
   const quark = function (...v) {
     if (!quark.listeners) {
-      throw DECAY_ATOM_ERROR
+      throw DECAY_QUARK_ERROR
     }
     if (v.length) {
       const value = quark.isHoly ? v : v[0]

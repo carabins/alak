@@ -1,8 +1,8 @@
-import { atomicModel } from 'alak/atomicModel'
+import { alakModel } from 'alak/model'
 
-export function initMolecule<T extends Record<string, any>>(models: T) {
+export function alakMolecule<T extends Record<string, any>>(models: T) {
   const nodes = {} as {
-    [K in keyof T as `${Extract<K, string>}Node`]: AtomicNode<T[K]>
+    [K in keyof T as `${Extract<K, string>}Node`]: ANode<T[K]>
   }
   const cores = {} as {
     [K in keyof T as `${Extract<K, string>}Core`]: AtomCore<Instance<T[K]>>
@@ -12,7 +12,7 @@ export function initMolecule<T extends Record<string, any>>(models: T) {
   }
 
   for (const name in models) {
-    const an = atomicModel({
+    const an = alakModel({
       name,
       model: models[name],
     })

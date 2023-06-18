@@ -3,8 +3,8 @@
  */
 
 import { test } from 'tap'
-import { atomicFactory, atomicModel } from 'alak/atomicModel'
-import { getAtomCluster } from 'alak/index'
+import { alakFactory, alakModel } from 'alak/model'
+import { activeCluster } from 'alak/index'
 
 class model {
   one = 1
@@ -27,11 +27,11 @@ class model {
   }
 }
 
-const a = atomicModel({
+const a = alakModel({
   name: 'a',
   model,
 })
-const b = atomicModel({
+const b = alakModel({
   name: 'b',
   model: class {
     two: number = 2
@@ -41,20 +41,22 @@ const b = atomicModel({
   },
 })
 
-const multiA = atomicFactory({
+const multiA = alakFactory({
   name: 'aa',
   model,
 })
 
-const mole = getAtomCluster()
+const mole = activeCluster()
 test('cluster name', (t) => {
   t.plan(7)
   mole.atoms.a.core.z(12)
   t.equal(a.state.z, 12)
   const aInstance = multiA.get('A')
   aInstance.core.z(24)
+
   const aInstanceFromMole = mole.atoms['aa.A'] as any
   t.equal(aInstance.state.z, aInstanceFromMole.state.z)
+
   aInstance.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   aInstanceFromMole.actions.addOne()

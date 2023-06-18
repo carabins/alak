@@ -1,24 +1,24 @@
 import { traced } from '@alaq/atom/property'
-import { AtomicModel, getAtomCluster } from 'alak/index'
-import { atomicModel } from 'alak/atomicModel'
+import { AlakModel, activeCluster } from 'alak/index'
+import { alakModel } from 'alak/model'
 import { test } from 'tap'
 
-class model extends AtomicModel {
+class model extends AlakModel {
   someVar = traced.some_id('somevar')
   some = traced()
 }
 
-const a = atomicModel({
+const a = alakModel({
   name: 'a',
   model,
 })
-const b = atomicModel({
+const b = alakModel({
   name: 'b',
   model,
   emitChanges: true,
 })
 
-const cluster = getAtomCluster()
+const cluster = activeCluster()
 
 test('atom init events', (t) => {
   t.plan(3)

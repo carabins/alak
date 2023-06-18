@@ -6,32 +6,15 @@ const upEnds = ['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'u
 export default function (q: QuantumAtom) {
   const eventListeners = {}
   Object.keys(q.atom.actions).forEach((name) => {
-    ///Deprecated
-    if (name.startsWith('on')) {
-      const nn = name.replace('on', '')
-      if (nn[0] !== nn[0].toUpperCase()) {
-        return
-      }
-      if (checkUp(q, nn, name)) {
-        return
-      }
-      if (nn.endsWith('Listener')) {
-        const n = getMidlleName(nn, ['Listener'])
-        eventListeners[camelToSnakeCase(n)] = name
-        return
-      }
-    }
     if (q.cluster && name.startsWith('in')) {
       checkIn(q, name.replace('in', ''), name)
     }
-
-    //new style
     if (name.startsWith(patternOnUpdate)) {
       const nucleusName = getNucleusName(name, patternOnUpdate)
       q.atom.core[nucleusName].up(q.atom.actions[name])
     }
     if (name.startsWith(patternOnEvent)) {
-      let eventName = getMidlleName(name.replace(patternOnEvent, ''), [])
+      let eventName = getMiddleName(name.replace(patternOnEvent, ''), [])
       eventListeners[camelToSnakeCase(eventName)] = name
     }
   })
@@ -59,7 +42,7 @@ function checkIn(q, nn, name) {
     for (const up of upEnds) {
       const c = cap(up)
       if (nn.endsWith(c)) {
-        const n = getMidlleName(nn, [cap(module), c])
+        const n = getMiddleName(nn, [cap(module), c])
         if (n) {
           atom.core[n][up](q.atom.actions[name])
           return true
@@ -70,18 +53,7 @@ function checkIn(q, nn, name) {
   return false
 }
 
-function checkUp(q, nn, name) {
-  for (const up of upEnds) {
-    const c = cap(up)
-    if (nn.endsWith(c)) {
-      q.atom.core[getMidlleName(nn, [c])][up](q.atom.actions[name])
-      return true
-    }
-  }
-  return false
-}
-
-function getMidlleName(str, rm: string[]) {
+function getMiddleName(str, rm: string[]) {
   rm.forEach((v) => {
     str = str.replace(v, '')
   })

@@ -10,12 +10,10 @@ export default function (q: QuantumAtom) {
     }
     return a
   }
-  // const proxy = new Proxy({_}, {})
 
   const under = {
     id: q.id,
     name: q.name,
-    // dispatchEvent: q.cluster.eventBus,
     cluster: q.cluster.atoms,
     target: q.target,
     call(atom: string, methodName: string, args?: any[]) {},
