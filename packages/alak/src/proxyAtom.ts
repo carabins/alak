@@ -1,5 +1,5 @@
-import { atomicConstructor } from './atomicConstructor'
-import { getAtomCluster, QuarkEventBus } from './index'
+import { alakConstructor } from './constructor'
+import { activeCluster, QuarkEventBus } from './index'
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -9,7 +9,7 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const cluster = constructor.cluster ? getAtomCluster(constructor.cluster) : getAtomCluster()
+  const cluster = constructor.cluster ? activeCluster(constructor.cluster) : activeCluster()
   const quantum: QuantumAtom = {
     name,
     cluster,
@@ -25,7 +25,7 @@ export function proxyAtom(constructor, id?, target?) {
   // quantum.eventBus = quantum.cluster.eventBus
   quantum.cluster.bus
   const up = () => {
-    atomicConstructor(constructor, quantum)
+    alakConstructor(constructor, quantum)
   }
 
   if (constructor.startup === 'immediately') {

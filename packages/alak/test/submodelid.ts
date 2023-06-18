@@ -1,7 +1,7 @@
-import { AtomicModel, getAtomCluster } from 'alak/index'
-import { atomicModel } from 'alak/atomicModel'
+import { AlakModel, activeCluster } from 'alak/index'
+import { alakModel } from 'alak/model'
 
-class submodel extends AtomicModel {
+class submodel extends AlakModel {
   get thisOne() {
     return this['one'] as number
   }
@@ -32,7 +32,7 @@ class model extends submodel {
   }
 }
 
-const a = atomicModel({
+const a = alakModel({
   name: 'a',
   model,
 })

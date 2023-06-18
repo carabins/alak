@@ -4,11 +4,11 @@
 
 import { proxyAtom } from './proxyAtom'
 
-export function atomicModel<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
-  return proxyAtom(constructor) as AtomicNode<M>
+export function alakModel<M, E, N>(constructor: AlakConstructor<M, E, N>) {
+  return proxyAtom(constructor) as ANode<M>
 }
 
-export function atomicFactory<M, E, N>(constructor: AtomicConstructor<M, E, N>) {
+export function alakFactory<M, E, N>(constructor: AlakConstructor<M, E, N>) {
   const nodes = {}
 
   const broadCast = new Proxy(
@@ -18,14 +18,14 @@ export function atomicFactory<M, E, N>(constructor: AtomicConstructor<M, E, N>) 
         return (v) => Object.values(nodes).forEach((n) => n[p](v))
       },
     },
-  ) as AtomicNode<M>['core']
+  ) as ANode<M>['core']
   return {
     get(id, target?) {
       let npa = nodes[id]
       if (!npa) {
         npa = nodes[id] = proxyAtom(constructor, id, target)
       }
-      return npa as AtomicNode<M>
+      return npa as ANode<M>
     },
     delete(id) {
       delete nodes[id]

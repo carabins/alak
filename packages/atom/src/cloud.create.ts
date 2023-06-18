@@ -18,14 +18,14 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
   const knownKeys = {}
   const electrons = new CloudElectrons(getNucleon, cloud)
 
-  if (atomOptions.nucleusStrategy === 'eternal' || atomOptions.eternal === '*') {
+  if (atomOptions.nucleusStrategy === 'stored' || atomOptions.stored === '*') {
     cloud.superEternal = true
   } else if (
-    typeof atomOptions.eternal !== 'string' &&
-    atomOptions.eternal &&
-    typeof atomOptions.eternal[0] === 'string'
+    typeof atomOptions.stored !== 'string' &&
+    atomOptions.stored &&
+    typeof atomOptions.stored[0] === 'string'
   ) {
-    electrons.eternalKeys = atomOptions.eternal as string[]
+    electrons.storedKeys = atomOptions.stored as string[]
   }
 
   const findElectrons = (model, isEternal?) => {
@@ -33,7 +33,7 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
     Object.assign(electrons.actions, parts.actions)
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
-    electrons.addEternals(parts.eternals)
+    electrons.addEternals(parts.storeds)
     const instaKeys = Object.keys(parts.instaValues)
     instaKeys.forEach((k) => {
       knownKeys[k] = true
@@ -44,7 +44,7 @@ export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
   }
 
   atomOptions.model && findElectrons(atomOptions.model)
-  atomOptions.eternal && findElectrons(atomOptions.eternal, true)
+  atomOptions.stored && findElectrons(atomOptions.stored, true)
 
   const bus = atomOptions.bus || QuarkEventBus()
 
