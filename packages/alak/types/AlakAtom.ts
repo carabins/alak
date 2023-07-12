@@ -5,21 +5,21 @@
 type CanBeArray<T> = T | Array<T>
 type ActionsAndN<T> = CanBeArray<GetValues<T> | GetActions<T>>
 
-type AtomicInstance<M, E, N> = N extends Record<string, ANode<any>>
-  ? MixClass<ANode<M>, GraphSubNodes<N>>
-  : ANode<M>
+type AtomicInstance<M, E, N> = N extends Record<string, AlakAtom<any>>
+  ? MixClass<AlakAtom<M>, GraphSubNodes<N>>
+  : AlakAtom<M>
 
 type ModelCore<Model> = Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>
 type ModelState<Model> = PureModel<Instance<Model>>
 
-interface ANode<Model> {
+interface AlakAtom<Model> {
   state: ModelState<Model>
   core: ModelCore<Model>
   actions: OnlyFunc<Instance<Model>>
   bus: QuarkBus<any, any>
 
   // emitEvent(name: ClusterEvents, data?: any)
-  onActivate(listiner: (node: ANode<Model>) => void)
+  onActivate(listiner: (node: AlakAtom<Model>) => void)
 
   getValues(): ModelState<Model>
 }
@@ -41,6 +41,6 @@ type QuantumAtom = {
     atoms: any
     bus: QuarkBus<any, any>
   }
-  atom?: ANode<any>
+  atom?: AlakAtom<any>
   eventListeners?: string[]
 }

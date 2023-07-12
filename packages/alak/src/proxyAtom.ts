@@ -1,5 +1,5 @@
 import { alakConstructor } from './constructor'
-import { activeCluster, QuarkEventBus } from './index'
+import { injectCluster, QuarkEventBus } from './index'
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -9,7 +9,7 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const cluster = constructor.cluster ? activeCluster(constructor.cluster) : activeCluster()
+  const cluster = constructor.cluster ? injectCluster(constructor.cluster) : injectCluster()
   const quantum: QuantumAtom = {
     name,
     cluster,
@@ -33,6 +33,7 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const pk = {}
+  const kv = {}
 
   function makeProxyKey(path) {
     return new Proxy(quantum, {
@@ -43,11 +44,22 @@ export function proxyAtom(constructor, id?, target?) {
     })
   }
 
+  const getKnows = (knownKey) => {
+    !quantum.atom && up()
+    const v = {}
+    Object.keys(quantum.atom[knownKey]).forEach((k) => {
+      v[k] = quantum.atom.state[k]
+    })
+    return v
+  }
   const proxy = new Proxy(quantum, {
     get(target: any, p: string | symbol): any {
       switch (p) {
+        case 'kv':
+          return kv
         case 'state':
         case 'core':
+        case 'bus':
         case 'nodes':
         case 'actions':
           let pp = pk[p]
@@ -55,12 +67,7 @@ export function proxyAtom(constructor, id?, target?) {
             pp = pk[pp] = makeProxyKey(p)
           }
           return pp
-        case 'bus':
-          !quantum.atom && up()
-          return quantum.bus
-        // case 'emitEvent':
-        //   return quantum.atom.emitEvent
-        case 'getValues':
+        case 'get':
           return () => {
             !quantum.atom && up()
             const v = {}
@@ -69,6 +76,10 @@ export function proxyAtom(constructor, id?, target?) {
             })
             return v
           }
+        case 'getActions':
+          return () => getKnows('knownActions')
+        case 'getValues':
+          return () => getKnows('knownKeys')
         case 'onActivate':
           return (listener) => {
             target.activateListeners.push(listener)

@@ -1,4 +1,4 @@
-import { AlakModel, activeCluster } from 'alak/index'
+import { AlakModel, injectCluster } from 'alak/index'
 import { alakModel } from 'alak/model'
 
 class submodel extends AlakModel {
