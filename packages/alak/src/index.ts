@@ -3,14 +3,22 @@
 
 export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
-export { Atom, storedAtom } from '@alaq/atom/index'
-export { stored, stateless, traced } from '@alaq/atom/property'
-export { storage } from '@alaq/atom/storage'
+export { Atom, savedAtom } from '@alaq/atom/index'
+export { saved, stateless, traced } from '@alaq/atom/property'
+import { storage } from '@alaq/atom/storage'
 
-import { Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
+import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
+
+export const NucleusStorage = storage
+export const NStored = (name, value) => {
+  const n = N(value)
+  n.setId(name)
+  storage.init(n)
+  return n
+}
 
 export class ActiveCluster {
-  atoms = {} as Record<string, ANode<any>>
+  atoms = {} as Record<string, AlakAtom<any>>
   bus: QuarkBus<string, any>
 
   public constructor(public namespace: string) {
@@ -20,10 +28,10 @@ export class ActiveCluster {
 
 const activeClusters = {}
 
-export function activeCluster(id: string = 'cluster'): ActiveCluster {
-  let cluster = activeClusters[id]
+export function injectCluster(name: string = 'cluster'): ActiveCluster {
+  let cluster = activeClusters[name]
   if (!cluster) {
-    cluster = activeClusters[id] = new ActiveCluster(id)
+    cluster = activeClusters[name] = new ActiveCluster(name)
   }
   return cluster
 }
@@ -34,7 +42,7 @@ export abstract class AlakModel {
     name: string
     target: any
     core: Record<string, INucleon<any>>
-    cluster: Record<string, ANode<any>>
+    cluster: Record<string, AlakAtom<any>>
     dispatchEvent(name: ClusterEvents, data?): void
     set(atom: string, nucleus: string, data: any): void
     get(atom: string, nucleus: string): void

@@ -4,98 +4,74 @@
  * @packageDocumentation
  */
 
-import { onMounted, onUnmounted, reactive, Ref, ref, watch } from 'vue'
+import { reactive, Ref, ref, watch } from 'vue'
 import { UnwrapNestedRefs } from '@vue/reactivity'
-import { Atom, coreAtom } from '@alaq/atom/index'
-import { activeCluster } from 'alak/index'
 
-function warpVRtoA(r, a) {
-  const watched = {}
-  return new Proxy(r, {
-    get(o, k) {
-      if (!watched[k]) {
-        watch(
-          () => o[k],
-          (v) => {
-            if (o[k] !== a[k].value) {
-              a[k](v)
-            }
-          },
-        )
-        a[k]
-        watched[k] = true
-      }
-      return o[k]
-    },
-  })
+const vueKey = 'vueKey'
+
+export function vueNucleon<T = any>(n: INucleon<T>): Ref<T> {
+  if (n.hasMeta(vueKey)) {
+    return n.getMeta(vueKey)
+  } else {
+    const l = ref()
+    if (n.value) {
+      l.value = n.value
+    }
+    n.up((v) => (l.value = v))
+    return l
+  }
 }
 
-export function vueAtom<Model extends object>(atomConfig: {
-  name?: string
-  model?: Model
-  nucleusStrategy?: NucleusStrategy
-}) {
-  const r = reactive(atomConfig.model)
-
-  function listener(key, value) {
-    r[key] = value
-  }
-
-  const a = coreAtom({
-    model: atomConfig.model,
-    name: atomConfig.name,
-    nucleusStrategy: atomConfig.nucleusStrategy,
-    listener,
-  })
-  const proxy = warpVRtoA(r, a)
-  return [proxy, a] as [UnwrapNestedRefs<Model>, Atomized<Model>]
-}
-
-export function useNucleon<T = any>(n: INucleon<T>) {
-  const l = ref()
-  if (n.value) {
-    l.value = n.value
-  }
-  const listener = (v) => {
-    l.value = v
-  }
-  onMounted(() => {
-    n.up(listener)
-  })
-  onUnmounted(() => {
-    n.down(listener)
-  })
-  return l as Ref<T>
-}
-
-export function useWatchNucleon<T = any>(n: INucleon<T>) {
-  const l = useNucleon(n)
+export function watchVueNucleon<T = any>(n: INucleon<T>) {
+  const l = vueNucleon(n)
   watch(l, (v) => {
     n(v)
   })
   return l
 }
 
-export const vueNucleonExtension: NucleonExtension = {
-  ref() {
-    if (!this.vueRef) {
-      this.vueRef = ref()
-      this._.up((v) => (this.vueRef.value = v))
+const vueAtomKey = '__vue_reactive'
+export default function vueAtom<M>(atom: IAtom<M>): UnwrapNestedRefs<ClassToKV<M>> {
+  let r = atom['kv'][vueAtomKey]
+  const values = atom.getValues()
+  const actions = atom['getActions']()
+  if (!r) {
+    r = atom['kv'] = reactive(Object.assign({}, values, actions)) as UnwrapNestedRefs<ClassToKV<M>>
+  }
+  const listeners = {}
+  Object.keys(values).forEach((k) => {
+    listeners[k] = (v) => {
+      r[k] = v
     }
-    return this.vueRef
-  },
-  refWatch() {
-    watch(this.vueRef, (v) => {
-      this(v)
-    })
-    return this.vueRef
-  },
-  vv() {
-    return this._.ref.value
-  },
-  vw() {
-    return this._.refWatch.value
-  },
+  })
+  Object.keys(values).forEach((k) => {
+    atom.core[k].up(listeners[k])
+  })
+  return r
 }
 
-export default vueNucleonExtension
+export function watchVueAtom<M>(atom: IAtom<M>) {
+  const vueReactive = vueAtom(atom)
+  return proxyReactiveSyncedWithAtom(vueReactive, atom.core) as UnwrapNestedRefs<ClassToKV<M>>
+}
+
+function proxyReactiveSyncedWithAtom(vueReactive, atomCore) {
+  const watched = {}
+  return new Proxy(vueReactive, {
+    get(vueReactive, k) {
+      if (!watched[k]) {
+        watch(
+          () => vueReactive[k],
+          (v) => {
+            if (vueReactive[k] !== atomCore[k].value) {
+              atomCore[k](v)
+            }
+          },
+        )
+        atomCore[k]
+        watched[k] = true
+      }
+      return vueReactive[k]
+    },
+  })
+}

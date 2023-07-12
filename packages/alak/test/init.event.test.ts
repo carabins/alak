@@ -1,5 +1,5 @@
 import { traced } from '@alaq/atom/property'
-import { AlakModel, activeCluster } from 'alak/index'
+import { AlakModel, injectCluster } from 'alak/index'
 import { alakModel } from 'alak/model'
 import { test } from 'tap'
 
@@ -18,7 +18,7 @@ const b = alakModel({
   emitChanges: true,
 })
 
-const cluster = activeCluster()
+const cluster = injectCluster()
 
 test('atom init events', (t) => {
   t.plan(3)

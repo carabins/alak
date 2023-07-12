@@ -11,7 +11,7 @@ export function alakConstructor<M, E, N>(
     model: constructor.model,
     name: quantum.name,
     emitChanges: constructor.emitChanges,
-    stored: constructor.nucleusStrategy === 'stored' ? '*' : null,
+    saved: constructor.nucleusStrategy === 'saved' ? '*' : null,
     thisExtension: alakExtension(quantum),
     constructorArgs: [quantum.id, quantum.target],
     bus: quantum.bus,

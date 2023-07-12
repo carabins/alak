@@ -38,7 +38,7 @@ const baseAtom = alakFactory({
 const eAtom = alakFactory({
   name: 'aAtom',
   model,
-  nucleusStrategy: 'stored',
+  nucleusStrategy: 'saved',
 })
 
 test('multiAtoms', (t) => {

@@ -2,7 +2,7 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-export const storedSym = Symbol('stored')
+export const savedSym = Symbol('saved')
 export const tracedSym = Symbol('traced')
 export const statelessSym = Symbol('stateless')
 
@@ -22,8 +22,8 @@ export const traced = new Proxy(() => true, {
   [s: string]: <T>(startValue?: T) => T
 }
 
-export function stored<T>(startValue?: T): T {
-  return { sym: storedSym, startValue } as any as T
+export function saved<T>(startValue?: T): T {
+  return { sym: savedSym, startValue } as any as T
 }
 
 export function stateless<T>(startValue?: T): T {

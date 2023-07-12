@@ -10,7 +10,7 @@ type EdgesBuilder<Model, CNS> = Edges<GetValues<Model>, GetActions<Model>>
 
 type GraphBuilder<Model> = Edges<GetValues<Model>, GetActions<Model>>
 
-type GraphBuilderN<Model, N extends Record<string, ANode<any>>> = Edges<
+type GraphBuilderN<Model, N extends Record<string, AlakAtom<any>>> = Edges<
   GetValues<Model> | ChildNodesState<N>,
   GetActions<Model> | ChildNodesActions<N>
 >
@@ -21,7 +21,7 @@ interface GraphSubNodes<Nodes> {
   }
 }
 
-type ChildNodesState<N extends Record<string, ANode<any>>> = Leaves<
+type ChildNodesState<N extends Record<string, AlakAtom<any>>> = Leaves<
   {
     [K in keyof N]: N[K]['state']
   },
@@ -32,7 +32,7 @@ type KeepKeys<N> = {
   [K in keyof N]: boolean
 }
 
-type ChildNodesActions<N extends Record<string, ANode<any>>> = Leaves<
+type ChildNodesActions<N extends Record<string, AlakAtom<any>>> = Leaves<
   {
     [K in keyof N]: KeepKeys<N[K]['actions']>
   },

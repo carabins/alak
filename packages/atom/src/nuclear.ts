@@ -2,7 +2,7 @@
 import { storage } from './storage'
 import { isDefined } from './extra'
 import N from '@alaq/nucleus/index'
-import { storedSym, tracedSym, statelessSym } from '@alaq/atom/property'
+import { savedSym, tracedSym, statelessSym } from '@alaq/atom/property'
 
 const nonNucleons = ['constructor']
 export default function (key, valence, core: DeepAtomCore<any>) {
@@ -19,11 +19,11 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       }
     }
 
-    if (typeof core.stored === 'boolean') {
-      mem = core.stored
+    if (typeof core.saved === 'boolean') {
+      mem = core.saved
     } else {
       //@ts-ignore
-      mem = core.stored && core.stored.indexOf(key) !== -1
+      mem = core.saved && core.saved.indexOf(key) !== -1
     }
     core.nucleons[key] = nucleon = N()
     if (isDefined(modelValue)) {
@@ -32,7 +32,7 @@ export default function (key, valence, core: DeepAtomCore<any>) {
           traced = modelValue.traced || true
           modelValue = modelValue.startValue
           break
-        case storedSym:
+        case savedSym:
           modelValue = modelValue.startValue
           mem = true
           break

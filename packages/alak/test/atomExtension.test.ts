@@ -4,7 +4,7 @@
 
 import { test } from 'tap'
 import { alakFactory, alakModel } from 'alak/model'
-import { activeCluster } from 'alak/index'
+import { injectCluster } from 'alak/index'
 
 class model {
   one = 1
@@ -46,7 +46,7 @@ const multiA = alakFactory({
   model,
 })
 
-const mole = activeCluster()
+const mole = injectCluster()
 test('cluster name', (t) => {
   t.plan(7)
   mole.atoms.a.core.z(12)

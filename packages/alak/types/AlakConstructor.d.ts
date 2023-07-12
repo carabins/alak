@@ -14,7 +14,7 @@ interface AlakConstructor<Model, E, N> {
 
   // dispatchEachValues?: boolean
 
-  edges?: N extends Record<string, ANode<any>>
+  edges?: N extends Record<string, AlakAtom<any>>
     ? GraphBuilderN<Instance<Model>, N>
     : GraphBuilder<Instance<Model>>
   listen?: PartialRecord<ClusterEvents, keyof Instance<Model>>

@@ -10,6 +10,7 @@ export type Project = {
   packagePath: string
   artPatch: string
   dir: string
+  changes: []
   copyToArt(filename: string)
   resolveInPackage(name: string): string
   savePackageJsonTo: {
@@ -27,13 +28,14 @@ export function initProject(dir) {
     return false
   } else {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson
-    trace(packageJson.name, packageJson.version)
+    // trace(packageJson.name, packageJson.version)
     const artPatch = path.join(Const.ARTIFACTS, dir)
     return {
       dir,
       artPatch,
       packageJson,
       packagePath,
+      changes: [],
       resolveInPackage(name) {
         return path.resolve(path.join(packagePath, name))
       },

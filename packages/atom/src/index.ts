@@ -1,10 +1,10 @@
 import cloudCreate from './cloud.create'
 
-export const storedAtom = <T>(name: string, model: T) =>
+export const savedAtom = <T>(name: string, model: T) =>
   Atom({
     model,
     name,
-    stored: true,
+    saved: true,
   })
 
 export const coreAtom = <T>(model: T) =>
