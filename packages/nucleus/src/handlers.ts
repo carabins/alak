@@ -101,10 +101,7 @@ export const handlers: any = {
   },
   resend() {
     notifyListeners(this)
-    return this._
-  },
-  emit() {
-    this.resend()
+
     return this._
   },
   next(f) {
