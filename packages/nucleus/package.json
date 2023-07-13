@@ -1,6 +1,6 @@
 {
     "name": "@alaq/nucleus",
-    "version": "5.0.0-omega.4",
+    "version": "5.0.0-up.6",
     "description": "Alak Nucleus part of proactive universe",
     "main": "index.js",
     "types": "index.d.ts",
