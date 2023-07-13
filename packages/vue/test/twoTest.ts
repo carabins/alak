@@ -5,6 +5,7 @@ import vueAtom, { watchVueAtom } from '../src'
 class Model {
   one = 1
   two: number
+
   doIt() {
     this.two = 2
   }
@@ -12,6 +13,7 @@ class Model {
 
 test('reactive', (t) => {
   const a = alakModel({ model: Model, name: 'one' })
+  //@ts-ignore
   const r = vueAtom(a)
   t.equal(r.one, 1)
   a.core.one(10)

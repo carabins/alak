@@ -22,7 +22,7 @@ export async function test(project: Project) {
         const worker = new Worker(`./packages/${project.dir}/test/${f}`, {
           stdout: true,
           // stderr: true,
-          // stdin: true
+          // stdin: true,
         })
         files[f] = 'start'
         let chunks = ''

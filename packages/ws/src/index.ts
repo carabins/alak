@@ -76,10 +76,13 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
   function onCloseHandler(e: CloseEvent) {
     instance.isConnected(false)
     if (o.reconnect) {
-      setTimeout(() => {
-        reConnectCount++
-        connect()
-      }, 1000 * (reConnectCount * Math.log10(24)))
+      setTimeout(
+        () => {
+          reConnectCount++
+          connect()
+        },
+        1000 * (reConnectCount * Math.log10(24)),
+      )
     }
   }
 
@@ -87,7 +90,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
     e.stopPropagation()
     e.stopImmediatePropagation()
     error(e)
-    console.log('websocket error', nws.value.url)
+    console.warn('WebSocket catch error', nws.value.url)
   }
 
   nws.up((ws) => {

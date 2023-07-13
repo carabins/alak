@@ -10,7 +10,7 @@ export type Project = {
   packagePath: string
   artPatch: string
   dir: string
-  changes: []
+  changes: string[]
   copyToArt(filename: string)
   resolveInPackage(name: string): string
   savePackageJsonTo: {

@@ -1,9 +1,9 @@
 {
     "name": "@alaq/vue",
-    "version": "5.0.0-omega.20",
+    "version": "5.0.0-up.24",
     "description": "vue3 extension for alak atoms",
     "main": "index.js",
     "type": "index.d.ts",
     "author": "Gleb Panteleev",
-    "license": "MIT & TRU"
+    "license": "TRU"
 }

@@ -1,6 +1,6 @@
 {
     "name": "@alaq/vite",
-    "version": "5.0.0-omega.51",
+    "version": "5.0.0-up.56",
     "description": "vite alak vue extension for vue",
     "main": "index.js",
     "type": "index.d.ts",
