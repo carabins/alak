@@ -9,12 +9,19 @@ import { publish, upver } from './task.publish'
 import { test } from './task.test'
 import { syncDeps } from '~/scripts/task.syncDeps'
 import { push } from '~/scripts/task.push'
-import { git, initGit } from '~/scripts/common/git'
+import { initGit } from '~/scripts/common/git'
+import { getLine } from '~/scripts/common/oneLine'
+import * as process from 'process'
 
-const task = process.argv[3] || 'test'
+const task = process.argv[2] || 'test'
+
+const commit = {
+  name: 'commit',
+  isCommit: true,
+}
 
 const pre = [upver, syncDeps, test, compile]
-const up = [...pre, publish]
+const up = [compile, commit]
 const pipeLines = { pre, up }
 
 const tasks = {
@@ -23,6 +30,7 @@ const tasks = {
   publish,
   test,
   sync: syncDeps,
+  commit,
 }
 
 const taskName = task.toLowerCase()
@@ -51,53 +59,55 @@ packs.forEach((f) => {
     versions[p.packageJson.name] = p.packageJson.version
   }
 })
-const git = initGit(projects)
-git.commit().then(() => {
-  // console.log(projects)
-})
 
-// const arg2 = process.argv[2] || 'all'
-// const target = arg2 === 'all' ? Object.keys(projects).join(',') : arg2
-//
-// console.log(`
-//       o
-//        o
-//      ___
-//      | |
-//      | |
-//      |o|
-//     .' '.
-//    /  o  \\
-//   :____o__:
-//   '._____.'`)
-//
-// console.log('  task', color.bold(task.toUpperCase()))
-// console.log('target', color.bold(target))
-//
-// function getProject(target) {
-//   const p = projects[target]
-//   if (!p) {
-//     console.log(`
-// (╯°□°)╯︵ ${target}
-// `)
-//     Log.error(`not found project`, `${target}`.toUpperCase())
-//     process.exit()
-//   }
-//   return p
-// }
-//
-// const z = target.split(',')
-// if (z.length) {
-//   job.projects = z.map(getProject)
-// } else {
-//   job.projects.push(getProject(target))
-// }
-//
-// async function runPipeLine() {
-//   for (const task of job.pipeLine) {
-//     Log(color.bold('NEXT TASK'), task.name)
-//     await Promise.all(job.projects.map((p) => task(p)))
-//   }
-// }
-//
-// runPipeLine()
+function getProject(target) {
+  const p = projects[target]
+  if (!p) {
+    console.log(`
+(╯°□°)╯︵ ${target}
+`)
+    Log.error(`not found project`, `${target}`.toUpperCase())
+    process.exit()
+  }
+  return p
+}
+
+initGit(projects).then(async (git) => {
+  if (task === 'commit') {
+  }
+  const changes = git.affected.join(',')
+  const target = task !== 'commit' ? process.argv[3] || changes : changes
+  console.log(`
+      o
+       o
+     ___
+     | |
+     | |
+     |o|
+    .' '.
+   /  o  \\
+  :____o__:
+  '._____.'`)
+
+  console.log(color.dim('tasks'), '\t\t', color.bold(task.toUpperCase()))
+  console.log('\t\t', color.bold(target))
+
+  const targets = target.toLowerCase().split(',')
+  if (targets.length) {
+    job.projects = targets.map(getProject)
+  } else {
+    job.projects.push(getProject(target))
+  }
+  async function runPipeLine() {
+    for (const t of job.pipeLine) {
+      Log(color.bold('TASK'), t.name)
+      if (t.isCommit) {
+        await git.commit(task == 'commit' ? process.argv[3] : false)
+      } else {
+        await Promise.all(job.projects.map(t))
+      }
+    }
+  }
+  await runPipeLine()
+  Log(color.bold('Complete'))
+})
