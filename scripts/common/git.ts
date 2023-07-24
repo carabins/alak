@@ -4,7 +4,6 @@ import path from 'path'
 import fs from 'fs'
 import { versions } from '~/scripts/index'
 import { getLine } from '~/scripts/common/oneLine'
-import fsExtra from 'fs-extra/esm'
 import { FileLog } from '~/scripts/log'
 import { is } from 'tap'
 
@@ -137,11 +136,10 @@ ${changedFiles.length > 0 ? ' - ' + changedFiles.join('\n - ') : ''}
       })
       trace(message)
       const prevLog = fs.readFileSync(changelogFileName.replace('.md', ''))
-      // fs.writeFileSync(changelogFileName.replace('.md', ''), [changeLog, prevLog].join('\n\n'))
+      fs.writeFileSync(changelogFileName.replace('.md', ''), [changeLog, prevLog].join('\n\n'))
       await git.add('-A')
-      const res = await git.commit(message)
-      console.log(res)
-      // trace(res)
+      await git.commit(message)
+      trace('done')
     },
   }
 }
