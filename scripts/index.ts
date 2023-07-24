@@ -73,10 +73,23 @@ function getProject(target) {
 }
 
 initGit(projects).then(async (git) => {
-  if (task === 'commit') {
+  let changes = git.affected.join(',')
+  if (!changes) {
+    Log.info('no one changes')
+    if (task === 'test') {
+      changes = Object.keys(projects).join(',')
+    }
   }
-  const changes = git.affected.join(',')
-  const target = task !== 'commit' ? process.argv[3] || changes : changes
+  const target = (function () {
+    switch (task) {
+      case 'commit':
+        return process.argv[3]
+      case 'test':
+        return Object.keys(projects).join(',')
+      default:
+        return changes
+    }
+  })()
   console.log(`
       o
        o
@@ -98,6 +111,7 @@ initGit(projects).then(async (git) => {
   } else {
     job.projects.push(getProject(target))
   }
+
   async function runPipeLine() {
     for (const t of job.pipeLine) {
       Log(color.bold('TASK'), t.name)
@@ -108,6 +122,7 @@ initGit(projects).then(async (git) => {
       }
     }
   }
+
   await runPipeLine()
   Log(color.bold('Complete'))
 })

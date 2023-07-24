@@ -4,13 +4,14 @@ import * as fs from 'fs'
 import { copyFileSync, writeFileSync } from 'fs'
 import { FileLog } from '../log'
 import { PackageJson } from 'type-fest'
+import { FileStatusResult } from 'simple-git/dist/typings/response'
 
 export type Project = {
   packageJson: PackageJson
   packagePath: string
   artPatch: string
   dir: string
-  changes: string[]
+  changes: FileStatusResult[]
   copyToArt(filename: string)
   resolveInPackage(name: string): string
   savePackageJsonTo: {
