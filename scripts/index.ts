@@ -12,6 +12,7 @@ import { push } from '~/scripts/task.push'
 import { initGit } from '~/scripts/common/git'
 import { getLine } from '~/scripts/common/oneLine'
 import * as process from 'process'
+import { doc } from '~/scripts/common/doc'
 
 const task = process.argv[2] || 'test'
 
@@ -29,6 +30,7 @@ const tasks = {
   upver,
   publish,
   test,
+  doc,
   sync: syncDeps,
   commit,
 }
@@ -90,6 +92,7 @@ initGit(projects).then(async (git) => {
         return changes
     }
   })()
+
   console.log(`
       o
        o

@@ -1,5 +1,5 @@
-import {setNucleonValue} from './quark'
-import {alive, isPromise} from './utils'
+import { setNucleonValue } from './quark'
+import { alive, isPromise } from './utils'
 
 /** @internal */
 export function from(...fromNucleons: INucleon<any>[]) {
@@ -35,7 +35,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
 
   const makeMix = (mixFn) => {
     const inAwaiting: INucleon<any>[] = []
-    const {strong, some} = mixFn
+    const { strong, some } = mixFn
     const needFull = strong || some
     const values = fromNucleons.map((a) => {
       if (a.isAwaiting) {
