@@ -1,55 +1,87 @@
-import { test } from 'tap'
-import { bitmaskBuilder } from '../src'
-const { masks, groups, stateBuilder } = bitmaskBuilder(
-  ['ALPHA', 'BETA', 'GAMMA', 'DELTA', 'EPSILON'] as const,
-  {
-    BETA_DELTA: ['BETA', 'DELTA'],
-    ALPHA_BETA_GAMMA: ['ALPHA', 'BETA', 'GAMMA'],
+import BitInstance from "@alaq/bitmask/BitInstance";
+import {test} from "tap";
+
+const instance = BitInstance({
+  startValue: 1,
+  flags: ['ONE', 'TWO', 'THREE', 'FOUR'] as const,
+  groups: {
+    ONE_TWO: ['ONE', 'TWO'],
+    FOUR_TWO: ['FOUR', 'TWO'],
   },
-)
-const state = stateBuilder(groups.ALPHA_BETA_GAMMA)
+  combinations: {
+    A: {
+      and: ['TWO', 'ONE'],
+    },
+    Z: {
+      and: ['ONE', 'THREE'],
+      not: ['TWO'],
+    },
+    B: {
+      or: ['ONE', 'FOUR'],
+    },
+  },
+})
 test('basic', (t) => {
-  state.values.once((is) => {
-    t.ok(is.ALPHA_BETA_GAMMA)
 
-    t.ok(is.ALPHA)
-    t.ok(is.BETA)
-    t.ok(is.GAMMA)
-    t.notOk(is.DELTA)
-    t.notOk(is.EPSILON)
-  })
-  state.setFalse('ALPHA', 'GAMMA')
-  state.setTrue('EPSILON', 'DELTA')
+  t.ok(instance.state.ONE)
+  t.notOk(instance.state.TWO)
+  t.ok(instance.state.B)
 
-  state.values.once((flags) => {
-    t.notOk(flags.ALPHA_BETA_GAMMA)
-    t.ok(flags.DELTA)
-    t.notOk(flags.ALPHA)
-    t.ok(flags.BETA)
-    t.notOk(flags.GAMMA)
-    t.ok(flags.DELTA)
-    t.ok(flags.EPSILON)
+  instance.flags.TWO.setTrue()
+  t.ok(instance.state.TWO)
+
+  instance.setTrue("THREE", "FOUR")
+  t.ok(instance.state.THREE)
+  t.ok(instance.state.FOUR)
+  const r = instance.onValueUpdate("AFFECTED_FLAGS", (v)=>{
+    t.ok(v.Z)
   })
-  state.values.clearListeners()
-  // state.set(0)
-  t.plan(13)
+  instance.setFalse("TWO", "FOUR")
+  t.notOk(instance.state.FOUR)
+  t.ok(instance.state.Z)
+  instance.removeValueUpdate(r)
+  instance.setTrue("TWO", "FOUR")
+  t.ok(instance.state.A)
+  t.plan(10)
   t.end()
 })
+test('combinations and', (t) => {
+  instance.bitwise.set(0)
+  let r = instance.flags.A.onValueUpdate("ANY", ()=>{
 
-test('sync update', (t) => {
-  state.values.up((flags) => {
-    t.notOk(flags.ALPHA_BETA_GAMMA)
-    t.ok(flags.DELTA)
-    t.notOk(flags.ALPHA)
-    t.notOk(flags.BETA)
-    t.notOk(flags.GAMMA)
-    t.notOk(flags.EPSILON)
-    t.equal(masks.DELTA, state.flag.value)
+    t.pass("any" )
   })
-  state.flag.next((v) => {
-    t.ok(masks.DELTA == v && v == state.mask.flags)
+  instance.flags.A.removeValueUpdate(r)
+  r = instance.flags.A.onValueUpdate("TRUE", ()=>{
+    t.pass("true" )
+
   })
-  state.set(masks.DELTA)
-  t.plan(8)
+  instance.setTrue("ONE", "TWO")
+  instance.flags.A.removeValueUpdate(r)
+  r = instance.flags.A.onValueUpdate("FALSE", ()=>{
+    t.ok(true)
+  })
+  instance.setFalse("ONE", "TWO")
+  instance.flags.A.removeValueUpdate(r)
+  t.plan(3)
+  t.end()
+})
+test('combinations and not', (t) => {
+  instance.bitwise.set(0)
+  let r = instance.flags.Z.onValueUpdate("ANY", ()=>{
+    t.ok(true)
+  })
+  instance.flags.Z.removeValueUpdate(r)
+  r = instance.flags.Z.onValueUpdate("TRUE", ()=>{
+    t.ok(true)
+  })
+  instance.setTrue("ONE", "THREE")
+  instance.flags.Z.removeValueUpdate(r)
+  r = instance.flags.Z.onValueUpdate("FALSE", ()=>{
+    t.ok(true)
+  })
+  instance.setTrue("ONE", "TWO")
+  instance.removeValueUpdate(r)
+  t.plan(3)
   t.end()
 })
