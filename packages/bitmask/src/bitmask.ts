@@ -7,7 +7,10 @@ const bitToNum = (bitmask: AlakBitMask<any> | number): number => {
 }
 
 export class AlakBitMask<T extends Record<string, number>> {
-  constructor(public flags: number, public masks: T) {}
+  constructor(
+    public flags: number,
+    public masks: T,
+  ) {}
 
   is(n): boolean {
     return (this.flags & n) === n
@@ -53,9 +56,5 @@ export class AlakBitMask<T extends Record<string, number>> {
       return true
     }
     return false
-  }
-
-  public binary(bits: 8 | 16 | 24 | 32 = 8): string {
-    return '0b' + (this.flags >>> 0).toString(2).padStart(bits, '0')
   }
 }
