@@ -2,8 +2,14 @@ type RoArrayToRecord<T extends ReadonlyArray<string>> = {
   [K in T extends ReadonlyArray<infer U> ? U : never]: number
 }
 
-type FlagGroupKeys<T extends ReadonlyArray<string>> = Record<string, Array<keyof RoArrayToRecord<T>>>
-type FlagGroup<F extends ReadonlyArray<string>, S, T> = Record<keyof RoArrayToRecord<F> | keyof S, T>
+type FlagGroupKeys<T extends ReadonlyArray<string>> = Record<
+  string,
+  Array<keyof RoArrayToRecord<T>>
+>
+type FlagGroup<F extends ReadonlyArray<string>, S, T> = Record<
+  keyof RoArrayToRecord<F> | keyof S,
+  T
+>
 
 // type BitBoolState<T> = {
 //   [K in keyof T as `${Capitalize<Extract<K, string>>}`]: boolean
@@ -39,7 +45,7 @@ type IBitWise = {
   removeValueUpdate(ro: RemoveObject): void
 }
 
-type BitInstanceConfigWises<B, S> = Record<
+type BitInstanceConfigWises<B extends ReadonlyArray<string>, S> = Record<
   string,
   BitWiseOperations<keyof RoArrayToRecord<B> | keyof S>
 >
@@ -78,27 +84,22 @@ type FlagListener = {
 // type BitFlagMutation = {
 // }
 
-interface IBitInstance<
-  F extends ReadonlyArray<string>,
-  G extends FlagGroupKeys<F>,
-  C,
-> {
+interface IBitInstance<F extends ReadonlyArray<string>, G extends FlagGroupKeys<F>, C> {
   state: Record<keyof RoArrayToRecord<F> | keyof G | keyof C, boolean>
-  flags: BiTFlags<RoArrayToRecord<F>, CoreBitFlag & FlagListener> & BiTFlags<G, CoreBitFlag & FlagListener> & BiTFlags<C,FlagListener>
+  flags: BiTFlags<RoArrayToRecord<F>, CoreBitFlag & FlagListener> &
+    BiTFlags<G, CoreBitFlag & FlagListener> &
+    BiTFlags<C, FlagListener>
   core: {
     allFlagValues: Record<keyof RoArrayToRecord<F> | keyof G, number>
     baseFlagValues: Record<keyof RoArrayToRecord<F>, number>
-  },
+  }
   bitwise: IBitWise
 
   setTrue(...flags: Array<keyof RoArrayToRecord<F>>)
 
   setFalse(...flags: Array<keyof RoArrayToRecord<F>>)
 
-  onValueUpdate(
-    event: 'AFFECTED_FLAGS' | 'FULL_STATE' | 'BIT_VALUE',
-    listener: Function,
-  ): Function
+  onValueUpdate(event: 'AFFECTED_FLAGS' | 'FULL_STATE' | 'BIT_VALUE', listener: Function): Function
 
   removeValueUpdate(listener: Function | string): void
 }
