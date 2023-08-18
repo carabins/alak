@@ -6,7 +6,7 @@ function construct(constructor, args) {
   // return new F()
 }
 
-class Z {
+class TWO_THREE {
   one = 1
   constructor(a?) {
     console.log({ a }, this)
@@ -17,7 +17,6 @@ const two = {
   two: 2,
 }
 // const zz = Reflect.construct.apply(two, [Z, [3]])
-
 
 // const z = new Z()
 
@@ -36,7 +35,7 @@ const findExtends = (prototype) => {
 
   if (np) findExtends(np)
 }
-findExtends(Z.prototype)
+findExtends(TWO_THREE.prototype)
 // console.log(Object.getPrototypeOf(Z).constructor)
 // console.log(invoke(Object.getPrototypeOf(Z).constructor, [1]))
 

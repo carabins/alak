@@ -17,7 +17,7 @@ test('core and state', async (t) => {
   // // // console.log(eth.everCount)
   t.equal(bid.core.everCount.value, classInstance.everCount)
   t.equal(bid.state.everCount, classInstance.everCount)
-  // console.log(bid.state.multiCount)
+  // console.log(bid.state.multiCoun t) 
   // console.log(classInstance.multiCount, bid.core.multiCount.value)
   t.equal(classInstance.multiCount, bid.state.multiCount)
   t.equal(classInstance.multiCount, bid.core.multiCount.value)

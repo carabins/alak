@@ -1,16 +1,16 @@
-declare interface Ref<T = any> {
+declare interface ARef<T = any> {
   value: T
 }
 
 declare interface INucleon<T> {
   vv: T
   rv: T
-  ref: Ref<T>
-  refWatch: Ref<T>
+  ref: ARef<T>
+  refWatch: ARef<T>
 }
 
 declare interface Quark {
-  vueRef: Ref
+  vueRef: ARef
   vueWatch: Boolean
 }
 
@@ -18,12 +18,12 @@ declare module '@alaq/nucleus/' {
   interface INucleon<T> {
     vv: T
     rv: T
-    ref: Ref<T>
-    refWatch: Ref<T>
+    ref: ARef<T>
+    refWatch: ARef<T>
   }
 
   interface Quark {
-    vueRef: Ref
+    vueRef: ARef
     vueWatch: Boolean
   }
 }

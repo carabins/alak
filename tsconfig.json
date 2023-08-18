@@ -28,6 +28,12 @@
       "@alaq/nucleus/*": [
         "packages/nucleus/src/*"
       ],
+      "@alaq/bitmask/*": [
+        "packages/bitmask/src/*"
+      ],
+      "@alaq/datastruct/*": [
+        "packages/datastruct/src/*"
+      ],
       "~/scripts/*": [
         "scripts/*"
       ]
