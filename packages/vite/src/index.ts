@@ -35,32 +35,32 @@ export const Alak = async (opts?: AVDefaultOptions) => {
   return {
     name: 'alak-vite-plugin',
     async configureServer({ watcher, ws, config: { logger } }: ViteDevServer) {
-      let bitmaskFiles = await fg(options.bitmasks)
-      let atomsFiles = await fg(atomsFolder)
-      const shouldBitReload = picomatch(bitmaskFiles)
-      const shouldAtomReload = picomatch(atomsFiles)
-      const checkReload = (path: string) => {
-        if (shouldAtomReload(path)) {
-          updateAtoms([path]).then(async () => {
-            updateIndex()
-            ws.send({ type: 'full-reload', path })
-          })
-        }
-        if (shouldBitReload(path)) {
-          updateBitmask(path).then(() => {
-            updateIndex()
-            ws.send({ type: 'full-reload', path })
-          })
-        }
-      }
-      await updateAtoms(atomsFiles)
-      await Promise.all(bitmaskFiles.map(updateBitmask))
-      await updateIndex()
-
-      watcher.add(bitmaskFiles)
-      watcher.add(atomsFiles)
-      watcher.on('add', checkReload)
-      watcher.on('change', checkReload)
+      // let bitmaskFiles = await fg(options.bitmasks)
+      // let atomsFiles = await fg(atomsFolder)
+      // const shouldBitReload = picomatch(bitmaskFiles)
+      // const shouldAtomReload = picomatch(atomsFiles)
+      // const checkReload = (path: string) => {
+      //   if (shouldAtomReload(path)) {
+      //     updateAtoms([path]).then(async () => {
+      //       updateIndex()
+      //       ws.send({ type: 'full-reload', path })
+      //     })
+      //   }
+      //   if (shouldBitReload(path)) {
+      //     updateBitmask(path).then(() => {
+      //       updateIndex()
+      //       ws.send({ type: 'full-reload', path })
+      //     })
+      //   }
+      // }
+      // await updateAtoms(atomsFiles)
+      // await Promise.all(bitmaskFiles.map(updateBitmask))
+      // await updateIndex()
+      //
+      // watcher.add(bitmaskFiles)
+      // watcher.add(atomsFiles)
+      // watcher.on('add', checkReload)
+      // watcher.on('change', checkReload)
     },
   }
 }
