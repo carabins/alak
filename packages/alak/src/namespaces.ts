@@ -1,7 +1,6 @@
-import {alakModel} from 'alak/model'
-import {QuarkEventBus} from 'alak/index'
+import { alakModel } from 'alak/model'
+import { QuarkEventBus } from 'alak/index'
 import isBrowser from 'packages/rune/src/isBrowser'
-
 
 // export class ActiveCluster {
 //   atoms = {} as Record<string, AlakAtom<any>>
@@ -11,17 +10,16 @@ import isBrowser from 'packages/rune/src/isBrowser'
 //   }
 // }
 
-
-const defaultNamespace = "ActiveUnion"
+const defaultNamespace = 'ActiveUnion'
 const AlakUnion = {
-    namespaces: {}
+  namespaces: {},
 }
 
 function getBrowserNs() {
-    if (window['AlakUnionNamespace']) {
-        return AlakUnion.namespaces = window['AlakUnionNamespace']
-    }
-    return window['AlakUnionNamespace'] = AlakUnion.namespaces
+  if (window['AlakUnionNamespace']) {
+    return (AlakUnion.namespaces = window['AlakUnionNamespace'])
+  }
+  return (window['AlakUnionNamespace'] = AlakUnion.namespaces)
 }
 
 const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.namespaces) as UnionNamespaces
@@ -29,17 +27,17 @@ const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.namespaces) 
 type UnionNamespaces = Record<string, UnionCore>
 
 const atomLinked = {
-  buses:true,
-  cores:true,
-  states:true
+  buses: true,
+  cores: true,
+  states: true,
 }
 const facadeHandlers = {
   get(target: UnionCoreService, key): any {
-    if (atomLinked[key]){
+    if (atomLinked[key]) {
       return target.atoms[key]
     }
     return target[key]
-  }
+  },
 }
 export function UnionCore<Models>(namespace: string = defaultNamespace): UnionCore {
   const namespaces = getNamespaces()
@@ -49,37 +47,17 @@ export function UnionCore<Models>(namespace: string = defaultNamespace): UnionCo
   const bus = QuarkEventBus(namespace)
   const services = {
     atoms: {},
-    bus
+    bus,
   }
-  const facade = new Proxy(services, facadeHandlers) as UnionFacade<Models>
-  return namespaces[namespace] = {
-    services, facade, bus
-  }
+  const facade = new Proxy(services, facadeHandlers) as FacadeModels<Models>
+  return (namespaces[namespace] = {
+    services,
+    facade,
+    bus,
+  })
 }
 
-// function registerUnionFacade<Models>(namespace: string, models?: Models) {
-//   return facade
-// }
-
-export function registerUnionAtom(namespace: string, name: string, value: any) {
-  // const namespaces = getNamespaces()
-  // !namespaces[namespace] && registerUnionFacade(namespace)
-  // const unionCore = namespaces[namespace]
-  // unionCore.services.atoms[name] = value
-}
-
-export function registerUnionService(namespace: string, name: string, value: any) {
-  // const namespaces = getNamespaces()
-  // !namespaces[namespace] && registerUnionFacade(namespace)
-  // const unionCore = namespaces[namespace]
-  // unionCore.services[name] = value
-}
-
-
-
-interface ActiveUnion {
-
-}
+interface ActiveUnion {}
 
 type UF = DefaultUnionFacades & ActiveUnion
 
@@ -91,36 +69,3 @@ export function UnionFacade<N extends keyof UF>(namespace?: N): UF[N] {
   !namespaces[namespace] && UnionCore(namespace)
   return namespaces[namespace].facade
 }
-
-
-//
-//
-// export function addModelsToCluster<T extends Record<string, any>>(models: T, clusterName = 'ActiveCluster') {
-//   const atoms = {} as {
-//     [K in keyof T]: AlakAtom<T[K]>
-//   }
-//   const cores = {} as {
-//     [K in keyof T]: AtomCore<Instance<T[K]>>
-//   }
-//   const states = {} as {
-//     [K in keyof T]: ModelState<T[K]>
-//   }
-//   const buses = {} as {
-//     [K in keyof T]: QuarkBus<any, any>
-//   }
-//
-//   for (const name in models) {
-//     const an = alakModel({
-//       name,
-//       model: models[name],
-//     })
-//     atoms[name] = an
-//     cores[name] = an.core
-//     states[name] = an.state
-//     buses[name] = an.bus
-//   }
-//
-//   const ic = initiateUnion(name as any)
-//   return {atoms, nucleons: cores, states, buses, bus: ic.bus} as UnionFacade<T>
-// }
-

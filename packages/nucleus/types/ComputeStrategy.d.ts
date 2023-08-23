@@ -13,7 +13,7 @@ type ComputeInOut<IN extends any[], OUT> = {
   (...v: ReturnArrayTypes<IN>): OUT
 }
 type ComputeNucleon<IN extends any[]> = {
-  <OUT>(fn: ComputeInOut<IN, OUT>): INucleon<OUT>
+  <OUT>(fn: ComputeInOut<IN, OUT>): INucleus<OUT>
 }
 
 /** @internal */

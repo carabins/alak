@@ -4,36 +4,36 @@
  * ```
  * */
 interface INucleonConstructor<D> extends INucleonQuarkConstructor {
-  <T>(value?: T): INucleon<MaybeAny<T>>
+  <T>(value?: T): INucleus<MaybeAny<T>>
 
   /**
    * Создать нуклон c предустановленным идентификатором
-   * то же что и  {@link INucleon.setId}.
+   * то же что и  {@link INucleus.setId}.
    */
-  id<T>(id: string | number, startValue?: T): INucleon<MaybeAny<T>>
+  id<T>(id: string | number, startValue?: T): INucleus<MaybeAny<T>>
 
   /**
    * Создать нуклон c функцией обёртки
-   * то же что и {@link INucleon.setWrapper}.
+   * то же что и {@link INucleus.setWrapper}.
    */
-  setWrapper<T>(wrapperFun: (v: D) => T): INucleon<MaybeAny<T>>
+  setWrapper<T>(wrapperFun: (v: D) => T): INucleus<MaybeAny<T>>
   /**
    * Создать нуклон c функцией добытчика
    */
-  setGetter<T>(getterFn: () => T): INucleon<T>
+  setGetter<T>(getterFn: () => T): INucleus<T>
 
   /**
    * Создать нуклон c функцией добытчика вызываемый только раз
    */
-  setOnceGet<D>(getterFn: () => D): INucleon<D>
+  setOnceGet<D>(getterFn: () => D): INucleus<D>
   /**
    * Создать нуклон, с контейнерем не запоминающием значение.
    */
-  stateless(): INucleon<MaybeAny<D>>
+  stateless(): INucleus<MaybeAny<D>>
   /**
    * Создать нуклон, с аргументами передающимися в функции-добытчики в полном числе.
    */
-  holistic(): INucleon<MaybeAny<D>>
+  holistic(): INucleus<MaybeAny<D>>
   /**
    * Создать нуклон из нескольких других нуклонов и стратегии вычисления.
    * Смотрите описание стратегий: {@link ext-computed#ComputeStrategy}.
@@ -49,5 +49,5 @@ interface INucleonConstructor<D> extends INucleonQuarkConstructor {
    * @param nucleons - набор входных нуклонов для вычисления значения
    * @returns {@link ext-computed#ComputeStrategy}
    */
-  from<IN extends INucleon<any>[]>(...nucleons: IN): ComputeStrategicNucleon<IN>
+  from<IN extends INucleus<any>[]>(...nucleons: IN): ComputeStrategicNucleon<IN>
 }

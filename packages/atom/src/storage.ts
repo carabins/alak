@@ -3,7 +3,7 @@ const isBrowser = () => ![typeof window, typeof document].includes('undefined')
 const isServer = !isBrowser()
 
 export const storage = {
-  init(nucleon: INucleon<any>) {
+  init(nucleon: INucleus<any>) {
     if (isServer) {
       fsStore(nucleon)
     } else {
@@ -17,7 +17,7 @@ const fsProps = {
   isReady: false,
 }
 
-function fsStore(nucleon: INucleon<any>) {
+function fsStore(nucleon: INucleus<any>) {
   const fs = require('fs')
   const path = require('path')
   if (!fsProps.isReady) {
@@ -52,7 +52,7 @@ function fsStore(nucleon: INucleon<any>) {
   }
 }
 
-function browserStore(nucleon: INucleon<any>) {
+function browserStore(nucleon: INucleus<any>) {
   let v = localStorage.getItem(nucleon.id)
   const writeHandler = (v) => localStorage.setItem(nucleon.id, JSON.stringify(v))
   if (v && v != 'undefined') {

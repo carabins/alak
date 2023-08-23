@@ -18,6 +18,7 @@ type AnyFunction = {
 
 type Level = 'value' | 'all' | 'decay'
 
+type EventConnector = Function
 interface QuarkBus<Events, DataType> {
   addEverythingListener(listener: (event: Events, data: DataType) => void): void
 
@@ -31,13 +32,17 @@ interface QuarkBus<Events, DataType> {
 
   getListenersMap(): Map<string, Set<AnyFunction>>
 
-  connectEventBus(event, bus: QuarkBus<any, any>): void
+  addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
+  removeEventToBus(connector:EventConnector): void
+
+  addBus(bus:QuarkBus<any, any>):void
+  removeBus(bus:QuarkBus<any, any>):void
 }
 
 interface Quark {
   (...a: any[]): void
 
-  _: INucleon<any>
+  _: INucleus<any>
   _name?: string
   value?: any
   prev?: any
@@ -51,7 +56,7 @@ interface Quark {
   wrapperFn?: any
   meta?: any
   metaMap?: Map<string, any>
-  parents?: INucleon<any>[]
+  parents?: INucleus<any>[]
   isEmpty?: boolean
   isAsync?: boolean
   isSafe?: boolean
@@ -59,7 +64,7 @@ interface Quark {
   isPrivate?: boolean
   isAwaiting?: boolean | any
   isStateless?: boolean
-  tunedTarget?: INucleon<any>
+  tunedTarget?: INucleus<any>
   decays?: any[]
 }
 
@@ -72,29 +77,29 @@ interface Quark {
  * ```
  */
 interface INucleonQuarkConstructor {
-  /** Создать {@link INucleon} с необязательным аргументом как стартовое значение*/ <T>(
+  /** Создать {@link INucleus} с необязательным аргументом как стартовое значение*/ <T>(
     value?: T,
-  ): INucleon<MaybeAny<T>>
+  ): INucleus<MaybeAny<T>>
 
   /**
-   * Создать {@link INucleon} с необязательным аргументом как стартовое значение
+   * Создать {@link INucleus} с необязательным аргументом как стартовое значение
    * @remarks
    * Максимальные функции, максимальная скорость создания, минимальное потребление памяти.
    * @param value - необязательное стартовое значение
    * @returns {@link INucleon}
    * @readonly
    */
-  proxy<T>(value?: T): INucleon<MaybeAny<T>>
+  proxy<T>(value?: T): INucleus<MaybeAny<T>>
 
   /**
-   * Создать {@link INucleon} с необязательным аргументом как стартовое значение
+   * Создать {@link INucleus} с необязательным аргументом как стартовое значение
    * @remarks
    * Минимальные функции, максимальная скорость доставки значения за счёт увеличения потребления памяти.
    * @param value - необязательное стартовое значение
    * @returns {@link INucleon}
    */
-  proto<T>(value?: T): INucleon<MaybeAny<T>>
+  proto<T>(value?: T): INucleus<MaybeAny<T>>
 }
 
 type ValueDownReceiver<T> = (v: T, down?: () => void) => void
-type ValueReceiver<T> = (v: T, nucleon: INucleon<T>, ...flow: any[]) => void
+type ValueReceiver<T> = (v: T, nucleon: INucleus<T>, ...flow: any[]) => void

@@ -1,24 +1,47 @@
 
-With means more blessed than my barren rhyme?    // Wed Aug 23 2023 09:07:38
+Him in thy course untainted do allow    // Wed Aug 23 2023 11:06:23
+	alak@5.0.0-up.20
+		 - src/constructor.ts
+		 - src/index.ts
+		 - src/model.ts
+		 - src/namespaces.ts
+		 - types/Unions.d.ts
+	atom@5.0.0-up.10
+		 - src/extra.ts
+		 - src/nuclear.ts
+		 - src/storage.ts
+		 - types/base.d.ts
+	nucleus@5.0.0-up.7
+		 - src/bus.ts
+		 - src/computed.ts
+		 - src/create.ts
+		 - src/index.ts
+		 - test/base.test.ts
+		 - types/ComputeStrategy.d.ts
+		 - types/INucleus.d.ts
+		 - types/INuclonConstructor.d.ts
+		 - types/Quark.d.ts
+	vue@5.0.0-up.25
+		 - src/index.ts
+	ws@1.0.5
+		 - src/index.ts
+
+With means more blessed than my barren rhyme?    .. Wed Aug 23 2023 09:07:38
 	alak@5.0.0-up.19
 		 - src/namespaces.ts
 		 - types/Unions.d.ts
 	scripts/index.ts
 
-
-Of his self-love, to stop posterity?    // Wed Aug 23 2023 07:29:47
+Of his self-love, to stop posterity?    .. Wed Aug 23 2023 07:29:47
 	scripts/index.ts
 
-
-So dost thou too, and therein dignified.    // Wed Aug 23 2023 07:28:49
+So dost thou too, and therein dignified.    .. Wed Aug 23 2023 07:28:49
 	scripts/index.ts
 
-
-As 'twixt a miser and his wealth is found;    // Wed Aug 23 2023 07:21:57
+As 'twixt a miser and his wealth is found;    .. Wed Aug 23 2023 07:21:57
 	scripts/index.ts
 
-
-But flowers distill'd though they with winter meet,    // Wed Aug 23 2023 07:09:57
+But flowers distill'd though they with winter meet,    .. Wed Aug 23 2023 07:09:57
 	alak@5.0.0-up.16
 		 - src/constructor.ts
 		 - src/extension.ts
@@ -37,12 +60,9 @@ But flowers distill'd though they with winter meet,    // Wed Aug 23 2023 07:09:
 	datastruct@0.0.1
 		 - src/index.ts
 
+But do not so; I love thee in such sort    .. Fri Aug 18 2023 20:22:16
 
-But do not so; I love thee in such sort    // Fri Aug 18 2023 20:22:16
-
-
-By praising him here who doth hence remain!    // Fri Aug 18 2023 20:21:02
+By praising him here who doth hence remain!    .. Fri Aug 18 2023 20:21:02
 	bitmask@0.0.16
 		 - test/bitwise.test.ts
 		 - types/index.d.ts
-

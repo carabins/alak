@@ -9,7 +9,7 @@ import { UnwrapNestedRefs } from '@vue/reactivity'
 
 const vueKey = 'vueKey'
 
-export function vueNucleon<T = any>(n: INucleon<T>): Ref<T> {
+export function vueNucleon<T = any>(n: INucleus<T>): Ref<T> {
   if (n.hasMeta(vueKey)) {
     return n.getMeta(vueKey)
   } else {
@@ -22,7 +22,7 @@ export function vueNucleon<T = any>(n: INucleon<T>): Ref<T> {
   }
 }
 
-export function watchVueNucleon<T = any>(n: INucleon<T>) {
+export function watchVueNucleon<T = any>(n: INucleus<T>) {
   const l = vueNucleon(n)
   watch(l, (v) => {
     n(v)
