@@ -1,4 +1,24 @@
 
+But flowers distill'd though they with winter meet,    // Wed Aug 23 2023 07:09:57
+	alak@5.0.0-up.16
+		 - src/constructor.ts
+		 - src/extension.ts
+		 - src/index.ts
+		 - src/listeners.ts
+		 - src/namespaces.ts
+		 - src/proxyAtom.ts
+		 - test/atomExtension.test.ts
+		 - test/events.test.ts
+		 - test/init.event.test.ts
+		 - test/submodelid.ts
+		 - types/AlakAtom.ts
+		 - types/AlakConstructor.d.ts
+		 - types/Unions.d.ts
+		 - types/events.ts DELETED
+	datastruct@0.0.1
+		 - src/index.ts
+
+
 But do not so; I love thee in such sort    // Fri Aug 18 2023 20:22:16
 
 

@@ -4,7 +4,7 @@
 
 import { test } from 'tap'
 import { alakFactory, alakModel } from 'alak/model'
-import { injectCluster } from 'alak/index'
+import { UnionFacade } from 'alak/index'
 
 class model {
   one = 1
@@ -46,7 +46,7 @@ const multiA = alakFactory({
   model,
 })
 
-const mole = injectCluster()
+const mole = UnionFacade()
 test('cluster name', (t) => {
   t.plan(7)
   mole.atoms.a.core.z(12)
@@ -68,5 +68,6 @@ test('cluster name', (t) => {
   t.equal(a.state.one, 100)
 
   t.equal(a.state.one, b.state.two)
+
   t.end()
 })

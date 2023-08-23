@@ -2,6 +2,8 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
+
+
 type CanBeArray<T> = T | Array<T>
 type ActionsAndN<T> = CanBeArray<GetValues<T> | GetActions<T>>
 
@@ -32,20 +34,12 @@ interface MultiAtomicNode<M, E, N> {
   broadCast: AtomicInstance<M, E, N>['core']
 }
 
-type ActiveCluster<Models> = {
-  atoms: { [K in keyof Models]: AlakAtom<Models[K]> }
-  nucleons: { [K in keyof Models]: AtomCore<Instance<Models[K]>>; };
-  states: { [K in keyof Models]: ModelState<Models[K]>; };
-  buses: { [K in keyof Models]: QuarkBus<any, any>; };
-  bus: QuarkBus<string, any>;
-}
-
 type QuantumAtom = {
   id?: any
   name: string
   target?: any
   bus: QuarkBus<any, any>
-  cluster: ActiveCluster<any>
+  union: UnionCore
   atom?: AlakAtom<any>
   eventListeners?: string[]
 }
