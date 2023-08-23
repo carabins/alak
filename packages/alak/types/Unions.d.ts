@@ -1,5 +1,5 @@
 
-type UnionFacades = {
+type DefaultUnionFacades = {
   ActiveUnion: UnionFacade<any>
 }
 
@@ -16,7 +16,6 @@ type UnionCore = {
 
 type UnionFacade<Models> = {
   readonly atoms: { [K in keyof Models]: AlakAtom<Models[K]> }
-  readonly name: string
   readonly nucleons: { [K in keyof Models]: AtomCore<Instance<Models[K]>>; };
   readonly states: { [K in keyof Models]: ModelState<Models[K]>; };
   readonly buses: { [K in keyof Models]: QuarkBus<any, any>; };
