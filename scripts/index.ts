@@ -114,7 +114,7 @@ initGit(projects).then(async (git) => {
 
   async function runPipeLine() {
     for (const t of job.pipeLine) {
-      Log(color.bold('run task '+ t.name))
+      Log(color.bold( t.name), )
       if (t.isCommit) {
         await git.commit(task == 'commit' ? process.argv[3] : false)
       } else {
