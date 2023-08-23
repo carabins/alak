@@ -22,7 +22,7 @@ const commit = {
 }
 
 const pre = [upver, syncDeps, test, compile]
-const up = [pre, publish, commit]
+const up = [upver, syncDeps, test, compile, publish, commit]
 const pipeLines = { pre, up }
 
 const tasks = {
@@ -114,12 +114,12 @@ initGit(projects).then(async (git) => {
 
   async function runPipeLine() {
     for (const t of job.pipeLine) {
-      Log(color.bold('TASK'), t.name)
+      Log(color.bold('run task '+ t.name))
       if (t.isCommit) {
         await git.commit(task == 'commit' ? process.argv[3] : false)
       } else {
-        console.log(job.projects, {t})
-        // await Promise.all(job.projects.map(t))
+        console.log(job.projects.map, {t})
+        await Promise.all(job.projects.map(t))
       }
     }
   }
