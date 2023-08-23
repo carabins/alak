@@ -22,7 +22,7 @@ const commit = {
 }
 
 const pre = [upver, syncDeps, test, compile]
-const up = [compile, commit]
+const up = [pre, publish, commit]
 const pipeLines = { pre, up }
 
 const tasks = {
@@ -78,9 +78,6 @@ initGit(projects).then(async (git) => {
   let changes = git.affected.join(',')
   if (!changes) {
     Log.info('no one changes')
-    if (task === 'test') {
-      changes = Object.keys(projects).join(',')
-    }
   }
   const target = (function () {
     switch (task) {
@@ -88,8 +85,8 @@ initGit(projects).then(async (git) => {
         return process.argv[3]
       case 'test':
         return Object.keys(projects).join(',')
-      default:
-        return changes
+      default :
+        return process.argv[3] ? process.argv[3] : changes
     }
   })()
 
@@ -121,7 +118,8 @@ initGit(projects).then(async (git) => {
       if (t.isCommit) {
         await git.commit(task == 'commit' ? process.argv[3] : false)
       } else {
-        await Promise.all(job.projects.map(t))
+        console.log(job.projects, {t})
+        // await Promise.all(job.projects.map(t))
       }
     }
   }
