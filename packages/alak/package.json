@@ -1,6 +1,6 @@
 {
     "name": "alak",
-    "version": "5.0.0-up.17",
+    "version": "5.0.0-up.16",
     "description": "Alak Last Atom",
     "main": "index.js",
     "types": "index.d.ts",

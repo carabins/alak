@@ -6,7 +6,7 @@ type StartupStrategy = 'lazy' | 'immediately'
 
 interface AlakConstructor<Model, E, N> {
   name?: string
-  clusterName?: string
+  namespace?: string
   model?: Model
   nucleusStrategy?: NucleusStrategy
 
@@ -18,7 +18,7 @@ interface AlakConstructor<Model, E, N> {
   edges?: N extends Record<string, AlakAtom<any>>
     ? GraphBuilderN<Instance<Model>, N>
     : GraphBuilder<Instance<Model>>
-  listen?: PartialRecord<ClusterEvents, keyof Instance<Model>>
+  listen?: PartialRecord<string, keyof Instance<Model>>
   nodes?: N
 
   activate?(

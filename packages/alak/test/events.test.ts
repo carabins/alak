@@ -1,4 +1,4 @@
-import { AlakModel, injectCluster } from 'alak/index'
+import { AlakModel, UnionFacade } from 'alak/index'
 import { alakModel } from 'alak/model'
 import { ok, test } from 'tap'
 
@@ -18,9 +18,9 @@ test('atom events', (t) => {
     name: 'b',
     model,
   })
-  const cluster = injectCluster()
+  const cluster = UnionFacade()
   cluster.bus.addEventListener('ATOM_INIT', (d) => {
-    // console.log(d.name)
+
     switch (d.name) {
       case 'a':
         t.pass('ATOM_INIT a')
@@ -48,7 +48,7 @@ test('atom events silent', (t) => {
     name: 'z',
     model,
   })
-  const cluster = injectCluster()
+  const cluster = UnionFacade()
   cluster.bus.addEventListener('ATOM_INIT', () => {
     t.fail()
   })

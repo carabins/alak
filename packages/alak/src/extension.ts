@@ -4,7 +4,7 @@
 
 export default function (q: QuantumAtom) {
   const getA = (name) => {
-    const a = q.cluster.atoms[name]
+    const a = q.union.services.atoms[name]
     if (!a) {
       console.error(`обращение из атома [${q.name}] к отсуствующему атому [${name}]`)
     }
@@ -14,7 +14,7 @@ export default function (q: QuantumAtom) {
   const under = {
     id: q.id,
     name: q.name,
-    cluster: q.cluster.atoms,
+    union: q.union.services.atoms,
     target: q.target,
     call(atom: string, methodName: string, args?: any[]) {},
     set(atom: string, nucleon: string, data: any) {
