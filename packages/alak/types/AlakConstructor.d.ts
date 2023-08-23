@@ -6,6 +6,7 @@ type StartupStrategy = 'lazy' | 'immediately'
 
 interface AlakConstructor<Model, E, N> {
   name?: string
+  clusterName?: string
   model?: Model
   nucleusStrategy?: NucleusStrategy
 
