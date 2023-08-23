@@ -1,5 +1,4 @@
-// export { alakFactory, alakModel } from 'alak/alakModel'
-// export { alakMolecule } from 'alak/molecule'
+export { alakFactory, alakModel } from 'alak/model'
 
 export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
@@ -18,31 +17,12 @@ export const NStored = (name, value) => {
   return n
 }
 
-// export class ActiveCluster {
-//   atoms = {} as Record<string, AlakAtom<any>>
-//   bus: QuarkBus<string, any>
-//
-//   public constructor(public namespace: string) {
-//     this.bus = QuarkEventBus(namespace)
-//   }
-// }
-//
-// const activeClusters = {}
-//
-// export function UnionFacade(name: string = 'cluster'): ActiveCluster {
-//   let cluster = activeClusters[name]
-//   if (!cluster) {
-//     cluster = activeClusters[name] = new ActiveCluster(name)
-//   }
-//   return cluster
-// }
-
 export abstract class AlakModel {
   _: {
     id: any
     name: string
     target: any
-    core: Record<string, INucleon<any>>
+    core: Record<string, INucleus<any>>
     cluster: Record<string, AlakAtom<any>>
     dispatchEvent(name: string, data?): void
     set(atom: string, nucleus: string, data: any): void

@@ -9,13 +9,13 @@ export interface WsClientOptions {
 }
 
 export interface WsClientInstance {
-  isConnected: INucleon<boolean>
+  isConnected: INucleus<boolean>
   sendRaw(data: string): void
-  send: INucleon<any>
-  raw: INucleon<string>
-  data: INucleon<any>
-  ws: INucleon<WebSocket>
-  error: INucleon<any>
+  send: INucleus<any>
+  raw: INucleus<string>
+  data: INucleus<any>
+  ws: INucleus<WebSocket>
+  error: INucleus<any>
 }
 
 export default function WsClient(options: WsClientOptions = {} as WsClientOptions) {
@@ -36,7 +36,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
   const nws = N<WebSocket>()
   const queue = []
 
-  const rawDataNucleon = N.stateless() as INucleon<string>
+  const rawDataNucleon = N.stateless() as INucleus<string>
   const dataNucleon = N.stateless()
 
   const instance: WsClientInstance = {
