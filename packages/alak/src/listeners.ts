@@ -6,7 +6,7 @@ const upEnds = ['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'u
 export default function (q: QuantumAtom) {
   const eventListeners = {}
   Object.keys(q.atom.actions).forEach((name) => {
-    if (q.cluster && name.startsWith('in')) {
+    if ( name.startsWith('in')) {
       checkIn(q, name.replace('in', ''), name)
     }
     if (name.startsWith(patternOnUpdate)) {
@@ -36,7 +36,7 @@ function checkIn(q, nn, name) {
     return false
   }
   const module = parts[1].toLowerCase()
-  const atom = q.cluster.atoms[module]
+  const atom = q.union.services.atoms[module]
 
   if (atom) {
     for (const up of upEnds) {

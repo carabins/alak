@@ -1,5 +1,6 @@
 import { alakConstructor } from './constructor'
-import { injectCluster, QuarkEventBus } from './index'
+import { QuarkEventBus } from './index'
+import {UnionCore} from "alak/namespaces";
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -9,10 +10,10 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const cluster = constructor.cluster ? injectCluster(constructor.cluster) : injectCluster()
+  const union = UnionCore(constructor.namespace)
   const quantum: QuantumAtom = {
     name,
-    cluster,
+    union,
     bus: QuarkEventBus(name),
   }
 
@@ -22,8 +23,7 @@ export function proxyAtom(constructor, id?, target?) {
   if (target) {
     quantum.target = target
   }
-  // quantum.eventBus = quantum.cluster.eventBus
-  quantum.cluster.bus
+
   const up = () => {
     alakConstructor(constructor, quantum)
   }
@@ -87,6 +87,7 @@ export function proxyAtom(constructor, id?, target?) {
       }
     },
   })
-  quantum.cluster.atoms[quantum.name] = proxy
+
+  union.services.atoms[quantum.name] = proxy
   return proxy
 }
