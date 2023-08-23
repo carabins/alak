@@ -95,8 +95,13 @@ export function alakConstructor<M, E, N>(
     quantum.union.bus.addEverythingListener(eventListener)
   }
 
-  quantum.bus.connectEventBus('NUCLEON_INIT', quantum.union.bus)
-  quantum.bus.connectEventBus('NUCLEON_CHANGE', quantum.union.bus)
+  const c1 = quantum.bus.addEventToBus('NUCLEON_INIT', quantum.union.bus)
+  const c2 = quantum.bus.addEventToBus('NUCLEON_CHANGE', quantum.union.bus)
+
+  quantum.bus.addEventListener('ATOM_DECAY', ()=>{
+    quantum.bus.removeEventToBus(c1)
+    quantum.bus.removeEventToBus(c2)
+  })
 
   quantum.id && atom.core.id(quantum.id)
   quantum.target && atom.core.target(quantum.target)

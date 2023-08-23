@@ -2,7 +2,7 @@ import { setNucleonValue } from './quark'
 import { alive, isPromise } from './utils'
 
 /** @internal */
-export function from(...fromNucleons: INucleon<any>[]) {
+export function from(...fromNucleons: INucleus<any>[]) {
   const quark: Quark = this
   if (quark.parents) {
     throw `from nucleons already has a assigned`
@@ -34,7 +34,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
   }
 
   const makeMix = (mixFn) => {
-    const inAwaiting: INucleon<any>[] = []
+    const inAwaiting: INucleus<any>[] = []
     const { strong, some } = mixFn
     const needFull = strong || some
     const values = fromNucleons.map((a) => {
@@ -53,7 +53,7 @@ export function from(...fromNucleons: INucleon<any>[]) {
     return applyValue(mixFn(...values))
   }
   const linkedValues = {}
-  const listen = (a: INucleon<any>, fn: any) => {
+  const listen = (a: INucleus<any>, fn: any) => {
     a.next(fn)
     if (!quark.decays) quark.decays = []
     quark.decays.push(() => a.down(fn))

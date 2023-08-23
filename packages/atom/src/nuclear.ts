@@ -6,7 +6,7 @@ import { savedSym, tracedSym, statelessSym } from '@alaq/atom/property'
 
 const nonNucleons = ['constructor']
 export default function (key, valence, core: DeepAtomCore<any>) {
-  let nucleon: INucleon<any> = core.nucleons[key]
+  let nucleon: INucleus<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
     let modelValue, mem, traced, broadcast

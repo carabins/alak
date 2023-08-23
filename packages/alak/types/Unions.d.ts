@@ -1,6 +1,6 @@
 
 type DefaultUnionFacades = {
-  ActiveUnion: UnionFacade<any>
+  ActiveUnion: FacadeModels<any>
 }
 
 interface UnionCoreService {
@@ -10,11 +10,11 @@ interface UnionCoreService {
 
 type UnionCore = {
   bus: QuarkBus<any, any>
-  facade: UnionFacade<any>
+  facade: FacadeModels<any>
   services: UnionCoreService
 }
 
-type UnionFacade<Models> = {
+type FacadeModels<Models> = {
   readonly atoms: { [K in keyof Models]: AlakAtom<Models[K]> }
   readonly nucleons: { [K in keyof Models]: AtomCore<Instance<Models[K]>>; };
   readonly states: { [K in keyof Models]: ModelState<Models[K]>; };

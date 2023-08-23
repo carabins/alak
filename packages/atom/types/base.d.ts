@@ -11,7 +11,7 @@ type ClassInstance = new (...args: any) => any
 type ClassToKV<T> = T extends ClassInstance ? InstanceType<T> : T
 
 type PureModel<T> = RemoveKeysByType<T, AnyFunction>
-type Atomized<T> = { readonly [K in keyof T]: INucleon<T[K]> }
+type Atomized<T> = { readonly [K in keyof T]: INucleus<T[K]> }
 
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
@@ -45,6 +45,6 @@ type AtomOptions<Model> = {
 }
 type DeepAtomCore<T> = AtomOptions<T> & {
   proxy?: any
-  nucleons?: Record<string, INucleon<any>>
+  nucleons?: Record<string, INucleus<any>>
   quarkBus: QuarkBus<any, any>
 }

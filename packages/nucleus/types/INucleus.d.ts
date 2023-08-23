@@ -4,7 +4,7 @@ type UnpackKV<T> = T[keyof T]
  * @remarks
  * Функция-контейнер.
  */
-interface INucleon<T> {
+interface INucleus<T> {
   /**
    * Вернуть текущее значение контейнера
    */
@@ -42,9 +42,9 @@ interface INucleon<T> {
   /** Вернёт `true` при наличии значения в контейнере*/
   readonly isFull: boolean
 
-  /** Идентификатор, вернёт `uid` если не был задан {@link INucleon.setId}*/
+  /** Идентификатор, вернёт `uid` если не был задан {@link INucleus.setId}*/
   readonly id: string
-  /** Имя заданное {@link INucleon.setName} */
+  /** Имя заданное {@link INucleus.setName} */
   readonly name: string
 
   /** Уникальный идентификатор генерируется при создании.*/
@@ -55,25 +55,25 @@ interface INucleon<T> {
   // off: FlowStateListener
 
   /** check 'from' or 'warp' function are async*/
-  /** Является ли уставленный добытчик {@link INucleon.setGetter} асинхронным */
+  /** Является ли уставленный добытчик {@link INucleus.setGetter} асинхронным */
   readonly isAsync: Boolean
   /** Находится ли нуклон в процессе получения значения от асинхронного добытчика
-   * {@link INucleon.setGetter}*/
+   * {@link INucleus.setGetter}*/
   readonly isAwaiting: Boolean
 
   /** `true` когда нуклон не запоминает значение
-   * {@link INucleon.stateless}*/
+   * {@link INucleus.stateless}*/
   readonly isStateless: Boolean
 
   /** `true` когда нуклон передаёт все аргументы функциям-слушателям
-   * {@link INucleon.stateless}*/
+   * {@link INucleus.stateless}*/
   readonly isHoly: Boolean
 
   /** Добавить функцию-получатель обновлений значения контейнера
    * и передать текущее значение контейнера, если оно есть
    * @param receiver - функция-получатель
    * @returns {@link quark#INucleon}*/
-  up(receiver: ValueReceiver<T>): INucleon<T>
+  up(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Каррирование, создаёт новую чистую функцию для приёма значения
    * для случаев когда нужны bind, call, apply
@@ -92,69 +92,69 @@ interface INucleon<T> {
    * @param a:{@link quark#INucleon} - нуклон-получатель
    * @param name:string? - опциональное имя канала
    * @returns {@link quark#INucleon}*/
-  connect(nucleon: INucleon<T>, parentName?: string): INucleon<T>
+  connect(nucleon: INucleus<T>, parentName?: string): INucleus<T>
 
   /** Добавить функцию-получатель обновлений значения контейнера
-   * с возможностью отписаться {@link INucleon.downLink} по объёкту-ссылке
+   * с возможностью отписаться {@link INucleus.downLink} по объёкту-ссылке
    * @param receiver - функция-получатель
-   * @param linkObject - любой объект для вызова {@link INucleon.downLink}
+   * @param linkObject - любой объект для вызова {@link INucleus.downLink}
    * @returns {@link quark#INucleon}*/
-  link(linkObject: any, receiver: ValueReceiver<T>): INucleon<T>
+  link(linkObject: any, receiver: ValueReceiver<T>): INucleus<T>
 
-  /** Отписать функцию-получатель по объекту ссылки установленную в {@link INucleon.link}
+  /** Отписать функцию-получатель по объекту ссылки установленную в {@link INucleus.link}
    * @param linkObject - функция-получатель
    */
-  downLink(linkObject: any): INucleon<T>
+  downLink(linkObject: any): INucleus<T>
 
   /** Добавить функцию-получатель и передать значение со следующего обновления
    * @param receiver - функция-получатель
    */
-  next(receiver: ValueReceiver<T>): INucleon<T>
+  next(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Удалить функцию-получатель
    * @param receiver - функция-получатель
    * @returns {@link quark#INucleon}*/
-  down(receiver: ValueReceiver<T>): INucleon<T>
+  down(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Передать один раз в функцию-получатель значение контейнера,
    * текущее если оно есть или как появится
    * @param receiver - функция-получатель
    */
-  once(receiver: ValueReceiver<T>): INucleon<T>
+  once(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель со вторым аргументом функцией-отмены подписки
    * @param receiver - функция-получатель
    */
-  coldUp(receiver: ValueDownReceiver<T>): INucleon<T>
+  coldUp(receiver: ValueDownReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель значений не равных `null` и `undefined`
    * @param receiver - функция-получатель
    */
-  upSome(receiver: ValueReceiver<T>): INucleon<T>
+  upSome(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель значений равных `true`
    * после приведения значения к типу `boolean` методом `!!value`
    * @param receiver - функция-получатель
    */
-  upTrue(receiver: ValueReceiver<T>): INucleon<T>
+  upTrue(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель значений равных `false`
    * после приведения значения к типу `boolean` методом `!value`
    * @param receiver - функция-получатель
    */
-  upFalse(receiver: ValueReceiver<T>): INucleon<T>
+  upFalse(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель значений равных `false`
    * после приведения значения к типу `boolean` методом `!value`
    * за исключением `null` и `undefined`
    * @param receiver - функция-получатель
    */
-  upSomeFalse(receiver: ValueReceiver<T>): INucleon<T>
+  upSomeFalse(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Добавить функцию-получатель значений равных `null` и `undefined`
    * @param receiver - функция-получатель
    */
-  upNone(receiver: ValueReceiver<T>): INucleon<T>
+  upNone(receiver: ValueReceiver<T>): INucleus<T>
 
   /** Проверить значение контейнера на соответствие
    * @param compareValue - проверяемое значение
@@ -165,42 +165,42 @@ interface INucleon<T> {
    * @param event - имя события
    * @param value - необязательное значение
    */
-  dispatch(event: string, ...value: any[]): INucleon<T>
+  dispatch(event: string, ...value: any[]): INucleus<T>
 
-  /** Удалить слушатель события {@link INucleon.on}
+  /** Удалить слушатель события {@link INucleus.on}
    * @param event - имя события
    * @param listener - функция-слушатель
    */
-  off(event: string, listener: (...value: any[]) => void): INucleon<T>
+  off(event: string, listener: (...value: any[]) => void): INucleus<T>
 
   /** Добавить слушатель события
    * @param event - имя события
    * @param listener - функция-слушатель
    */
-  on(event: string, listener: (...value: any[]) => void): INucleon<T>
+  on(event: string, listener: (...value: any[]) => void): INucleus<T>
 
-  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link INucleon.setGetter}
+  /** Добавить слушатель изменения асинхронного состояния функции добычи значения {@link INucleus.setGetter}
    * @param listener - функция-слушатель
    */
-  onAwait(listener: (isAwaiting: boolean) => void): INucleon<T>
+  onAwait(listener: (isAwaiting: boolean) => void): INucleus<T>
 
   /** Добавить слушатель отчистки значения
    * @remarks
    *  Значение глубины отчистки
    *
-   * - value отичстка значения {@link INucleon.clearValue}
+   * - value отичстка значения {@link INucleus.clearValue}
    *
-   * - all отичстка всего {@link INucleon.clear}
+   * - all отичстка всего {@link INucleus.clear}
    *
-   * - decay рапад {@link INucleon.decay}
+   * - decay рапад {@link INucleus.decay}
    * @param listener - функция-слушатель принимающая строку - значение глубины отчистки
    */
-  onClear(listener: (deep: Level) => void): INucleon<T>
+  onClear(listener: (deep: Level) => void): INucleus<T>
 
-  /** Удалить слушатель отчистки зачения {@link INucleon.clearValue}
+  /** Удалить слушатель отчистки зачения {@link INucleus.clearValue}
    * @param listener - функция-слушатель
    */
-  offClear(listener: () => void): INucleon<T>
+  offClear(listener: () => void): INucleus<T>
 
   /** Удалить слушатель изменения асинхронного состояния
    * @param listener - функция-слушатель
@@ -209,38 +209,38 @@ interface INucleon<T> {
 
   /** Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
    */
-  clearListeners(): INucleon<T>
+  clearListeners(): INucleus<T>
 
   /** Очистить значение контейнера
    * @returns {@link quark#INucleon} */
-  clearValue(): INucleon<T>
+  clearValue(): INucleus<T>
 
   /** Распад нуклона, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.*/
   decay(): void
 
   /** Повторно отправить значение всем функциям-получателям
    */
-  resend(): INucleon<T>
+  resend(): INucleus<T>
 
   /** Вызвать всех слушателей
    */
-  emit(): INucleon<T>
+  emit(): INucleus<T>
 
   /** Установить идентификатор
    * @param id - идентификатор
    */
-  setId(id: string): INucleon<T>
+  setId(id: string): INucleus<T>
 
   /** Установить имя
    * @param name - имя
    */
-  setName(name: string): INucleon<T>
+  setName(name: string): INucleus<T>
 
   /** Добавить мета-данные
    * @param metaName - название-ключ мета-данных
    * @param value - необязательное значение мета-данных
    */
-  addMeta(metaName: string, value?: any): INucleon<T>
+  addMeta(metaName: string, value?: any): INucleus<T>
 
   /** Проверить на наличие мета-данных
    * @param metaName - имя мета-данных
@@ -261,30 +261,30 @@ interface INucleon<T> {
    * @remarks
    * Функция-добытчик вызывается каждый раз при вызове функции-нуклона
    * @param getter - функция-добытчик
-   * @param isAsync - установить значение {@link INucleon.isAsync}
+   * @param isAsync - установить значение {@link INucleus.isAsync}
    */
-  setGetter(getter: () => T | Promise<T>, isAsync?: boolean): INucleon<T>
+  setGetter(getter: () => T | Promise<T>, isAsync?: boolean): INucleus<T>
 
   /** Использовать функцию-добытчик только один раз
    * @param getter - функция-добытчик
-   * @param isAsync - установить значение {@link INucleon.isAsync}
+   * @param isAsync - установить значение {@link INucleus.isAsync}
    */
-  setOnceGet(getter: () => T | Promise<T>, isAsync?: boolean): INucleon<T>
+  setOnceGet(getter: () => T | Promise<T>, isAsync?: boolean): INucleus<T>
 
   /** Использовать функцию-обёртку
    * Каждое новое обновление значение контейнера нуклона,
    * всегда будет проходить сперва через функцию-обёртку
    * @param wrapper - функция-обёртка
-   * @param isAsync - установить значение returns {@link INucleon.isAsync}
+   * @param isAsync - установить значение returns {@link INucleus.isAsync}
    */
-  setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?: boolean): INucleon<T>
+  setWrapper(wrapper: (newValue: T, prevValue: T) => T | Promise<T>, isAsync?: boolean): INucleus<T>
 
   /**
    * Сделать конетейнер всегда пустым.
    * Значение переданное в нуклон, доставится в функции-получатели минуя контейнер.
    * @param bool? - по умолчанию `true`
    */
-  stateless(bool?: boolean): INucleon<T>
+  stateless(bool?: boolean): INucleus<T>
 
   /**
    * Сделать конетейнер принимающим и передаюшим множество агрументов.
@@ -292,13 +292,13 @@ interface INucleon<T> {
    * В функции-получатели значения передаются в полном количестве.
    * @param bool? - по умолчанию `true`
    */
-  holistic(bool?: boolean): INucleon<T>
+  holistic(bool?: boolean): INucleus<T>
 
   /**
    * Обновление  фукнций-приёмников происходит только при уникальных значениях
    * @param bool? - по умолчанию `true`
    */
-  safe(bool?: boolean): INucleon<T>
+  safe(bool?: boolean): INucleus<T>
 
   /**
    * Создать дубликат значение
@@ -311,20 +311,20 @@ interface INucleon<T> {
    * @param targetObject - целевой объект
    * @param key - ключ доступа к значению в объекте
    */
-  injectTo(targetObject: any, key?: string): INucleon<T>
+  injectTo(targetObject: any, key?: string): INucleus<T>
 
   /**
    * Создать нуклон из нескольких других нуклонов и стратегии вычисления.
    * @param nucleons - набор входных нуклонов для вычисления значения
    * @returns {@link ext-computed#ComputeStrategy}
    */
-  from<IN extends INucleon<any>[]>(...nucleons: IN): ComputeStrategicNucleon<IN>
+  from<IN extends INucleus<any>[]>(...nucleons: IN): ComputeStrategicNucleon<IN>
 
   /**
    * Список производных нуклонов {@link from}
-   * @returns INucleon<any>[]
+   * @returns INucleus<any>[]
    */
-  parents: INucleon<any>[]
+  parents: INucleus<any>[]
 
   /**
    * Подписать текущий нуклон на друой нуклон
@@ -332,12 +332,12 @@ interface INucleon<T> {
    * Работает как переключить источник
    * @param INucleon<T>
    */
-  tuneTo(nucleon: INucleon<T>): void
+  tuneTo(nucleon: INucleus<T>): void
 
   /**
    * Отключить нуклон от подключенных ранее через tuneTo
    */
-  tuneOff(nucleon: INucleon<T>): void
+  tuneOff(nucleon: INucleus<T>): void
 
   haveListeners: boolean
 }
