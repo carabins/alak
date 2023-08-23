@@ -118,7 +118,6 @@ initGit(projects).then(async (git) => {
       if (t.isCommit) {
         await git.commit(task == 'commit' ? process.argv[3] : false)
       } else {
-        console.log(job.projects.map, {t})
         await Promise.all(job.projects.map(t))
       }
     }
