@@ -77,8 +77,13 @@ export function registerUnionService(namespace: string, name: string, value: any
 
 
 
+interface ActiveUnion {
 
-export function UnionFacade<N extends keyof UnionFacades>(namespace?: N): UnionFacades[N] {
+}
+
+type UF = DefaultUnionFacades & ActiveUnion
+
+export function UnionFacade<N extends keyof UF>(namespace?: N): UF[N] {
   if (!namespace) {
     namespace = defaultNamespace as any
   }
