@@ -5,11 +5,11 @@
 import { proxyAtom } from './proxyAtom'
 import { QuarkEventBus } from '@alaq/nucleus/index'
 
-export function alakModel<M, E, N>(constructor: AlakConstructor<M, E, N>) {
-  return proxyAtom(constructor) as AlakAtom<M>
+export function alakModel<M, E extends object, N>(constructor: AlakConstructor<M, E, N>) {
+  return proxyAtom(constructor) as AlakAtom<M, E>
 }
 
-export function alakFactory<M, E, N>(constructor: AlakConstructor<M, E, N>) {
+export function alakFactory<M, E extends object, N>(constructor: AlakConstructor<M, E, N>) {
   const nodes = {}
   const bus = QuarkEventBus(constructor.name)
   const multiCore = new Proxy(
@@ -19,15 +19,15 @@ export function alakFactory<M, E, N>(constructor: AlakConstructor<M, E, N>) {
         return (v) => Object.values(nodes).forEach((n) => n[p](v))
       },
     },
-  ) as AlakAtom<M>['core']
+  ) as AlakAtom<M, E>['core']
   return {
     get(id, target?) {
-      let npa = nodes[id] as AlakAtom<any>
+      let npa = nodes[id] as AlakAtom<any, any>
       if (!npa) {
         npa = nodes[id] = proxyAtom(constructor, id, target)
         bus.addBus(npa.bus)
       }
-      return npa as AlakAtom<M>
+      return npa as AlakAtom<M, E>
     },
     delete(id) {
       bus.removeBus(nodes[id].bus)
@@ -35,5 +35,5 @@ export function alakFactory<M, E, N>(constructor: AlakConstructor<M, E, N>) {
     },
     multiCore,
     bus,
-  } as AlakAtomFactory<M>
+  } as AlakAtomFactory<M, E>
 }

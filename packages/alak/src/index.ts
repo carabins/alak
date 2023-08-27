@@ -4,7 +4,6 @@ export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, savedAtom } from '@alaq/atom/index'
 export { saved, stateless, traced } from '@alaq/atom/property'
-export { UnionFacadeFactory } from './namespaces'
 import { storage } from '@alaq/atom/storage'
 
 import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
@@ -23,7 +22,7 @@ export abstract class AlakModel {
     name: string
     target: any
     core: Record<string, INucleus<any>>
-    cluster: Record<string, AlakAtom<any>>
+    cluster: Record<string, AlakAtom<any, any>>
     dispatchEvent(name: string, data?): void
     set(atom: string, nucleus: string, data: any): void
     get(atom: string, nucleus: string): void

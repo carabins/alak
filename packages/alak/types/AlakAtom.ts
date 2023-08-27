@@ -20,7 +20,7 @@ type AtomNucleusChangeEventData = {
   value: any
   key: string
   atomId: string
-  n: INucleus<any>
+  nucleus: INucleus<any>
 }
 
 type AtomLifeCycleEventData = {
@@ -68,8 +68,8 @@ type QuantumAtom = {
 }
 
 type AlakAtomFactory<M, E extends Object> = {
-  get(id: string, target: any): AlakAtom<M, E>
-  delete(id: string): void
+  get(id: string | number, target?: any): AlakAtom<M, E>
+  delete(id: string | number): void
   multiCore: ModelCore<M>
   bus: IQuarkBus<AlakCoreEvents & E, E>
 }

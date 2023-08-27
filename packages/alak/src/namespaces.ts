@@ -1,4 +1,4 @@
-import { QuarkEventBus } from 'alak/index'
+import { alakFactory, alakModel, QuarkEventBus } from 'alak/index'
 import isBrowser from 'packages/rune/src/isBrowser'
 
 const defaultNamespace = 'defaultUnion'
@@ -17,27 +17,64 @@ function getBrowserNs() {
 const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.namespaces) as UnionNamespaces
 
 const atomLinked = {
-  buses: true,
-  cores: true,
-  states: true,
+  buses: 'base',
+  cores: 'core',
+  actions: 'action',
+  states: 'state',
+}
+const likedProxy = {}
+const likedProxyHandler = {
+  get(o, key) {
+    return o.atoms[key][o.key]
+  },
 }
 const facadeHandlers = {
   get(target: UnionCoreService<any, any, any>, key): any {
     if (atomLinked[key]) {
-      return target.atoms[key]
+      if (!likedProxy[key]) {
+        likedProxy[key] = new Proxy(
+          { atoms: target.atoms, key: atomLinked[key] },
+          likedProxyHandler,
+        )
+      }
+      return likedProxy[key]
     }
     return target[key]
   },
 }
 
-export function UnionFactory<Models, Events, Services, Fabrice>(
-  synthesis: UnionSynthesis<Models, Events, Services, Fabrice>,
-): FacadeModel<Models, Events, Fabrice> & Services {
+type EventsData<E extends object> = {
+  [K in keyof E]: Parameters<E[K]>[0]
+}
+
+export function UnionFactory<Models, Events extends object, Services, Factories>(
+  synthesis: UnionSynthesis<Models, Events, Services, Factories>,
+): FacadeModel<Models, EventsData<Events>, Factories> & Services {
   const uc = UnionCoreFactory(synthesis.namespace as any) as IUnionCore
   Object.keys(synthesis.models).forEach((modelName) => {
-    uc
+    uc.services.atoms[modelName] = alakModel({
+      namespace: synthesis.namespace,
+      name: modelName,
+      model: synthesis.models[modelName],
+      emitChanges: synthesis.emitChanges,
+    })
   })
-  return
+  synthesis.factories &&
+    Object.keys(synthesis.factories).forEach((modelName) => {
+      uc.services.atoms[modelName] = alakFactory({
+        namespace: synthesis.namespace,
+        name: modelName,
+        model: synthesis.factories[modelName],
+        emitChanges: synthesis.emitChanges,
+      }) as any
+    })
+  synthesis.events &&
+    Object.keys(synthesis.events).forEach((eventName) => {
+      const handler = synthesis.events[eventName].bind(uc)
+      uc.bus.addEventListener(eventName, handler)
+    })
+  synthesis.services && Object.assign(uc.services, synthesis.services)
+  return uc.facade
 }
 
 export function UnionCoreFactory<N extends keyof UnionNamespaces>(
@@ -55,10 +92,9 @@ export function UnionCoreFactory<N extends keyof UnionNamespaces>(
     atoms: {},
     bus,
   }
-  const facade = new Proxy(services, facadeHandlers)
   const uc = {
     services,
-    facade,
+    facade: new Proxy(services, facadeHandlers),
     bus,
   } as any
   namespaces[namespace] = uc
@@ -71,8 +107,6 @@ type DefaultUnions = {
   defaultUnion: IUnionCore
 }
 
-// type mixed<A extends Record<string, UnionCore<any, any, any>> = A
-
 type UnionNamespaces = DefaultUnions & ActiveUnions
 
 export function UnionFacade<N extends keyof UnionNamespaces>(namespace?: N): UnionNamespaces[N] {
@@ -84,7 +118,5 @@ export function UnionFacade<N extends keyof UnionNamespaces>(namespace?: N): Uni
     console.error('namespace', namespace, 'not found')
     throw 'unknown namespace'
   }
-  const z = namespaces[namespace]
-
   return namespaces[namespace]
 }

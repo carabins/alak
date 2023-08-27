@@ -17,15 +17,16 @@ export function alakConstructor<M, E, N>(
     bus: quantum.bus,
   }) as any
   const nodes = {}
+
   // const eventBus = Nucleus.stateless().holistic()
 
-  constructor.nodes &&
-    Object.keys(constructor.nodes).forEach((key) => {
-      const subAtom = constructor.nodes[key]
-      subAtom.name = quantum.name ? quantum.name + '.' + key : key
-      // subAtom.injectBus = eventBus
-      nodes[key] = subAtom
-    })
+  // constructor.nodes &&
+  //   Object.keys(constructor.nodes).forEach((key) => {
+  //     const subAtom = constructor.nodes[key]
+  //     subAtom.name = quantum.name ? quantum.name + '.' + key : key
+  //     // subAtom.injectBus = eventBus
+  //     nodes[key] = subAtom
+  //   })
 
   const getFromNode = ([nodeKey, targetKey]: string[]) => {
     const node = nodes[nodeKey]
@@ -41,46 +42,48 @@ export function alakConstructor<M, E, N>(
     }
   }
 
-  constructor.edges &&
-    constructor.edges.forEach((e) => {
-      const listeners = []
-      if (typeof e.to === 'string') {
-        listeners.push(getNode(e.to))
-        //@ts-ignore
-      } else if (e.to?.length) {
-        //@ts-ignore
-        listeners.push(...e.to.map(getNode))
-      }
-      if (typeof e.from === 'string') {
-        //@ts-ignore
-        listeners.forEach((l) => getNode(e.from).up(l))
-      } else {
-        //@ts-ignore
-        const fromNodes = e.from.map(getNode)
-        const n = Nucleus.stateless()
-        const strategy = e.strategy.toLocaleLowerCase() || 'some'
-        const strategyMethod = n.from(...fromNodes)[strategy]
-        if (!strategyMethod) {
-          console.error(
-            `unsupported strategy [ ${e.strategy.toUpperCase()}  ]in atomic node ${constructor.name.toString()} for edge`,
-            e,
-          )
-          throw 'unsupported strategy'
-        }
-        strategyMethod(listeners[0])
-      }
-    })
+  // constructor.edges &&
+  //   constructor.edges.forEach((e) => {
+  //     const listeners = []
+  //     if (typeof e.to === 'string') {
+  //       listeners.push(getNode(e.to))
+  //       //@ts-ignore
+  //     } else if (e.to?.length) {
+  //       //@ts-ignore
+  //       listeners.push(...e.to.map(getNode))
+  //     }
+  //     if (typeof e.from === 'string') {
+  //       //@ts-ignore
+  //       listeners.forEach((l) => getNode(e.from).up(l))
+  //     } else {
+  //       //@ts-ignore
+  //       const fromNodes = e.from.map(getNode)
+  //       const n = Nucleus.stateless()
+  //       const strategy = e.strategy.toLocaleLowerCase() || 'some'
+  //       const strategyMethod = n.from(...fromNodes)[strategy]
+  //       if (!strategyMethod) {
+  //         console.error(
+  //           `unsupported strategy [ ${e.strategy.toUpperCase()}  ]in atomic node ${constructor.name.toString()} for edge`,
+  //           e,
+  //         )
+  //         throw 'unsupported strategy'
+  //       }
+  //       strategyMethod(listeners[0])
+  //     }
+  //   })
   const an = { nodes } as any
   quantum.atom = Object.assign(an, atom)
+  // console.log(quantum.union)
+
   const al = alakListeners(quantum)
-  if (constructor.listen || al) {
+  if (al) {
     const eventListener = (event, data) => {
       const apply = (where) => {
         const fn = getNode(where)
         fn && fn(data)
       }
 
-      const listenerName = al[event] || (constructor?.listen ? constructor.listen[event] : null)
+      const listenerName = al[event]
 
       if (listenerName) {
         if (typeof listenerName === 'string') {
@@ -106,6 +109,6 @@ export function alakConstructor<M, E, N>(
   quantum.id && atom.core.id(quantum.id)
   quantum.target && atom.core.target(quantum.target)
   atom.actions.onActivate && atom.actions.onActivate(quantum.id, quantum.target)
-  constructor.activate && constructor.activate.apply(atom.state, [atom.core, nodes])
+  // constructor.activate && constructor.activate.apply(atom.state, [atom.core, nodes])
   quantum.union.bus.dispatchEvent('ATOM_INIT', { name: quantum.name, atom })
 }

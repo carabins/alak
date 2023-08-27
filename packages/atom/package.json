@@ -1,11 +1,11 @@
 {
     "name": "@alaq/atom",
-    "version": "5.0.0-up.10",
+    "version": "5.0.0-up.11",
     "main": "index.js",
     "type": "index.d.ts",
     "author": "Gleb Panteleev",
     "license": "MIT & TRU",
     "dependencies": {
-        "@alaq/nucleus": "5.0.0-up.7"
+        "@alaq/nucleus": "5.0.0-up.8"
     }
 }
