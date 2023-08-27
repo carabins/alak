@@ -22,21 +22,45 @@ type EventConnector = Function
 interface QuarkBus<Events, DataType> {
   addEverythingListener(listener: (event: Events, data: DataType) => void): void
 
-  addEventListener(event: Events, listener: (data: DataType) => void): void
+  addEventListener<E extends keyof Events>(event: E, listener: (data: DataType[E]) => void): void
 
-  removeEventListener(listener, event): void
+  removeEventListener(listener, event: Events): void
 
   removeListener(listener): void
 
-  dispatchEvent(event: string, data?: DataType): void
+  dispatchEvent(event: Events, data?: DataType): void
 
   getListenersMap(): Map<string, Set<AnyFunction>>
 
   addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
-  removeEventToBus(connector:EventConnector): void
+  removeEventToBus(connector: EventConnector): void
 
-  addBus(bus:QuarkBus<any, any>):void
-  removeBus(bus:QuarkBus<any, any>):void
+  addBus(bus: QuarkBus<any, any>): void
+  removeBus(bus: QuarkBus<any, any>): void
+}
+
+interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object> {
+  addEverythingListener<E extends keyof ListenerEvents>(
+    listener: (event: E, data: ListenerEvents[E]) => void,
+  ): void
+  addEventListener<E extends keyof ListenerEvents>(
+    event: E,
+    listener: (data: ListenerEvents[E]) => void,
+  ): void
+
+  removeEventListener(event: keyof ListenerEvents, listener: Function): void
+
+  removeListener(listener: Function): void
+
+  dispatchEvent<E extends keyof DispatchEvents>(event: E, data?: DispatchEvents[E]): void
+
+  getListenersMap(): Map<string, Set<AnyFunction>>
+
+  addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
+  removeEventToBus(connector: EventConnector): void
+
+  addBus(bus: QuarkBus<any, any>): void
+  removeBus(bus: QuarkBus<any, any>): void
 }
 
 interface Quark {

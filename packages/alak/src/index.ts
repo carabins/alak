@@ -4,7 +4,7 @@ export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, savedAtom } from '@alaq/atom/index'
 export { saved, stateless, traced } from '@alaq/atom/property'
-export {UnionFacade} from './namespaces'
+export { UnionFacadeFactory } from './namespaces'
 import { storage } from '@alaq/atom/storage'
 
 import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'

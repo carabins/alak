@@ -1,4 +1,4 @@
-import { AlakModel, UnionFacade } from 'alak/index'
+import { AlakModel, UnionFacadeFactory } from 'alak/index'
 import { alakModel } from 'alak/model'
 
 class submodel extends AlakModel {
