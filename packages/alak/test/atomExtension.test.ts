@@ -4,7 +4,7 @@
 
 import { test } from 'tap'
 import { alakFactory, alakModel } from 'alak/model'
-import { UnionFacade } from 'alak/index'
+import { UnionFacadeFactory } from 'alak/index'
 
 class model {
   one = 1
@@ -46,7 +46,7 @@ const multiA = alakFactory({
   model,
 })
 
-const mole = UnionFacade()
+const mole = UnionFacadeFactory()
 test('cluster name', (t) => {
   t.plan(7)
   mole.atoms.a.core.z(12)
