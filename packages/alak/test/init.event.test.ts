@@ -1,5 +1,5 @@
 import { traced } from '@alaq/atom/property'
-import { AlakModel, UnionFacade } from 'alak/index'
+import { AlakModel, UnionFacadeFactory } from 'alak/index'
 import { alakModel } from 'alak/model'
 import { test } from 'tap'
 
@@ -18,13 +18,13 @@ const b = alakModel({
   emitChanges: true,
 })
 
-const cluster = UnionFacade()
+const cluster = UnionFacadeFactory()
 
 test('atom init events', (t) => {
   t.plan(3)
   const listener = (event, data) => {
     switch (event) {
-      case 'NUCLEON_INIT':
+      case 'NUCLEUS_INIT':
         console.log(data)
         t.equal(data.nucleon.id, a.core.someVar.id)
         t.equal(data.nucleon.value, 'somevar')
@@ -40,7 +40,7 @@ test('atom init events', (t) => {
 
 test('atom change events', (t) => {
   t.plan(2)
-  b.bus.addEventListener('NUCLEON_CHANGE', (n) => {
+  b.bus.addEventListener('NUCLEUS_CHANGE', (n) => {
     if (n.value === 'nextVar' || n.value === 'somevar') {
       t.pass()
     } else {

@@ -35,10 +35,5 @@ export function alakFactory<M, E, N>(constructor: AlakConstructor<M, E, N>) {
     },
     multiCore,
     bus,
-  } as {
-    get(id: string, target: any): AlakAtom<M>
-    delete(id: string): void
-    multiCore: ModelCore<M>
-    bus: QuarkBus<string, any>
-  }
+  } as AlakAtomFactory<M>
 }

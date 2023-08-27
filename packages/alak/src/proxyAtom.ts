@@ -1,6 +1,6 @@
 import { alakConstructor } from './constructor'
 import { QuarkEventBus } from './index'
-import {UnionCore} from "alak/namespaces";
+import { UnionCoreFactory } from 'alak/namespaces'
 
 export function proxyAtom(constructor, id?, target?) {
   // constructor = Object.assign({}, constructor)
@@ -10,7 +10,7 @@ export function proxyAtom(constructor, id?, target?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const union = UnionCore(constructor.namespace)
+  const union = UnionCoreFactory(constructor.namespace)
   const quantum: QuantumAtom = {
     name,
     union,

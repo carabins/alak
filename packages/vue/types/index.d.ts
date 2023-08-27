@@ -2,7 +2,7 @@ declare interface ARef<T = any> {
   value: T
 }
 
-declare interface INucleon<T> {
+declare interface INucleus<T> {
   vv: T
   rv: T
   ref: ARef<T>

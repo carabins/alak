@@ -1,30 +1,20 @@
-import { alakModel } from 'alak/model'
 import { QuarkEventBus } from 'alak/index'
 import isBrowser from 'packages/rune/src/isBrowser'
 
-// export class ActiveCluster {
-//   atoms = {} as Record<string, AlakAtom<any>>
-//   bus: QuarkBus<string, any>
-//   public constructor(public namespace: string) {
-//     this.bus = QuarkEventBus(namespace)
-//   }
-// }
-
-const defaultNamespace = 'ActiveUnion'
+const defaultNamespace = 'defaultUnion' as keyof UnionNamespaces
+const AlakUnionNamespace = 'AlakUnionNamespace'
 const AlakUnion = {
   namespaces: {},
 }
 
 function getBrowserNs() {
-  if (window['AlakUnionNamespace']) {
-    return (AlakUnion.namespaces = window['AlakUnionNamespace'])
+  if (window[AlakUnionNamespace]) {
+    return (AlakUnion.namespaces = window[AlakUnionNamespace])
   }
-  return (window['AlakUnionNamespace'] = AlakUnion.namespaces)
+  return (window[AlakUnionNamespace] = AlakUnion.namespaces)
 }
 
 const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.namespaces) as UnionNamespaces
-
-type UnionNamespaces = Record<string, UnionCore>
 
 const atomLinked = {
   buses: true,
@@ -32,40 +22,75 @@ const atomLinked = {
   states: true,
 }
 const facadeHandlers = {
-  get(target: UnionCoreService, key): any {
+  // apply: function (target: UnionCoreService, thisArg, [key, value]) {
+  //   if (!key || !value) {
+  //     console.error('KV Arguments need more', { key, value })
+  //     return
+  //   }
+  //   target[key] = value
+  // },
+  get(target: UnionCoreService<any, any>, key): any {
     if (atomLinked[key]) {
       return target.atoms[key]
     }
     return target[key]
   },
 }
-export function UnionCore<Models>(namespace: string = defaultNamespace): UnionCore {
+
+export function UnionFactory<Models, Events, Services>(
+  synthesis: UnionSynthesis<Models, Events, Services>,
+): FacadeModel<Models, Events> & Services {
+  const uc = UnionCoreFactory(synthesis.namespace as any)
+  Object.keys(synthesis.models).forEach((modelName) => {
+    uc
+  })
+  return
+}
+
+export function UnionCoreFactory<N extends keyof UnionNamespaces>(
+  namespace: N,
+): UnionNamespaces[N] {
+  const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
-  if (namespaces[namespace]) {
-    return namespaces[namespace]
+  if (namespaces[ns]) {
+    return namespaces[ns]
   }
-  const bus = QuarkEventBus(namespace)
+  const bus = QuarkEventBus(ns)
   const services = {
     atoms: {},
     bus,
   }
-  const facade = new Proxy(services, facadeHandlers) as FacadeModels<Models>
-  return (namespaces[namespace] = {
+  const facade = new Proxy(services, facadeHandlers)
+  const uc = {
     services,
     facade,
     bus,
-  })
+  } as UnionCore<any, any, any>
+  namespace[ns] = uc
+  return namespace[ns]
 }
 
-interface ActiveUnion {}
+export interface ActiveUnions {}
 
-type UF = DefaultUnionFacades & ActiveUnion
+type DefaultUnions = {
+  defaultUnion:UnionCore<any, any, any>
+}
 
-export function UnionFacade<N extends keyof UF>(namespace?: N): UF[N] {
+type mixed<A extends Record<string, UnionCore<any, any, any>> = A
+
+
+type UnionNamespaces = DefaultUnions & ActiveUnions
+
+export function UnionFacade<N extends keyof UnionNamespaces>(namespace?: N): UnionNamespaces[N] {
   if (!namespace) {
     namespace = defaultNamespace as any
   }
   const namespaces = getNamespaces()
-  !namespaces[namespace] && UnionCore(namespace)
-  return namespaces[namespace].facade
+  if (!namespaces[namespace]) {
+    console.error('namespace', namespace, 'not found')
+    throw 'unknown namespace'
+  }
+  const z = namespaces[namespace]
+
+  return namespaces[namespace]
 }
