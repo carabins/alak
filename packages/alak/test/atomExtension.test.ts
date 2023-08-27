@@ -4,7 +4,7 @@
 
 import { test } from 'tap'
 import { alakFactory, alakModel } from 'alak/model'
-import { UnionFacadeFactory } from 'alak/index'
+import { UnionFacade, UnionFactory } from 'alak/namespaces'
 
 class model {
   one = 1
@@ -22,52 +22,52 @@ class model {
   onEventNewOne(v) {
     this.one = v
   }
+
   onEventNewSome(v) {
     this.one = v
   }
 }
 
-const a = alakModel({
-  name: 'a',
-  model,
-})
-const b = alakModel({
-  name: 'b',
-  model: class {
-    two: number = 2
-    inAOneUp(v) {
-      this.two = v
-    }
-  },
-})
-
-const multiA = alakFactory({
-  name: 'aa',
-  model,
-})
-
-const mole = UnionFacadeFactory()
 test('cluster name', (t) => {
-  t.plan(7)
-  mole.atoms.a.core.z(12)
-  t.equal(a.state.z, 12)
-  const aInstance = multiA.get('A')
-  aInstance.core.z(24)
+  const u = UnionFactory({
+    namespace: 'extensionTest',
+    models: {
+      a: model,
+      b: class {
+        two: number = 2
 
-  const aInstanceFromMole = mole.atoms['aa.A'] as any
+        inAOneUp(v) {
+          this.two = v
+        }
+      },
+    },
+    factories: {
+      aa: model,
+    },
+    events: {
+      NEW_ONE(data: number) {},
+    },
+  })
+  t.plan(7)
+
+  u.atoms.a.core.z(12)
+  t.equal(u.states.a.z, 12)
+  const aInstance = u.atoms.aa.get('A')
+  aInstance.core.z(24)
+  //
+  const aInstanceFromMole = u.atoms['aa.A'] as any
   t.equal(aInstance.state.z, aInstanceFromMole.state.z)
 
   aInstance.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
   aInstanceFromMole.actions.addOne()
   t.equal(aInstance.state.one, aInstanceFromMole.state.one)
-  a.actions.addOne()
-  t.equal(a.state.two, 2)
 
-  a.bus.dispatchEvent('NEW_ONE', 100)
-  t.equal(a.state.one, 100)
+  u.atoms.a.actions.addOne()
+  t.equal(u.states.a.two, 2)
 
-  t.equal(a.state.one, b.state.two)
-
+  u.bus.dispatchEvent('NEW_ONE', 100)
+  t.equal(u.states.a.one, 100)
+  t.equal(u.states.a.one, u.states.b.two)
   t.end()
 })

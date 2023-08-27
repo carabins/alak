@@ -1,4 +1,24 @@
 
+What's in the brain that ink may character    // Sun Aug 27 2023 19:54:34
+	alak@5.0.0-up.21
+		 - src/constructor.ts
+		 - src/index.ts
+		 - src/model.ts
+		 - src/namespaces.ts
+		 - test/atomExtension.test.ts
+		 - test/events.test.ts
+		 - test/init.event.test.ts
+		 - test/multi.test.ts
+		 - test/submodelid.ts
+		 - types/AlakAtom.ts
+		 - types/AlakConstructor.d.ts
+		 - types/Unions.d.ts
+	atom@5.0.0-up.11
+		 - src/nuclear.ts
+	nucleus@5.0.0-up.8
+		 - types/Quark.d.ts
+
+
 Him in thy course untainted do allow    // Wed Aug 23 2023 11:06:23
 	alak@5.0.0-up.20
 		 - src/constructor.ts

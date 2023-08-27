@@ -1,39 +1,39 @@
 import { traced } from '@alaq/atom/property'
-import { AlakModel, UnionFacadeFactory } from 'alak/index'
+import { AlakModel } from 'alak/index'
 import { alakModel } from 'alak/model'
 import { test } from 'tap'
+import { UnionFacade, UnionFactory } from 'alak/namespaces'
 
 class model extends AlakModel {
   someVar = traced.some_id('somevar')
   some = traced()
 }
 
-const a = alakModel({
-  name: 'a',
-  model,
-})
-const b = alakModel({
-  name: 'b',
-  model,
+const u = UnionFactory({
+  namespace: 'initEventTest',
   emitChanges: true,
+  models: {
+    a: model,
+    b: model,
+  },
 })
 
-const cluster = UnionFacadeFactory()
+const { a, b } = u.atoms
 
 test('atom init events', (t) => {
   t.plan(3)
   const listener = (event, data) => {
     switch (event) {
       case 'NUCLEUS_INIT':
-        console.log(data)
-        t.equal(data.nucleon.id, a.core.someVar.id)
-        t.equal(data.nucleon.value, 'somevar')
+        t.equal(data.nucleus.id, a.core.someVar.id)
+        t.equal(data.nucleus.value, 'somevar')
         t.equal(data.traced, 'some_id')
+        break
     }
   }
-  cluster.bus.addEverythingListener(listener)
+  u.bus.addEverythingListener(listener)
   a.core.someVar()
-  cluster.bus.removeListener(listener)
+  u.bus.removeListener(listener)
   a.core.some(3)
   t.end()
 })

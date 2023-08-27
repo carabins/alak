@@ -15,15 +15,15 @@ interface AlakConstructor<Model, E, N> {
 
   // dispatchEachValues?: boolean
 
-  edges?: N extends Record<string, AlakAtom<any>>
-    ? GraphBuilderN<Instance<Model>, N>
-    : GraphBuilder<Instance<Model>>
-  listen?: PartialRecord<string, keyof Instance<Model>>
-  nodes?: N
+  // edges?: N extends Record<string, AlakAtom<any, any>>
+  //   ? GraphBuilderN<Instance<Model>, N>
+  //   : GraphBuilder<Instance<Model>>
+  // listen?: PartialRecord<string, keyof Instance<Model>>
+  // nodes?: N
 
-  activate?(
-    this: ModelState<Model>,
-    core: Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>,
-    nodes: N,
-  ): void
+  // activate?(
+  //   this: ModelState<Model>,
+  //   core: Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>,
+  //   nodes: N,
+  // ): void
 }

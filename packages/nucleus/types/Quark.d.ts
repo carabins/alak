@@ -22,7 +22,7 @@ type EventConnector = Function
 interface QuarkBus<Events, DataType> {
   addEverythingListener(listener: (event: Events, data: DataType) => void): void
 
-  addEventListener<E extends keyof Events>(event: E, listener: (data: DataType[E]) => void): void
+  addEventListener(event: Events, listener: (data: DataType) => void): void
 
   removeEventListener(listener, event: Events): void
 

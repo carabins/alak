@@ -76,7 +76,7 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { traced, n: nucleon })
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { traced, nucleus: nucleon })
   }
 
   return nucleon
