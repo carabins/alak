@@ -1,7 +1,7 @@
 import { QuarkEventBus } from 'alak/index'
 import isBrowser from 'packages/rune/src/isBrowser'
 
-const defaultNamespace = 'defaultUnion' as keyof UnionNamespaces
+const defaultNamespace = 'defaultUnion'
 const AlakUnionNamespace = 'AlakUnionNamespace'
 const AlakUnion = {
   namespaces: {},
@@ -22,14 +22,7 @@ const atomLinked = {
   states: true,
 }
 const facadeHandlers = {
-  // apply: function (target: UnionCoreService, thisArg, [key, value]) {
-  //   if (!key || !value) {
-  //     console.error('KV Arguments need more', { key, value })
-  //     return
-  //   }
-  //   target[key] = value
-  // },
-  get(target: UnionCoreService<any, any>, key): any {
+  get(target: UnionCoreService<any, any, any>, key): any {
     if (atomLinked[key]) {
       return target.atoms[key]
     }
@@ -37,10 +30,10 @@ const facadeHandlers = {
   },
 }
 
-export function UnionFactory<Models, Events, Services>(
-  synthesis: UnionSynthesis<Models, Events, Services>,
-): FacadeModel<Models, Events> & Services {
-  const uc = UnionCoreFactory(synthesis.namespace as any)
+export function UnionFactory<Models, Events, Services, Fabrice>(
+  synthesis: UnionSynthesis<Models, Events, Services, Fabrice>,
+): FacadeModel<Models, Events, Fabrice> & Services {
+  const uc = UnionCoreFactory(synthesis.namespace as any) as IUnionCore
   Object.keys(synthesis.models).forEach((modelName) => {
     uc
   })
@@ -50,12 +43,14 @@ export function UnionFactory<Models, Events, Services>(
 export function UnionCoreFactory<N extends keyof UnionNamespaces>(
   namespace: N,
 ): UnionNamespaces[N] {
-  const ns = namespace || defaultNamespace
+  //@ts-ignore
+  namespace = namespace || defaultNamespace
   const namespaces = getNamespaces()
-  if (namespaces[ns]) {
-    return namespaces[ns]
+
+  if (namespaces[namespace]) {
+    return namespaces[namespace]
   }
-  const bus = QuarkEventBus(ns)
+  const bus = QuarkEventBus(namespace)
   const services = {
     atoms: {},
     bus,
@@ -65,19 +60,18 @@ export function UnionCoreFactory<N extends keyof UnionNamespaces>(
     services,
     facade,
     bus,
-  } as UnionCore<any, any, any>
-  namespace[ns] = uc
-  return namespace[ns]
+  } as any
+  namespaces[namespace] = uc
+  return namespaces[namespace]
 }
 
 export interface ActiveUnions {}
 
 type DefaultUnions = {
-  defaultUnion:UnionCore<any, any, any>
+  defaultUnion: IUnionCore
 }
 
-type mixed<A extends Record<string, UnionCore<any, any, any>> = A
-
+// type mixed<A extends Record<string, UnionCore<any, any, any>> = A
 
 type UnionNamespaces = DefaultUnions & ActiveUnions
 

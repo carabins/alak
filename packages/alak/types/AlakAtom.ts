@@ -25,7 +25,7 @@ type AtomNucleusChangeEventData = {
 
 type AtomLifeCycleEventData = {
   name: string
-  atom: AlakAtom<any>
+  atom: AlakAtom<any, any>
 }
 
 type AlakCoreEvents = {
@@ -34,17 +34,17 @@ type AlakCoreEvents = {
   NUCLEUS_CHANGE: AtomNucleusChangeEventData
   NUCLEUS_INIT: AtomNucleusInitEventData
 }
-type AlakEventsData = AlakCoreEvents & AlakSynthesisEvents
+// type AlakEventsData = AlakCoreEvents & AlakSynthesisEvents
+//
+// type AtomicEventBus = IQuarkBus<AlakEventsData, AlakSynthesisEvents>
 
-type AtomicEventBus = IQuarkBus<AlakEventsData, AlakSynthesisEvents>
-
-interface AlakAtom<Model> {
+interface AlakAtom<Model, Events extends object> {
   state: ModelState<Model>
   core: ModelCore<Model>
   actions: OnlyFunc<Instance<Model>>
-  bus: AtomicEventBus
+  bus: IQuarkBus<AlakCoreEvents & Events, Events>
 
-  onActivate(listiner: (node: AlakAtom<Model>) => void)
+  onActivate(listiner: (node: AlakAtom<Model, Events>) => void)
 
   getValues(): ModelState<Model>
 }
@@ -62,14 +62,14 @@ type QuantumAtom = {
   name: string
   target?: any
   bus: QuarkBus<any, any>
-  union: UnionCore<any, any, any>
-  atom?: AlakAtom<any>
+  union: IUnionCore
+  atom?: AlakAtom<any, any>
   eventListeners?: string[]
 }
 
-type AlakAtomFactory<M> = {
-  get(id: string, target: any): AlakAtom<M>
+type AlakAtomFactory<M, E extends Object> = {
+  get(id: string, target: any): AlakAtom<M, E>
   delete(id: string): void
   multiCore: ModelCore<M>
-  bus: QuarkBus<string, any>
+  bus: IQuarkBus<AlakCoreEvents & E, E>
 }
