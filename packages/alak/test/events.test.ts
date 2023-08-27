@@ -1,5 +1,5 @@
 import { ok, test } from 'tap'
-import { UnionFacadeFactory, UnionFactory } from 'alak/namespaces'
+import { UnionFacade, UnionFactory } from 'alak/namespaces'
 
 class model {
   eventState: string
@@ -25,7 +25,7 @@ declare module 'alak/namespaces' {
 }
 
 test('atom events', (t) => {
-  const q = UnionFacadeFactory('eventsTests')
+  const q = UnionFacade('eventsTests')
   u.bus.addEventListener('ATOM_INIT', (d) => {
     switch (d.name) {
       case 'a':
