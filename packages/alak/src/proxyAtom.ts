@@ -2,7 +2,7 @@ import { alakConstructor } from './constructor'
 import { QuarkEventBus } from './index'
 import { UnionCoreFactory } from 'alak/namespaces'
 
-export function proxyAtom(constructor, id?, target?) {
+export function proxyAtom(constructor, id?, data?) {
   // constructor = Object.assign({}, constructor)
 
   if (!constructor.name) {
@@ -20,8 +20,8 @@ export function proxyAtom(constructor, id?, target?) {
   if (id) {
     quantum.id = id
   }
-  if (target) {
-    quantum.target = target
+  if (data) {
+    quantum.data = data
   }
 
   const up = () => {
@@ -80,10 +80,8 @@ export function proxyAtom(constructor, id?, target?) {
           return () => getKnows('knownActions')
         case 'getValues':
           return () => getKnows('knownKeys')
-        case 'onActivate':
-          return (listener) => {
-            target.activateListeners.push(listener)
-          }
+        case 'decay':
+          return () => quantum.bus.dispatchEvent('ATOM_DECAY', quantum)
       }
     },
   })

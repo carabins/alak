@@ -3,18 +3,18 @@
  */
 
 export const savedSym = Symbol('saved')
-export const tracedSym = Symbol('traced')
+export const runeSym = Symbol('rune')
 export const statelessSym = Symbol('stateless')
 
-export const traced = new Proxy(() => true, {
+export const rune = new Proxy(() => true, {
   apply(_, thisArg: any, argArray: any[]): any {
     const [startValue] = argArray
-    return { sym: tracedSym, startValue, traced: true }
+    return { sym: runeSym, startValue, rune: true }
   },
-  get(_, traced: string): any {
+  get(_, rune: string): any {
     return (startValue) => {
       // target.startValue = startValue
-      return { sym: tracedSym, startValue, traced }
+      return { sym: runeSym, startValue, rune }
     }
   },
 }) as {

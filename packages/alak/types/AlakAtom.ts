@@ -1,75 +1,56 @@
-/*
- * Copyright (c) 2022. Only the truth - liberates.
- */
-
 type CanBeArray<T> = T | Array<T>
 type ActionsAndN<T> = CanBeArray<GetValues<T> | GetActions<T>>
 
-// type AtomicInstance<M, E, N> = N extends Record<string, AlakAtom<any>>
-//   ? MixClass<AlakAtom<M>, GraphSubNodes<N>>
-//   : AlakAtom<M>
-
-type ModelCore<Model> = Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>
-type ModelState<Model> = PureModel<Instance<Model>>
-type AtomNucleusInitEventData = {
-  traced?: any
-  n: INucleus<any>
+type IModelCore<Model> = Atomized<PureModel<Instance<Model>>> & OnlyFunc<Instance<Model>>
+type IModelState<Model> = PureModel<Instance<Model>>
+type INucleusInitEventData = {
+  rune?: any
+  nucleus: INucleus<any>
 }
 
-type AtomNucleusChangeEventData = {
+type INucleusChangeEventData = {
   value: any
   key: string
   atomId: string
   nucleus: INucleus<any>
 }
 
-type AtomLifeCycleEventData = {
+type IAtomLifeCycleEventData = {
   name: string
-  atom: AlakAtom<any, any>
+  atom: IAlakAtom<any, any>
 }
 
-type AlakCoreEvents = {
-  ATOM_DECAY: AtomLifeCycleEventData
-  ATOM_INIT: AtomLifeCycleEventData
-  NUCLEUS_CHANGE: AtomNucleusChangeEventData
-  NUCLEUS_INIT: AtomNucleusInitEventData
+type IAlakCoreEvents = {
+  ATOM_DECAY: IAtomLifeCycleEventData
+  ATOM_INIT: IAtomLifeCycleEventData
+  NUCLEUS_CHANGE: INucleusChangeEventData
+  NUCLEUS_INIT: INucleusInitEventData
 }
-// type AlakEventsData = AlakCoreEvents & AlakSynthesisEvents
-//
-// type AtomicEventBus = IQuarkBus<AlakEventsData, AlakSynthesisEvents>
 
-interface AlakAtom<Model, Events extends object> {
-  state: ModelState<Model>
-  core: ModelCore<Model>
+interface IAlakAtom<Model, Events extends object> {
+  state: IModelState<Model>
+  core: IModelCore<Model>
   actions: OnlyFunc<Instance<Model>>
-  bus: IQuarkBus<AlakCoreEvents & Events, Events>
+  bus: IQuarkBus<IAlakCoreEvents & Events, Events>
 
-  onActivate(listiner: (node: AlakAtom<Model, Events>) => void)
+  onActivate(listiner: (node: IAlakAtom<Model, Events>) => void)
 
-  getValues(): ModelState<Model>
+  getValues(): IModelState<Model>
 }
-
-// interface MultiAtomicNode<M, E, N> {
-//   get(id): AtomicInstance<M, E, N>
-//
-//   delete(id): void
-//
-//   broadCast: AtomicInstance<M, E, N>['core']
-// }
 
 type QuantumAtom = {
   id?: any
   name: string
-  target?: any
+  data?: any
   bus: QuarkBus<any, any>
-  union: IUnionCore
-  atom?: AlakAtom<any, any>
+  union: IUnionDevCore
+  atom?: IAlakAtom<any, any>
   eventListeners?: string[]
 }
 
-type AlakAtomFactory<M, E extends Object> = {
-  get(id: string | number, target?: any): AlakAtom<M, E>
+type IAlakAtomFactory<M, E extends Object> = {
+  get(id: string | number, target?: any): IAlakAtom<M, E>
   delete(id: string | number): void
-  multiCore: ModelCore<M>
-  bus: IQuarkBus<AlakCoreEvents & E, E>
+  multiCore: IModelCore<M>
+  bus: IQuarkBus<IAlakCoreEvents & E, E>
 }

@@ -15,7 +15,7 @@ export default function (q: QuantumAtom) {
     id: q.id,
     name: q.name,
     union: q.union.services.atoms,
-    target: q.target,
+    target: q.data,
     call(atom: string, methodName: string, args?: any[]) {},
     set(atom: string, nucleon: string, data: any) {
       const a = getA(atom)
@@ -28,6 +28,11 @@ export default function (q: QuantumAtom) {
   }
   return {
     _: new Proxy(under, {
+      get(t, k) {
+        return q.union.facade
+      },
+    }),
+    __: new Proxy(under, {
       get(t, k) {
         if (k === 'core') {
           return q.atom.core

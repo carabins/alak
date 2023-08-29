@@ -1,6 +1,6 @@
 {
     "name": "@alaq/bitmask",
-    "version": "0.0.16",
+    "version": "0.0.17",
     "description": "Alak bitmask",
     "main": "index.js",
     "types": "index.d.ts",

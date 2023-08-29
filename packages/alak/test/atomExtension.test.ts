@@ -31,7 +31,7 @@ class model {
 test('cluster name', (t) => {
   const u = UnionFactory({
     namespace: 'extensionTest',
-    models: {
+    singletons: {
       a: model,
       b: class {
         two: number = 2
@@ -49,7 +49,6 @@ test('cluster name', (t) => {
     },
   })
   t.plan(7)
-
   u.atoms.a.core.z(12)
   t.equal(u.states.a.z, 12)
   const aInstance = u.atoms.aa.get('A')
