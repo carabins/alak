@@ -1,10 +1,10 @@
-import { isDefined } from '@alaq/atom/extra'
 import nuclear from '@alaq/atom/nuclear'
+import isDefined from '@alaq/rune/isDefined'
 
 export const isString = (p) => typeof p === 'string'
 
 export const cloudProxy = {
-  nuclear: (valence: Record<string, any>, core: DeepAtomCore<any>) =>
+  nuclear: (valence: Record<string, any>, core: IDeepAtomCore<any>) =>
     new Proxy(
       { valence, core },
       {

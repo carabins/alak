@@ -3,16 +3,17 @@
  */
 
 import { test } from 'tap'
-import { AlakModel } from 'alak/index'
+
 import { alakFactory } from 'alak/model'
 import { UnionFactory } from 'alak/namespaces'
+import { UnionMultiModel } from 'alak/index'
 
-class submodel extends AlakModel {
+class submodel extends UnionMultiModel<any, any, any, any> {
   get thisOne() {
     return this['one'] as number
   }
   get thisId() {
-    return this._.id as number
+    return this.__.id as number
   }
 }
 
@@ -24,7 +25,7 @@ class model extends submodel {
   }
 
   getIdMethod() {
-    return this._.id
+    return this.__.id
   }
   oneReturnMethod() {
     return this.thisOne
@@ -33,7 +34,7 @@ class model extends submodel {
 
 const u = UnionFactory({
   namespace: 'muiltitest',
-  models: {},
+  singletons: {},
   factories: {
     eAtom: model,
     baseAtom: model,
@@ -44,6 +45,8 @@ const { baseAtom, eAtom } = u.atoms
 test('multiAtoms', (t) => {
   const a = baseAtom.get(100)
 
+  // console.log(a.state.thisId)
+  t.equal(a.state.thisId, 100)
   t.equal(a.state.thisId, a.actions.getIdMethod())
   t.equal(a.core.oneReturnMethod(), a.state.thisOne)
 
@@ -52,8 +55,9 @@ test('multiAtoms', (t) => {
   t.notSame(a.state.one, b.state.one)
 
   const e1 = eAtom.get(1)
-  // e1.actions.add()
-  // const e2 = eAtom.get(2)
-  // t.notSame(e1.state.one, e2.state.one)
+  e1.actions.add()
+  const e2 = eAtom.get(2)
+  t.notSame(e1.state.one, e2.state.one)
+  t.plan(5)
   t.end()
 })

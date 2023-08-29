@@ -1,15 +1,16 @@
 // import {installNucleonExtension} from "@alaq/nucleus/create";
 import { storage } from './storage'
-import { isDefined } from './extra'
+
 import N from '@alaq/nucleus/index'
-import { savedSym, tracedSym, statelessSym } from '@alaq/atom/property'
+import { savedSym, runeSym, statelessSym } from '@alaq/atom/property'
+import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
-export default function (key, valence, core: DeepAtomCore<any>) {
+export default function (key, valence, core: IDeepAtomCore<any>) {
   let nucleon: INucleus<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue, mem, traced, broadcast
+    let modelValue, mem, rune, broadcast
 
     if (valence) {
       let v = valence[key]
@@ -28,8 +29,8 @@ export default function (key, valence, core: DeepAtomCore<any>) {
     core.nucleons[key] = nucleon = N()
     if (isDefined(modelValue)) {
       switch (modelValue.sym) {
-        case tracedSym:
-          traced = modelValue.traced || true
+        case runeSym:
+          rune = modelValue.rune || true
           modelValue = modelValue.startValue
           break
         case savedSym:
@@ -76,7 +77,7 @@ export default function (key, valence, core: DeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { traced, nucleus: nucleon })
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { rune, nucleus: nucleon })
   }
 
   return nucleon

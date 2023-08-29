@@ -10,13 +10,14 @@ type Instance<T> = T extends ClassInstance ? ClassToKV<T> : T
 type ClassInstance = new (...args: any) => any
 type ClassToKV<T> = T extends ClassInstance ? InstanceType<T> : T
 
-type PureModel<T> = RemoveKeysByType<T, AnyFunction>
+type ModelHiddenProps = '-'
+type PureModel<T> = Omit<RemoveKeysByType<T, AnyFunction>, ModelHiddenProps>
 type Atomized<T> = { readonly [K in keyof T]: INucleus<T[K]> }
 
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
 
-type AtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
+type IAtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
 type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
 type NucleusStrategy = 'core' | 'saved' | 'holistic' | 'stateless' | 'holystate'
@@ -27,13 +28,13 @@ type ExternalEventData = {}
 interface IAtom<T> {
   state: AtomState<Instance<T>>
   actions: OnlyFunc<Instance<T>>
-  core: AtomCore<Instance<T>>
+  core: IAtomCore<Instance<T>>
   bus: QuarkBus<string, any>
 
   getValues(): PureModel<Instance<T>>
 }
 
-type AtomOptions<Model> = {
+type IAtomOptions<Model> = {
   name?: string
   model?: Model
   saved?: Array<keyof PureModel<Model>> | '*' | boolean
@@ -43,7 +44,7 @@ type AtomOptions<Model> = {
   constructorArgs?: any[]
   bus?: QuarkBus<any, any>
 }
-type DeepAtomCore<T> = AtomOptions<T> & {
+type IDeepAtomCore<T> = IAtomOptions<T> & {
   proxy?: any
   nucleons?: Record<string, INucleus<any>>
   quarkBus: QuarkBus<any, any>

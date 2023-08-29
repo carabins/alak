@@ -3,7 +3,7 @@ export { alakFactory, alakModel } from 'alak/model'
 export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, savedAtom } from '@alaq/atom/index'
-export { saved, stateless, traced } from '@alaq/atom/property'
+export { saved, stateless, rune } from '@alaq/atom/property'
 import { storage } from '@alaq/atom/storage'
 
 import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
@@ -16,16 +16,20 @@ export const NStored = (name, value) => {
   return n
 }
 
-export abstract class AlakModel {
-  _: {
-    id: any
-    name: string
-    target: any
-    core: Record<string, INucleus<any>>
-    cluster: Record<string, AlakAtom<any, any>>
-    dispatchEvent(name: string, data?): void
-    set(atom: string, nucleus: string, data: any): void
-    get(atom: string, nucleus: string): void
-    call(atom: string, methodName: string, args?: any[])
+export abstract class UnionModel<Models, Events extends object, Factory, Services> {
+  _: IFacadeModel<Models, Events, Factory> & Services
+  __: {
+    namespace: string
+    modelName: string
+  }
+}
+
+export abstract class UnionMultiModel<Models, Events extends object, Factory, Services> {
+  _: IFacadeModel<Models, Events, Factory> & Services
+  __: {
+    namespace: string
+    modelName: string
+    id: string | number
+    data?: any
   }
 }

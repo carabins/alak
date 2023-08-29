@@ -1,4 +1,4 @@
-export default function (model, config: AtomOptions<any>) {
+export default function (model, config: IAtomOptions<any>) {
   const isClass = typeof model === 'function'
   const getters = {}
   const actions = {}

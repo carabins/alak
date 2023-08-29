@@ -1,11 +1,9 @@
-import {isDefined} from "@alaq/atom/extra";
-
 type ProxyObject = {
   value: number
   p: IBitWise
 }
 
-const emit = (o)=> o.l.forEach(f=>f(o.value))
+const emit = (o) => o.l.forEach((f) => f(o.value))
 const proxyActions = {
   is(n) {
     return (this.value & n) === n
@@ -39,8 +37,7 @@ const proxyActions = {
     emit(this)
   },
   removeValueUpdate(listener) {
-    this.l = this.l.filter(l => l != listener)
-
+    this.l = this.l.filter((l) => l != listener)
   },
   onValueUpdate(listener) {
     this.l.push(listener)
@@ -73,7 +70,7 @@ const proxyHandler = {
 }
 
 export default function BitWise(value = 0) {
-  const p = new Proxy({value, l: []}, proxyHandler)
+  const p = new Proxy({ value, l: [] }, proxyHandler)
   p.p = p
   return p as IBitWise
 }

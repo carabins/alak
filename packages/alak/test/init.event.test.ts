@@ -1,18 +1,18 @@
-import { traced } from '@alaq/atom/property'
-import { AlakModel } from 'alak/index'
+import { rune } from '@alaq/atom/property'
+
 import { alakModel } from 'alak/model'
 import { test } from 'tap'
 import { UnionFacade, UnionFactory } from 'alak/namespaces'
 
-class model extends AlakModel {
-  someVar = traced.some_id('somevar')
-  some = traced()
+class model {
+  someVar = rune.some_id('somevar')
+  some = rune()
 }
 
 const u = UnionFactory({
   namespace: 'initEventTest',
   emitChanges: true,
-  models: {
+  singletons: {
     a: model,
     b: model,
   },
@@ -27,7 +27,7 @@ test('atom init events', (t) => {
       case 'NUCLEUS_INIT':
         t.equal(data.nucleus.id, a.core.someVar.id)
         t.equal(data.nucleus.value, 'somevar')
-        t.equal(data.traced, 'some_id')
+        t.equal(data.rune, 'some_id')
         break
     }
   }

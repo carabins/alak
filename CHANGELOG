@@ -1,4 +1,41 @@
 
+The statute of thy beauty thou wilt take,    // Tue Aug 29 2023 20:30:19
+	alak@5.0.0-up.22
+		 - src/constructor.ts
+		 - src/extension.ts
+		 - src/index.ts
+		 - src/model.ts
+		 - src/namespaces.ts
+		 - src/proxyAtom.ts
+		 - test/atomExtension.test.ts
+		 - test/events.test.ts
+		 - test/init.event.test.ts
+		 - test/multi.test.ts
+		 - types/AlakAtom.ts
+		 - types/AlakConstructor.d.ts
+		 - types/Unions.d.ts
+		 - types/graph.d.ts DELETED
+		 - types/spread.d.ts DELETED
+		 - types/stringkey.d.ts DELETED
+	atom@5.0.0-up.12
+		 - src/cloud.create.ts
+		 - src/cloud.orbit.ts
+		 - src/cloud.parse.ts
+		 - src/cloud.proxy.ts
+		 - src/extra.ts
+		 - src/index.ts
+		 - src/nuclear.ts
+		 - src/property.ts
+		 - test/bud/model.ts
+		 - types/base.d.ts
+	bitmask@0.0.17
+		 - src/BitWise.ts
+	nucleus@5.0.0-up.9
+		 - src/computed.ts
+	rune@0.0.4
+		 - src/isDefined.ts
+
+
 What's in the brain that ink may character    // Sun Aug 27 2023 19:54:34
 	alak@5.0.0-up.21
 		 - src/constructor.ts

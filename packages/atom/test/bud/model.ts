@@ -1,11 +1,11 @@
-import { traced } from '@alaq/atom/property'
+import { rune } from '@alaq/atom/property'
 
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
   everCount = 12
 
-  someOtherVar = traced.some('+')
+  someOtherVar = rune.some('+')
 
   addEverCount(v) {
     this.everCount += v

@@ -7,7 +7,7 @@ import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
 
-export default function <Model, Eternal>(atomOptions: AtomOptions<Model>) {
+export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   const cloud = {
     nucleons: {},
     actions: {},
