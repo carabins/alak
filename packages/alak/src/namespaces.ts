@@ -1,5 +1,5 @@
 import { alakFactory, alakModel, QuarkEventBus } from 'alak/index'
-import isBrowser from 'packages/rune/src/isBrowser'
+import isBrowser from '@alaq/rune/isBrowser'
 
 const defaultNamespace = 'defaultUnion'
 const AlakUnionNamespace = 'AlakUnionNamespace'
@@ -17,7 +17,7 @@ function getBrowserNs() {
 const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.namespaces) as UnionNamespaces
 
 const atomLinked = {
-  buses: 'base',
+  buses: 'bus',
   cores: 'core',
   actions: 'action',
   states: 'state',
@@ -29,7 +29,7 @@ const likedProxyHandler = {
   },
 }
 const facadeHandlers = {
-  get(target: UnionCoreService<any, any, any>, key): any {
+  get(target: IUnionCoreService<any, any, any>, key): any {
     if (atomLinked[key]) {
       if (!likedProxy[key]) {
         likedProxy[key] = new Proxy(
@@ -48,14 +48,14 @@ type EventsData<E extends object> = {
 }
 
 export function UnionFactory<Models, Events extends object, Services, Factories>(
-  synthesis: UnionSynthesis<Models, Events, Services, Factories>,
-): FacadeModel<Models, EventsData<Events>, Factories> & Services {
-  const uc = UnionCoreFactory(synthesis.namespace as any) as IUnionCore
-  Object.keys(synthesis.models).forEach((modelName) => {
+  synthesis: IUnionSynthesis<Models, Events, Services, Factories>,
+): IFacadeModel<Models, EventsData<Events>, Factories> & Services {
+  const uc = UnionCoreFactory(synthesis.namespace as any) as IUnionDevCore
+  Object.keys(synthesis.singletons).forEach((modelName) => {
     uc.services.atoms[modelName] = alakModel({
       namespace: synthesis.namespace,
       name: modelName,
-      model: synthesis.models[modelName],
+      model: synthesis.singletons[modelName],
       emitChanges: synthesis.emitChanges,
     })
   })
@@ -104,7 +104,7 @@ export function UnionCoreFactory<N extends keyof UnionNamespaces>(
 export interface ActiveUnions {}
 
 type DefaultUnions = {
-  defaultUnion: IUnionCore
+  defaultUnion: IUnionDevCore
 }
 
 type UnionNamespaces = DefaultUnions & ActiveUnions

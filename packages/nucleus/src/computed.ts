@@ -95,7 +95,7 @@ export function from(...fromNucleons: INucleus<any>[]) {
   function strong(mixFn, safe) {
     // let firstRun = true
     let getting = {}
-    let traced = false
+    let rune = false
     quark._.safe(safe)
 
     function getterFn(callerUid?) {
@@ -143,9 +143,9 @@ export function from(...fromNucleons: INucleus<any>[]) {
       quark.getterFn = getterFn
       getting = {}
       const nv = mixFn(...values)
-      if (!traced) {
-        traced = true
-        // console.log("traced", values)
+      if (!rune) {
+        rune = true
+        // console.log("rune", values)
         quark(nv)
       }
       return nv
@@ -176,7 +176,7 @@ export function from(...fromNucleons: INucleus<any>[]) {
         if (safe && !isChanged()) {
           return
         }
-        if (traced) {
+        if (rune) {
           // console.log("calling ::: ->")
           const args = getterFn(a.uid)
           if (isPromise(args)) args.then(quark)

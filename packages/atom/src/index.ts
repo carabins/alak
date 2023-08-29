@@ -12,7 +12,7 @@ export const coreAtom = <T>(model: T) =>
     get(a, k) {
       return a.core[k]
     },
-  }) as any as AtomCore<ClassToKV<T>>
+  }) as any as IAtomCore<ClassToKV<T>>
 
 export const Atom = cloudCreate
 

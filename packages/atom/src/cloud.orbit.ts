@@ -6,7 +6,7 @@ import cloudGetters from './cloud.getters'
 import { cloudProxy } from './cloud.proxy'
 import CloudElectrons from './cloud.electrons'
 
-export default function (electrons: CloudElectrons, cloud, config: AtomOptions<any>, quarkBus) {
+export default function (electrons: CloudElectrons, cloud, config: IAtomOptions<any>, quarkBus) {
   const atom = cloudProxy.nuclear(
     electrons.instaValues,
     Object.assign({ nucleons: {}, quarkBus }, config),
