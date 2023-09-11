@@ -101,13 +101,15 @@ export function UnionCoreFactory<N extends keyof UnionNamespaces>(
   return namespaces[namespace]
 }
 
-export interface ActiveUnions {}
+export interface ActiveUnions {
+  defaultUnion: IUnionDevCore
+}
 
 type DefaultUnions = {
   defaultUnion: IUnionDevCore
 }
 
-type UnionNamespaces = DefaultUnions & ActiveUnions
+export type UnionNamespaces = DefaultUnions & ActiveUnions
 
 export function UnionFacade<N extends keyof UnionNamespaces>(namespace?: N): UnionNamespaces[N] {
   if (!namespace) {
