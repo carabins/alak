@@ -1,3 +1,5 @@
+import { ActiveUnions, UnionNamespaces } from 'alak/namespaces'
+
 export { alakFactory, alakModel } from 'alak/model'
 
 export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
@@ -16,16 +18,16 @@ export const NStored = (name, value) => {
   return n
 }
 
-export abstract class UnionModel<Models, Events extends object, Factory, Services> {
-  _: IFacadeModel<Models, Events, Factory> & Services
+export declare abstract class UnionModel<NS extends keyof ActiveUnions> {
+  _: ActiveUnions[NS]['facade']
   __: {
     namespace: string
     modelName: string
   }
 }
 
-export abstract class UnionMultiModel<Models, Events extends object, Factory, Services> {
-  _: IFacadeModel<Models, Events, Factory> & Services
+export abstract class UnionMultiModel<NS extends keyof ActiveUnions> {
+  _: ActiveUnions[NS]['facade']
   __: {
     namespace: string
     modelName: string
