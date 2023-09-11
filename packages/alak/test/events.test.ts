@@ -26,7 +26,7 @@ const u = UnionFactory({
 
 declare module 'alak/namespaces' {
   export interface ActiveUnions {
-    eventsTests: typeof u
+    eventsTests: IUnionDevCore
   }
 }
 
