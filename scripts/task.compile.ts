@@ -78,6 +78,8 @@ export async function compile(project: Project) {
         sourcemap: false,
         // paths: tsconfig.compilerOptions.paths
       })
+
+      // transformSync
       // console.log(srcFile, Z.code.length)
       totalSize += Z.code.length
       writeFileSync(path.join(project.artPatch, src.name + '.js'), Z.code)
