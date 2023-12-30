@@ -8,11 +8,10 @@ import * as color from 'colorette'
 import { publish, upver } from './task.publish'
 import { test } from './task.test'
 import { syncDeps } from '~/scripts/task.syncDeps'
-import { push } from '~/scripts/task.push'
 import { initGit } from '~/scripts/common/git'
-import { getLine } from '~/scripts/common/oneLine'
 import * as process from 'process'
 import { doc } from '~/scripts/common/doc'
+import { browser } from '~/scripts/task.browser'
 
 const task = process.argv[2] || 'test'
 
@@ -85,7 +84,7 @@ initGit(projects).then(async (git) => {
         return process.argv[3]
       case 'test':
         return Object.keys(projects).join(',')
-      default :
+      default:
         return process.argv[3] ? process.argv[3] : changes
     }
   })()
@@ -114,12 +113,14 @@ initGit(projects).then(async (git) => {
 
   async function runPipeLine() {
     for (const t of job.pipeLine) {
-      Log(color.bold( t.name), )
-      if (t.isCommit) {
-        await git.commit(task == 'commit' ? process.argv[3] : false)
-      } else {
-        await Promise.all(job.projects.map(t))
-      }
+      Log(color.bold(t.name))
+      console.log('+++')
+      await Promise.all(job.projects.map(browser))
+      // if (t.isCommit) {
+      //   await git.commit(task == 'commit' ? process.argv[3] : false)
+      // } else {
+      //   await Promise.all(job.projects.map(t))
+      // }
     }
   }
 
