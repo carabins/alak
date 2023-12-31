@@ -34,6 +34,5 @@ function baseTest(t, m) {
 
 test('private model atom ', async (t) => {
   const m = coreAtom(Model)
-  console.log(m.getP())
   t.end()
 })

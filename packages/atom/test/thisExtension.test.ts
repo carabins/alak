@@ -13,7 +13,7 @@ class model {
   }
 
   constructor(a) {
-    console.log(a)
+    // console.log(a)
   }
 }
 

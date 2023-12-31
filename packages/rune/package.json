@@ -2,5 +2,6 @@
     "name": "@alaq/rune",
     "version": "0.0.4",
     "author": "Gleb Panteleev",
-    "license": "MIT & TRU"
+    "license": "MIT & TRU",
+    "browser": true
 }

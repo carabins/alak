@@ -19,7 +19,7 @@ import {
   removeListener,
 } from '@alaq/nucleus/events'
 import { createNucleus, nucleonExtensions } from './create'
-import { alive, rnd } from './utils'
+import { alive } from './utils'
 export { QuarkEventBus, Q } from '@alaq/nucleus/bus'
 
 export const installNucleonExtensions = nucleonExtensions
@@ -50,5 +50,5 @@ export const N = Object.assign(createNucleus, {
   },
 }) as INucleonConstructor<any>
 
-export const Nucleus = (window['Nucleus'] = N)
-export default Nucleus
+export const Nucleus = (globalThis['Nucleus'] = N)
+export default N
