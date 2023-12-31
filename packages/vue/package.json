@@ -4,6 +4,7 @@
     "description": "vue3 extension for alak atoms",
     "main": "index.js",
     "type": "index.d.ts",
+    "browser": true,
     "author": "Gleb Panteleev",
     "license": "TRU"
 }

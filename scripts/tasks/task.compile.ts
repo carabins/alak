@@ -1,5 +1,5 @@
-import { Project } from './common/project'
-import { FileLog } from './log'
+import { Project } from '../common/project'
+import { FileLog } from '../log'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import { runTsc } from '~/scripts/common/tsc'
@@ -24,15 +24,15 @@ function tsc() {
 }
 
 export async function compile(project: Project) {
-  const trace = FileLog(project.packageJson.name + ' compiler')
-  trace('prepare...')
+  const log = FileLog(project.packageJson.name + ' compiler')
+  log('prepare...')
   await tsc()
   const { sources, declarations } = tscState.result
 
   fs.existsSync(project.artPatch) && fs.removeSync(project.artPatch)
   fs.mkdirpSync(project.artPatch)
 
-  trace('write...')
+  log('write...')
   declarations[project.dir].forEach(({ outFile, content }) => {
     if (outFile.endsWith('index.d.ts')) {
       content = `/// <reference path="types.d.ts" />\n` + content
@@ -44,7 +44,7 @@ export async function compile(project: Project) {
   const declarationsMix = fs.existsSync(declarationsPath)
   if (declarationsMix) {
     let declarationSource = ''
-    trace('mixin declarations...')
+    log('mixin declarations...')
     fs.readdirSync(declarationsPath).forEach((f) => {
       declarationSource += fs.readFileSync(path.resolve(declarationsPath, f))
     })
@@ -78,15 +78,13 @@ export async function compile(project: Project) {
         sourcemap: false,
         // paths: tsconfig.compilerOptions.paths
       })
-
-      // transformSync
       // console.log(srcFile, Z.code.length)
       totalSize += Z.code.length
       writeFileSync(path.join(project.artPatch, src.name + '.js'), Z.code)
     }
   })
-  trace('unminified source size', (totalSize / 1024).toFixed(2), 'kb')
+  log('unminified source size', (totalSize / 1024).toFixed(2), 'kb')
   fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
   project.savePackageJsonTo.art()
-  trace('complete')
+  log('complete')
 }

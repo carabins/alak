@@ -1,6 +1,6 @@
 type IUnionSynthesis<M, E extends object, S, F> = {
-  namespace: string
-  singletons: M
+  namespace?: string
+  singletons?: M
   factories?: F
   events?: E
   services?: S

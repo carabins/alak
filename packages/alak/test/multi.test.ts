@@ -5,10 +5,10 @@
 import { test } from 'tap'
 
 import { alakFactory } from 'alak/model'
-import { UnionFactory } from 'alak/namespaces'
+ import { UnionFactory } from 'alak/namespaces'
 import { UnionMultiModel } from 'alak/index'
 
-class submodel extends UnionMultiModel<any, any, any, any> {
+class SubModel extends UnionMultiModel<"defaultUnion"> {
   get thisOne() {
     return this['one'] as number
   }
@@ -17,7 +17,7 @@ class submodel extends UnionMultiModel<any, any, any, any> {
   }
 }
 
-class model extends submodel {
+class Model extends SubModel {
   one = 1
 
   add() {
@@ -33,11 +33,10 @@ class model extends submodel {
 }
 
 const u = UnionFactory({
-  namespace: 'muiltitest',
-  singletons: {},
+  namespace: 'defaultUnion',
   factories: {
-    eAtom: model,
-    baseAtom: model,
+    eAtom: Model,
+    baseAtom: Model,
   },
 })
 const { baseAtom, eAtom } = u.atoms

@@ -1,9 +1,10 @@
 {
     "name": "@alaq/nucleus",
-    "version": "5.0.0-up.9",
+    "version": "5.0.0-up.10",
     "description": "Alak Nucleus part of proactive universe",
     "main": "index.js",
     "types": "index.d.ts",
+    "browser": true,
     "keywords": [
         "alak",
         "streams",

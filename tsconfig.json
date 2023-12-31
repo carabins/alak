@@ -70,6 +70,9 @@
   ],
   "ts-node": {
     "transpileOnly": true,
+    "require": [
+      "tsconfig-paths/register"
+    ],
     "compilerOptions": {
       "module": "CommonJS"
     }

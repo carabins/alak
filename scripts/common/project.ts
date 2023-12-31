@@ -11,6 +11,7 @@ export type Project = {
   packagePath: string
   artPatch: string
   dir: string
+  id: string
   changes: FileStatusResult[]
   copyToArt(filename: string)
   resolveInPackage(name: string): string
@@ -21,7 +22,7 @@ export type Project = {
 }
 
 export function initProject(dir) {
-  const trace = FileLog('project:' + dir)
+  const log = FileLog('project:' + dir)
   const packagePath = path.join(Const.PACKAGES, dir)
   const packageJsonPath = path.join(packagePath, Const.PK_JSON)
   const isAlive = fs.existsSync(packageJsonPath)
@@ -55,6 +56,6 @@ export function initProject(dir) {
           )
         },
       },
-    }
+    } as Project
   }
 }

@@ -20,12 +20,12 @@ const state = {
 
 const tsconfig = fs.readJSONSync('tsconfig.json')
 export async function runTsc(): Promise<typeof state> {
-  const trace = FileLog('tsc')
+  const log = FileLog('tsc')
   if (state.ready) {
     return state
   }
 
-  trace('reading sources...')
+  log('reading sources...')
   await new Promise((done) => setTimeout(done, 60))
   return new Promise((done) => {
     state.sources = scanAllSrc()
@@ -33,7 +33,7 @@ export async function runTsc(): Promise<typeof state> {
       state.declarations[p] = []
     })
 
-    trace('compile declarations...')
+    log('compile declarations...')
     const tscOptions: CompilerOptions = {
       allowJs: true,
       declaration: true,
@@ -70,12 +70,12 @@ export async function runTsc(): Promise<typeof state> {
         console.log(`
 (╯°□°)╯︵ ${message}
 `)
-        trace.error(`${diagnostic.file.fileName} (${line + 1},${character + 1})`)
-        trace.error(`ts.getPreEmitDiagnostics`)
+        log.error(`${diagnostic.file.fileName} (${line + 1},${character + 1})`)
+        log.error(`ts.getPreEmitDiagnostics`)
 
         process.exit()
       } else {
-        trace.warn(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
+        log.warn(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
       }
     })
 

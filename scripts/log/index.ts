@@ -67,7 +67,7 @@ const newProxy = (i) =>
 
 function wrapLog(module) {
   function fn() {}
-  fn.l = logInstance.child({ module }, { level: 20 })
+  fn.l = logInstance.child({ module }, { level: 10 })
   return newProxy(fn)
 }
 export const Log = wrapLog(false)

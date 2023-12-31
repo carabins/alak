@@ -100,57 +100,57 @@ export const handlers: any = {
     }
   },
 
-  // parentFor(nucleon: INucleon<any>, name) {
-  //   let parents = nucleon.getMeta('parents')
-  //   if (!parents) {
-  //     parents = {}
-  //     nucleon.addMeta('parents', parents)
-  //   }
-  //   const trueName = name | 1
-  //   const prevNucleon = parents[trueName]
-  //   prevNucleon && prevNucleon.down(nucleon)
-  //   parents[trueName] = this._
-  //   this._.up(nucleon)
-  // },
+  parentFor(nucleon: INucleus<any>, name) {
+    let parents = nucleon.getMeta('parents')
+    if (!parents) {
+      parents = {}
+      nucleon.addMeta('parents', parents)
+    }
+    const trueName = name | 1
+    const prevNucleon = parents[trueName]
+    prevNucleon && prevNucleon.down(nucleon)
+    parents[trueName] = this._
+    this._.up(nucleon)
+  },
 
-  // onClear(fun) {
-  //   addEventListener(this, QState.CLEAR, fun)
-  // },
-  // offClear(fun) {
-  //   removeEventListener(this, QState.CLEAR, fun)
-  // },
-  // onAwait(fun) {
-  //   addEventListener(this, QState.AWAIT, fun)
-  // },
-  // offAwait(fun) {
-  //   removeEventListener(this, QState.AWAIT, fun)
-  // },
+  onClear(fun) {
+    addEventListener(this, QState.CLEAR, fun)
+  },
+  offClear(fun) {
+    removeEventListener(this, QState.CLEAR, fun)
+  },
+  onAwait(fun) {
+    addEventListener(this, QState.AWAIT, fun)
+  },
+  offAwait(fun) {
+    removeEventListener(this, QState.AWAIT, fun)
+  },
 
-  // upDown(fun) {
-  //   grandUpFn(this, fun, upDownFilter(fun))
-  //   return this._
-  // },
-  // upSome(fun) {
-  //   grandUpFn(this, fun, someFilter)
-  //   return this._
-  // },
-  // upTrue(fun) {
-  //   grandUpFn(this, fun, trueFilter)
-  //   return this._
-  // },
-  // upFalse(fun) {
-  //   grandUpFn(this, fun, falseFilter)
-  //   return this._
-  // },
-  //
-  // upSomeFalse(fun) {
-  //   grandUpFn(this, fun, someFalseFilter)
-  //   return this._
-  // },
-  // upNone(fun) {
-  //   grandUpFn(this, fun, noneFilter)
-  //   return this._
-  // },
+  upDown(fun) {
+    grandUpFn(this, fun, upDownFilter(fun))
+    return this._
+  },
+  upSome(fun) {
+    grandUpFn(this, fun, someFilter)
+    return this._
+  },
+  upTrue(fun) {
+    grandUpFn(this, fun, trueFilter)
+    return this._
+  },
+  upFalse(fun) {
+    grandUpFn(this, fun, falseFilter)
+    return this._
+  },
+
+  upSomeFalse(fun) {
+    grandUpFn(this, fun, someFalseFilter)
+    return this._
+  },
+  upNone(fun) {
+    grandUpFn(this, fun, noneFilter)
+    return this._
+  },
   setId(id) {
     this.id = id
     return this._
@@ -208,58 +208,58 @@ export const handlers: any = {
     if (!this.metaMap) return null
     return this.metaMap.get(metaName)
   },
-  // dispatch(event, ...value) {
-  //   dispatchEvent(this, event, ...value)
-  //   return this._
-  // },
-  // on(stateEvent, fn) {
-  //   addEventListener(this, stateEvent, fn)
-  //   return this._
-  // },
-  // off(stateEvent, fn) {
-  //   removeEventListener(this, stateEvent, fn)
-  //   return this._
-  // },
-  // setGetter(getterFunction, isAsync) {
-  //   this.getterFn = getterFunction
-  //   this.isAsync = isAsync
-  //   return this._
-  // },
-  // setOnceGet(getterFunction, isAsync) {
-  //   this.getterFn = () => {
-  //     delete this.getterFn
-  //     delete this.isAsync
-  //     return getterFunction()
-  //   }
-  //   this.isAsync = isAsync
-  //   return this._
-  // },
-  // setWrapper(wrapperFunction, isAsync) {
-  //   this.wrapperFn = wrapperFunction
-  //   this.isAsync = isAsync
-  //   return this._
-  // },
+  dispatch(event, ...value) {
+    dispatchEvent(this, event, ...value)
+    return this._
+  },
+  on(stateEvent, fn) {
+    addEventListener(this, stateEvent, fn)
+    return this._
+  },
+  off(stateEvent, fn) {
+    removeEventListener(this, stateEvent, fn)
+    return this._
+  },
+  setGetter(getterFunction, isAsync) {
+    this.getterFn = getterFunction
+    this.isAsync = isAsync
+    return this._
+  },
+  setOnceGet(getterFunction, isAsync) {
+    this.getterFn = () => {
+      delete this.getterFn
+      delete this.isAsync
+      return getterFunction()
+    }
+    this.isAsync = isAsync
+    return this._
+  },
+  setWrapper(wrapperFunction, isAsync) {
+    this.wrapperFn = wrapperFunction
+    this.isAsync = isAsync
+    return this._
+  },
 
-  // tuneTo(a: INucleon<any>) {
-  //   this.tuneOff()
-  //   this.tunedTarget = a
-  //   a.up(this._)
-  // },
-  // tuneOff() {
-  //   this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
-  // },
+  tuneTo(a: INucleus<any>) {
+    this.tuneOff()
+    this.tunedTarget = a
+    a.up(this._)
+  },
+  tuneOff() {
+    this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
+  },
 
-  // injectTo(o, key) {
-  //   if (!key) {
-  //     key = this._name ? this._name : this.id ? this.id : this.uid
-  //   }
-  //   if (!o) throw 'trying inject quark to null object'
-  //   o[key] = this.value
-  //   return this._
-  // },
-  // cloneValue() {
-  //   return JSON.parse(JSON.stringify(this.value))
-  // },
+  injectTo(o, key) {
+    if (!key) {
+      key = this._name ? this._name : this.id ? this.id : this.uid
+    }
+    if (!o) throw 'trying inject quark to null object'
+    o[key] = this.value
+    return this._
+  },
+  cloneValue() {
+    return JSON.parse(JSON.stringify(this.value))
+  },
 
   [Symbol.toPrimitive]() {
     this._.toString()
@@ -270,6 +270,4 @@ export const handlers: any = {
   valueOf() {
     return `nucleon:${this._.uid}`
   },
-  // from,
-  // isNucleon: () => true,
 }

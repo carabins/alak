@@ -1,5 +1,6 @@
-// import { AlakModel, UnionFacadeFactory } from 'alak/index'
-// import { alakModel } from 'alak/model'
+// import {alakModel} from "alak/model";
+//
+//
 //
 // class submodel extends AlakModel {
 //   get thisOne() {
@@ -36,5 +37,5 @@
 //   name: 'a',
 //   model,
 // })
-//
-// // console.log(a.state.thisOne)
+// //
+// console.log(a.state)

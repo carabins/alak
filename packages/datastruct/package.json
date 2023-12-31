@@ -8,6 +8,7 @@
         "alak",
         "datastructures"
     ],
+    "browser": true,
     "author": "Gleb Panteleev",
     "license": "MIT & TRU",
     "repository": "https://github.com/carabins/alak"

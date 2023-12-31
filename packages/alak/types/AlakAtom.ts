@@ -36,6 +36,8 @@ interface IAlakAtom<Model, Events extends object> {
   onActivate(listiner: (node: IAlakAtom<Model, Events>) => void)
 
   getValues(): IModelState<Model>
+
+  free(): void
 }
 
 type QuantumAtom = {
