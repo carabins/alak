@@ -1,14 +1,19 @@
-import { ActiveUnions, UnionNamespaces } from 'alak/namespaces'
+import {ActiveUnions} from "alak/namespaces";
 
-export { alakFactory, alakModel } from 'alak/model'
+export {alakFactory, alakModel} from 'alak/model'
 
-export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
-export { nucleonExtensions } from '@alaq/nucleus/create'
-export { Atom, savedAtom } from '@alaq/atom/index'
-export { saved, stateless, rune } from '@alaq/atom/property'
-import { storage } from '@alaq/atom/storage'
+export {N, Nucleus, QuarkEventBus} from '@alaq/nucleus/index'
+export {nucleonExtensions} from '@alaq/nucleus/create'
+export {Atom, savedAtom} from '@alaq/atom/index'
+export {saved, stateless, rune} from '@alaq/atom/property'
 
-import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
+export {
+   UnionFactory, UnionFacade, UnionCoreFactory, UnionNamespaces
+} from 'alak/namespaces'
+
+import {storage} from '@alaq/atom/storage'
+
+import {Nucleus, N, QuarkEventBus} from '@alaq/nucleus/index'
 
 export const NucleusStorage = storage
 export const NStored = (name, value) => {
@@ -17,6 +22,7 @@ export const NStored = (name, value) => {
   storage.init(n)
   return n
 }
+
 
 export declare abstract class UnionModel<NS extends keyof ActiveUnions> {
   _: ActiveUnions[NS]['facade']

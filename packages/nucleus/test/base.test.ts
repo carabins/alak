@@ -53,7 +53,7 @@ test('bus connections', (t) => {
 
   b.addBus(a)
   a.addEverythingListener( (e,d)=>{
-    console.log({e, d})
+    // console.log({e, d})
   })
 
   b.dispatchEvent("E1", 1)

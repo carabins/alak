@@ -9,7 +9,7 @@ function construct(constructor, args) {
 class TWO_THREE {
   one = 1
   constructor(a?) {
-    console.log({ a }, this)
+    // console.log({ a }, this)
   }
 }
 
@@ -25,7 +25,7 @@ const findExtends = (prototype) => {
 
   // if (n.indexOf('__proto__') === -1) {
   n.forEach((key) => {
-    console.log(key, n[key].toString())
+    // console.log(key, n[key].toString())
     // console.log(n)
     const opd = Object.getOwnPropertyDescriptor(prototype, key)
     // console.log(opd)
