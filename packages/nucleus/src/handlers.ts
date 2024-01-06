@@ -53,19 +53,14 @@ export const handlers: any = {
       setNucleonValue(ctx, v)
     }
   },
-  clearListeners(silent) {
-    !silent && dispatchEvent(this, QState.CLEAR, ClearState.ALL)
-    delete this.value
+  decay(silent) {
+    !silent && dispatchEvent(this, QState.CLEAR, ClearState.DECAY)
     this.listeners.clear()
     this.grandListeners && this.grandListeners.clear()
     this.stateListeners && this.stateListeners.clear()
     this.haveFrom && delete this.haveFrom
-    return this._
-  },
-  decay() {
-    dispatchEvent(this, QState.CLEAR, ClearState.DECAY)
-    this._.clear(true)
-    this.decays && this.decays.forEach((f) => f())
+    delete this.value
+    this.risen && this.risen.forEach((f) => f())
     deleteParams(this)
   },
   clearValue() {
@@ -263,6 +258,9 @@ export const handlers: any = {
 
   [Symbol.toPrimitive]() {
     this._.toString()
+  },
+  [Symbol.dispose](){
+    this._.decay()
   },
   toString() {
     return `nucleon:${this._.uid}`

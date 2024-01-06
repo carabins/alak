@@ -4,7 +4,6 @@ export const QState = {
 }
 export const ClearState = {
   VALUE: 'value',
-  ALL: 'all',
   DECAY: 'decay',
 }
 

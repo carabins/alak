@@ -2,7 +2,7 @@
 import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
-import { savedSym, runeSym, statelessSym } from '@alaq/atom/property'
+import {savedSym, runeSym, statelessSym, mixedSum} from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -27,22 +27,28 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       mem = core.saved && core.saved.indexOf(key) !== -1
     }
     core.nucleons[key] = nucleon = N()
-    if (isDefined(modelValue)) {
-      switch (modelValue.sym) {
+    const defineRune = mv => {
+      switch (mv.sym) {
+        case mixedSum:
+          mv.startValue.forEach(v=>{
+            defineRune(v)
+          })
+          break
         case runeSym:
-          rune = modelValue.rune || true
-          modelValue = modelValue.startValue
+          rune = mv.rune || true
+          modelValue = mv.startValue
           break
         case savedSym:
-          modelValue = modelValue.startValue
+          modelValue = mv.startValue
           mem = true
           break
         case statelessSym:
-          modelValue = modelValue.startValue
+          modelValue = mv.startValue
           mem = false
           break
       }
     }
+    isDefined(modelValue) && modelValue.sym && defineRune(modelValue)
 
     switch (core.nucleusStrategy) {
       case 'holistic':

@@ -1,8 +1,8 @@
-import { rune } from '@alaq/atom/property'
+import {rune} from '@alaq/atom/property'
 
-import { alakModel } from 'alak/model'
-import { test } from 'tap'
-import { UnionFacade, UnionFactory } from 'alak/namespaces'
+
+import {test} from 'tap'
+import {UnionFactory} from 'alak/index'
 
 class model {
   someVar = rune.some_id('somevar')
@@ -12,7 +12,7 @@ class model {
 const u = UnionFactory({
   namespace: 'initEventTest',
   emitChanges: true,
-  singletons: {
+  models: {
     a: model,
     b: model,
   },
