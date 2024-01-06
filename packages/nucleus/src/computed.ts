@@ -55,8 +55,8 @@ export function from(...fromNucleons: INucleus<any>[]) {
   const linkedValues = {}
   const listen = (a: INucleus<any>, fn: any) => {
     a.next(fn)
-    if (!quark.decays) quark.decays = []
-    quark.decays.push(() => a.down(fn))
+    if (!quark.decayHooks) quark.decayHooks = []
+    quark.decayHooks.push(() => a.down(fn))
   }
 
   function weak(mixFn, finiteLoop) {

@@ -2,10 +2,12 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { QuarkEventBus } from '@alaq/nucleus/index'
+import {QuarkEventBus} from '@alaq/nucleus/index'
 import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
+import {deleteParams} from "@alaq/nucleus/utils";
+import Model from "../test/bud/model";
 
 export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   const cloud = {
@@ -15,8 +17,17 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     superEternal: false,
   }
 
-  const knownKeys = {}
-  const knownActions = {}
+  const known = {
+    values() {
+      const o = {} as PureModel<Instance<Model>>
+      known.keys.forEach(k => {
+        o[k] = electrons.state[k]
+      })
+      return o
+    }
+  } as IAtomKnown<Model>
+  const knownKeys = new Set()
+  const knownActions = new Set()
   const electrons = new CloudElectrons(getNucleon, cloud)
 
   if (atomOptions.nucleusStrategy === 'saved' || atomOptions.saved === '*') {
@@ -35,13 +46,10 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
     electrons.addEternals(parts.saveds)
-    Object.keys(electrons.actions).forEach((k) => {
-      knownActions[k] = true
-    })
+    const onlyPublic = k => !k.startsWith("_")
+    known.actions = new Set<string>(Object.keys(electrons.actions).filter(onlyPublic))
     const instaKeys = Object.keys(parts.instaValues)
-    instaKeys.forEach((k) => {
-      knownKeys[k] = true
-    })
+    known.keys = new Set(instaKeys.filter(onlyPublic))
     if (isEternal) {
       electrons.addEternals(instaKeys)
     }
@@ -50,6 +58,7 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   atomOptions.model && findElectrons(atomOptions.model)
   atomOptions.saved && findElectrons(atomOptions.saved, true)
 
+  const externalBus = !!atomOptions.bus
   const bus = atomOptions.bus || QuarkEventBus()
 
   const orbital = cloudOrbit(electrons, cloud, atomOptions, bus)
@@ -71,13 +80,29 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     return nucleon
   }
 
-  return {
+  const atom = {
     core: electrons.core,
     state: electrons.state,
     actions: cloud.actions,
+    decay,
     bus,
-    cloud,
-    knownKeys,
-    knownActions,
-  } as any as IAtom<Model>
+    known
+  } as IAtom<Model>
+
+  function decay() {
+    Object.keys(knownKeys).forEach(key => {
+      let nucleon = cloud.sleepingNucleons[key] || cloud.nucleons[key] || orbital.atom[key]
+      if (nucleon) {
+        nucleon.decay()
+      }
+    })
+    if (externalBus) {
+      bus.decay()
+    }
+    deleteParams(atom)
+    deleteParams(orbital)
+    deleteParams(known)
+  }
+
+  return atom
 }

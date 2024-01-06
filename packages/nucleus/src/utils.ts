@@ -12,7 +12,7 @@ export const upDownFilter = (fun) => (f) => {
   }
 }
 
-export const DECAY_QUARK_ERROR = 'Attempt to pass into the decayed quark'
+// export const DECAY_QUARK_ERROR = 'Attempt to pass into the decayed quark'
 // export const PROPERTY_ATOM_ERROR = 'undefined quark property'
 
 export const deleteParams = (o) => {

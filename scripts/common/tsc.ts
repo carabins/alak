@@ -50,6 +50,9 @@ export async function runTsc(): Promise<typeof state> {
       const parts = srcFile.split('/').slice(-3)
       const project = parts[0]
       const outName = parts[2]
+      if (!state.declarations[project]) {
+        state.declarations[project] = []
+      }
       state.declarations[project].push({
         outFile: path.resolve(Const.ARTIFACTS, project, outName.replace('.ts', '.d.ts')),
         content,

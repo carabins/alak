@@ -16,33 +16,39 @@ type AnyFunction = {
   (...v: any[]): any
 }
 
-type Level = 'value' | 'all' | 'decay'
+type Level = 'value' | 'all'
 
 type EventConnector = Function
-interface QuarkBus<Events, DataType> {
-  addEverythingListener(listener: (event: Events, data: DataType) => void): void
 
-  addEventListener(event: Events, listener: (data: DataType) => void): void
-
-  removeEventListener(listener, event: Events): void
-
-  removeListener(listener): void
-
-  dispatchEvent(event: Events, data?: DataType): void
-
-  getListenersMap(): Map<string, Set<AnyFunction>>
-
-  addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
-  removeEventToBus(connector: EventConnector): void
-
-  addBus(bus: QuarkBus<any, any>): void
-  removeBus(bus: QuarkBus<any, any>): void
-}
+// interface QuarkBus<Events, DataType> {
+//   addEverythingListener(listener: (event: Events, data: DataType) => void): void
+//
+//   addEventListener(event: Events, listener: (data: DataType) => void): void
+//
+//   removeEventListener(listener, event: Events): void
+//
+//   removeListener(listener): void
+//
+//   dispatchEvent(event: Events, data?: DataType): void
+//
+//   getListenersMap(): Map<string, Set<AnyFunction>>
+//
+//   addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
+//
+//   removeEventToBus(connector: EventConnector): void
+//
+//   addBus(bus: QuarkBus<any, any>): void
+//
+//   removeBus(bus: QuarkBus<any, any>): void
+//
+//   decay():void
+// }
 
 interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object> {
   addEverythingListener<E extends keyof ListenerEvents>(
     listener: (event: E, data: ListenerEvents[E]) => void,
   ): void
+
   addEventListener<E extends keyof ListenerEvents>(
     event: E,
     listener: (data: ListenerEvents[E]) => void,
@@ -56,11 +62,14 @@ interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object
 
   getListenersMap(): Map<string, Set<AnyFunction>>
 
-  addEventToBus(event, bus: QuarkBus<any, any>): EventConnector
+  addEventToBus(event, bus: IQuarkBus<any, any>): EventConnector
+
   removeEventToBus(connector: EventConnector): void
 
-  addBus(bus: QuarkBus<any, any>): void
-  removeBus(bus: QuarkBus<any, any>): void
+  addBus(bus: IQuarkBus<any, any>): void
+
+  removeBus(bus: IQuarkBus<any, any>): void
+  decay():void
 }
 
 interface Quark {
@@ -89,7 +98,7 @@ interface Quark {
   isAwaiting?: boolean | any
   isStateless?: boolean
   tunedTarget?: INucleus<any>
-  decays?: any[]
+  decayHooks?: Function[]
 }
 
 /**
@@ -101,7 +110,7 @@ interface Quark {
  * ```
  */
 interface INucleonQuarkConstructor {
-  /** Создать {@link INucleus} с необязательным аргументом как стартовое значение*/ <T>(
+  /** Создать {@link INucleus} с необязательным аргументом как стартовое значение*/<T>(
     value?: T,
   ): INucleus<MaybeAny<T>>
 

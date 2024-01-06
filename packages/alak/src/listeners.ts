@@ -6,7 +6,7 @@ const upEnds = ['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'u
 export default function (q: QuantumAtom) {
   const eventListeners = {}
   Object.keys(q.atom.actions).forEach((name) => {
-    if ( name.startsWith('in')) {
+    if (name.startsWith('in')) {
       checkIn(q, name.replace('in', ''), name)
     }
     if (name.startsWith(patternOnUpdate)) {

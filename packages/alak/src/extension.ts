@@ -12,11 +12,15 @@ export default function (q: QuantumAtom) {
   }
 
   const under = {
-    id: q.id,
-    name: q.name,
-    union: q.union.services.atoms,
-    target: q.data,
-    call(atom: string, methodName: string, args?: any[]) {},
+    _: q.union.facade,
+    _modelNamespace: q,
+    _modelName: q.name,
+    _modelId: q.id,
+    _modelData: q.data,
+    call(atom: string, methodName: string, args?: any[]) {
+    },
+
+
     set(atom: string, nucleon: string, data: any) {
       const a = getA(atom)
       a && a.core[nucleon](data)
@@ -26,23 +30,11 @@ export default function (q: QuantumAtom) {
       return a ? a.core[nucleon].value : new Error('atom not found')
     },
   }
-  return {
-    _: new Proxy(under, {
-      get(t, k) {
-        return q.union.facade
-      },
-    }),
-    __: new Proxy(under, {
-      get(t, k) {
-        if (k === 'core') {
-          return q.atom.core
-        }
-        const v = t[k]
-        if (v) {
-          return v
-        }
-        return undefined
-      },
-    }),
-  }
+  return new Proxy(under, {
+    get(u, key){
+      if (key === "$")
+        return q.atom.core
+      return u[key]
+    }
+  })
 }

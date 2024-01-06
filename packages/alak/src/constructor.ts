@@ -3,6 +3,8 @@ import { Atom } from '@alaq/atom/index'
 import alakListeners from './listeners'
 import alakExtension from './extension'
 
+const toUpEvents = new Set(['NUCLEUS_INIT', 'NUCLEUS_CHANGE'])
+
 export function alakConstructor<M, E, N>(
   constructor: IAlakConstructor<M, E, N>,
   quantum: QuantumAtom,
@@ -15,7 +17,7 @@ export function alakConstructor<M, E, N>(
     thisExtension: alakExtension(quantum),
     constructorArgs: [quantum.id, quantum.data],
     bus: quantum.bus,
-  }) as IAtom<any>
+  })
 
   const getNode = (n: string) => {
     const parts = n.split('.')
@@ -25,50 +27,51 @@ export function alakConstructor<M, E, N>(
   //@ts-ignore
   quantum.atom = atom
 
-  const al = alakListeners(quantum)
-  if (al) {
-    const eventListener = (event, data) => {
-      const apply = (where) => {
-        const fn = getNode(where)
-        fn && fn(data)
-      }
+  if (!constructor.disableSpringModel) {
+    const al = alakListeners(quantum)
+    if (al) {
+      const eventListener = (event, data) => {
+        const apply = (where) => {
+          const fn = getNode(where)
+          fn && fn(data)
+        }
 
-      const listenerName = al[event]
+        const listenerName = al[event]
 
-      if (listenerName) {
-        if (typeof listenerName === 'string') {
-          apply(listenerName)
-        } else {
-          //@ts-ignore
-          listenerName.forEach(apply)
+        if (listenerName) {
+          if (typeof listenerName === 'string') {
+            apply(listenerName)
+          } else {
+            //@ts-ignore
+            listenerName.forEach(apply)
+          }
         }
       }
+      quantum.bus.addEverythingListener(eventListener)
     }
-    quantum.bus.addEverythingListener(eventListener)
   }
 
-  const toUpEvents = new Set(['NUCLEUS_INIT', 'NUCLEUS_CHANGE'])
-  const unbindKeys = Array.from(toUpEvents).map((e) =>
-    quantum.bus.addEventToBus(e, quantum.union.bus),
-  )
 
-  const busBridge = (e: string, d) => {
-    !toUpEvents.has(e) && quantum.bus.dispatchEvent(e, d)
-  }
-  quantum.union.bus.addEverythingListener(busBridge)
-
-  quantum.bus.addEventListener('ATOM_DECAY', (q: QuantumAtom) => {
-    if (q.id === quantum.id) {
-      unbindKeys.forEach(quantum.bus.removeEventToBus)
-      quantum.bus.removeListener(busBridge)
-      // Object.values(atom.core).forEach((n:)=>{
-      //   atom.core
-      // })
+  if (!constructor.globalBus) {
+    const busBridge = (e: string, d) => {
+      !toUpEvents.has(e) && quantum.bus.dispatchEvent(e, d)
     }
-  })
+    quantum.union.bus.addEverythingListener(busBridge)
 
-  quantum.id && atom.core.id(quantum.id)
-  quantum.data && atom.core.data(quantum.data)
+    const unbindKeys = Array.from(toUpEvents).map((e) =>
+      quantum.bus.addEventToBus(e, quantum.union.bus),
+    )
+
+    quantum.bus.addEventListener('UNION_ATOM_DECAY', (q: QuantumAtom) => {
+      if (q.id === quantum.id) {
+        quantum.union.bus.removeListener(busBridge)
+        unbindKeys.forEach(quantum.bus.removeEventToBus)
+      }
+    })
+  }
+
+  quantum.id && atom.core['_modelId'](quantum.id)
+  quantum.data && atom.core['._modelData'](quantum.data)
   // atom.actions.onActivate && atom.actions.onActivate(quantum.id, quantum.data)
   quantum.bus.dispatchEvent('INIT', {
     [quantum.id && 'id']: quantum.id,

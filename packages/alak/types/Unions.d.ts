@@ -1,6 +1,6 @@
 type IUnionSynthesis<M, E extends object, S, F> = {
   namespace?: string
-  singletons?: M
+  models?: M
   factories?: F
   events?: E
   services?: S
@@ -8,20 +8,20 @@ type IUnionSynthesis<M, E extends object, S, F> = {
 }
 
 interface IUnionCoreService<Models, Events extends object, Factory> {
-  readonly atoms: { [K in keyof Models]: IAlakAtom<Models[K], Events> }
-  bus: IQuarkBus<IAlakCoreEvents & Events, Events>
+  readonly atoms: { [K in keyof Models]: IUnionAtom<Models[K], Events> }
+  readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
 }
 
 type IUnionCore<Models, Events extends object, Services, Factory> = {
-  bus: IQuarkBus<IAlakCoreEvents & Events, Events>
-  facade: IFacadeModel<Models, Events, Factory> & Services
-  services: IUnionCoreService<Models, Events, Factory>
+  readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
+  readonly facade: IFacadeModel<Models, Events, Factory> & Services
+  readonly services: IUnionCoreService<Models, Events, Factory>
 }
 
 type IUnionDevCore = IUnionCore<any, any, any, any>
 
 type IAtomicModels<Models, E extends object> = {
-  [K in keyof Models]: IAlakAtom<Models[K], E>
+  [K in keyof Models]: IUnionAtom<Models[K], E>
 }
 
 type IAtomicFactory<F, E> = {

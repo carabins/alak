@@ -1,5 +1,8 @@
-import { ok, test } from 'tap'
-import { UnionFacade, UnionFactory } from 'alak/namespaces'
+// import { ok, test } from 'tap'
+// import { UnionFacade, UnionFactory } from 'alak/namespaces'
+//
+import {UnionFacade, UnionFactory} from "alak/index";
+import {test} from "tap";
 
 class model {
   eventState: string
@@ -18,7 +21,7 @@ class model {
 
 const u = UnionFactory({
   namespace: 'eventsTests',
-  singletons: { a: model, b: model },
+  models: { a: model, b: model },
   events: {
     HELLO_WORLD(data) {},
   },
@@ -65,7 +68,7 @@ test('atom events proxy silent', (t) => {
 
   const u = UnionFactory({
     namespace: 'eventsTests',
-    singletons: { z: model },
+    models: { z: model },
     events: {
       HELLO_WORLD(data) {},
     },

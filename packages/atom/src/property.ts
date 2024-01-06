@@ -5,6 +5,7 @@
 export const savedSym = Symbol('saved')
 export const runeSym = Symbol('rune')
 export const statelessSym = Symbol('stateless')
+export const mixedSum = Symbol('mixed')
 
 export const rune = new Proxy(() => true, {
   apply(_, thisArg: any, argArray: any[]): any {
@@ -24,6 +25,10 @@ export const rune = new Proxy(() => true, {
 
 export function saved<T>(startValue?: T): T {
   return { sym: savedSym, startValue } as any as T
+}
+
+export function mixed<T>(...a:any[]): T {
+  return { sym: mixedSum, startValue:a } as any as T
 }
 
 export function stateless<T>(startValue?: T): T {

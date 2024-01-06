@@ -184,8 +184,6 @@ interface INucleus<T> {
    * - value отичстка значения {@link INucleus.clearValue}
    *
    * - all отичстка всего {@link INucleus.clear}
-   *
-   * - decay рапад {@link INucleus.decay}
    * @param listener - функция-слушатель принимающая строку - значение глубины отчистки
    */
   onClear(listener: (deep: Level) => void): INucleus<T>
@@ -201,15 +199,14 @@ interface INucleus<T> {
   offAwait(listener: AnyFunction): void
 
   /** Удалить связи всех функций-получателей, слушателей, и очистить значение контейнера
-   */
-  clearListeners(): INucleus<T>
+   * Распад нуклона, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.
+   **/
+  decay(): void
 
   /** Очистить значение контейнера
    * @returns {@link quark#INucleon} */
   clearValue(): INucleus<T>
 
-  /** Распад нуклона, форсировать отчистку пямятти, удалить все свойства, функции и ссылки.*/
-  decay(): void
 
   /** Повторно отправить значение всем функциям-получателям
    */
