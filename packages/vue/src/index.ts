@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import { reactive, Ref, ref, watch } from 'vue'
-import { UnwrapNestedRefs } from '@vue/reactivity'
+import {reactive, Ref, ref, watch} from 'vue'
+import {UnwrapNestedRefs} from '@vue/reactivity'
 
 const vueKey = 'vueKey'
 
@@ -31,12 +31,14 @@ export function watchVueNucleon<T = any>(n: INucleus<T>) {
 }
 
 const vueAtomKey = '__vue_reactive'
-export default function vueAtom<M>(atom: IAtom<M>): UnwrapNestedRefs<ClassToKV<M>> {
-  let r = atom['kv'][vueAtomKey]
-  const values = atom.getValues()
-  const actions = atom['getActions']()
-  if (!r) {
-    r = atom['kv'] = reactive(Object.assign({}, values, actions)) as UnwrapNestedRefs<ClassToKV<M>>
+export default function vueAtom<M>(atom: IAtom<M> | IUnionAtom<any, any>): UnwrapNestedRefs<ClassToKV<M>> {
+  if (!atom.known.meta) {
+    atom.known.meta = {}
+  }
+  let r = atom.known.meta[vueAtomKey]
+  const values = atom.known.values()
+
+  if (!r) {    r = atom[vueAtomKey] = reactive(Object.assign({}, values, atom.known.actions)) as UnwrapNestedRefs<ClassToKV<M>>
   }
   const listeners = {}
   Object.keys(values).forEach((k) => {

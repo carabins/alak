@@ -21,7 +21,7 @@ The statute of thy beauty thou wilt take,    // Tue Aug 29 2023 20:30:19
 		 - test/events.test.ts
 		 - test/init.event.test.ts
 		 - test/multi.test.ts
-		 - types/AlakAtom.ts
+		 - types/AlakAtom.d.ts
 		 - types/AlakConstructor.d.ts
 		 - types/Unions.d.ts
 		 - types/graph.d.ts DELETED
@@ -57,7 +57,7 @@ What's in the brain that ink may character    // Sun Aug 27 2023 19:54:34
 		 - test/init.event.test.ts
 		 - test/multi.test.ts
 		 - test/submodelid.ts
-		 - types/AlakAtom.ts
+		 - types/AlakAtom.d.ts
 		 - types/AlakConstructor.d.ts
 		 - types/Unions.d.ts
 	atom@5.0.0-up.11
@@ -120,7 +120,7 @@ But flowers distill'd though they with winter meet,    .. Wed Aug 23 2023 07:09:
 		 - test/events.test.ts
 		 - test/init.event.test.ts
 		 - test/submodelid.ts
-		 - types/AlakAtom.ts
+		 - types/AlakAtom.d.ts
 		 - types/AlakConstructor.d.ts
 		 - types/Unions.d.ts
 		 - types/events.ts DELETED

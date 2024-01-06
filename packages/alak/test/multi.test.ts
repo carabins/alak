@@ -4,8 +4,8 @@
 
 import { test } from 'tap'
 
-import { alakFactory } from 'alak/model'
- import { UnionFactory } from 'alak/namespaces'
+
+import { UnionFactory } from 'alak/index'
 import { UnionMultiModel } from 'alak/index'
 
 class SubModel extends UnionMultiModel<"defaultUnion"> {
@@ -13,7 +13,7 @@ class SubModel extends UnionMultiModel<"defaultUnion"> {
     return this['one'] as number
   }
   get thisId() {
-    return this.__.id as number
+    return this._modelId
   }
 }
 
@@ -25,7 +25,7 @@ class Model extends SubModel {
   }
 
   getIdMethod() {
-    return this.__.id
+    return this._modelId
   }
   oneReturnMethod() {
     return this.thisOne

@@ -1,10 +1,11 @@
-import { rune } from '@alaq/atom/property'
+import {mixed, rune, saved} from '@alaq/atom/property'
 
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
-  everCount = 12
+  everCount =  12
 
+  runedVar = mixed(rune(), saved(12))
   someOtherVar = rune.some('+')
 
   addEverCount(v) {
@@ -15,7 +16,7 @@ export default class {
   }
 
   get multiCount() {
-    // console.log('multiCount', this.multiplex, this.taskCount)
+
     return this.multiplex * this.taskCount
   }
 

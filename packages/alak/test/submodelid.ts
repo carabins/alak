@@ -1,41 +1,44 @@
-// import {alakModel} from "alak/model";
-//
-//
-//
-// class submodel extends AlakModel {
-//   get thisOne() {
-//     return this['one'] as number
-//   }
-//   get thisId() {
-//     return this._.id as number
-//   }
-// }
-//
-// class model extends submodel {
-//   one = 1
-//   add() {
-//     this.one++
-//   }
-//
-//   getIdMethod() {
-//     // return this._.id
-//   }
-//   oneReturnMethod() {
-//     return this.thisOne
-//   }
-//   constructor(...a) {
-//     super()
-//     // console.log('constructor', a)
-//   }
-//
-//   onEventHelloWorld(data) {
-//     console.log(this._.name, 'hi event', data)
-//   }
-// }
-//
-// const a = alakModel({
-//   name: 'a',
-//   model,
-// })
-// //
-// console.log(a.state)
+import {UnionAtom, UnionModel} from "alak/index";
+
+class ParentModel extends UnionModel<"defaultUnion"> {
+  get parentCallChild() {
+    return this['birds'] as number
+  }
+  get parentName() {
+    return this._
+  }
+
+}
+
+class BaseModel extends ParentModel {
+  birds = 10
+  add() {
+    this.birds++
+  }
+
+  get parentValue() {
+    return this.parentCallChild
+  }
+  // oneReturnMethod() {
+  //   // return this.parentOne
+  // }
+  // constructor(...a) {
+  //   super()
+  //   // console.log('constructor', a)
+  // }
+
+  onEventHelloWorld(data) {
+    // console.log(this._.name, 'hi event', data)
+  }
+}
+const a = UnionAtom({
+  name:"a",
+  model:BaseModel
+})
+
+// console.log("::", a.core.birds)
+// console.log("::parentCallChild", a.state.parentCallChild)
+// console.log("::", a.state.parentname)
+
+
+
