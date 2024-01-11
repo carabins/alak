@@ -25,14 +25,27 @@ interface ISuperTasks {
 }
 
 export const buildTask = {
-  prepare: testProjects,
-  pipeline: [ upver, syncDeps, compile, browser],
-  // pipeline: [ compile, browser],
+  // prepare: testProjects,
+  pipeline: [upver, syncDeps, browser, compile],
+  // pipeline: [ compile ],
+}
+export const xTask = {
+  pipeline: [upver, syncDeps, browser, compile, publish],
 }
 
 export function getTaskChoices(affectedStr) {
-  const publishPipeline = [  publish]
+  const publishPipeline = [upver, syncDeps, compile, browser, publish]
   return [
+    // {
+    //   name: "build & publish changes (" + affectedStr + ")",
+    //   description: "build & push to npm ",
+    //   value: {
+    //     affected: true,
+    //     prepare: testProjects,
+    //     pipeline:  [ upver, syncDeps, compile, browser, publish],
+    //     // finalize: commitAndPush
+    //   }
+    // },
     {
       name: "publish changes (" + affectedStr + ")",
       description: "push to npm and git new version",
@@ -66,7 +79,7 @@ export function getTaskChoices(affectedStr) {
       description: "local compile bundles",
       value: {
         prepare: testProjects,
-        pipeline: [upver, syncDeps, compile]
+        pipeline: [upver, syncDeps, compile, browser]
       }
     },
     {
@@ -118,14 +131,26 @@ export const getProjectChoices = (affectedObj, affectedStr) => {
 
 
 export async function startTask(superTask: ISuperTasks, targetProjects: Project[]) {
-  console.clear()
+  // console.clear()
+  if (!targetProjects?.length) {
+    Log.error("Проекты не выбраны")
+    return
+  }
   Log.info("start pipeline for supertask : " + superTask.name)
   const b = bench()
   superTask.prepare && await superTask.prepare(targetProjects)
+
+  targetProjects.forEach(p => {
+
+  })
+
   if (superTask.pipeline?.length) {
     for (const task of superTask.pipeline) {
       Log.info("start task : " + task.name)
       await Promise.all(targetProjects.map(task))
+        .catch(e => {
+          Log.error({e})
+        })
     }
   }
   superTask.finalize && await superTask.finalize(targetProjects)

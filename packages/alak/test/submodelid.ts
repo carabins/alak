@@ -1,6 +1,6 @@
 import {UnionAtom, UnionModel} from "alak/index";
 
-class ParentModel extends UnionModel<"defaultUnion"> {
+class ParentModel extends UnionModel<any> {
   get parentCallChild() {
     return this['birds'] as number
   }

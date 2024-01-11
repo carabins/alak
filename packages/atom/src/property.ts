@@ -28,7 +28,7 @@ export function saved<T>(startValue?: T): T {
 }
 
 export function mixed<T>(...a:any[]): T {
-  return { sym: mixedSum, startValue:a } as any as T
+  return { sym: mixedSum, mix:a } as any as T
 }
 
 export function stateless<T>(startValue?: T): T {

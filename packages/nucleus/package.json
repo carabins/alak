@@ -1,10 +1,10 @@
 {
     "name": "@alaq/nucleus",
-    "version": "5.0.0-up.10",
+    "version": "5.0.0-up.17",
     "description": "Alak Nucleus part of proactive universe",
     "main": "index.js",
     "types": "index.d.ts",
-    "browser": true,
+    "browser": "lib/umd.js",
     "keywords": [
         "alak",
         "streams",
@@ -13,6 +13,8 @@
         "flow"
     ],
     "author": "Gleb Panteleev",
-    "license": "MIT & TRU",
-    "repository": "https://github.com/carabins/alak"
+    "license": "TVR",
+    "repository": "https://github.com/carabins/alak",
+    "typings": "index.d.ts",
+    "unpkg": "lib/es.js"
 }

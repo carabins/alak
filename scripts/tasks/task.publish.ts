@@ -9,6 +9,7 @@ export async function publish(project: Project) {
   const log = FileLog('publish:' + project.packageJson.name)
   project.savePackageJsonTo.source()
 
+
   const cmd = 'npm publish --access public'
   log('run ' + cmd)
 

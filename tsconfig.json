@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": ".middle",
+    "outDir": ".tsc-outDir",
     "declaration": true,
     "emitDeclarationOnly": true,
     "module": "esnext",
