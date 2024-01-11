@@ -46,7 +46,7 @@ type EventConnector = Function
 
 interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object> {
   addEverythingListener<E extends keyof ListenerEvents>(
-    listener: (event: E, data: ListenerEvents[E]) => void,
+    listener: (event: E, data: ListenerEvents[E] ) => void,
   ): void
 
   addEventListener<E extends keyof ListenerEvents>(
@@ -58,7 +58,7 @@ interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object
 
   removeListener(listener: Function): void
 
-  dispatchEvent<E extends keyof DispatchEvents>(event: E, data?: DispatchEvents[E]): void
+  dispatchEvent<E extends keyof DispatchEvents>(event: E | string, data?: DispatchEvents[E]): void
 
   getListenersMap(): Map<string, Set<AnyFunction>>
 

@@ -49,6 +49,7 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     const onlyPublic = k => !k.startsWith("_")
     known.actions = new Set<string>(Object.keys(electrons.actions).filter(onlyPublic))
     const instaKeys = Object.keys(parts.instaValues)
+    instaKeys.push(...Object.keys(parts.getters))
     known.keys = new Set(instaKeys.filter(onlyPublic))
     if (isEternal) {
       electrons.addEternals(instaKeys)

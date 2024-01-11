@@ -1,5 +1,5 @@
 // import {installNucleonExtension} from "@alaq/nucleus/create";
-import { storage } from './storage'
+import {storage} from './storage'
 
 import N from '@alaq/nucleus/index'
 import {savedSym, runeSym, statelessSym, mixedSum} from '@alaq/atom/property'
@@ -10,45 +10,63 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
   let nucleon: INucleus<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue, mem, rune, broadcast
+    let modelValue, metaValue, mem, rune
+    mem = core.saved
+    core.nucleons[key] = nucleon = N()
 
     if (valence) {
       let v = valence[key]
+      delete valence[key]
       if (isDefined(v)) {
-        modelValue = v
-        delete valence[key]
+        let findSomeOne = false
+        const defineRune = mv => {
+          switch (mv?.sym) {
+            case mixedSum:
+              findSomeOne = true
+              mv.mix.forEach(v => {
+                defineRune(v)
+              })
+              return
+            case runeSym:
+              findSomeOne = true
+              rune = mv.rune || true
+              break
+            case savedSym:
+              findSomeOne = true
+              mem = true
+              break
+            case statelessSym:
+              findSomeOne = true
+              nucleon.stateless()
+              break
+          }
+          if (findSomeOne && isDefined(mv.startValue)) {
+            modelValue = mv.startValue
+          }
+        }
+        if (v.sym) {
+          defineRune(v)
+          if (!findSomeOne) {
+            modelValue = v
+          }
+        } else {
+          modelValue = v
+        }
+        // if (isDefined(mv.startValue))
+        //   modelValue = mv.startValue
       }
+
+      // isDefined(modelValue) && defineRune(modelValue)
+
+
     }
 
-    if (typeof core.saved === 'boolean') {
-      mem = core.saved
-    } else {
-      //@ts-ignore
-      mem = core.saved && core.saved.indexOf(key) !== -1
-    }
-    core.nucleons[key] = nucleon = N()
-    const defineRune = mv => {
-      switch (mv.sym) {
-        case mixedSum:
-          mv.startValue.forEach(v=>{
-            defineRune(v)
-          })
-          break
-        case runeSym:
-          rune = mv.rune || true
-          modelValue = mv.startValue
-          break
-        case savedSym:
-          modelValue = mv.startValue
-          mem = true
-          break
-        case statelessSym:
-          modelValue = mv.startValue
-          mem = false
-          break
-      }
-    }
-    isDefined(modelValue) && modelValue.sym && defineRune(modelValue)
+    // if (typeof core.saved === 'boolean') {
+    //   mem = core.saved
+    // } else {
+    //   mem = core.saved && core.saved.indexOf(key) !== -1
+    // }
+
 
     switch (core.nucleusStrategy) {
       case 'holistic':
@@ -83,7 +101,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { rune, nucleus: nucleon })
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', {rune, nucleus: nucleon})
   }
 
   return nucleon

@@ -1,4 +1,4 @@
-type IUnionSynthesis<M, E extends object, S, F> = {
+type IUnionSynthesis<M, F, S, E extends object, > = {
   namespace?: string
   models?: M
   factories?: F
@@ -7,18 +7,19 @@ type IUnionSynthesis<M, E extends object, S, F> = {
   emitChanges?: boolean
 }
 
-interface IUnionCoreService<Models, Events extends object, Factory> {
+interface IUnionCoreService<Models, Factory, Events extends object,> {
   readonly atoms: { [K in keyof Models]: IUnionAtom<Models[K], Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
 }
 
-type IUnionCore<Models, Events extends object, Services, Factory> = {
+type IUnionCore<Models, Factory, Services, Events extends object> = {
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
-  readonly facade: IFacadeModel<Models, Events, Factory> & Services
-  readonly services: IUnionCoreService<Models, Events, Factory>
+  readonly facade: IUnionFacade<Models, Factory, Events> & Services
+  readonly services: IUnionCoreService<Models, Factory, Events>
 }
 
-type IUnionDevCore = IUnionCore<any, any, any, any>
+
+// type IUnionDevCore = IUnionCore<any, any, any, any>
 
 type IAtomicModels<Models, E extends object> = {
   [K in keyof Models]: IUnionAtom<Models[K], E>
@@ -28,9 +29,9 @@ type IAtomicFactory<F, E> = {
   [K in keyof F]: IAlakAtomFactory<F[K], E>
 }
 
-type IFacadeModel<Models, Events extends object, Factory> = {
+type IUnionFacade<Models, Factory, Events extends object> = {
   readonly atoms: IAtomicModels<Models, Events> & IAtomicFactory<Factory, Events>
-  readonly core: { [K in keyof Models]: IAtomCore<Instance<Models[K]>> }
+  readonly cores: { [K in keyof Models]: IAtomCore<Instance<Models[K]>> }
   readonly states: { [K in keyof Models]: IModelState<Models[K]> }
   readonly buses: { [K in keyof Models]: IQuarkBus<IAlakCoreEvents & Events, Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>

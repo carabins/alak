@@ -1,10 +1,14 @@
 {
     "name": "@alaq/vue",
-    "version": "5.0.0-up.25",
+    "version": "5.0.0-up.45",
     "description": "vue3 extension for alak atoms",
+    "module": "lib/es.js",
+    "browser": "lib/umd.js",
+    "peerDependencies": {
+        "vue": "^3.2.25"
+    },
+    "typings": "index.d.ts",
     "main": "index.js",
-    "type": "index.d.ts",
-    "browser": true,
-    "author": "Gleb Panteleev",
-    "license": "TRU"
+    "unpkg": "lib/es.js",
+    "license": "TVR"
 }

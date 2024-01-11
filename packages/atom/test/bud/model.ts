@@ -5,7 +5,7 @@ export default class {
   multiplex = 10
   everCount =  12
 
-  runedVar = mixed(rune(), saved(12))
+  runedVar = mixed(saved(12), rune())
   someOtherVar = rune.some('+')
 
   addEverCount(v) {

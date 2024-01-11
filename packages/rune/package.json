@@ -1,7 +1,10 @@
 {
     "name": "@alaq/rune",
-    "version": "0.0.4",
+    "version": "0.0.8",
     "author": "Gleb Panteleev",
-    "license": "MIT & TRU",
-    "browser": true
+    "license": "TVR",
+    "browser": "lib/umd.js",
+    "typings": "index.d.ts",
+    "main": "index.js",
+    "unpkg": "lib/es.js"
 }

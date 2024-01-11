@@ -2,7 +2,8 @@ import {alakConstructor} from './constructor'
 import {defaultNamespace} from 'alak/namespaces'
 import {deleteParams} from "@alaq/nucleus/utils";
 import {QuarkEventBus} from "@alaq/nucleus/bus";
-import {UnionCoreFactory} from "alak/UnionCoreFactory";
+import {ExtendUnionCore} from "alak/UnionCore";
+
 
 // export function UnionAtom<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
 //   return unionAtom(constructor) as IUnionAtom<M, E>
@@ -10,8 +11,6 @@ import {UnionCoreFactory} from "alak/UnionCoreFactory";
 
 
 export function unionAtom(constructor, id?, data?) {
-  // constructor = Object.assign({}, constructor)
-
 
   if (!constructor.name) {
     console.warn('отсутствует имя атома')
@@ -21,7 +20,7 @@ export function unionAtom(constructor, id?, data?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const union = UnionCoreFactory(constructor.namespace)
+  const union = ExtendUnionCore(constructor.namespace)
   const quantum: QuantumAtom = {
     name,
     union,

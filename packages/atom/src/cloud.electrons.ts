@@ -9,7 +9,7 @@ export default class CloudElectrons {
   savedKeys = []
   core: any
   state: any
-
+ 
   constructor(public getNucleon: AnyFunction, cloud) {
     this.core = new Proxy(
       {},

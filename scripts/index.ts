@@ -1,6 +1,6 @@
 import select from '@inquirer/select';
 import checkbox from '@inquirer/checkbox';
-import {buildTask, getProjectChoices, getTaskChoices, startTask} from "~/scripts/tasks";
+import {buildTask, getProjectChoices, getTaskChoices, startTask, xTask} from "~/scripts/tasks";
 import {getAffected} from "~/scripts/common/git";
 import {projects} from "~/scripts/now";
 import {coverageTest, testProjects} from "~/scripts/tasks/task.test";
@@ -13,23 +13,32 @@ async function start() {
   console.clear()
   const fullBench = bench()
   const allProjects = Object.values(projects)
+  const affectedList = await getAffected()
+  const affectedObj = affectedList.map(id => projects[id])
+  const affectedStr = affectedList.join(", ")
+
+  let selectedTask
   switch (process.argv[2]) {
     case "build":
-      return await startTask(buildTask, allProjects)
+      return await startTask(buildTask, [projects['vue']])
     case "cover":
       return coverageTest()
     case "test":
       return testProjects(allProjects)
     case "dev":
       return dev()
+    case "up":
+      selectedTask = getTaskChoices(affectedStr)[0].value
+    case "x":
+      return await startTask(xTask, [projects['alak'], projects['vue']])
+
   }
-  const affectedList = await getAffected()
-  const affectedObj = affectedList.map(id => projects[id])
-  const affectedStr = affectedList.join(", ")
-  const selectedTask: any = await select({
-    message: 'Select a task',
-    choices: getTaskChoices(affectedStr),
-  })
+  if (!selectedTask) {
+    selectedTask = await select({
+      message: 'Select a task',
+      choices: getTaskChoices(affectedStr),
+    })
+  }
 
   let selectedProjects: any = selectedTask.affected ? affectedObj : Object.values(projects)
 

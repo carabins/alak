@@ -38,7 +38,7 @@ export async function devTestFile(f, project, trace) {
   })
 }
 
-export async function testFileWorker(f, project, trace) {
+export async function testFileWorker(f, project, log) {
   return new Promise((resolve, reject) => {
     const id = f.replace(".test.ts", "")
     const fp = `./packages/${project.dir}/test/${f}`
@@ -48,15 +48,15 @@ export async function testFileWorker(f, project, trace) {
       name: f,
     })
     worker.stderr.on('data', (chunk) => {
-      trace.error(chunk)
+      log.warn(id +" : "+ chunk.toString())
     })
     worker.on('error', (code) => {
-      trace.error(id)
+      log.error(id)
     })
     worker.on('exit', (fall) => {
       if (!fall) {
         resolve(false)
-        trace.trace("PASS", id)
+        log.trace("PASS", id)
       } else {
         resolve(fp)
       }
@@ -88,6 +88,7 @@ export const coverageTest = () => new Promise(async done => {
     if (chinks.length > 1) {
       chinks.shift()
       Log.error(chinks.join("\n"))
+
       done(true)
     } else {
       Log.info("All tests passed successfully")

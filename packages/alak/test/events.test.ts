@@ -1,40 +1,50 @@
-// import { ok, test } from 'tap'
-// import { UnionFacade, UnionFactory } from 'alak/namespaces'
-//
-import {UnionFacade, UnionFactory} from "alak/index";
+import {InjectUnionFacade, IUFacade, UnionConstructor} from "alak/index";
 import {test} from "tap";
 
 class model {
   eventState: string
   init: boolean = false
   lastInit: string
+
   onEventHelloWorld(data) {
     this.eventState = data
   }
+
   onEventAtomInit(data) {
     this.lastInit = data.name
   }
+
   onEventInit(data) {
     this.init = true
   }
 }
 
-const u = UnionFactory({
+const uc = UnionConstructor({
   namespace: 'eventsTests',
-  models: { a: model, b: model },
+  models: {a: model, b: model},
   events: {
-    HELLO_WORLD(data) {},
+
+    // ATOM_INIT(this: IUFacade<"eventsTests">, atom){
+    //
+    // }
+
+  } as {
+    HELLO_WORLD(s: string): void
   },
 })
 
+type ICT = typeof uc
+
 declare module 'alak/namespaces' {
-  export interface ActiveUnions {
-    eventsTests: IUnionDevCore
+  interface ActiveUnions {
+    //@ts-ignore
+    eventsTests: typeof uc
   }
 }
 
 test('atom events', (t) => {
-  const q = UnionFacade('eventsTests')
+  const u = InjectUnionFacade('eventsTests')
+
   u.bus.addEventListener('ATOM_INIT', (d) => {
     switch (d.name) {
       case 'a':
@@ -66,20 +76,27 @@ test('atom events proxy silent', (t) => {
     one = 1
   }
 
-  const u = UnionFactory({
+  const {facade} = UnionConstructor({
     namespace: 'eventsTests',
-    models: { z: model },
+    models: {z: model},
     events: {
-      HELLO_WORLD(data) {},
+      HELLO_WORLD(data) {
+        console.warn("----", this.states.a.init)
+        t.pass(this.states.a.init)
+      },
+      ATOM_INIT() {
+        console.warn("---")
+      }
     },
   })
 
-  u.bus.addEventListener('ATOM_INIT', () => {
+  facade.bus.addEventListener('ATOM_INIT', () => {
     t.fail()
   })
-  u.atoms.z.core
-  u.atoms.z.state
-  u.atoms.z.actions
-  u.atoms.z.bus
+  facade.atoms.z.core
+  facade.atoms.z.state
+  facade.atoms.z.actions
+  facade.atoms.z.bus
+  facade.bus.dispatchEvent("HELLO_WORLD", '+')
   t.end()
 })

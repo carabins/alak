@@ -2,14 +2,14 @@ import {rune} from '@alaq/atom/property'
 
 
 import {test} from 'tap'
-import {UnionFactory} from 'alak/index'
+import {UnionConstructor} from 'alak/index'
 
 class model {
   someVar = rune.some_id('somevar')
   some = rune()
 }
 
-const u = UnionFactory({
+const u = UnionConstructor({
   namespace: 'initEventTest',
   emitChanges: true,
   models: {
@@ -18,7 +18,7 @@ const u = UnionFactory({
   },
 })
 
-const { a, b } = u.atoms
+const { a, b } = u.facade.atoms
 
 test('atom init events', (t) => {
   t.plan(3)

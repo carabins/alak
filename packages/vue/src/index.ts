@@ -52,7 +52,7 @@ export default function vueAtom<M>(atom: IAtom<M> | IUnionAtom<any, any>): Unwra
   return r
 }
 
-export function watchVueAtom<M>(atom: IAtom<M>) {
+export function watchVueAtom<M>(atom: IAtom<M>| IUnionAtom<any, any>) {
   const vueReactive = vueAtom(atom)
   return proxyReactiveSyncedWithAtom(vueReactive, atom.core) as UnwrapNestedRefs<ClassToKV<M>>
 }

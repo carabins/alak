@@ -1,6 +1,6 @@
 import {unionAtom, UnionAtomFactory} from "alak/unionAtom";
 import {defaultNamespace} from "alak/namespaces";
-import {UnionCoreFactory} from "alak/UnionCoreFactory";
+import {ExtendUnionCore} from "alak/UnionCore";
 
 
 type EventRecords = Record<string, (...any) => any>
@@ -8,10 +8,10 @@ type EventsData<E extends EventRecords> = {
   [K in keyof E]: Parameters<E[K]>[0]
 }
 
-export function UnionFactory<Models, Events extends EventRecords, Services, Factories>(
-  synthesis: IUnionSynthesis<Models, Events, Services, Factories>,
-): IFacadeModel<Models, EventsData<Events>, Factories> & Services {
-  const uc = UnionCoreFactory(synthesis.namespace as any || defaultNamespace) as IUnionDevCore
+export function UnionConstructor<Models, Factory, Services, Events extends EventRecords>(
+  synthesis: IUnionSynthesis<Models, Factory, Services, Events>,
+) {
+  const uc = ExtendUnionCore(synthesis.namespace as any || defaultNamespace)
   synthesis.models && Object.keys(synthesis.models).forEach((modelName) => {
     uc.services.atoms[modelName] = unionAtom({
       namespace: synthesis.namespace,
@@ -31,9 +31,11 @@ export function UnionFactory<Models, Events extends EventRecords, Services, Fact
   })
   synthesis.events &&
   Object.keys(synthesis.events).forEach((eventName) => {
-    const handler = synthesis.events[eventName].bind(uc)
+    const handler = synthesis.events[eventName].bind(uc.facade)
     uc.bus.addEventListener(eventName, handler)
   })
-  synthesis.services && Object.assign(uc.services, synthesis.services)
-  return uc.facade
+  synthesis.services && Object.keys(synthesis.services).forEach(serviceName => {
+    uc.services[serviceName] = synthesis.services[serviceName]
+  })
+  return uc as IUnionCore<Models, Factory, Services, EventsData<Events>>
 }
