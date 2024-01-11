@@ -84,6 +84,7 @@ export async function compile(project: Project) {
     }
   })
   log('unminified source size', (totalSize / 1024).toFixed(2), 'kb')
+  project.packageJson.license = "TVR"
   fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
   project.savePackageJsonTo.art()
   log('complete')

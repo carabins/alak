@@ -43,7 +43,7 @@
 
 
 import {Atom, coreAtom} from "@alaq/atom/index";
-import {makeRune} from "@alaq/rune/makeRune";
+import {makeRune} from "@alaq/rune/index";
 import {UnionAtom, UnionModel} from "alak/index";
 
 

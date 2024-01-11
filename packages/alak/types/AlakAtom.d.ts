@@ -42,7 +42,7 @@ type QuantumAtom = {
   name: string
   data?: any
   bus?: IQuarkBus<any, any>
-  union: IUnionDevCore
+  union: IUnionCore<any, any, any, any>
   atom?: IAtom<any>
   eventListeners?: string[]
 }

@@ -4,13 +4,12 @@ import {ActiveUnions} from "alak/namespaces";
 export {N, Nucleus, QuarkEventBus} from '@alaq/nucleus/index'
 export {nucleonExtensions} from '@alaq/nucleus/create'
 export {Atom, savedAtom} from '@alaq/atom/index'
-export {saved, stateless, rune} from '@alaq/atom/property'
+export {saved, stateless, rune, mixed} from '@alaq/atom/property'
 
 export {UnionNamespaces} from 'alak/namespaces'
 
-export {UnionFactory} from "alak/UnionFactory"
-export {UnionCoreFactory} from "alak/UnionCoreFactory"
-export {UnionFacade} from "alak/UnionFacade"
+export {UnionConstructor} from "alak/UnionConstructor"
+export {ExtendUnionCore, InjectUnionFacade} from "alak/UnionCore"
 export {UnionAtom, UnionAtomFactory} from "alak/unionAtom"
 
 
@@ -28,6 +27,8 @@ export const NStored = (name, value) => {
 }
 
 
+export type IUFacade<NS extends keyof ActiveUnions> = ActiveUnions[NS]['facade']
+
 export abstract class UnionModel<NS extends keyof ActiveUnions> {
   $: Atomized<PureModel<this>>
   _: ActiveUnions[NS]['facade']
@@ -39,3 +40,4 @@ export abstract class UnionMultiModel<NS extends keyof ActiveUnions> extends Uni
   _modelId?: string | number
   _modelData?: any
 }
+

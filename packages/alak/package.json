@@ -1,10 +1,11 @@
 {
     "name": "alak",
-    "version": "5.0.0-up.24",
+    "version": "5.0.0-up.45",
     "description": "Alak Last Atom",
+    "typings": "index.d.ts",
     "main": "index.js",
-    "types": "index.d.ts",
-    "browser": true,
+    "unpkg": "lib/es.js",
+    "browser": "lib/umd.js",
     "keywords": [
         "alak",
         "reactive",
@@ -14,11 +15,9 @@
         "dataflow",
         "flow"
     ],
-    "author": "Gleb Panteleev",
-    "license": "MIT & TRU",
-    "repository": "https://github.com/carabins/alak",
     "dependencies": {
-        "@alaq/nucleus": "5.0.0-up.10",
-        "@alaq/atom": "5.0.0-up.13"
-    }
+        "@alaq/nucleus": "5.0.0-up.17",
+        "@alaq/atom": "5.0.0-up.22"
+    },
+    "license": "TVR"
 }

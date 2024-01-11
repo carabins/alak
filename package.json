@@ -5,7 +5,8 @@
   "scripts": {
     "format": "prettier --write --ignore-unknown .",
     "start": "node -r @swc-node/register -r tsconfig-paths/register scripts ",
-    "next": "node --watch -r @swc-node/register -r tsconfig-paths/register scripts build",
+    "next": "node --watch -r @swc-node/register -r tsconfig-paths/register scripts x",
+    "dev": "node -r @swc-node/register -r tsconfig-paths/register scripts dev",
     "test": "tap ./packages/*/test/*.test.ts"
   },
   "devDependencies": {

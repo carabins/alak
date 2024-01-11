@@ -30,17 +30,16 @@ const facadeHandlers = {
   },
 }
 
-export function UnionCoreFactory<N extends keyof UnionNamespaces>(
+export function ExtendUnionCore<N extends keyof UnionNamespaces>(
   namespace: N,
 ): UnionNamespaces[N] {
-  //@ts-ignore
-  namespace = namespace || defaultNamespace
+  const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
 
-  if (namespaces[namespace]) {
-    return namespaces[namespace]
+  if (namespaces[ns]) {
+    return namespaces[ns]
   }
-  const bus = QuarkEventBus(namespace)
+  const bus = QuarkEventBus(ns)
   const services = {
     atoms: {},
     bus,
@@ -50,6 +49,19 @@ export function UnionCoreFactory<N extends keyof UnionNamespaces>(
     facade: new Proxy(services, facadeHandlers),
     bus,
   } as any
-  namespaces[namespace] = uc
-  return namespaces[namespace]
+  namespaces[ns] = uc
+  return namespaces[ns]
 }
+
+export function InjectUnionFacade<N extends keyof UnionNamespaces >(namespace?: N): UnionNamespaces[N]['facade'] {
+  if (!namespace) {
+    namespace = defaultNamespace as any
+  }
+  const namespaces = getNamespaces()
+  if (!namespaces[namespace]) {
+    console.error('namespace', namespace, 'not found')
+    throw 'unknown namespace'
+  }
+  return namespaces[namespace]['facade']
+}
+

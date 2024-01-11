@@ -3,12 +3,13 @@ import {
   CompilerOptions,
   createCompilerHost,
   createProgram,
+  ModuleKind,
   ModuleResolutionKind,
-  ScriptTarget,
+  ScriptTarget
 } from 'typescript'
-import { FileLog } from '~/scripts/log'
-import { scanAllSrc } from '~/scripts/common/scan'
-import { Const } from '~/scripts/common/constants'
+import {FileLog} from '~/scripts/log'
+import {scanAllSrc} from '~/scripts/common/scan'
+import {Const} from '~/scripts/common/constants'
 import path from 'path'
 import * as fs from 'fs-extra'
 
@@ -39,6 +40,7 @@ export async function runTsc(): Promise<typeof state> {
       declaration: true,
       emitDeclarationOnly: true,
       outDir: Const.ARTIFACTS,
+      module: ModuleKind.NodeNext,
       moduleResolution: ModuleResolutionKind.NodeNext,
       target: ScriptTarget.ESNext,
       baseUrl: '.',

@@ -5,7 +5,7 @@ import isBrowser from '@alaq/rune/isBrowser'
 export const defaultNamespace = 'defaultUnion'
 const AlakUnionNamespace = 'AlakUnionNamespace'
 const AlakUnion = {
-  namespaces: {},
+  namespaces: {} as Record<string, IUnionCore<any, any, any, any>>,
 }
 
 function getBrowserNs() {
@@ -20,11 +20,11 @@ export const getNamespaces = () => (isBrowser ? getBrowserNs() : AlakUnion.names
 
 
 export interface ActiveUnions {
-  defaultUnion: IUnionDevCore
+
 }
 
 type DefaultUnions = {
-  defaultUnion: IUnionDevCore
-}
+  defaultUnion: IUnionCore<any, any, any, any>
+} & Record<string, IUnionCore<any, any, any, any>>
 
 export type UnionNamespaces = DefaultUnions & ActiveUnions

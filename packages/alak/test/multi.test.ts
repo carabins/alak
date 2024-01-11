@@ -5,10 +5,10 @@
 import { test } from 'tap'
 
 
-import { UnionFactory } from 'alak/index'
+import { UnionConstructor } from 'alak/index'
 import { UnionMultiModel } from 'alak/index'
 
-class SubModel extends UnionMultiModel<"defaultUnion"> {
+class SubModel extends UnionMultiModel<any> {
   get thisOne() {
     return this['one'] as number
   }
@@ -32,19 +32,21 @@ class Model extends SubModel {
   }
 }
 
-const u = UnionFactory({
-  namespace: 'defaultUnion',
+const u = UnionConstructor({
+  namespace: 'multi.test',
+  // models: { m:Model },
   factories: {
     eAtom: Model,
     baseAtom: Model,
   },
 })
-const { baseAtom, eAtom } = u.atoms
+u.facade.atoms
+
+const { baseAtom, eAtom } = u.facade.atoms
 
 test('multiAtoms', (t) => {
   const a = baseAtom.get(100)
 
-  // console.log(a.state.thisId)
   t.equal(a.state.thisId, 100)
   t.equal(a.state.thisId, a.actions.getIdMethod())
   t.equal(a.core.oneReturnMethod(), a.state.thisOne)
