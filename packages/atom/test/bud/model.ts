@@ -1,12 +1,12 @@
-import {mixed, rune, saved} from '@alaq/atom/property'
+import {mixed, tag, saved} from '@alaq/atom/property'
 
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
   everCount =  12
 
-  runedVar = mixed(saved(12), rune())
-  someOtherVar = rune.some('+')
+  taggedVar = mixed(saved, tag, 12)
+  someOtherVar = tag.some('+')
 
   addEverCount(v) {
     this.everCount += v

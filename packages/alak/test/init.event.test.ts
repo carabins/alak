@@ -1,12 +1,12 @@
-import {rune} from '@alaq/atom/property'
+import {tag} from '@alaq/atom/property'
 
 
 import {test} from 'tap'
 import {UnionConstructor} from 'alak/index'
 
 class model {
-  someVar = rune.some_id('somevar')
-  some = rune()
+  someVar = tag.some_id('somevar')
+  some = tag()
 }
 
 const u = UnionConstructor({
@@ -27,7 +27,7 @@ test('atom init events', (t) => {
       case 'NUCLEUS_INIT':
         t.equal(data.nucleus.id, a.core.someVar.id)
         t.equal(data.nucleus.value, 'somevar')
-        t.equal(data.rune, 'some_id')
+        t.equal(data.tag, 'some_id')
         break
     }
   }
@@ -50,3 +50,4 @@ test('atom change events', (t) => {
   b.core.someVar('nextVar')
   t.end()
 })
+
