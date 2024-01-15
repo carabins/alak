@@ -61,7 +61,6 @@ export function grandUpFn(quark: Quark, keyFun: AnyFunction, grandFun: AnyFuncti
 
 export const createQuark = (...a) => {
   const quark = function (...v) {
-
     if (v.length) {
       const value = quark.isHoly ? v : v[0]
       return setNucleonValue(quark, value)

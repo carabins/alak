@@ -4,7 +4,7 @@ import {ActiveUnions} from "alak/namespaces";
 export {N, Nucleus, QuarkEventBus} from '@alaq/nucleus/index'
 export {nucleonExtensions} from '@alaq/nucleus/create'
 export {Atom, savedAtom} from '@alaq/atom/index'
-export {saved, stateless, rune, mixed} from '@alaq/atom/property'
+export {saved, stateless, tag, mixed} from '@alaq/atom/property'
 
 export {UnionNamespaces} from 'alak/namespaces'
 
@@ -16,7 +16,6 @@ export {UnionAtom, UnionAtomFactory} from "alak/unionAtom"
 import {storage} from '@alaq/atom/storage'
 
 import {Nucleus, N, QuarkEventBus} from '@alaq/nucleus/index'
-import {unionAtom} from "alak/unionAtom";
 
 export const NucleusStorage = storage
 export const NStored = (name, value) => {

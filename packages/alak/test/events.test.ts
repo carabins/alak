@@ -22,13 +22,7 @@ class model {
 const uc = UnionConstructor({
   namespace: 'eventsTests',
   models: {a: model, b: model},
-  events: {
-
-    // ATOM_INIT(this: IUFacade<"eventsTests">, atom){
-    //
-    // }
-
-  } as {
+  events: {} as {
     HELLO_WORLD(s: string): void
   },
 })
@@ -37,7 +31,6 @@ type ICT = typeof uc
 
 declare module 'alak/namespaces' {
   interface ActiveUnions {
-    //@ts-ignore
     eventsTests: typeof uc
   }
 }
@@ -81,11 +74,11 @@ test('atom events proxy silent', (t) => {
     models: {z: model},
     events: {
       HELLO_WORLD(data) {
-        console.warn("----", this.states.a.init)
+        console.log("----", this.states.a.init)
         t.pass(this.states.a.init)
       },
       ATOM_INIT() {
-        console.warn("---")
+        console.log("---")
       }
     },
   })

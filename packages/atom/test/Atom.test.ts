@@ -18,7 +18,7 @@ test('core and state', async (t) => {
 
   t.equal(classInstance.multiMethod(), bid.actions.multiMethod())
 
-  t.equal(bid.state.runedVar, 12)
+  t.equal(bid.state.taggedVar, 12)
   t.end()
 })
 
