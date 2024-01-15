@@ -9,29 +9,30 @@ test('factory test', async (t) => {
     models: {
       b: BirdsModel
     },
-    emitChanges: true
+    // emitChanges: true
   })
 
-  uc.bus.addEverythingListener((event, data) => {
-      switch (event) {
-        case "NUCLEUS_INIT":
-          const {rune, nucleus} = data
-          // console.warn(event, nucleus.value)
-          // console.warn(event, ":", data)
-          nucleus.up(v=>{
-            // console.warn({v})
-          })
-      }
-    }
-  )
+  // uc.bus.addEverythingListener((event, data) => {
+  //     switch (event) {
+  //       case "NUCLEUS_INIT":
+  //         const {tag, nucleus} = data
+  //         // console.warn(event, nucleus.value)
+  //         // console.warn(event, ":", data)
+  //         // nucleus.up(v=>{
+  //         //   console.warn({v})
+  //         // })
+  //     }
+  //   }
+  // )
 
 
   // uc.bus.addEventListener("NUCLEUS_INIT",(data)=>{
   //   console.warn(data.nucleus.value)
   // })
-  // console.warn(uc.atoms.b.state.notRune)
+  console.warn(uc.facade.cores.b.mixed.value)
+
+  // console.warn(uc.facade.atoms.b.state.mixed)
   // console.warn(uc.atoms.b.state.rune)
-  // console.warn(uc.atoms.b.state.runic)
   // console.warn("state song", uc.atoms.b.state.song)
   // uc.cores.b.song("zz")
 

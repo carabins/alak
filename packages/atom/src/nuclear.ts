@@ -2,7 +2,7 @@
 import {storage} from './storage'
 
 import N from '@alaq/nucleus/index'
-import {savedSym, runeSym, statelessSym, mixedSum} from '@alaq/atom/property'
+import {savedSym, tagSym, statelessSym, mixedSym} from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -10,7 +10,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
   let nucleon: INucleus<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue, metaValue, mem, rune
+    let modelValue, metaValue, mem, tag
     mem = core.saved
     core.nucleons[key] = nucleon = N()
 
@@ -21,15 +21,19 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
         let findSomeOne = false
         const defineRune = mv => {
           switch (mv?.sym) {
-            case mixedSum:
+            case mixedSym:
               findSomeOne = true
               mv.mix.forEach(v => {
-                defineRune(v)
+                if (v?.paked) {
+                  defineRune(v())
+                } else {
+                  modelValue = v
+                }
               })
               return
-            case runeSym:
+            case tagSym:
               findSomeOne = true
-              rune = mv.rune || true
+              tag = mv.tag || true
               break
             case savedSym:
               findSomeOne = true
@@ -101,8 +105,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', {rune, nucleus: nucleon})
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', {tag, nucleus: nucleon})
   }
-
   return nucleon
 }

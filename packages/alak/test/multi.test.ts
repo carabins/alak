@@ -34,13 +34,15 @@ class Model extends SubModel {
 
 const u = UnionConstructor({
   namespace: 'multi.test',
-  // models: { m:Model },
+  // models:{
+  //   a:Model,
+  // },
   factories: {
     eAtom: Model,
     baseAtom: Model,
   },
 })
-u.facade.atoms
+
 
 const { baseAtom, eAtom } = u.facade.atoms
 
