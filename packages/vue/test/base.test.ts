@@ -1,6 +1,6 @@
-import {test} from 'tap'
-import {Atom, UnionAtom, UnionConstructor} from 'alak/index'
-import vueAtom, {watchVueAtom} from '../src'
+import { test } from 'tap'
+import { Atom, UnionAtom, UnionConstructor } from 'alak/index'
+import vueAtom, { watchVueAtom } from '../src'
 
 class Model {
   one = 1
@@ -22,7 +22,6 @@ test('reactive atom', (t) => {
   t.end()
 })
 
-
 test('reactive union atom', (t) => {
   const a = UnionAtom({ model: Model, name: 'one' })
   const r = vueAtom(a)
@@ -35,11 +34,11 @@ test('reactive union atom', (t) => {
 })
 
 test('reactive union atom', (t) => {
-  const {facade} = UnionConstructor({
-    namespace: "factory_test",
+  const { facade } = UnionConstructor({
+    namespace: 'factory_test',
     models: {
-      a: Model
-    }
+      a: Model,
+    },
   })
   const a = facade.atoms.a
   console.warn(a.known.values())
@@ -52,7 +51,6 @@ test('reactive union atom', (t) => {
   t.end()
 })
 
-
 // test("nuclon", (t)=>{
 //   const n = Nucleus(3)
 //   const r = watchVueNucleon(n)
@@ -61,4 +59,3 @@ test('reactive union atom', (t) => {
 //   // t.equal(n.value, r.value)
 //   t.end()
 // })
-

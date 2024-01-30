@@ -51,7 +51,6 @@ export function alakConstructor<M, E, N>(
     }
   }
 
-
   if (!constructor.globalBus) {
     const busBridge = (e: string, d) => {
       !toUpEvents.has(e) && quantum.bus.dispatchEvent(e, d)

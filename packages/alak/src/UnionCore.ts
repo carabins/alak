@@ -1,6 +1,5 @@
-import {QuarkEventBus} from "@alaq/nucleus/bus";
-import {defaultNamespace, getNamespaces, UnionNamespaces} from "alak/namespaces";
-
+import { QuarkEventBus } from '@alaq/nucleus/bus'
+import { defaultNamespace, getNamespaces, UnionNamespaces } from 'alak/namespaces'
 
 const atomLinked = {
   buses: 'bus',
@@ -20,7 +19,7 @@ const facadeHandlers = {
     if (atomLinked[key]) {
       if (!linkedProxy[key]) {
         linkedProxy[key] = new Proxy(
-          {atoms: target.atoms, key: atomLinked[key]},
+          { atoms: target.atoms, key: atomLinked[key] },
           linkedProxyHandler,
         )
       }
@@ -30,9 +29,7 @@ const facadeHandlers = {
   },
 }
 
-export function ExtendUnionCore<N extends keyof UnionNamespaces>(
-  namespace: N,
-): UnionNamespaces[N] {
+export function ExtendUnionCore<N extends keyof UnionNamespaces>(namespace: N): UnionNamespaces[N] {
   const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
 
@@ -53,7 +50,9 @@ export function ExtendUnionCore<N extends keyof UnionNamespaces>(
   return namespaces[ns]
 }
 
-export function InjectUnionFacade<N extends keyof UnionNamespaces >(namespace?: N): UnionNamespaces[N]['facade'] {
+export function InjectUnionFacade<N extends keyof UnionNamespaces>(
+  namespace?: N,
+): UnionNamespaces[N]['facade'] {
   if (!namespace) {
     namespace = defaultNamespace as any
   }
@@ -64,4 +63,3 @@ export function InjectUnionFacade<N extends keyof UnionNamespaces >(namespace?: 
   }
   return namespaces[namespace]['facade']
 }
-

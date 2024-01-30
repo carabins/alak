@@ -1,17 +1,14 @@
-import {alakConstructor} from './constructor'
-import {defaultNamespace} from 'alak/namespaces'
-import {deleteParams} from "@alaq/nucleus/utils";
-import {QuarkEventBus} from "@alaq/nucleus/bus";
-import {ExtendUnionCore} from "alak/UnionCore";
-
+import { alakConstructor } from './constructor'
+import { defaultNamespace } from 'alak/namespaces'
+import { deleteParams } from '@alaq/nucleus/utils'
+import { QuarkEventBus } from '@alaq/nucleus/bus'
+import { ExtendUnionCore } from 'alak/UnionCore'
 
 // export function UnionAtom<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
 //   return unionAtom(constructor) as IUnionAtom<M, E>
 // }
 
-
 export function unionAtom(constructor, id?, data?) {
-
   if (!constructor.name) {
     console.warn('отсутствует имя атома')
   }
@@ -72,8 +69,8 @@ export function unionAtom(constructor, id?, data?) {
           return quantum.atom.known
         case 'decay':
           return decay
-        default :
-          return quantum.name + ":" + quantum.id
+        default:
+          return quantum.name + ':' + quantum.id
       }
     },
   })
@@ -94,7 +91,9 @@ export function unionAtom(constructor, id?, data?) {
   return proxy
 }
 
-export const UnionAtom = unionAtom as <M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) => IUnionAtom<M, E>
+export const UnionAtom = unionAtom as <M, E extends object, N>(
+  constructor: IAlakConstructor<M, E, N>,
+) => IUnionAtom<M, E>
 
 export function UnionAtomFactory<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
   const nodes = {}
@@ -126,4 +125,3 @@ export function UnionAtomFactory<M, E extends object, N>(constructor: IAlakConst
     bus,
   } as IAlakAtomFactory<M, E>
 }
-

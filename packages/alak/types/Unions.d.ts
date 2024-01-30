@@ -1,4 +1,4 @@
-type IUnionSynthesis<M, F, S, E extends object, > = {
+type IUnionSynthesis<M, F, S, E extends object> = {
   namespace?: string
   models?: M
   factories?: F
@@ -7,7 +7,7 @@ type IUnionSynthesis<M, F, S, E extends object, > = {
   emitChanges?: boolean
 }
 
-interface IUnionCoreService<Models, Factory, Events extends object,> {
+interface IUnionCoreService<Models, Factory, Events extends object> {
   readonly atoms: { [K in keyof Models]: IUnionAtom<Models[K], Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
 }
@@ -17,7 +17,6 @@ type IUnionCore<Models, Factory, Services, Events extends object> = {
   readonly facade: IUnionFacade<Models, Factory, Events> & Services
   readonly services: IUnionCoreService<Models, Factory, Events>
 }
-
 
 // type IUnionDevCore = IUnionCore<any, any, any, any>
 

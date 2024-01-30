@@ -1,4 +1,3 @@
-import BitInstance from "./BitInstance";
-
+import BitInstance from './BitInstance'
 
 export default BitInstance

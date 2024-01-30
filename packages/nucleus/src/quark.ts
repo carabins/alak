@@ -1,5 +1,5 @@
 import { dispatchEvent, QState } from './events'
-import {  rnd } from './utils'
+import { rnd } from './utils'
 
 export function setNucleonValue(quark: Quark, value?) {
   const setValue = (finalValue) => {

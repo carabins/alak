@@ -41,46 +41,45 @@
 // solution2(large);
 // solution3(large);
 
-
-import {Atom, coreAtom} from "@alaq/atom/index";
-import {makeRune} from "@alaq/rune/index";
-import {UnionAtom, UnionModel} from "alak/index";
-
+import { Atom, coreAtom } from '@alaq/atom/index'
+import { makeRune } from '@alaq/rune/index'
+import { UnionAtom, UnionModel } from 'alak/index'
 
 const getMem = () => {
   const r = makeRune(30000000)
-  return new Array(7).fill(0).map(i => r).join("+")
+  return new Array(7)
+    .fill(0)
+    .map((i) => r)
+    .join('+')
 }
-
 
 async function start() {
   const r = makeRune(3)
   console.time(r)
-  const a = new Array(10000).fill(0).map(i => UnionAtom({
-    name: makeRune(24),
-    model: {
-      bigString: makeRune(3000),
-      _privateBigString: makeRune(3000)
-    },
-    startup: "immediately",
-    // disableSpringModel:true,
-    // globalBus:true
-  }))
+  const a = new Array(10000).fill(0).map((i) =>
+    UnionAtom({
+      name: makeRune(24),
+      model: {
+        bigString: makeRune(3000),
+        _privateBigString: makeRune(3000),
+      },
+      startup: 'immediately',
+      // disableSpringModel:true,
+      // globalBus:true
+    }),
+  )
   // console.log("created", process.memoryUsage())
   setTimeout(() => {
-    a.forEach(i => {
+    a.forEach((i) => {
       i.decay()
     })
     // console.log("cleared", process.memoryUsage())
     console.timeEnd(r)
     setTimeout(start, 1000)
   }, 1000)
-
 }
 
 start()
-
-
 
 // // console.log(a.getValues())
 //

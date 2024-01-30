@@ -1,8 +1,7 @@
 import BitWise from './BitWise'
 import BitFlags from './BitFlags'
-import IndexedVertexMap from "@alaq/datastruct/IndexedVertexMap";
-import calcCombination from "@alaq/bitmask/calcCombination";
-
+import IndexedVertexMap from '@alaq/datastruct/IndexedVertexMap'
+import calcCombination from '@alaq/bitmask/calcCombination'
 
 type EventListener = {
   event: string
@@ -12,14 +11,14 @@ type EventListener = {
 function getBalseState(v: IBitWise, flags, state = {}) {
   const affected = {}
   const newState = {}
-  Object.keys(flags).forEach(flagName => {
+  Object.keys(flags).forEach((flagName) => {
     const nv = v.is(flags[flagName])
     newState[flagName] = nv
     if (state[flagName] !== nv) {
       affected[flagName] = nv
     }
   })
-  return {state: newState, affected}
+  return { state: newState, affected }
 }
 
 export default function BitInstance<
@@ -33,19 +32,20 @@ export default function BitInstance<
   const base = {} as Record<keyof RoArrayToRecord<F>, number>
   const haveCombinations = !!config.combinations
 
-  config.flags.forEach(flagName => {
+  config.flags.forEach((flagName) => {
     base[flagName] = all[flagName] = bitFlags.values[flagName]
   })
   const groupAffectEdges = IndexedVertexMap<string, string>()
-  config.groups && Object.keys(config.groups).forEach(flagName => {
-    all[flagName] = bitFlags.values[flagName]
-    config.groups[flagName].forEach(baseFlagName => {
-      groupAffectEdges.push(baseFlagName, flagName)
+  config.groups &&
+    Object.keys(config.groups).forEach((flagName) => {
+      all[flagName] = bitFlags.values[flagName]
+      config.groups[flagName].forEach((baseFlagName) => {
+        groupAffectEdges.push(baseFlagName, flagName)
+      })
     })
-  })
   const combinationsAffectEdges = IndexedVertexMap<string, string>()
   if (haveCombinations) {
-    Object.keys(config.combinations).forEach(cName => {
+    Object.keys(config.combinations).forEach((cName) => {
       const cOps = config.combinations[cName]
       Object.values(cOps).forEach((flags) => {
         flags.forEach((f: string) => combinationsAffectEdges.push(f, cName))
@@ -57,82 +57,89 @@ export default function BitInstance<
   let valueListeners = [] as EventListener[]
 
   const proxyFlagsActions = {
-    is: f => bitFlags.wise[f].is,
-    bitValue: f => bitFlags.values[f],
-    state: f => bi.state[f],
-    toggle: f => bitFlags.wise[f].toggle(bitFlags.values[f]),
-    setTrue: f => () => bi.setTrue(f),
-    setFalse: f => () => bi.setFalse(f),
-    onValueUpdate: f => (event, listener) => {
+    is: (f) => bitFlags.wise[f].is,
+    bitValue: (f) => bitFlags.values[f],
+    state: (f) => bi.state[f],
+    toggle: (f) => bitFlags.wise[f].toggle(bitFlags.values[f]),
+    setTrue: (f) => () => bi.setTrue(f),
+    setFalse: (f) => () => bi.setFalse(f),
+    onValueUpdate: (f) => (event, listener) => {
       switch (event) {
-        case "TRUE" :
+        case 'TRUE':
           bi.state[f] && listener()
           break
-        case "FALSE" :
+        case 'FALSE':
           !bi.state[f] && listener()
           break
         default:
           listener()
       }
       return flagListeners.push(f, {
-        event, listener
+        event,
+        listener,
       })
     },
-    removeValueUpdate: f => v => flagListeners.remove(f, v)
+    removeValueUpdate: (f) => (v) => flagListeners.remove(f, v),
   }
   const proxyFlagsHandler = {
-    get({flag}, key) {
+    get({ flag }, key) {
       return proxyFlagsActions[key](flag)
-    }
+    },
   }
 
   const proxyFlags = {}
   const bi = {
     state: {},
     bitwise: value,
-    core: {
-      allFlagValues: all,
-      baseFlagValues: base
+    flagValues: {
+      all,
+      base,
     },
-    setFalse: (...flags) => value.remove(flags.map(f => all[f]).reduce((prev, now) => prev | now)),
-    setTrue: (...flags) => value.add(flags.map(f => all[f]).reduce((prev, now) => prev | now)),
+    setFalse: (...flags) =>
+      value.remove(flags.map((f) => all[f]).reduce((prev, now) => prev | now)),
+    setTrue: (...flags) => value.add(flags.map((f) => all[f]).reduce((prev, now) => prev | now)),
     removeValueUpdate(v) {
-      valueListeners = valueListeners.filter(f => f !== v as any)
+      valueListeners = valueListeners.filter((f) => f !== (v as any))
     },
     onValueUpdate(event, listener) {
       const o = {
-        event, listener
+        event,
+        listener,
       } as any
       valueListeners.push(o)
       return o
     },
-    flags: new Proxy({}, {
-      get(o, flag: any) {
-        let v = proxyFlags[flag]
-        if (!v) {
-          v = proxyFlags[flag] = new Proxy({flag}, proxyFlagsHandler)
-        }
-        return v
-
-      }
-    })
+    flags: new Proxy(
+      {},
+      {
+        get(o, flag: any) {
+          let v = proxyFlags[flag]
+          if (!v) {
+            v = proxyFlags[flag] = new Proxy({ flag }, proxyFlagsHandler)
+          }
+          return v
+        },
+      },
+    ),
   } as IBitInstance<F, G, C>
 
   const update = (vv) => {
     const baseChanges = getBalseState(value, base, bi.state)
     const affected = {}
-    Object.keys(baseChanges.affected).forEach(baseFlag => {
-      groupAffectEdges.forEach(baseFlag, groupFlag => {
+    Object.keys(baseChanges.affected).forEach((baseFlag) => {
+      groupAffectEdges.forEach(baseFlag, (groupFlag) => {
         if (affected[groupFlag] === undefined) {
           affected[groupFlag] = value.is(all[groupFlag])
         }
       })
       if (haveCombinations) {
-        combinationsAffectEdges.forEach(baseFlag, combinationName => {
+        combinationsAffectEdges.forEach(baseFlag, (combinationName) => {
           if (affected[combinationName] === undefined) {
-
-            affected[combinationName] = calcCombination(config.combinations[combinationName], value, all)
-
+            affected[combinationName] = calcCombination(
+              config.combinations[combinationName],
+              value,
+              all,
+            )
           }
         })
       }
@@ -140,14 +147,13 @@ export default function BitInstance<
     const allAffected = Object.assign(affected, baseChanges.affected)
     bi.state = Object.assign(bi.state, allAffected) as any
 
-
-    Object.keys(allAffected).forEach(flag => {
-      flagListeners.forEach(flag, el => {
+    Object.keys(allAffected).forEach((flag) => {
+      flagListeners.forEach(flag, (el) => {
         switch (el.event) {
-          case "TRUE" :
+          case 'TRUE':
             allAffected[flag] && el.listener()
             break
-          case "FALSE" :
+          case 'FALSE':
             !allAffected[flag] && el.listener()
             break
           default:
@@ -155,9 +161,9 @@ export default function BitInstance<
         }
       })
     })
-    valueListeners.forEach(v => {
+    valueListeners.forEach((v) => {
       switch (v.event) {
-        case "AFFECTED_FLAGS" :
+        case 'AFFECTED_FLAGS':
           v.listener(allAffected)
           break
         case 'FULL_STATE':
@@ -169,7 +175,6 @@ export default function BitInstance<
       }
     })
   }
-
 
   value.onValueUpdate(update)
 

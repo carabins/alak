@@ -4,7 +4,6 @@
 
 import { test } from 'tap'
 
-
 import { UnionConstructor } from 'alak/index'
 import { UnionMultiModel } from 'alak/index'
 
@@ -42,7 +41,6 @@ const u = UnionConstructor({
     baseAtom: Model,
   },
 })
-
 
 const { baseAtom, eAtom } = u.facade.atoms
 

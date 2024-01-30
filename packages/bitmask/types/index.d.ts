@@ -89,9 +89,9 @@ interface IBitInstance<F extends ReadonlyArray<string>, G extends FlagGroupKeys<
   flags: BiTFlags<RoArrayToRecord<F>, CoreBitFlag & FlagListener> &
     BiTFlags<G, CoreBitFlag & FlagListener> &
     BiTFlags<C, FlagListener>
-  core: {
-    allFlagValues: Record<keyof RoArrayToRecord<F> | keyof G, number>
-    baseFlagValues: Record<keyof RoArrayToRecord<F>, number>
+  flagValues: {
+    all: Record<keyof RoArrayToRecord<F> | keyof G, number>
+    base: Record<keyof RoArrayToRecord<F>, number>
   }
   bitwise: IBitWise
 

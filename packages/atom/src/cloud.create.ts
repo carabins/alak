@@ -2,12 +2,12 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import {QuarkEventBus} from '@alaq/nucleus/index'
+import { QuarkEventBus } from '@alaq/nucleus/index'
 import cloudOrbit from './cloud.orbit'
 import cloudParse from './cloud.parse'
 import CloudElectrons from './cloud.electrons'
-import {deleteParams} from "@alaq/nucleus/utils";
-import Model from "../test/bud/model";
+import { deleteParams } from '@alaq/nucleus/utils'
+import Model from '../test/bud/model'
 
 export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   const cloud = {
@@ -20,11 +20,11 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   const known = {
     values() {
       const o = {} as PureModel<Instance<Model>>
-      known.keys.forEach(k => {
+      known.keys.forEach((k) => {
         o[k] = electrons.state[k]
       })
       return o
-    }
+    },
   } as IAtomKnown<Model>
   const knownKeys = new Set()
   const knownActions = new Set()
@@ -46,7 +46,7 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     Object.assign(electrons.getters, parts.getters)
     Object.assign(electrons.instaValues, parts.instaValues)
     electrons.addEternals(parts.saveds)
-    const onlyPublic = k => !k.startsWith("_")
+    const onlyPublic = (k) => !k.startsWith('_')
     known.actions = new Set<string>(Object.keys(electrons.actions).filter(onlyPublic))
     const instaKeys = Object.keys(parts.instaValues)
     instaKeys.push(...Object.keys(parts.getters))
@@ -87,11 +87,11 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
     actions: cloud.actions,
     decay,
     bus,
-    known
+    known,
   } as IAtom<Model>
 
   function decay() {
-    Object.keys(knownKeys).forEach(key => {
+    Object.keys(knownKeys).forEach((key) => {
       let nucleon = cloud.sleepingNucleons[key] || cloud.nucleons[key] || orbital.atom[key]
       if (nucleon) {
         nucleon.decay()

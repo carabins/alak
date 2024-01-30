@@ -4,7 +4,6 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/carabins/alak/badge.svg?branch=refs/heads/master)](https://coveralls.io/github/carabins/alak?branch=refs/heads/master)
 
-
 [![Downloads](https://img.shields.io/npm/dt/alak.svg)](https://www.npmjs.com/package/alak)
 
 [![Install Size](https://badgen.net/packagephobia/install/alak)](https://badgen.net/packagephobia/install/alak)

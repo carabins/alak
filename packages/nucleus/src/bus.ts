@@ -1,6 +1,10 @@
-import {rnd} from "@alaq/nucleus/utils";
-import {addEventListener, dispatchEvent, removeEventListener, removeListener} from "@alaq/nucleus/events";
-
+import { rnd } from '@alaq/nucleus/utils'
+import {
+  addEventListener,
+  dispatchEvent,
+  removeEventListener,
+  removeListener,
+} from '@alaq/nucleus/events'
 
 function removeEverythingListener(q, l) {
   if (q.everythingListeners?.has(l)) {
@@ -13,11 +17,10 @@ function addEverythingListener(q, listener) {
   q.everythingListeners.add(listener)
 }
 
-
 const handlers = {
   decay(q) {
     const clearSet = (l: any) => {
-      l && l.forEach(l.delete);
+      l && l.forEach(l.delete)
     }
     clearSet(q.buses)
     clearSet(q.everythingListeners)
@@ -30,7 +33,7 @@ const handlers = {
   },
   removeListener: (q, listener) => {
     removeListener(q, listener)
-    removeEverythingListener(q,listener)
+    removeEverythingListener(q, listener)
   },
   dispatchEvent: (q, event: string, data) => {
     if (q.everythingListeners) {
@@ -38,11 +41,11 @@ const handlers = {
     }
     dispatchEvent(q, event, data)
   },
-  getListenersMap: (q,) => {
+  getListenersMap: (q) => {
     if (!q.stateListeners) q.stateListeners = new Map()
     return q.stateListeners
   },
-  addEventToBus(q,event: string, bus: IQuarkBus<any, any>): Function {
+  addEventToBus(q, event: string, bus: IQuarkBus<any, any>): Function {
     const connector = (v) => bus.dispatchEvent(event, v)
     addEventListener(q, event, connector)
     return connector
@@ -54,7 +57,7 @@ const handlers = {
     if (!q.buses) q.buses = new Set()
     if (!q.buses.has(bus)) {
       q.buses.add(bus)
-      addEverythingListener(q,bus.dispatchEvent)
+      addEverythingListener(q, bus.dispatchEvent)
     }
   },
   removeBus(q, bus) {
@@ -62,7 +65,7 @@ const handlers = {
       q.buses.delete(bus)
       removeEverythingListener(q, bus.dispatchEvent)
     }
-  }
+  },
 }
 type Q = {
   id: string
@@ -76,13 +79,13 @@ const proxyHandler = {
     if (h) {
       return (...a) => h(q, ...a)
     }
-    console.error(key, "404", q)
+    console.error(key, '404', q)
     return q[key]
-  }
+  },
 }
 
 export function QuarkEventBus(id?: string) {
-  return new Proxy({id} as any, proxyHandler) as IQuarkBus<any, any>
+  return new Proxy({ id } as any, proxyHandler) as IQuarkBus<any, any>
 }
 
 export const Q = QuarkEventBus

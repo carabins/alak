@@ -1,6 +1,6 @@
 {
     "name": "@alaq/atom",
-    "version": "5.0.0-up.24",
+    "version": "5.0.0-up.26",
     "main": "index.js",
     "typings": "index.d.ts",
     "unpkg": "lib/es.js",
@@ -9,6 +9,6 @@
     "license": "TVR",
     "browser": "lib/umd.js",
     "dependencies": {
-        "@alaq/nucleus": "5.0.0-up.19"
+        "@alaq/nucleus": "5.0.0-up.21"
     }
 }

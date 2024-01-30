@@ -1,3 +1,3 @@
 import IndexedVertexMap from './IndexedVertexMap'
 
-export {IndexedVertexMap}
+export { IndexedVertexMap }

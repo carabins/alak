@@ -1,5 +1,5 @@
-import BitInstance from "@alaq/bitmask/BitInstance";
-import {test} from "tap";
+import BitInstance from '@alaq/bitmask/BitInstance'
+import { test } from 'tap'
 
 const instance = BitInstance({
   startValue: 1,
@@ -21,8 +21,8 @@ const instance = BitInstance({
     },
   },
 })
-test('basic', (t) => {
 
+test('basic', (t) => {
   t.ok(instance.state.ONE)
   t.notOk(instance.state.TWO)
   t.ok(instance.state.B)
@@ -30,57 +30,55 @@ test('basic', (t) => {
   instance.flags.TWO.setTrue()
   t.ok(instance.state.TWO)
 
-  instance.setTrue("THREE", "FOUR")
+  instance.setTrue('THREE', 'FOUR')
   t.ok(instance.state.THREE)
   t.ok(instance.state.FOUR)
-  const r = instance.onValueUpdate("AFFECTED_FLAGS", (v)=>{
+  const r = instance.onValueUpdate('AFFECTED_FLAGS', (v) => {
     t.ok(v.Z)
   })
-  instance.setFalse("TWO", "FOUR")
+  instance.setFalse('TWO', 'FOUR')
   t.notOk(instance.state.FOUR)
   t.ok(instance.state.Z)
   instance.removeValueUpdate(r)
-  instance.setTrue("TWO", "FOUR")
+  instance.setTrue('TWO', 'FOUR')
   t.ok(instance.state.A)
   t.plan(10)
   t.end()
 })
 test('combinations and', (t) => {
   instance.bitwise.set(0)
-  let r = instance.flags.A.onValueUpdate("ANY", ()=>{
-
-    t.pass("any" )
+  let r = instance.flags.A.onValueUpdate('ANY', () => {
+    t.pass('any')
   })
   instance.flags.A.removeValueUpdate(r)
-  r = instance.flags.A.onValueUpdate("TRUE", ()=>{
-    t.pass("true" )
-
+  r = instance.flags.A.onValueUpdate('TRUE', () => {
+    t.pass('true')
   })
-  instance.setTrue("ONE", "TWO")
+  instance.setTrue('ONE', 'TWO')
   instance.flags.A.removeValueUpdate(r)
-  r = instance.flags.A.onValueUpdate("FALSE", ()=>{
+  r = instance.flags.A.onValueUpdate('FALSE', () => {
     t.ok(true)
   })
-  instance.setFalse("ONE", "TWO")
+  instance.setFalse('ONE', 'TWO')
   instance.flags.A.removeValueUpdate(r)
   t.plan(3)
   t.end()
 })
 test('combinations and not', (t) => {
   instance.bitwise.set(0)
-  let r = instance.flags.Z.onValueUpdate("ANY", ()=>{
+  let r = instance.flags.Z.onValueUpdate('ANY', () => {
     t.ok(true)
   })
   instance.flags.Z.removeValueUpdate(r)
-  r = instance.flags.Z.onValueUpdate("TRUE", ()=>{
+  r = instance.flags.Z.onValueUpdate('TRUE', () => {
     t.ok(true)
   })
-  instance.setTrue("ONE", "THREE")
+  instance.setTrue('ONE', 'THREE')
   instance.flags.Z.removeValueUpdate(r)
-  r = instance.flags.Z.onValueUpdate("FALSE", ()=>{
+  r = instance.flags.Z.onValueUpdate('FALSE', () => {
     t.ok(true)
   })
-  instance.setTrue("ONE", "TWO")
+  instance.setTrue('ONE', 'TWO')
   instance.removeValueUpdate(r)
   t.plan(3)
   t.end()

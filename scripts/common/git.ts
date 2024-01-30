@@ -5,7 +5,7 @@ import fs from 'fs'
 
 import { getLine } from '~/scripts/common/oneLine'
 import { FileLog } from '~/scripts/log'
-import {projects} from "~/scripts/now";
+import { projects } from '~/scripts/now'
 
 const add = (o, key) => (o[key] = o[key] ? o[key] + 1 : 1)
 
@@ -33,7 +33,6 @@ export async function getAffected() {
     }
     return f
   })
-  const affected = Object.keys(changes).filter((s) => s !== 'scripts' && !s.endsWith(".ts"))
+  const affected = Object.keys(changes).filter((s) => s !== 'scripts' && !s.endsWith('.ts'))
   return affected
 }
-

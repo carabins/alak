@@ -13,9 +13,7 @@ export default function calcCombination(operations, value, flags) {
         break
       }
       case 'or':
-        results.push(
-          operationFlags.reduce((prev, now) => value.is(flags[now]) || prev, false),
-        )
+        results.push(operationFlags.reduce((prev, now) => value.is(flags[now]) || prev, false))
         break
     }
   })

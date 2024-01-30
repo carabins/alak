@@ -1,37 +1,35 @@
-import select from '@inquirer/select';
-import checkbox from '@inquirer/checkbox';
-import {buildTask, getProjectChoices, getTaskChoices, startTask, xTask} from "~/scripts/tasks";
-import {getAffected} from "~/scripts/common/git";
-import {projects} from "~/scripts/now";
-import {coverageTest, testProjects} from "~/scripts/tasks/task.test";
-import {bench} from "~/scripts/common/bench";
-import {Log} from "~/scripts/log";
-import {dev} from "~/scripts/tasks/task.dev";
-
+import select from '@inquirer/select'
+import checkbox from '@inquirer/checkbox'
+import { buildTask, getProjectChoices, getTaskChoices, startTask, xTask } from '~/scripts/tasks'
+import { getAffected } from '~/scripts/common/git'
+import { projects } from '~/scripts/now'
+import { coverageTest, testProjects } from '~/scripts/tasks/task.test'
+import { bench } from '~/scripts/common/bench'
+import { Log } from '~/scripts/log'
+import { dev } from '~/scripts/tasks/task.dev'
 
 async function start() {
   console.clear()
   const fullBench = bench()
   const allProjects = Object.values(projects)
   const affectedList = await getAffected()
-  const affectedObj = affectedList.map(id => projects[id])
-  const affectedStr = affectedList.join(", ")
+  const affectedObj = affectedList.map((id) => projects[id])
+  const affectedStr = affectedList.join(', ')
 
   let selectedTask
   switch (process.argv[2]) {
-    case "build":
+    case 'build':
       return await startTask(buildTask, [projects['vue']])
-    case "cover":
+    case 'cover':
       return coverageTest()
-    case "test":
+    case 'test':
       return testProjects(allProjects)
-    case "dev":
+    case 'dev':
       return dev()
-    case "up":
+    case 'up':
       selectedTask = getTaskChoices(affectedStr)[0].value
-    case "x":
+    case 'x':
       return await startTask(xTask, [projects['alak'], projects['vue']])
-
   }
   if (!selectedTask) {
     selectedTask = await select({
@@ -46,24 +44,24 @@ async function start() {
     selectedProjects = await select({
       message: 'Select a project',
       choices: getProjectChoices(affectedObj, affectedStr),
-    });
+    })
 
     if (!selectedProjects) {
       selectedProjects = await checkbox({
         message: 'Select a project',
-        choices: Object.values(projects).map(p => {
+        choices: Object.values(projects).map((p) => {
           return {
             name: p.packageJson.name,
             description: p.packageJson.description,
-            value: p
+            value: p,
           }
         }),
-        pageSize: Object.keys(projects).length
-      });
+        pageSize: Object.keys(projects).length,
+      })
     }
   }
   await startTask(selectedTask, selectedProjects)
-  Log.info("total time ", fullBench())
+  Log.info('total time ', fullBench())
 }
 
 start()

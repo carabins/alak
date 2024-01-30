@@ -11,7 +11,9 @@ type ClassInstance = new (...args: any) => any
 type ClassToKV<T> = T extends ClassInstance ? InstanceType<T> : T
 
 type ModelHiddenProps = '_' | '$'
-type FilterNotStartingWith<Set, Needle extends string> = Set extends `${Needle}${infer _X}` ? never : Set
+type FilterNotStartingWith<Set, Needle extends string> = Set extends `${Needle}${infer _X}`
+  ? never
+  : Set
 type FilteredKeys<T> = FilterNotStartingWith<keyof T, ModelHiddenProps>
 type HideUnderScore<T> = Omit<T, ModelHiddenProps>
 // type OnlyPublicKeys<T> = Omit<T, ModelHiddenProps>
@@ -33,7 +35,6 @@ type NucleusStrategy = 'core' | 'saved' | 'holistic' | 'stateless' | 'holystate'
 type ExternalEvents = 'init' | 'decay'
 type ExternalEventData = {}
 
-
 interface IAtomKnown<T> {
   keys: Set<string>
   actions: Set<string>
@@ -51,7 +52,6 @@ interface IAtom<T> {
   known: IAtomKnown<T>
   decay(): void
 }
-
 
 type IAtomOptions<Model> = {
   name?: string

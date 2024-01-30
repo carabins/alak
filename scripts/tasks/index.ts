@@ -1,19 +1,17 @@
-import {Project} from "~/scripts/common/project";
-import {publish} from "~/scripts/tasks/task.publish";
-import {syncDeps} from "~/scripts/tasks/task.syncDeps";
-import {coverageTest, testProjects} from "~/scripts/tasks/task.test";
-import {compile} from "~/scripts/tasks/task.compile";
-import {upver} from "~/scripts/tasks/task.upver";
-import {dev} from "~/scripts/tasks/task.dev";
-import {projects} from "~/scripts/now";
-import {commitAndPush} from "~/scripts/tasks/task.commitAndPush";
-import {Log} from "~/scripts/log";
-import {bench} from "~/scripts/common/bench";
-import {browser} from "~/scripts/tasks/task.browser";
-
+import { Project } from '~/scripts/common/project'
+import { publish } from '~/scripts/tasks/task.publish'
+import { syncDeps } from '~/scripts/tasks/task.syncDeps'
+import { coverageTest, testProjects } from '~/scripts/tasks/task.test'
+import { compile } from '~/scripts/tasks/task.compile'
+import { upver } from '~/scripts/tasks/task.upver'
+import { dev } from '~/scripts/tasks/task.dev'
+import { projects } from '~/scripts/now'
+import { commitAndPush } from '~/scripts/tasks/task.commitAndPush'
+import { Log } from '~/scripts/log'
+import { bench } from '~/scripts/common/bench'
+import { browser } from '~/scripts/tasks/task.browser'
 
 type ITaskProcess = (p: Project) => Promise<any>
-
 
 interface ISuperTasks {
   name?: string
@@ -47,63 +45,63 @@ export function getTaskChoices(affectedStr) {
     //   }
     // },
     {
-      name: "publish changes (" + affectedStr + ")",
-      description: "push to npm and git new version",
+      name: 'publish changes (' + affectedStr + ')',
+      description: 'push to npm and git new version',
       value: {
         affected: true,
         prepare: testProjects,
         pipeline: publishPipeline,
         // finalize: commitAndPush
-      }
+      },
     },
     {
-      name: "select for publish",
-      description: "select packages and push to npm and git new version",
+      name: 'select for publish',
+      description: 'select packages and push to npm and git new version',
       value: {
         selectProjectsDialog: true,
         prepare: testProjects,
         pipeline: publishPipeline,
         // finalize: commitAndPush
-      }
+      },
     },
     {
-      name: "commit and push to git",
-      description: "just push to git",
+      name: 'commit and push to git',
+      description: 'just push to git',
       value: {
         prepare: testProjects,
-        finalize: commitAndPush
-      }
+        finalize: commitAndPush,
+      },
     },
     {
-      name: "build",
-      description: "local compile bundles",
+      name: 'build',
+      description: 'local compile bundles',
       value: {
         prepare: testProjects,
-        pipeline: [upver, syncDeps, compile, browser]
-      }
+        pipeline: [upver, syncDeps, compile, browser],
+      },
     },
     {
-      name: "dev",
-      description: "run test on changes",
+      name: 'dev',
+      description: 'run test on changes',
       value: {
-        finalize: dev
-      }
+        finalize: dev,
+      },
     },
     {
-      name: "test",
-      description: "fast test",
+      name: 'test',
+      description: 'fast test',
       value: {
-        finalize: testProjects
-      }
+        finalize: testProjects,
+      },
     },
     {
-      name: "test + report",
-      description: "coverage test",
+      name: 'test + report',
+      description: 'coverage test',
       value: {
-        finalize: coverageTest
-      }
+        finalize: coverageTest,
+      },
     },
-  ].map(o => {
+  ].map((o) => {
     o.value['name'] = o.name
     return o
   }) as any
@@ -112,47 +110,43 @@ export function getTaskChoices(affectedStr) {
 export const getProjectChoices = (affectedObj, affectedStr) => {
   return [
     {
-      name: "affected (" + affectedStr + ")",
-      description: "Filesystem changes with GIT",
-      value: affectedObj
+      name: 'affected (' + affectedStr + ')',
+      description: 'Filesystem changes with GIT',
+      value: affectedObj,
     },
     {
-      name: "custom",
-      description: "manual select",
-      value: false
+      name: 'custom',
+      description: 'manual select',
+      value: false,
     },
     {
-      name: "all",
-      description: "all",
-      value: projects
+      name: 'all',
+      description: 'all',
+      value: projects,
     },
   ] as any
 }
 
-
 export async function startTask(superTask: ISuperTasks, targetProjects: Project[]) {
   // console.clear()
   if (!targetProjects?.length) {
-    Log.error("Проекты не выбраны")
+    Log.error('Проекты не выбраны')
     return
   }
-  Log.info("start pipeline for supertask : " + superTask.name)
+  Log.info('start pipeline for supertask : ' + superTask.name)
   const b = bench()
-  superTask.prepare && await superTask.prepare(targetProjects)
+  superTask.prepare && (await superTask.prepare(targetProjects))
 
-  targetProjects.forEach(p => {
-
-  })
+  targetProjects.forEach((p) => {})
 
   if (superTask.pipeline?.length) {
     for (const task of superTask.pipeline) {
-      Log.info("start task : " + task.name)
-      await Promise.all(targetProjects.map(task))
-        .catch(e => {
-          Log.error({e})
-        })
+      Log.info('start task : ' + task.name)
+      await Promise.all(targetProjects.map(task)).catch((e) => {
+        Log.error({ e })
+      })
     }
   }
-  superTask.finalize && await superTask.finalize(targetProjects)
-  Log.info("finish at", b())
+  superTask.finalize && (await superTask.finalize(targetProjects))
+  Log.info('finish at', b())
 }

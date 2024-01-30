@@ -1,4 +1,4 @@
-import {UnionAtom, UnionModel} from "alak/index";
+import { UnionAtom, UnionModel } from 'alak/index'
 
 class ParentModel extends UnionModel<any> {
   get parentCallChild() {
@@ -7,7 +7,6 @@ class ParentModel extends UnionModel<any> {
   get parentName() {
     return this._
   }
-
 }
 
 class BaseModel extends ParentModel {
@@ -32,13 +31,10 @@ class BaseModel extends ParentModel {
   }
 }
 const a = UnionAtom({
-  name:"a",
-  model:BaseModel
+  name: 'a',
+  model: BaseModel,
 })
 
 // console.log("::", a.core.birds)
 // console.log("::parentCallChild", a.state.parentCallChild)
 // console.log("::", a.state.parentname)
-
-
-
