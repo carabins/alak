@@ -1,9 +1,9 @@
-import {mixed, tag, saved} from '@alaq/atom/property'
+import { mixed, tag, saved } from '@alaq/atom/property'
 
 export default class {
   tasks = ['a', 'b']
   multiplex = 10
-  everCount =  12
+  everCount = 12
 
   taggedVar = mixed(saved, tag, 12)
   someOtherVar = tag.some('+')
@@ -16,7 +16,6 @@ export default class {
   }
 
   get multiCount() {
-
     return this.multiplex * this.taskCount
   }
 

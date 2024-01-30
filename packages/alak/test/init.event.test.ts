@@ -1,8 +1,7 @@
-import {tag} from '@alaq/atom/property'
+import { tag } from '@alaq/atom/property'
 
-
-import {test} from 'tap'
-import {UnionConstructor} from 'alak/index'
+import { test } from 'tap'
+import { UnionConstructor } from 'alak/index'
 
 class model {
   someVar = tag.some_id('somevar')
@@ -50,4 +49,3 @@ test('atom change events', (t) => {
   b.core.someVar('nextVar')
   t.end()
 })
-

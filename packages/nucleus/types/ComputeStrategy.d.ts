@@ -1,6 +1,9 @@
 type UnpackedPromise<T> = T extends Promise<infer U> ? U : T
-type UnpackedFlow<T> = T extends (...args: any[]) => infer U ? U : T
-type ReturnArrayTypes<IN extends any[]> = { [K in keyof IN]: UnpackedPromise<UnpackedFlow<IN[K]>> }
+type UnpackedNucleus<T> = T extends INucleus<infer U> ? U : T
+type UnpackedFnArgs<T> = T extends (...args: any[]) => infer U ? U : T
+type ReturnArrayTypes<IN extends any[]> = {
+  [K in keyof IN]: UnpackedPromise<UnpackedNucleus<IN[K]>>
+}
 
 type FunComputeIn<T, IN extends any[]> = {
   (...a: ReturnArrayTypes<IN>): T | PromiseLike<T>
@@ -26,15 +29,15 @@ type ComputeStrategicNucleon<IN extends any[]> = {
  */
 interface ComputeStrategy<T, IN extends any[]> {
   /**
-   * Функция-обработчик вызывается при наличии значений всех нуклонов исключая `null` и `undefined`.
-   */
-  some: ComputedIn<T, IN>
-  /**
    * Функция-обработчик вызывается обновлением любого нуклона-источника.
    */
   weak: ComputedIn<T, IN>
   /**
-   * При вызове целевого нуклона, будет вызвана функци-добытчик у всех асинхронных нуклонов-источников.
+   * Функция-обработчик вызывается при наличии значений всех нуклонов исключая `null` и `undefined`.
+   */
+  some: ComputedIn<T, IN>
+  /**
+   * При вызове целевого нуклона, будет вызвана функция-добытчик у всех асинхронных нуклонов-источников.
    * Функция-обработчик вызывается при заполнении всех нуклонов любыми значениями.
    */
   strong: ComputedIn<T, IN>

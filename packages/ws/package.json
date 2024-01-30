@@ -1,6 +1,6 @@
 {
     "name": "@alaq/ws",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Alak websockets",
     "main": "index.js",
     "types": "index.d.ts",
@@ -12,6 +12,7 @@
         "flow"
     ],
     "author": "Gleb Panteleev",
-    "license": "TRU",
-    "repository": "https://github.com/carabins/alak"
+    "license": "TVR",
+    "repository": "https://github.com/carabins/alak",
+    "typings": "index.d.ts"
 }

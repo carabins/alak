@@ -1,35 +1,36 @@
-import {test} from 'tap'
-import {UnionConstructor} from "alak/index";
-import BirdsModel from "./models/BirdsModel";
-
+import { test } from 'tap'
+import { UnionConstructor } from 'alak/index'
+import BirdsModel from './models/BirdsModel'
 
 test('factory test', async (t) => {
   const uc = UnionConstructor({
     // namespace: "factory_test",
     models: {
-      b: BirdsModel
+      b: BirdsModel,
     },
-    // emitChanges: true
+    factories: {
+      z: BirdsModel,
+    },
+    emitChanges: true,
   })
+  // console.warn('::', uc.facade.BState.song)
 
-  // uc.bus.addEverythingListener((event, data) => {
-  //     switch (event) {
-  //       case "NUCLEUS_INIT":
-  //         const {tag, nucleus} = data
-  //         // console.warn(event, nucleus.value)
-  //         // console.warn(event, ":", data)
-  //         // nucleus.up(v=>{
-  //         //   console.warn({v})
-  //         // })
-  //     }
-  //   }
-  // )
-
+  uc.bus.addEverythingListener((event, data) => {
+    switch (event) {
+      case 'NUCLEUS_INIT':
+        const { tag, nucleus } = data
+      // console.warn(event, nucleus.value)
+      // console.warn(event, ":", data)
+      // nucleus.up(v=>{
+      //   console.warn({v})
+      // })
+    }
+  })
 
   // uc.bus.addEventListener("NUCLEUS_INIT",(data)=>{
   //   console.warn(data.nucleus.value)
   // })
-  console.warn(uc.facade.cores.b.mixed.value)
+  // console.warn(uc.facade.cores.b.mixed.value)
 
   // console.warn(uc.facade.atoms.b.state.mixed)
   // console.warn(uc.atoms.b.state.rune)
@@ -38,6 +39,3 @@ test('factory test', async (t) => {
 
   t.pass()
 })
-
-
-

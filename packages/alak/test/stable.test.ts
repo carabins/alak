@@ -1,29 +1,28 @@
-import {test} from 'tap'
-import {UnionConstructor} from "alak/index";
-import {UnionAtom} from "alak/index";
-import CountModel from "./models/CountModel";
+import { test } from 'tap'
+import { UnionConstructor } from 'alak/index'
+import { UnionAtom } from 'alak/index'
+import CountModel from './models/CountModel'
 
 const a = UnionAtom({
-  name: "a",
+  name: 'a',
   model: CountModel,
 })
 
 test('stable model', async (t) => {
+  a.core.count.up((z) => {})
   t.match(a.state.count, 1)
   t.match(a.state.mixedCount, 100)
-  console.warn(a.known.values())
 })
 
-
 test('stable atom', async (t) => {
-  const {facade} = UnionConstructor({
+  const { facade } = UnionConstructor({
     models: {
-      s: CountModel
+      s: CountModel,
     },
     factories: {
       b: CountModel,
-      c: CountModel
-    }
+      c: CountModel,
+    },
   })
 
   const bInstance1 = facade.atoms.b.get(1)
@@ -40,5 +39,3 @@ test('stable atom', async (t) => {
 
   t.end()
 })
-
-

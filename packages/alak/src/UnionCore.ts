@@ -1,6 +1,5 @@
-import {QuarkEventBus} from "@alaq/nucleus/bus";
-import {defaultNamespace, getNamespaces, UnionNamespaces} from "alak/namespaces";
-
+import { QuarkEventBus } from '@alaq/nucleus/bus'
+import { defaultNamespace, getNamespaces, UnionNamespaces } from 'alak/namespaces'
 
 const atomLinked = {
   buses: 'bus',
@@ -15,12 +14,26 @@ const linkedProxyHandler = {
     return o.atoms[key][o.key]
   },
 }
+const deCapitalize = (key) => key[0].toLowerCase() + key.substring(1)
+const fastKey = ['Core', 'State', 'Atom', 'Bus']
 const facadeHandlers = {
-  get(target: IUnionCoreService<any, any, any>, key): any {
+  get(target: IUnionCoreService<any, any, any>, key: string): any {
+    for (const k of fastKey) {
+      if (key.endsWith(k)) {
+        const atomName = deCapitalize(key).replace(k, '')
+        const a = target.atoms[atomName]
+        if (a) {
+          if (key === 'Atom') {
+            return a
+          }
+          return a[deCapitalize(k)]
+        }
+      }
+    }
     if (atomLinked[key]) {
       if (!linkedProxy[key]) {
         linkedProxy[key] = new Proxy(
-          {atoms: target.atoms, key: atomLinked[key]},
+          { atoms: target.atoms, key: atomLinked[key] },
           linkedProxyHandler,
         )
       }
@@ -30,9 +43,7 @@ const facadeHandlers = {
   },
 }
 
-export function ExtendUnionCore<N extends keyof UnionNamespaces>(
-  namespace: N,
-): UnionNamespaces[N] {
+export function GetUnionCore<N extends keyof UnionNamespaces>(namespace: N): UnionNamespaces[N] {
   const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
 
@@ -45,6 +56,7 @@ export function ExtendUnionCore<N extends keyof UnionNamespaces>(
     bus,
   }
   const uc = {
+    namespace: ns,
     services,
     facade: new Proxy(services, facadeHandlers),
     bus,
@@ -52,16 +64,3 @@ export function ExtendUnionCore<N extends keyof UnionNamespaces>(
   namespaces[ns] = uc
   return namespaces[ns]
 }
-
-export function InjectUnionFacade<N extends keyof UnionNamespaces >(namespace?: N): UnionNamespaces[N]['facade'] {
-  if (!namespace) {
-    namespace = defaultNamespace as any
-  }
-  const namespaces = getNamespaces()
-  if (!namespaces[namespace]) {
-    console.error('namespace', namespace, 'not found')
-    throw 'unknown namespace'
-  }
-  return namespaces[namespace]['facade']
-}
-

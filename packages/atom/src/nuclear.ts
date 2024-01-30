@@ -1,8 +1,8 @@
 // import {installNucleonExtension} from "@alaq/nucleus/create";
-import {storage} from './storage'
+import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
-import {savedSym, tagSym, statelessSym, mixedSym} from '@alaq/atom/property'
+import { savedSym, tagSym, statelessSym, mixedSym, finiteSym } from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -18,12 +18,12 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       let v = valence[key]
       delete valence[key]
       if (isDefined(v)) {
-        let findSomeOne = false
-        const defineRune = mv => {
+        let valueInSym = false
+        const defineRune = (mv) => {
           switch (mv?.sym) {
             case mixedSym:
-              findSomeOne = true
-              mv.mix.forEach(v => {
+              valueInSym = true
+              mv.mix.forEach((v) => {
                 if (v?.paked) {
                   defineRune(v())
                 } else {
@@ -32,25 +32,29 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
               })
               return
             case tagSym:
-              findSomeOne = true
+              valueInSym = true
               tag = mv.tag || true
               break
             case savedSym:
-              findSomeOne = true
+              valueInSym = true
               mem = true
               break
             case statelessSym:
-              findSomeOne = true
+              valueInSym = true
               nucleon.stateless()
               break
+            case finiteSym:
+              valueInSym = true
+              nucleon.finite()
+              break
           }
-          if (findSomeOne && isDefined(mv.startValue)) {
+          if (valueInSym && isDefined(mv.startValue)) {
             modelValue = mv.startValue
           }
         }
         if (v.sym) {
           defineRune(v)
-          if (!findSomeOne) {
+          if (!valueInSym) {
             modelValue = v
           }
         } else {
@@ -61,8 +65,6 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       }
 
       // isDefined(modelValue) && defineRune(modelValue)
-
-
     }
 
     // if (typeof core.saved === 'boolean') {
@@ -71,8 +73,10 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
     //   mem = core.saved && core.saved.indexOf(key) !== -1
     // }
 
-
     switch (core.nucleusStrategy) {
+      case 'finite':
+        nucleon.finite()
+        break
       case 'holistic':
         nucleon.holistic()
         break
@@ -105,7 +109,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', {tag, nucleus: nucleon})
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { tag, nucleus: nucleon })
   }
   return nucleon
 }

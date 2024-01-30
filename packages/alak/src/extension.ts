@@ -11,18 +11,23 @@ export default function (q: QuantumAtom) {
     return a
   }
 
+  const facadeProxy = new Proxy(q.union.facade, {
+    get(p, key, caller) {
+      return p[key]
+    },
+  })
+
   const under = {
-    _: q.union.facade,
+    _: facadeProxy,
     _modelNamespace: q,
     _modelName: q.name,
     _modelId: q.id,
     _modelData: q.data,
-    call(atom: string, methodName: string, args?: any[]) {
-    },
-
+    call(atom: string, methodName: string, args?: any[]) {},
 
     set(atom: string, nucleon: string, data: any) {
       const a = getA(atom)
+
       a && a.core[nucleon](data)
     },
     get(atom: string, nucleon) {
@@ -31,10 +36,9 @@ export default function (q: QuantumAtom) {
     },
   }
   return new Proxy(under, {
-    get(u, key){
-      if (key === "$")
-        return q.atom.core
+    get(u, key) {
+      if (key === '$') return q.atom.core
       return u[key]
-    }
+    },
   })
 }

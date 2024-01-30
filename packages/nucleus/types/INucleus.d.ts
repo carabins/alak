@@ -207,7 +207,6 @@ interface INucleus<T> {
    * @returns {@link quark#INucleon} */
   clearValue(): INucleus<T>
 
-
   /** Повторно отправить значение всем функциям-получателям
    */
   resend(): INucleus<T>
@@ -288,7 +287,7 @@ interface INucleus<T> {
    * Обновление  фукнций-приёмников происходит только при уникальных значениях
    * @param bool? - по умолчанию `true`
    */
-  safe(bool?: boolean): INucleus<T>
+  finite(bool?: boolean): INucleus<T>
 
   /**
    * Создать дубликат значение

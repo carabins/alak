@@ -3,6 +3,6 @@ export function bench() {
   return () => {
     const ms = Date.now() - t
     const sec = Math.floor(ms / 1000)
-    return sec + "." + ms + "s"
+    return sec + '.' + ms + 's'
   }
 }

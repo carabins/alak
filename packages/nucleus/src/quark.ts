@@ -1,5 +1,5 @@
 import { dispatchEvent, QState } from './events'
-import {  rnd } from './utils'
+import { rnd } from './utils'
 
 export function setNucleonValue(quark: Quark, value?) {
   const setValue = (finalValue) => {
@@ -11,7 +11,7 @@ export function setNucleonValue(quark: Quark, value?) {
       finalValue = wrappedValue
     }
 
-    if (quark.isSafe && quark.value == finalValue) {
+    if (quark.isFinite && quark.value == finalValue) {
       return
     }
     quark.prev = quark.value
@@ -32,7 +32,7 @@ async function setAsyncValue(quark: Quark, promise: PromiseLike<any>) {
   quark.isAwaiting = promise
   quark.isAsync = true
   const v = await promise
-  if (quark.isSafe && quark.value == v) {
+  if (quark.isFinite && quark.value == v) {
     return
   }
   quark.prev = quark.value

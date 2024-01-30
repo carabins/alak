@@ -1,5 +1,5 @@
-import {test} from 'tap'
-import {coreAtom} from '@alaq/atom/index'
+import { test } from 'tap'
+import { coreAtom } from '@alaq/atom/index'
 
 const model = {
   other: 30,
@@ -24,7 +24,6 @@ function baseTest(t, m) {
   })
   m.state(10)
   t.equal(m.other.value, 30)
-
 }
 
 test('pure one atom: object ', async (t) => {
@@ -39,10 +38,9 @@ test('pure atom one', async (t) => {
 
 test('private model atom ', async (t) => {
   const m = coreAtom(Model)
-  m.privateOther.up(v => {
+  m.privateOther.up((v) => {
     t.ok(v === 90 || v === 60)
   })
   m.other(20)
   t.end()
-
 })

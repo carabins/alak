@@ -1,30 +1,28 @@
-import {ActiveUnions} from "alak/namespaces";
+import { ActiveUnions } from 'alak/namespaces'
 
+export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
+export { nucleonExtensions } from '@alaq/nucleus/create'
+export { Atom, savedAtom } from '@alaq/atom/index'
+export { saved, stateless, tag, mixed } from '@alaq/atom/property'
 
-export {N, Nucleus, QuarkEventBus} from '@alaq/nucleus/index'
-export {nucleonExtensions} from '@alaq/nucleus/create'
-export {Atom, savedAtom} from '@alaq/atom/index'
-export {saved, stateless, tag, mixed} from '@alaq/atom/property'
+export { UnionNamespaces } from 'alak/namespaces'
 
-export {UnionNamespaces} from 'alak/namespaces'
+export { UnionConstructor } from 'alak/UnionConstructor'
+export { GetUnionCore } from 'alak/UnionCore'
+export { UnionAtom, UnionAtomFactory } from 'alak/unionAtom'
 
-export {UnionConstructor} from "alak/UnionConstructor"
-export {ExtendUnionCore, InjectUnionFacade} from "alak/UnionCore"
-export {UnionAtom, UnionAtomFactory} from "alak/unionAtom"
+import { storage } from '@alaq/atom/storage'
 
+import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
 
-import {storage} from '@alaq/atom/storage'
+export { injectFacade } from 'alak/facadeInjector'
 
-import {Nucleus, N, QuarkEventBus} from '@alaq/nucleus/index'
-
-export const NucleusStorage = storage
 export const NStored = (name, value) => {
   const n = N(value)
   n.setId(name)
   storage.init(n)
   return n
 }
-
 
 export type IUFacade<NS extends keyof ActiveUnions> = ActiveUnions[NS]['facade']
 
@@ -39,4 +37,3 @@ export abstract class UnionMultiModel<NS extends keyof ActiveUnions> extends Uni
   _modelId?: string | number
   _modelData?: any
 }
-

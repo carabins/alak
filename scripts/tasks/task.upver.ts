@@ -1,6 +1,6 @@
-import {Project} from "~/scripts/common/project";
-import {FileLog, Log} from "~/scripts/log";
-import {versions} from "~/scripts/now";
+import { Project } from '~/scripts/common/project'
+import { FileLog, Log } from '~/scripts/log'
+import { versions } from '~/scripts/now'
 
 export async function upver(project: Project) {
   const log = FileLog(project.packageJson.name + ' version')

@@ -1,7 +1,6 @@
 export default class CountModel {
   count = 1
 
-
   get mixedCount() {
     return this.count * 100
   }
@@ -9,5 +8,4 @@ export default class CountModel {
   increment() {
     this.count = this.count + 1
   }
-
 }

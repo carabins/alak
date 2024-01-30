@@ -46,7 +46,7 @@ type EventConnector = Function
 
 interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object> {
   addEverythingListener<E extends keyof ListenerEvents>(
-    listener: (event: E, data: ListenerEvents[E] ) => void,
+    listener: (event: E, data: ListenerEvents[E]) => void,
   ): void
 
   addEventListener<E extends keyof ListenerEvents>(
@@ -69,7 +69,7 @@ interface IQuarkBus<ListenerEvents extends object, DispatchEvents extends object
   addBus(bus: IQuarkBus<any, any>): void
 
   removeBus(bus: IQuarkBus<any, any>): void
-  decay():void
+  decay(): void
 }
 
 interface Quark {
@@ -92,7 +92,7 @@ interface Quark {
   parents?: INucleus<any>[]
   isEmpty?: boolean
   isAsync?: boolean
-  isSafe?: boolean
+  isFinite?: boolean
   isHoly?: boolean
   isPrivate?: boolean
   isAwaiting?: boolean | any
@@ -110,7 +110,7 @@ interface Quark {
  * ```
  */
 interface INucleonQuarkConstructor {
-  /** Создать {@link INucleus} с необязательным аргументом как стартовое значение*/<T>(
+  /** Создать {@link INucleus} с необязательным аргументом как стартовое значение*/ <T>(
     value?: T,
   ): INucleus<MaybeAny<T>>
 
