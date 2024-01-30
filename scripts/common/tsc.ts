@@ -5,16 +5,16 @@ import {
   createProgram,
   ModuleKind,
   ModuleResolutionKind,
-  ScriptTarget
+  ScriptTarget,
 } from 'typescript'
-import {FileLog} from '~/scripts/log'
-import {scanAllSrc} from '~/scripts/common/scan'
-import {Const} from '~/scripts/common/constants'
+import { FileLog } from '~/scripts/log'
+import { scanAllSrc } from '~/scripts/common/scan'
+import { Const } from '~/scripts/common/constants'
 import path from 'path'
 import * as fs from 'fs-extra'
 
 const state = {
-  sources: {} as UnpackedFlow<typeof scanAllSrc>,
+  sources: {} as UnpackedFnArgs<typeof scanAllSrc>,
   ready: false,
   declarations: {} as Record<string, any>,
 }

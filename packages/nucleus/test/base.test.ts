@@ -46,16 +46,15 @@ test('bus', (t) => {
   t.end()
 })
 
-
 test('bus connections', (t) => {
   const a = Q()
   const b = Q()
 
   b.addBus(a)
-  a.addEverythingListener( (e,d)=>{
+  a.addEverythingListener((e, d) => {
     // console.log({e, d})
   })
 
-  b.dispatchEvent("E1", 1)
+  b.dispatchEvent('E1', 1)
   t.end()
 })

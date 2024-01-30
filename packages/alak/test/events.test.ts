@@ -1,5 +1,5 @@
-import {InjectUnionFacade, IUFacade, UnionConstructor} from "alak/index";
-import {test} from "tap";
+import { InjectUnionFacade, IUFacade, UnionConstructor } from 'alak/index'
+import { test } from 'tap'
 
 class model {
   eventState: string
@@ -21,7 +21,7 @@ class model {
 
 const uc = UnionConstructor({
   namespace: 'eventsTests',
-  models: {a: model, b: model},
+  models: { a: model, b: model },
   events: {} as {
     HELLO_WORLD(s: string): void
   },
@@ -69,17 +69,17 @@ test('atom events proxy silent', (t) => {
     one = 1
   }
 
-  const {facade} = UnionConstructor({
+  const { facade } = UnionConstructor({
     namespace: 'eventsTests',
-    models: {z: model},
+    models: { z: model },
     events: {
       HELLO_WORLD(data) {
-        console.log("----", this.states.a.init)
+        console.log('----', this.states.a.init)
         t.pass(this.states.a.init)
       },
       ATOM_INIT() {
-        console.log("---")
-      }
+        console.log('---')
+      },
     },
   })
 
@@ -90,6 +90,6 @@ test('atom events proxy silent', (t) => {
   facade.atoms.z.state
   facade.atoms.z.actions
   facade.atoms.z.bus
-  facade.bus.dispatchEvent("HELLO_WORLD", '+')
+  facade.bus.dispatchEvent('HELLO_WORLD', '+')
   t.end()
 })

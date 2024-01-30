@@ -207,7 +207,6 @@ interface INucleus<T> {
    * @returns {@link quark#INucleon} */
   clearValue(): INucleus<T>
 
-
   /** Повторно отправить значение всем функциям-получателям
    */
   resend(): INucleus<T>

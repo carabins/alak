@@ -1,11 +1,13 @@
-import {Atom, coreAtom} from "@alaq/atom/index";
-import {makeRune} from "@alaq/rune/index";
-import {QuarkEventBus} from "@alaq/nucleus/bus";
-
+import { Atom, coreAtom } from '@alaq/atom/index'
+import { makeRune } from '@alaq/rune/index'
+import { QuarkEventBus } from '@alaq/nucleus/bus'
 
 const getMem = () => {
   const r = makeRune(30000000)
-  return new Array(7).fill(0).map(i => r).join("+")
+  return new Array(7)
+    .fill(0)
+    .map((i) => r)
+    .join('+')
 }
 
 const globalBus = QuarkEventBus()
@@ -13,30 +15,29 @@ const globalBus = QuarkEventBus()
 async function start() {
   const r = makeRune(3)
   console.time(r)
-  const a = new Array(100000).fill(0).map(i => Atom({
-    model: {
-      bigString: makeRune(3000),
-      _privateBigString: makeRune(3000),
-    },
-    bus:globalBus
-  }))
+  const a = new Array(100000).fill(0).map((i) =>
+    Atom({
+      model: {
+        bigString: makeRune(3000),
+        _privateBigString: makeRune(3000),
+      },
+      bus: globalBus,
+    }),
+  )
 
   setTimeout(() => {
-    a.forEach(i => {
+    a.forEach((i) => {
       i.state.bigString
       i.decay()
     })
     console.timeEnd(r)
     setTimeout(start, 1000)
   }, 1000)
-
 }
 
 start()
 
-
 // console.log(a.getValues())
-
 
 // function construct(constructor, args) {
 //   function F(): void {

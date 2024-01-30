@@ -1,8 +1,8 @@
 // import {installNucleonExtension} from "@alaq/nucleus/create";
-import {storage} from './storage'
+import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
-import {savedSym, tagSym, statelessSym, mixedSym} from '@alaq/atom/property'
+import { savedSym, tagSym, statelessSym, mixedSym } from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -19,11 +19,11 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       delete valence[key]
       if (isDefined(v)) {
         let findSomeOne = false
-        const defineRune = mv => {
+        const defineRune = (mv) => {
           switch (mv?.sym) {
             case mixedSym:
               findSomeOne = true
-              mv.mix.forEach(v => {
+              mv.mix.forEach((v) => {
                 if (v?.paked) {
                   defineRune(v())
                 } else {
@@ -61,8 +61,6 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       }
 
       // isDefined(modelValue) && defineRune(modelValue)
-
-
     }
 
     // if (typeof core.saved === 'boolean') {
@@ -70,7 +68,6 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
     // } else {
     //   mem = core.saved && core.saved.indexOf(key) !== -1
     // }
-
 
     switch (core.nucleusStrategy) {
       case 'holistic':
@@ -105,7 +102,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       })
     }
 
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', {tag, nucleus: nucleon})
+    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { tag, nucleus: nucleon })
   }
   return nucleon
 }

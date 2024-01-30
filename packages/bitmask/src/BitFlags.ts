@@ -12,7 +12,7 @@ export default function BitFlags<F extends ReadonlyArray<string>, G extends Flag
   groups &&
     Object.keys(groups).forEach((sumName) => {
       const o = groups[sumName]
-      let gv = 0
+      let gv = 1
       Object.values(o).forEach((v) => {
         gv = gv + flags[v]
       })

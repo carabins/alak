@@ -259,7 +259,7 @@ export const handlers: any = {
   [Symbol.toPrimitive]() {
     this._.toString()
   },
-  [Symbol.dispose](){
+  [Symbol.dispose]() {
     this._.decay()
   },
   toString() {
@@ -268,4 +268,5 @@ export const handlers: any = {
   valueOf() {
     return `nucleon:${this._.uid}`
   },
+  from,
 }
