@@ -1,6 +1,6 @@
 {
     "name": "alak",
-    "version": "5.0.0-up.49",
+    "version": "5.0.0-up.50",
     "description": "Alak Last Atom",
     "typings": "index.d.ts",
     "main": "index.js",
@@ -17,7 +17,7 @@
     ],
     "dependencies": {
         "@alaq/nucleus": "5.0.0-up.21",
-        "@alaq/atom": "5.0.0-up.26"
+        "@alaq/atom": "5.0.0-up.27"
     },
     "license": "TVR"
 }

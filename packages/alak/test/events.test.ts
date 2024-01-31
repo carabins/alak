@@ -1,4 +1,4 @@
-import { InjectUnionFacade, IUFacade, UnionConstructor } from 'alak/index'
+import { injectFacade, UnionConstructor } from 'alak/index'
 import { test } from 'tap'
 
 class model {
@@ -36,7 +36,7 @@ declare module 'alak/namespaces' {
 }
 
 test('atom events', (t) => {
-  const u = InjectUnionFacade('eventsTests')
+  const u = injectFacade('eventsTests')
 
   u.bus.addEventListener('ATOM_INIT', (d) => {
     switch (d.name) {

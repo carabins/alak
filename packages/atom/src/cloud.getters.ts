@@ -7,7 +7,6 @@ function awakeNucleon(n, getNucleon, thisContext, computeFn, finalListener) {
   const proxyContext = new Proxy(thisContext, {
     get(target: {}, p: string | symbol): any {
       getNucleon(p)
-      console.warn({ p })
       if (typeof p === 'string') {
         upDateOn[p] = true
       }

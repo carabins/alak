@@ -27,6 +27,7 @@ export default function (q: QuantumAtom) {
 
     set(atom: string, nucleon: string, data: any) {
       const a = getA(atom)
+
       a && a.core[nucleon](data)
     },
     get(atom: string, nucleon) {

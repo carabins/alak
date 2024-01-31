@@ -27,7 +27,7 @@ type Atomized<T> = { readonly [K in keyof T]: INucleus<T[K]> }
 type GetValues<T> = keyof RemoveKeysByType<T, AnyFunction>
 type GetActions<T> = keyof OnlyFunc<T>
 
-type IAtomCore<Model> = Atomized<PureModel<Model>> & OnlyFunc<Model>
+type IAtomCore<Model> = OnlyPublicKeys<Atomized<PureModel<Model>> & OnlyFunc<Model>>
 // type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
 type NucleusStrategy = 'core' | 'saved' | 'holistic' | 'stateless' | 'holystate'
@@ -38,6 +38,7 @@ type ExternalEventData = {}
 interface IAtomKnown<T> {
   keys: Set<string>
   actions: Set<string>
+  name: string
 
   values(): PureModel<Instance<T>>
 

@@ -8,8 +8,12 @@ test('factory test', async (t) => {
     models: {
       b: BirdsModel,
     },
+    factories: {
+      z: BirdsModel,
+    },
     // emitChanges: true
   })
+  console.warn('::', uc.facade.BState.song)
 
   // uc.bus.addEverythingListener((event, data) => {
   //     switch (event) {

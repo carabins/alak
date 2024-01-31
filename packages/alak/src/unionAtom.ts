@@ -2,7 +2,7 @@ import { alakConstructor } from './constructor'
 import { defaultNamespace } from 'alak/namespaces'
 import { deleteParams } from '@alaq/nucleus/utils'
 import { QuarkEventBus } from '@alaq/nucleus/bus'
-import { ExtendUnionCore } from 'alak/UnionCore'
+import { GetUnionCore } from 'alak/UnionCore'
 
 // export function UnionAtom<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
 //   return unionAtom(constructor) as IUnionAtom<M, E>
@@ -17,7 +17,7 @@ export function unionAtom(constructor, id?, data?) {
   }
 
   const name = id ? constructor.name + '.' + id : constructor.name
-  const union = ExtendUnionCore(constructor.namespace)
+  const union = GetUnionCore(constructor.namespace)
   const quantum: QuantumAtom = {
     name,
     union,
