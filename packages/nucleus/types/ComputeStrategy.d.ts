@@ -1,7 +1,9 @@
 type UnpackedPromise<T> = T extends Promise<infer U> ? U : T
 type UnpackedNucleus<T> = T extends INucleus<infer U> ? U : T
 type UnpackedFnArgs<T> = T extends (...args: any[]) => infer U ? U : T
-type ReturnArrayTypes<IN extends any[]> = { [K in keyof IN]: UnpackedPromise<UnpackedNucleus<IN[K]>> }
+type ReturnArrayTypes<IN extends any[]> = {
+  [K in keyof IN]: UnpackedPromise<UnpackedNucleus<IN[K]>>
+}
 
 type FunComputeIn<T, IN extends any[]> = {
   (...a: ReturnArrayTypes<IN>): T | PromiseLike<T>

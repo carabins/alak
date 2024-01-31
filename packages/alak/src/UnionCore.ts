@@ -14,8 +14,20 @@ const linkedProxyHandler = {
     return o.atoms[key][o.key]
   },
 }
+const deCapitalize = (key) => key[0].toLowerCase() + key.substring(1)
+const fastKey = ['Core', 'State', 'Atom', 'Bus']
 const facadeHandlers = {
-  get(target: IUnionCoreService<any, any, any>, key): any {
+  get(target: IUnionCoreService<any, any, any>, key: string): any {
+    for (const k of fastKey) {
+      if (key.endsWith(k)) {
+        const atomName = deCapitalize(key).replace(k, '')
+        console.warn('atom', atomName)
+        const a = target.atoms[atomName]
+        if (a) {
+          return a[deCapitalize(k)]
+        }
+      }
+    }
     if (atomLinked[key]) {
       if (!linkedProxy[key]) {
         linkedProxy[key] = new Proxy(
@@ -29,7 +41,7 @@ const facadeHandlers = {
   },
 }
 
-export function ExtendUnionCore<N extends keyof UnionNamespaces>(namespace: N): UnionNamespaces[N] {
+export function GetUnionCore<N extends keyof UnionNamespaces>(namespace: N): UnionNamespaces[N] {
   const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
 
@@ -48,18 +60,4 @@ export function ExtendUnionCore<N extends keyof UnionNamespaces>(namespace: N): 
   } as any
   namespaces[ns] = uc
   return namespaces[ns]
-}
-
-export function InjectUnionFacade<N extends keyof UnionNamespaces>(
-  namespace?: N,
-): UnionNamespaces[N]['facade'] {
-  if (!namespace) {
-    namespace = defaultNamespace as any
-  }
-  const namespaces = getNamespaces()
-  if (!namespaces[namespace]) {
-    console.error('namespace', namespace, 'not found')
-    throw 'unknown namespace'
-  }
-  return namespaces[namespace]['facade']
 }

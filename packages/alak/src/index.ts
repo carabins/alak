@@ -8,12 +8,13 @@ export { saved, stateless, tag, mixed } from '@alaq/atom/property'
 export { UnionNamespaces } from 'alak/namespaces'
 
 export { UnionConstructor } from 'alak/UnionConstructor'
-export { ExtendUnionCore, InjectUnionFacade } from 'alak/UnionCore'
+export { GetUnionCore } from 'alak/UnionCore'
 export { UnionAtom, UnionAtomFactory } from 'alak/unionAtom'
 
 import { storage } from '@alaq/atom/storage'
 
 import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
+export { injectFacade } from 'alak/facadeInjector'
 
 export const NucleusStorage = storage
 export const NStored = (name, value) => {

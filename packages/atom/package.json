@@ -1,6 +1,6 @@
 {
     "name": "@alaq/atom",
-    "version": "5.0.0-up.26",
+    "version": "5.0.0-up.27",
     "main": "index.js",
     "typings": "index.d.ts",
     "unpkg": "lib/es.js",

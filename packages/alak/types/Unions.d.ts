@@ -10,6 +10,25 @@ type IUnionSynthesis<M, F, S, E extends object> = {
 interface IUnionCoreService<Models, Factory, Events extends object> {
   readonly atoms: { [K in keyof Models]: IUnionAtom<Models[K], Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
+  readonly _injector: any
+}
+
+type IFAInjector<O, N extends string> = {
+  [K in keyof O as `${Capitalize<string & K>}${N}`]: O[K]
+}
+
+type IFUnionInjector<Models, Factory, Events extends object> = {
+  [K in keyof (Models & Factory) as `${Capitalize<string & K>}Atom`]: (IAtomicModels<
+    Models,
+    Events
+  > &
+    IAtomicFactory<Factory, Events>)[K]
+} & {
+  [K in keyof Models as `${Capitalize<string & K>}Core`]: IAtomCore<Instance<Models[K]>>
+} & {
+  [K in keyof Models as `${Capitalize<string & K>}State`]: IModelState<Models[K]>
+} & {
+  [K in keyof Models as `${Capitalize<string & K>}Bus`]: IQuarkBus<IAlakCoreEvents & Events, Events>
 }
 
 type IUnionCore<Models, Factory, Services, Events extends object> = {
@@ -34,4 +53,4 @@ type IUnionFacade<Models, Factory, Events extends object> = {
   readonly states: { [K in keyof Models]: IModelState<Models[K]> }
   readonly buses: { [K in keyof Models]: IQuarkBus<IAlakCoreEvents & Events, Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
-}
+} & IFUnionInjector<Models, Factory, Events>

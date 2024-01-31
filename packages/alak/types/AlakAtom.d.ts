@@ -29,7 +29,7 @@ type IAlakCoreEvents = {
 
 interface IUnionAtom<Model, Events extends object> {
   readonly state: IModelState<Model>
-  readonly core: IModelCore<Model>
+  readonly core: OnlyPublicKeys<IModelCore<Model>>
   readonly actions: OnlyPublicKeys<OnlyFunc<Instance<Model>>>
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
   readonly known: IAtomKnown<Model>
