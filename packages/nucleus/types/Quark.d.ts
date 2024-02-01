@@ -92,7 +92,7 @@ interface Quark {
   parents?: INucleus<any>[]
   isEmpty?: boolean
   isAsync?: boolean
-  isSafe?: boolean
+  isFinite?: boolean
   isHoly?: boolean
   isPrivate?: boolean
   isAwaiting?: boolean | any

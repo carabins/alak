@@ -3,6 +3,7 @@
  */
 
 export const savedSym = Symbol.for('saved')
+export const finiteSym = Symbol.for('finite')
 export const tagSym = Symbol.for('tag')
 export const statelessSym = Symbol.for('stateless')
 export const mixedSym = Symbol.for('mixed')

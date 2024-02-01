@@ -2,7 +2,7 @@
 import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
-import { savedSym, tagSym, statelessSym, mixedSym } from '@alaq/atom/property'
+import { savedSym, tagSym, statelessSym, mixedSym, finiteSym } from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -18,11 +18,11 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       let v = valence[key]
       delete valence[key]
       if (isDefined(v)) {
-        let findSomeOne = false
+        let valueInSym = false
         const defineRune = (mv) => {
           switch (mv?.sym) {
             case mixedSym:
-              findSomeOne = true
+              valueInSym = true
               mv.mix.forEach((v) => {
                 if (v?.paked) {
                   defineRune(v())
@@ -32,25 +32,29 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
               })
               return
             case tagSym:
-              findSomeOne = true
+              valueInSym = true
               tag = mv.tag || true
               break
             case savedSym:
-              findSomeOne = true
+              valueInSym = true
               mem = true
               break
             case statelessSym:
-              findSomeOne = true
+              valueInSym = true
               nucleon.stateless()
               break
+            case finiteSym:
+              valueInSym = true
+              nucleon.finite()
+              break
           }
-          if (findSomeOne && isDefined(mv.startValue)) {
+          if (valueInSym && isDefined(mv.startValue)) {
             modelValue = mv.startValue
           }
         }
         if (v.sym) {
           defineRune(v)
-          if (!findSomeOne) {
+          if (!valueInSym) {
             modelValue = v
           }
         } else {
@@ -70,6 +74,9 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
     // }
 
     switch (core.nucleusStrategy) {
+      case 'finite':
+        nucleon.finite()
+        break
       case 'holistic':
         nucleon.holistic()
         break

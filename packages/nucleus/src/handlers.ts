@@ -156,10 +156,10 @@ export const handlers: any = {
     Object.defineProperty(this, 'name', { value })
     return this._
   },
-  //TODO Rethink
-  safe(v?) {
-    if (v == undefined) this.isSafe = true
-    else this.isSafe = v
+
+  finite(v?) {
+    if (v == undefined) this.isFinite = true
+    else this.isFinite = v
     return this._
   },
   holistic(v?) {

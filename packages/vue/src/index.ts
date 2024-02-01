@@ -32,7 +32,7 @@ export function watchVueNucleon<T = any>(n: INucleus<T>) {
 
 const vueAtomKey = '__vue_reactive'
 export default function vueAtom<M>(
-  atom: IAtom<M> | IUnionAtom<any, any>,
+  atom: IAtom<M> | IUnionAtom<M, any>,
 ): UnwrapNestedRefs<ClassToKV<M>> {
   if (!atom.known.meta) {
     atom.known.meta = {}
@@ -57,7 +57,7 @@ export default function vueAtom<M>(
   return r
 }
 
-export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<any, any>) {
+export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<M, any>) {
   const vueReactive = vueAtom(atom)
   return proxyReactiveSyncedWithAtom(vueReactive, atom.core) as UnwrapNestedRefs<ClassToKV<M>>
 }

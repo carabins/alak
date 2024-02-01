@@ -1,17 +1,18 @@
 {
-  "name": "@alaq/ws",
-  "version": "1.0.5",
-  "description": "Alak websockets",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "keywords": [
-    "alak",
-    "streams",
-    "channels",
-    "dataflow",
-    "flow"
-  ],
-  "author": "Gleb Panteleev",
-  "license": "TRU",
-  "repository": "https://github.com/carabins/alak"
+    "name": "@alaq/ws",
+    "version": "1.0.6",
+    "description": "Alak websockets",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "keywords": [
+        "alak",
+        "streams",
+        "channels",
+        "dataflow",
+        "flow"
+    ],
+    "author": "Gleb Panteleev",
+    "license": "TVR",
+    "repository": "https://github.com/carabins/alak",
+    "typings": "index.d.ts"
 }

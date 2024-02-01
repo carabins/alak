@@ -30,7 +30,7 @@ type GetActions<T> = keyof OnlyFunc<T>
 type IAtomCore<Model> = OnlyPublicKeys<Atomized<PureModel<Model>> & OnlyFunc<Model>>
 // type AtomState<Model> = PureModel<Model> & OnlyFunc<Model>
 
-type NucleusStrategy = 'core' | 'saved' | 'holistic' | 'stateless' | 'holystate'
+type NucleusStrategy = 'core' | 'saved' | 'holistic' | 'stateless' | 'holystate' | 'finite'
 
 type ExternalEvents = 'init' | 'decay'
 type ExternalEventData = {}

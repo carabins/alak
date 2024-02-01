@@ -41,7 +41,6 @@ test('reactive union atom', (t) => {
     },
   })
   const a = facade.atoms.a
-  console.warn(a.known.values())
   const r = watchVueAtom(a)
   t.equal(r.one, 1)
   a.core.one(10)
