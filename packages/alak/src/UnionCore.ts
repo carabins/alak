@@ -23,6 +23,9 @@ const facadeHandlers = {
         const atomName = deCapitalize(key).replace(k, '')
         const a = target.atoms[atomName]
         if (a) {
+          if (key === 'Atom') {
+            return a
+          }
           return a[deCapitalize(k)]
         }
       }
