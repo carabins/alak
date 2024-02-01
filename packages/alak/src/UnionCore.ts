@@ -54,6 +54,7 @@ export function GetUnionCore<N extends keyof UnionNamespaces>(namespace: N): Uni
     bus,
   }
   const uc = {
+    namespace: ns,
     services,
     facade: new Proxy(services, facadeHandlers),
     bus,

@@ -35,7 +35,7 @@ export async function devTestFile(f, project, trace) {
       }
     })
     child.stdout.pipe(p)
-    // child.stdout.pipe(process.stdout)
+    child.stdout.pipe(process.stdout)
     child.stderr.pipe(process.stderr)
     child.on('exit', done)
   })

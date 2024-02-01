@@ -1,5 +1,5 @@
 import { alakConstructor } from './constructor'
-import { defaultNamespace } from 'alak/namespaces'
+import { ActiveUnions, defaultNamespace } from 'alak/namespaces'
 import { deleteParams } from '@alaq/nucleus/utils'
 import { QuarkEventBus } from '@alaq/nucleus/bus'
 import { GetUnionCore } from 'alak/UnionCore'
@@ -95,6 +95,12 @@ export const UnionAtom = unionAtom as <M, E extends object, N>(
   constructor: IAlakConstructor<M, E, N>,
 ) => IUnionAtom<M, E>
 
+export function atomic<M, NS extends keyof ActiveUnions>(model: M, namespace?: NS) {
+  if (!namespace) {
+    namespace = defaultNamespace as any
+  }
+  // return UnionAtom({model, namespace})
+}
 export function UnionAtomFactory<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
   const nodes = {}
   const bus = QuarkEventBus(constructor.name)

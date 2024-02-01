@@ -6,7 +6,6 @@ export default class CountModel {
   }
 
   increment() {
-    console.warn('++')
     this.count = this.count + 1
   }
 }

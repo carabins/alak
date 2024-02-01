@@ -1,21 +1,26 @@
-import { injectFacade, UnionConstructor } from 'alak/index'
+import { injectFacade, UnionConstructor, UnionModel } from 'alak/index'
 import { test } from 'tap'
 
-class model {
+class model extends UnionModel<any> {
   eventState: string
   init: boolean = false
   lastInit: string
+  finalInit: boolean
 
-  onEventHelloWorld(data) {
+  _on$helloWorld(data) {
     this.eventState = data
   }
 
-  onEventAtomInit(data) {
+  _on$AtomInit(data) {
     this.lastInit = data.name
   }
 
-  onEventInit(data) {
+  _on$init(data) {
     this.init = true
+  }
+
+  _init$up(v) {
+    this.finalInit = true
   }
 }
 
@@ -51,6 +56,7 @@ test('atom events', (t) => {
 
   u.buses.a.dispatchEvent('HELLO_WORLD', 'a')
   t.ok(u.states.a.init)
+  t.ok(u.states.a.finalInit)
   t.equal(u.states.a.eventState, 'a')
 
   u.buses.b.dispatchEvent('HELLO_WORLD', 'just b')
@@ -60,7 +66,7 @@ test('atom events', (t) => {
   u.bus.dispatchEvent('HELLO_WORLD', '---')
   t.equal(u.states.a.eventState, '---')
 
-  t.plan(7)
+  t.plan(8)
   t.end()
 })
 
@@ -74,11 +80,10 @@ test('atom events proxy silent', (t) => {
     models: { z: model },
     events: {
       HELLO_WORLD(data) {
-        console.log('----', this.states.a.init)
         t.pass(this.states.a.init)
       },
       ATOM_INIT() {
-        console.log('---')
+        t.fail()
       },
     },
   })

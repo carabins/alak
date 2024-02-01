@@ -12,7 +12,6 @@ test('stable model', async (t) => {
   a.core.count.up((z) => {})
   t.match(a.state.count, 1)
   t.match(a.state.mixedCount, 100)
-  console.warn(a.known.values())
 })
 
 test('stable atom', async (t) => {

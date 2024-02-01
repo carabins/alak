@@ -87,16 +87,16 @@ export function from(...fromNucleons: INucleus<any>[]) {
     return weak(mixFn, false)
   }
 
-  function someSafe(mixFn) {
+  function someFinite(mixFn) {
     mixFn.some = true
     return weak(mixFn, true)
   }
 
-  function strong(mixFn, safe) {
+  function strong(mixFn, finite) {
     // let firstRun = true
     let getting = {}
     let rune = false
-    quark._.safe(safe)
+    quark._.finite(finite)
 
     function getterFn(callerUid?) {
       // console.log('getterFn()')
@@ -171,9 +171,9 @@ export function from(...fromNucleons: INucleus<any>[]) {
       const linkedValue = linkedValues[a.uid]
       // console.log("mixer")
 
-      if (!safe || v !== linkedValue) {
+      if (!finite || v !== linkedValue) {
         linkedValues[a.uid] = v
-        if (safe && !isChanged()) {
+        if (finite && !isChanged()) {
           return
         }
         if (rune) {
@@ -198,7 +198,7 @@ export function from(...fromNucleons: INucleus<any>[]) {
   }
 
   return {
-    some: someSafe,
+    some: someFinite,
     weak: (f) => weak(f, true),
     strong: (f) => strong(f, true),
   }

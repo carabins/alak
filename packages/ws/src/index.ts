@@ -29,7 +29,7 @@ export default function WsClient(options: WsClientOptions = {} as WsClientOption
     },
     options,
   )
-  const isConnected = N().safe()
+  const isConnected = N().finite()
 
   const send = N.stateless()
   const error = N.stateless()
