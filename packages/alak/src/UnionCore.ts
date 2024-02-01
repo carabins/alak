@@ -21,7 +21,6 @@ const facadeHandlers = {
     for (const k of fastKey) {
       if (key.endsWith(k)) {
         const atomName = deCapitalize(key).replace(k, '')
-        console.warn('atom', atomName)
         const a = target.atoms[atomName]
         if (a) {
           return a[deCapitalize(k)]
