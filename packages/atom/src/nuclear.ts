@@ -2,7 +2,7 @@
 import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
-import { savedSym, tagSym, statelessSym, mixedSym, finiteSym } from '@alaq/atom/property'
+import { savedSym, tagSym, statelessSym, mixedSym, finiteSym, wrapSym } from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
 
 const nonNucleons = ['constructor']
@@ -15,63 +15,54 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
     core.nucleons[key] = nucleon = N()
 
     if (valence) {
-      let v = valence[key]
+      let maybeValue = valence[key]
       delete valence[key]
-      if (isDefined(v)) {
-        let valueInSym = false
+      if (isDefined(maybeValue)) {
         const defineRune = (mv) => {
           switch (mv?.sym) {
-            case mixedSym:
-              valueInSym = true
-              mv.mix.forEach((v) => {
-                if (v?.paked) {
-                  defineRune(v())
-                } else {
-                  modelValue = v
-                }
-              })
-              return
             case tagSym:
-              valueInSym = true
               tag = mv.tag || true
               break
             case savedSym:
-              valueInSym = true
               mem = true
               break
             case statelessSym:
-              valueInSym = true
               nucleon.stateless()
               break
             case finiteSym:
-              valueInSym = true
               nucleon.finite()
               break
+            case wrapSym:
+              nucleon.setWrapper(mv.wrapper)
+              break
           }
-          if (valueInSym && isDefined(mv.startValue)) {
+          if (isDefined(mv.startValue)) {
             modelValue = mv.startValue
           }
         }
-        if (v.sym) {
-          defineRune(v)
-          if (!valueInSym) {
-            modelValue = v
-          }
-        } else {
-          modelValue = v
+        switch (true) {
+          case maybeValue.mix?.length > 1:
+            maybeValue.mix.forEach((xv) => {
+              switch (true) {
+                case typeof xv == 'function':
+                  defineRune(xv())
+                  break
+                case typeof maybeValue.sym === 'symbol':
+                  defineRune(xv)
+                  break
+                default:
+                  modelValue = xv
+              }
+            })
+            break
+          case typeof maybeValue.sym === 'symbol':
+            defineRune(maybeValue)
+            break
+          default:
+            modelValue = maybeValue
         }
-        // if (isDefined(mv.startValue))
-        //   modelValue = mv.startValue
       }
-
-      // isDefined(modelValue) && defineRune(modelValue)
     }
-
-    // if (typeof core.saved === 'boolean') {
-    //   mem = core.saved
-    // } else {
-    //   mem = core.saved && core.saved.indexOf(key) !== -1
-    // }
 
     switch (core.nucleusStrategy) {
       case 'finite':
