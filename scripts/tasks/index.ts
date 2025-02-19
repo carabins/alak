@@ -28,7 +28,7 @@ export const buildTask = {
   // pipeline: [ compile ],
 }
 export const xTask = {
-  pipeline: [upver, syncDeps, browser, compile, publish],
+  pipeline: [upver, syncDeps, browser, compile],
 }
 
 export function getTaskChoices(affectedStr) {

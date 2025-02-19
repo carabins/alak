@@ -4,13 +4,14 @@ import { storage } from './storage'
 import N from '@alaq/nucleus/index'
 import { savedSym, tagSym, statelessSym, mixedSym, finiteSym, wrapSym } from '@alaq/atom/property'
 import isDefined from '@alaq/rune/isDefined'
+import { coreAtom } from '@alaq/atom/index'
 
 const nonNucleons = ['constructor']
 export default function (key, valence, core: IDeepAtomCore<any>) {
   let nucleon: INucleus<any> = core.nucleons[key]
   if (!nucleon && !nonNucleons.includes(key)) {
     const id = core.name ? `${core.name}.${key}` : key
-    let modelValue, metaValue, mem, tag
+    let modelValue, metaValue, mem
     mem = core.saved
     core.nucleons[key] = nucleon = N()
 
@@ -21,7 +22,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
         const defineRune = (mv) => {
           switch (mv?.sym) {
             case tagSym:
-              tag = mv.tag || true
+              nucleon.addMeta('tag', mv.tag)
               break
             case savedSym:
               mem = true
@@ -47,7 +48,7 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
                 case typeof xv == 'function':
                   defineRune(xv())
                   break
-                case typeof maybeValue.sym === 'symbol':
+                case typeof xv.sym === 'symbol':
                   defineRune(xv)
                   break
                 default:
@@ -89,18 +90,23 @@ export default function (key, valence, core: IDeepAtomCore<any>) {
       }
     }
 
-    if (core.emitChanges) {
-      nucleon.up((value) => {
-        core.quarkBus.dispatchEvent('NUCLEUS_CHANGE', {
-          key,
-          value,
-          atomId: core.name,
-          n: nucleon,
-        })
-      })
+    if (core.metaMap) {
+      const tags = core.metaMap[key]
+      tags?.forEach(nucleon.addMeta)
     }
-
-    core.quarkBus.dispatchEvent('NUCLEUS_INIT', { tag, nucleus: nucleon })
+    if (!nucleon.hasMeta('no_bus')) {
+      if (core.emitChanges) {
+        nucleon.up((value) => {
+          core.quarkBus.dispatchEvent('NUCLEUS_CHANGE', {
+            key,
+            value,
+            atomId: core.name,
+            n: nucleon,
+          })
+        })
+      }
+      core.quarkBus.dispatchEvent('NUCLEUS_INIT', nucleon)
+    }
   }
   return nucleon
 }

@@ -15,6 +15,7 @@ interface INucleus<T> {
    * @param value устанавливаемое значние
    */
   (value?: T): T
+
   (value?: T, ...auxiliaryValues): void
 
   /**
@@ -211,9 +212,9 @@ interface INucleus<T> {
    */
   resend(): INucleus<T>
 
-  /** Вызвать всех слушателей
+  /** Повторно применить функцию обёртку к текущему значению
    */
-  emit(): INucleus<T>
+  mutate(mutator: (v: T) => T): INucleus<T>
 
   /** Установить идентификатор
    * @param id - идентификатор

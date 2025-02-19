@@ -29,7 +29,7 @@ async function start() {
     case 'up':
       selectedTask = getTaskChoices(affectedStr)[0].value
     case 'x':
-      return await startTask(xTask, [projects['alak'], projects['vue']])
+      return await startTask(xTask, [projects['alak'], projects['atom']])
   }
   if (!selectedTask) {
     selectedTask = await select({

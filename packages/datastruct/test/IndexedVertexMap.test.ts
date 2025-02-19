@@ -1,5 +1,5 @@
 import { test } from 'tap'
-import { IndexedVertexMap } from '../src/index'
+import IndexedVertexMap from '../src/IndexedVertexMap'
 
 test('IndexedVertexMap', (t) => {
   const ivm = IndexedVertexMap()

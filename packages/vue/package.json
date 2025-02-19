@@ -1,14 +1,14 @@
 {
-    "name": "@alaq/vue",
-    "version": "5.0.0-up.46",
-    "description": "vue3 extension for alak atoms",
-    "module": "lib/es.js",
-    "browser": "lib/umd.js",
-    "peerDependencies": {
-        "vue": "^3.2.25"
-    },
-    "typings": "index.d.ts",
-    "main": "index.js",
-    "unpkg": "lib/es.js",
-    "license": "TVR"
+  "name": "@alaq/vue",
+  "version": "5.0.0-up.46",
+  "description": "vue3 extension for alak atoms",
+  "module": "lib/es.js",
+  "browser": "lib/umd.js",
+  "peerDependencies": {
+    "vue": "latest"
+  },
+  "typings": "index.d.ts",
+  "main": "index.js",
+  "unpkg": "lib/es.js",
+  "license": "TVR"
 }

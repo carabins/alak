@@ -73,6 +73,12 @@ export const handlers: any = {
     notifyListeners(this)
     return this._
   },
+
+  mutate(mutator) {
+    this.value = mutator(this.value)
+    notifyListeners(this)
+    return this._
+  },
   next(f) {
     this.listeners.add(f)
     return this._
