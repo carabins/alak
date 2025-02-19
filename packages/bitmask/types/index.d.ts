@@ -85,6 +85,7 @@ type FlagListener = {
 // }
 
 interface IBitInstance<F extends ReadonlyArray<string>, G extends FlagGroupKeys<F>, C> {
+  source: BitInstanceConfig<F, G, C>
   state: Record<keyof RoArrayToRecord<F> | keyof G | keyof C, boolean>
   flags: BiTFlags<RoArrayToRecord<F>, CoreBitFlag & FlagListener> &
     BiTFlags<G, CoreBitFlag & FlagListener> &
