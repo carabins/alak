@@ -43,6 +43,7 @@ export async function runTsc(): Promise<typeof state> {
       module: ModuleKind.NodeNext,
       moduleResolution: ModuleResolutionKind.NodeNext,
       target: ScriptTarget.ESNext,
+      skipLibCheck: true,
       baseUrl: '.',
       paths: tsconfig.compilerOptions.paths,
     }
@@ -60,7 +61,6 @@ export async function runTsc(): Promise<typeof state> {
         content,
       })
     }
-
     const program = createProgram(state.sources.all, tscOptions, host)
     const emitResult = program.emit()
     let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)

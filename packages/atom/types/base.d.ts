@@ -51,6 +51,7 @@ interface IAtom<T> {
   core: IAtomCore<Instance<T>>
   bus: IQuarkBus<any, any>
   known: IAtomKnown<T>
+
   decay(): void
 }
 
@@ -63,6 +64,7 @@ type IAtomOptions<Model> = {
   thisExtension?: any
   constructorArgs?: any[]
   bus?: IQuarkBus<any, any>
+  metaMap?: Record<string, string[]>
 }
 type IDeepAtomCore<T> = IAtomOptions<T> & {
   proxy?: any
