@@ -18,7 +18,7 @@ function getBalseState(v: IBitWise, flags, state = {}) {
       affected[flagName] = nv
     }
   })
-  return { state: newState, affected }
+  return {state: newState, affected}
 }
 
 export default function BitInstance<
@@ -37,12 +37,12 @@ export default function BitInstance<
   })
   const groupAffectEdges = IndexedVertexMap<string, string>()
   config.groups &&
-    Object.keys(config.groups).forEach((flagName) => {
-      all[flagName] = bitFlags.values[flagName]
-      config.groups[flagName].forEach((baseFlagName) => {
-        groupAffectEdges.push(baseFlagName, flagName)
-      })
+  Object.keys(config.groups).forEach((flagName) => {
+    all[flagName] = bitFlags.values[flagName]
+    config.groups[flagName].forEach((baseFlagName) => {
+      groupAffectEdges.push(baseFlagName, flagName)
     })
+  })
   const combinationsAffectEdges = IndexedVertexMap<string, string>()
   if (haveCombinations) {
     Object.keys(config.combinations).forEach((cName) => {
@@ -82,13 +82,14 @@ export default function BitInstance<
     removeValueUpdate: (f) => (v) => flagListeners.remove(f, v),
   }
   const proxyFlagsHandler = {
-    get({ flag }, key) {
+    get({flag}, key) {
       return proxyFlagsActions[key](flag)
     },
   }
 
   const proxyFlags = {}
   const bi = {
+    source: config,
     state: {},
     bitwise: value,
     flagValues: {
@@ -115,7 +116,7 @@ export default function BitInstance<
         get(o, flag: any) {
           let v = proxyFlags[flag]
           if (!v) {
-            v = proxyFlags[flag] = new Proxy({ flag }, proxyFlagsHandler)
+            v = proxyFlags[flag] = new Proxy({flag}, proxyFlagsHandler)
           }
           return v
         },
