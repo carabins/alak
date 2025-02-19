@@ -48,7 +48,7 @@ export async function browser(project: Project) {
           skipDefaultLibCheck: true,
           declaration: false,
           exclude: [path.resolve(project.dir, 'test')],
-          outDir: esDir,
+          outDir: outDir,
         }),
         terser(),
       ],
