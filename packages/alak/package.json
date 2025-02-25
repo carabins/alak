@@ -17,7 +17,8 @@
     ],
     "dependencies": {
         "@alaq/nucleus": "5.0.0-up.25",
-        "@alaq/atom": "5.0.0-up.31"
+        "@alaq/atom": "5.0.0-up.31",
+        "@alaq/rune": "^0.0.8"
     },
     "license": "TVR"
 }
