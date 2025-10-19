@@ -1,10 +1,27 @@
 {
-  "name": "@alaq/rune",
-  "version": "0.0.8",
-  "author": "Gleb Panteleev",
-  "license": "TVR",
-  "browser": "lib/umd.js",
-  "typings": "index.d.ts",
-  "main": "index.js",
-  "unpkg": "lib/es.js"
+    "name": "@alaq/rune",
+    "version": "0.0.12",
+    "author": "Gleb Panteleev",
+    "license": "TVR",
+    "typings": "index.d.ts",
+    "main": "index.js",
+    "unpkg": "dist/rune.global.js",
+    "module": "index.mjs",
+    "types": "index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js",
+            "default": "./index.js"
+        },
+        "./*": "./*"
+    },
+    "buildOptions": {
+        "name": "rune",
+        "formats": [
+            "global"
+        ]
+    }
 }

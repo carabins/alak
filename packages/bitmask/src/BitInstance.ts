@@ -35,7 +35,7 @@ export default function BitInstance<
   config.flags.forEach((flagName) => {
     base[flagName] = all[flagName] = bitFlags.values[flagName]
   })
-  const groupAffectEdges = IndexedVertexMap<string, string>()
+  const groupAffectEdges = IndexedVertexMap()
   config.groups &&
   Object.keys(config.groups).forEach((flagName) => {
     all[flagName] = bitFlags.values[flagName]
@@ -43,7 +43,7 @@ export default function BitInstance<
       groupAffectEdges.push(baseFlagName, flagName)
     })
   })
-  const combinationsAffectEdges = IndexedVertexMap<string, string>()
+  const combinationsAffectEdges = IndexedVertexMap()
   if (haveCombinations) {
     Object.keys(config.combinations).forEach((cName) => {
       const cOps = config.combinations[cName]
@@ -53,7 +53,7 @@ export default function BitInstance<
     })
   }
 
-  const flagListeners = IndexedVertexMap<string, EventListener>()
+  const flagListeners = IndexedVertexMap()
   let valueListeners = [] as EventListener[]
 
   const proxyFlagsActions = {

@@ -1,11 +1,10 @@
 {
     "name": "alak",
-    "version": "5.0.0-up.57",
+    "version": "5.0.64",
     "description": "Alak Last Atom",
     "typings": "index.d.ts",
     "main": "index.js",
-    "unpkg": "lib/es.js",
-    "browser": "lib/umd.js",
+    "unpkg": "dist/alak.global.js",
     "keywords": [
         "alak",
         "reactive",
@@ -16,9 +15,26 @@
         "flow"
     ],
     "dependencies": {
-        "@alaq/nucleus": "5.0.0-up.25",
-        "@alaq/atom": "5.0.0-up.31",
-        "@alaq/rune": "^0.0.8"
+        "@alaq/nucleus": "5.0.30",
+        "@alaq/atom": "5.0.37",
+        "@alaq/rune": "0.0.12"
     },
-    "license": "TVR"
+    "license": "TVR",
+    "module": "index.mjs",
+    "types": "index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js"
+        },
+        "./*": "./*"
+    },
+    "buildOptions": {
+        "name": "alak",
+        "formats": [
+            "global"
+        ]
+    }
 }

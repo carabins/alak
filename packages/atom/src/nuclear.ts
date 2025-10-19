@@ -9,7 +9,7 @@ import { coreAtom } from '@alaq/atom/index'
 const nonNucleons = ['constructor']
 export default function (key, valence, core: IDeepAtomCore<any>) {
   let nucleon: INucleus<any> = core.nucleons[key]
-  if (!nucleon && !nonNucleons.includes(key)) {
+  if (!nucleon && !nonNucleons.includes(key) && typeof key == 'string') {
     const id = core.name ? `${core.name}.${key}` : key
     let modelValue, metaValue, mem
     mem = core.saved

@@ -20,7 +20,7 @@ export default function <Model, Eternal>(atomOptions: IAtomOptions<Model>) {
   const known = {
     values() {
       const o = {} as PureModel<Instance<Model>>
-      known.keys.forEach((k) => {
+      known.keys?.forEach((k) => {
         o[k] = electrons.state[k]
       })
       return o

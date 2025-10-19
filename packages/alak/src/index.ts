@@ -1,11 +1,11 @@
-import { ActiveUnions } from 'alak/namespaces'
+import type { ActiveUnions } from './namespaces'
 
 export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
 export { nucleonExtensions } from '@alaq/nucleus/create'
 export { Atom, savedAtom } from '@alaq/atom/index'
 export { saved, stateless, tag, mixed } from '@alaq/atom/property'
 
-export { UnionNamespaces } from 'alak/namespaces'
+export type { UnionNamespaces } from './namespaces'
 
 export { UnionConstructor } from 'alak/UnionConstructor'
 export { GetUnionCore } from 'alak/UnionCore'

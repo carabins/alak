@@ -1,5 +1,6 @@
 import { QuarkEventBus } from '@alaq/nucleus/bus'
 import { defaultNamespace, getNamespaces, UnionNamespaces } from 'alak/namespaces'
+import { unionAtom } from './unionAtom'
 
 const atomLinked = {
   buses: 'bus',
@@ -8,20 +9,34 @@ const atomLinked = {
   states: 'state',
 }
 
-const linkedProxy = {}
-const linkedProxyHandler = {
+
+const linkedFacadeHandler = {
   get(o, key) {
+    // let q = o.atoms[key]
+    // if (q && q.atom) {
+    //   console.log("::::::::::::~!!!!!", typeof q)
+    //   console.log("::::::::::::~!!!!!", o.key)
+    //   let a = q.atom[o.key]
+    //   console.log("::::::::::::~~~~~~~", a)
+    //   if (a) {
+    //     return a
+    //   } else {
+    //     console.error('::: linkedProxyHandler', o.key)
+    //   }
+    // }
+    // console.error(`ошибка вызова свойства [${o.key}] у несушествующего атома [${key}], доступные атомы ${Object.keys(o.atoms)}`)
+
     return o.atoms[key][o.key]
   },
 }
 const deCapitalize = (key) => key[0].toLowerCase() + key.substring(1)
 const fastKey = ['Core', 'State', 'Atom', 'Bus']
 const facadeHandlers = {
-  get(target: IUnionCoreService<any, any, any>, key: string): any {
+  get(services: any, key: string): any {
     for (const k of fastKey) {
       if (key.endsWith(k)) {
         const atomName = deCapitalize(key).replace(k, '')
-        const a = target.atoms[atomName]
+        const a = services.atoms[atomName]
         if (a) {
           if (k === 'Atom') {
             return a
@@ -31,19 +46,19 @@ const facadeHandlers = {
       }
     }
     if (atomLinked[key]) {
-      if (!linkedProxy[key]) {
-        linkedProxy[key] = new Proxy(
-          { atoms: target.atoms, key: atomLinked[key] },
-          linkedProxyHandler,
+      if (!services.activeFacades[key]) {
+        services.activeFacades[key] = new Proxy(
+          { atoms: services.atoms, key: atomLinked[key] },
+          linkedFacadeHandler,
         )
       }
-      return linkedProxy[key]
+      return services.activeFacades[key]
     }
-    return target[key]
+    return services[key]
   },
 }
 
-export function GetUnionCore<N extends keyof UnionNamespaces>(namespace: N): UnionNamespaces[N] {
+export function GetUnionCore<N extends keyof UnionNamespaces>(namespace?: N): UnionNamespaces[N] {
   const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
 
@@ -54,13 +69,19 @@ export function GetUnionCore<N extends keyof UnionNamespaces>(namespace: N): Uni
   const services = {
     atoms: {},
     bus,
+    ns,
+    activeFacades:{}
   }
   const uc = {
     namespace: ns,
     services,
     facade: new Proxy(services, facadeHandlers),
     bus,
+    addAtom<M>(constructor: IAlakConstructor<M, any, N>): IAtom<M> {
+      return (services.atoms[constructor.name] = unionAtom(constructor))
+    },
   } as any
+
   namespaces[ns] = uc
   return namespaces[ns]
 }

@@ -4,12 +4,16 @@
  * @packageDocumentation
  */
 
-import { reactive, Ref, ref, watch } from 'vue'
-import { UnwrapNestedRefs } from '@vue/reactivity'
+
+const Vue = require('vue')
+const { ref, reactive, watch } = Vue
+import {UnwrapNestedRefs} from '@vue/reactivity'
+
+export {vueController} from "./vueController";
 
 const vueKey = 'vueKey'
 
-export function vueNucleon<T = any>(n: INucleus<T>): Ref<T> {
+export function vueNucleon<T = any>(n: INucleus<T>): any {
   if (n.hasMeta(vueKey)) {
     return n.getMeta(vueKey)
   } else {
@@ -62,23 +66,28 @@ export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<M, any>) {
   return proxyReactiveSyncedWithAtom(vueReactive, atom.core) as UnwrapNestedRefs<ClassToKV<M>>
 }
 
+const skip = {
+  __v_raw: true
+}
 function proxyReactiveSyncedWithAtom(vueReactive, atomCore) {
-  const watched = {}
+
   return new Proxy(vueReactive, {
     get(vueReactive, k) {
-      if (!watched[k]) {
-        watch(
-          () => vueReactive[k],
-          (v) => {
-            if (vueReactive[k] !== atomCore[k].value) {
-              atomCore[k](v)
-            }
-          },
-        )
+      if (!skip[k] && typeof k === 'string') {
         atomCore[k]
-        watched[k] = true
       }
+      console.log("get", k, vueReactive[k])
       return vueReactive[k]
     },
+    set(target: any, k: string | symbol, newValue: any, receiver: any): boolean {
+      target[k] = newValue
+      console.log("set", k, typeof k, newValue)
+      if (k == 'string') {
+        atomCore[k](newValue)
+        console.log("+", atomCore[k].name)
+        atomCore[k](newValue)
+      }
+      return true
+    }
   })
 }

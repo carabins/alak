@@ -1,10 +1,9 @@
 {
     "name": "@alaq/nucleus",
-    "version": "5.0.0-up.25",
+    "version": "5.0.30",
     "description": "Alak Nucleus part of proactive universe",
     "main": "index.js",
     "types": "index.d.ts",
-    "browser": "lib/umd.js",
     "keywords": [
         "alak",
         "streams",
@@ -16,5 +15,22 @@
     "license": "TVR",
     "repository": "https://github.com/carabins/alak",
     "typings": "index.d.ts",
-    "unpkg": "lib/es.js"
+    "unpkg": "dist/nucleus.global.js",
+    "module": "index.mjs",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js",
+            "default": "./index.js"
+        },
+        "./*": "./*"
+    },
+    "buildOptions": {
+        "name": "nucleus",
+        "formats": [
+            "global"
+        ]
+    }
 }

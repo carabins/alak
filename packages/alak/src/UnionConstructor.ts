@@ -14,6 +14,7 @@ export function UnionConstructor<Models, Factory, Services, Events extends Event
   const addAtom = (modelName: string, a: IUnionAtom<any, any> | IAlakAtomFactory<any, any>) => {
     uc.services.atoms[modelName] = a as any
   }
+
   synthesis.models &&
     Object.keys(synthesis.models).forEach((modelName) => {
       addAtom(
@@ -47,5 +48,5 @@ export function UnionConstructor<Models, Factory, Services, Events extends Event
     Object.keys(synthesis.services).forEach((serviceName) => {
       uc.services[serviceName] = synthesis.services[serviceName]
     })
-  return uc as IUnionCore<Models, Factory, Services, EventsData<Events>>
+  return uc as IUnionCore<Models, Factory, Services, EventsData<Events>> & IUnionFacade<Models, Factory, Events>
 }
