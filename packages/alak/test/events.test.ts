@@ -3,23 +3,23 @@ import { test } from 'tap'
 
 class model extends UnionModel<any> {
   eventState: string
-  init: boolean = false
+  isInit: boolean = false
   lastInit: string
   finalInit: boolean
 
-  _on$helloWorld(data) {
+  _on_helloWorld(data) {
     this.eventState = data
   }
 
-  _on$AtomInit(data) {
+  _on_AtomInit(data) {
     this.lastInit = data.name
   }
 
-  _on$init(data) {
-    this.init = true
+  _on_init(data) {
+    this.isInit = true
   }
 
-  _init$up(v) {
+  _isInit_up(v) {
     this.finalInit = true
   }
 }
@@ -55,7 +55,7 @@ test('atom events', (t) => {
   })
 
   u.buses.a.dispatchEvent('HELLO_WORLD', 'a')
-  t.ok(u.states.a.init)
+  t.ok(u.states.a.isInit)
   t.ok(u.states.a.finalInit)
   t.equal(u.states.a.eventState, 'a')
 

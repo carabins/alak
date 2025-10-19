@@ -11,6 +11,7 @@ interface IUnionCoreService<Models, Factory, Events extends object> {
   readonly atoms: { [K in keyof Models]: IUnionAtom<Models[K], Events> }
   readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
   readonly _injector: any
+  readonly ns: string
 }
 
 type IFAInjector<O, N extends string> = {
@@ -32,9 +33,10 @@ type IFUnionInjector<Models, Factory, Events extends object> = {
 }
 
 type IUnionCore<Models, Factory, Services, Events extends object> = {
-  readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
+  readonly addAtom<M>(c:IAlakConstructor<M, any, N>):IAtom<M>
   readonly facade: IUnionFacade<Models, Factory, Events> & Services
   readonly services: IUnionCoreService<Models, Factory, Events>
+  readonly bus: IQuarkBus<IAlakCoreEvents & Events, Events>
 }
 
 // type IUnionDevCore = IUnionCore<any, any, any, any>

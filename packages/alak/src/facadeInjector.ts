@@ -1,4 +1,5 @@
-import { ActiveUnions, defaultNamespace, getNamespaces, UnionNamespaces } from 'alak/namespaces'
+import type { ActiveUnions, UnionNamespaces } from './namespaces'
+import { defaultNamespace, getNamespaces } from './namespaces'
 export function injectFacade<N extends keyof UnionNamespaces>(
   namespace?: N,
 ): UnionNamespaces[N]['facade'] {

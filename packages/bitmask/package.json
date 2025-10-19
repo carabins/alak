@@ -4,7 +4,7 @@
     "description": "Alak bitmask",
     "main": "index.js",
     "types": "index.d.ts",
-    "browser": "lib/umd.js",
+
     "keywords": [
         "alak",
         "streams",

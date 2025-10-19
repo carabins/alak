@@ -19,7 +19,7 @@ async function start() {
   let selectedTask
   switch (process.argv[2]) {
     case 'build':
-      return await startTask(buildTask, [projects['vue']])
+      return await startTask(buildTask, [projects['vue'], projects['alak'], projects['nucleus'], projects['atom']])
     case 'cover':
       return coverageTest()
     case 'test':

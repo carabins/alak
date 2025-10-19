@@ -15,9 +15,9 @@ class FactoryClass {
 class FactoryPreInitClass {
   graph = mixed(saved, tag.sync)
 
-  _on$init({ id }) {}
+  _on_init({ id }) {}
 
-  _graph$once(v) {}
+  _on_once(v) {}
 }
 
 const u = UnionConstructor({
@@ -73,7 +73,7 @@ test('atom change events', (t) => {
 })
 
 test('factory events', (t) => {
-  t.plan(2)
+  t.plan(1)
   u.bus.addEventListener('NUCLEUS_INIT', (n) => {
     t.pass()
   })

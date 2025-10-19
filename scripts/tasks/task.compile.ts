@@ -69,23 +69,82 @@ export async function compile(project: Project) {
   }
 
   const srcFiles = sources.projects[project.dir]
-  let totalSize = 0
+  let totalSizeCjs = 0
+  let totalSizeEsm = 0
+
+  // Helper function to fix ESM imports - convert path aliases to relative paths
+  const fixEsmImports = (code: string, packageDir: string, packageName: string): string => {
+    // 1. Replace internal package aliases (e.g., 'alak/namespaces' -> './namespaces.mjs')
+    code = code.replace(
+      new RegExp(`(['"])${packageDir}/([^'"]+)(['"])`, 'g'),
+      "$1./$2.mjs$3"
+    )
+
+    // 2. Replace @alaq self-imports with relative paths (e.g., '@alaq/nucleus/bus' -> './bus.mjs' in nucleus package)
+    const selfImportRegex = new RegExp(`(['"])${packageName}/([^'"]+)(['"])`, 'g')
+    code = code.replace(
+      selfImportRegex,
+      "$1./$2.mjs$3"
+    )
+
+    // 3. Replace other @alaq package imports to include .mjs extension
+    code = code.replace(
+      /(['"])(@alaq\/[^'"]+)(['"])/g,
+      (match, quote1, importPath, quote2) => {
+        // Only add .mjs if there's no extension already
+        if (!importPath.endsWith('.mjs') && !importPath.endsWith('.js')) {
+          return `${quote1}${importPath}.mjs${quote2}`
+        }
+        return match
+      }
+    )
+
+    // 4. Add .mjs to relative imports without extension (e.g., './unionAtom' -> './unionAtom.mjs')
+    code = code.replace(
+      /(['"])(\.\.?\/[^'"]+)(['"])/g,
+      (match, quote1, importPath, quote2) => {
+        // Skip if already has extension
+        if (importPath.endsWith('.mjs') || importPath.endsWith('.js') || importPath.endsWith('.json')) {
+          return match
+        }
+        return `${quote1}${importPath}.mjs${quote2}`
+      }
+    )
+
+    return code
+  }
+
   Object.keys(srcFiles).forEach((srcFile) => {
     const src = srcFiles[srcFile]
     if (!src.isDeclaration) {
-      const Z = transformSync(readFileSync(srcFile).toString(), src.name, {
+      const sourceCode = readFileSync(srcFile).toString()
+
+      // Generate CommonJS version (.js)
+      const cjs = transformSync(sourceCode, src.name, {
         module: 'commonjs',
         sourcemap: false,
-        // paths: tsconfig.compilerOptions.paths
       })
-      // console.log(srcFile, Z.code.length)
-      totalSize += Z.code.length
-      writeFileSync(path.join(project.artPatch, src.name + '.js'), Z.code)
+      totalSizeCjs += cjs.code.length
+      writeFileSync(path.join(project.artPatch, src.name + '.js'), cjs.code)
+
+      // Generate ESM version (.mjs)
+      const esm = transformSync(sourceCode, src.name, {
+        module: 'es6',
+        sourcemap: false,
+      })
+
+      // Fix ESM imports to use relative paths with .mjs extension
+      const esmCodeFixed = fixEsmImports(esm.code, project.dir, project.packageJson.name as string)
+
+      totalSizeEsm += esmCodeFixed.length
+      writeFileSync(path.join(project.artPatch, src.name + '.mjs'), esmCodeFixed)
     }
   })
-  log('unminified source size', (totalSize / 1024).toFixed(2), 'kb')
+
+  log('unminified CJS size:', (totalSizeCjs / 1024).toFixed(2), 'kb')
+  log('unminified ESM size:', (totalSizeEsm / 1024).toFixed(2), 'kb')
   project.packageJson.license = 'TVR'
   fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
-  project.savePackageJsonTo.art()
+  //project.savePackageJsonTo.art()
   log('complete')
 }

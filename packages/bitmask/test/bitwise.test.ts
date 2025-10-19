@@ -27,7 +27,7 @@ test('operations', (t) => {
   t.ok(MAIN.isNot(flags.FOUR))
   MAIN.removeValueUpdate(f)
   MAIN.set(0)
-  // t.ok(MAIN.isNot(flags.ONE))
+  // t.ok(MAIN.isNot(flags.ONE)) base.test.ts
 
   t.plan(7)
   t.end()

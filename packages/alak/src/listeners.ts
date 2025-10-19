@@ -1,11 +1,11 @@
-const upStart = '$'
-// const upModuleStart = '$'
-const patternOnEvent = 'on$'
+// const upEnds = new Set(['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'upDown'])
+const pattern4Atom = '_$'
+const pattern4Event = "_on_"
 
-const upEnds = new Set(['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'upDown'])
+// const upEnds = new Set(['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'upDown'])
 
 const subscribeAtom = (atom, nucleusName, actionName, listenerType) => {
-  if (upEnds.has(listenerType)) {
+  if (listenerType) {
     atom.core[nucleusName][listenerType](atom.actions[actionName])
   } else {
     atom.core[nucleusName].up(atom.actions[actionName])
@@ -13,26 +13,31 @@ const subscribeAtom = (atom, nucleusName, actionName, listenerType) => {
 }
 export default function (q: QuantumAtom) {
   const eventListeners = {}
+  let _, moduleName, nucleusName, listenerType
   Object.keys(q.atom.actions).forEach((actionName) => {
-    if (actionName.startsWith('_')) {
-      const processName = actionName.slice(1)
-      let _, module, nucleusName, listenerType
-      switch (true) {
-        case processName.startsWith(patternOnEvent):
-          const eventName = camelToSnakeCase(processName.replace(patternOnEvent, '')).toUpperCase()
+    if (!actionName.startsWith('_')) {
+      return
+    }
+    const parts = actionName.split("_")
+    parts.shift()
+    if (parts.length < 2) {
+      return;
+    }
 
-          eventListeners[eventName] = actionName
-          break
-        case processName.startsWith(upStart):
-          ;[_, module, nucleusName, listenerType] = processName.split(upStart)
-          const atom = q.union.services.atoms[module]
-          atom && subscribeAtom(atom, nucleusName, actionName, listenerType)
-          break
-        case processName.includes(upStart):
-          ;[nucleusName, listenerType] = processName.split(upStart)
-          subscribeAtom(q.atom, nucleusName, actionName, listenerType)
-          break
-      }
+    switch (true) {
+      case actionName.startsWith(pattern4Event):
+        const eventName = camelToSnakeCase(actionName.replace(pattern4Event, '')).toUpperCase()
+        eventListeners[eventName] = actionName
+        break
+      case actionName.startsWith(pattern4Atom):
+        ; [moduleName, nucleusName, listenerType] = parts
+        moduleName = moduleName.replace(pattern4Atom, '')
+        const atom = q.union.services.atoms[moduleName]
+        atom && subscribeAtom(atom, nucleusName, actionName, listenerType)
+      break
+      default:
+        ; [nucleusName, listenerType] = parts
+        subscribeAtom(q.atom, nucleusName, actionName, listenerType)
     }
   })
   return Object.keys(eventListeners).length ? eventListeners : false
