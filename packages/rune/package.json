@@ -1,6 +1,6 @@
 {
     "name": "@alaq/rune",
-    "version": "0.0.12",
+    "version": "0.0.14",
     "author": "Gleb Panteleev",
     "license": "TVR",
     "typings": "index.d.ts",
@@ -13,8 +13,7 @@
         ".": {
             "types": "./index.d.ts",
             "import": "./index.mjs",
-            "require": "./index.js",
-            "default": "./index.js"
+            "require": "./index.js"
         },
         "./*": "./*"
     },

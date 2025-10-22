@@ -1,6 +1,6 @@
 {
     "name": "@alaq/atom",
-    "version": "5.0.37",
+    "version": "5.0.38",
     "main": "index.js",
     "typings": "index.d.ts",
     "unpkg": "dist/atom.global.js",

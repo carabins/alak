@@ -1,5 +1,5 @@
 import nuclear from '@alaq/atom/nuclear'
-import isDefined from '@alaq/rune/isDefined'
+const isDefined = (v) => v !== undefined && v !== null
 
 export const isString = (p) => typeof p === 'string'
 

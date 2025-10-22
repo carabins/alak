@@ -10,6 +10,7 @@ export type { UnionNamespaces } from './namespaces'
 export { UnionConstructor } from 'alak/UnionConstructor'
 export { GetUnionCore } from 'alak/UnionCore'
 export { UnionAtom, UnionAtomFactory } from 'alak/unionAtom'
+// export { extendUnion, createExtendableStore } from 'alak/unionBuilder'
 
 import { storage } from '@alaq/atom/storage'
 
