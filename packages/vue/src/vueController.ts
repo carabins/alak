@@ -5,15 +5,28 @@ import vueAtom, {watchVueAtom} from '.'
 
 type Reactive<T> = typeof Vue.Reactive
 
-export function vueController<T>(c: {
-  namespace?: string
-  name: string
-  model: T
-  sync?: boolean
-}): () => {
-  state: Reactive<PureState<Instance<T>>>
-  core: IAtomCore<Instance<T>>
-} {
+
+interface AlakVueControllerConstructor<T> {
+  namespace?: string;
+  name: string;
+  model: T;
+  sync?: boolean;
+}
+interface AlakVueStateOption<T> {
+  namespace?: string;
+  name: string;
+  model: T;
+  sync?: boolean;
+}
+export interface AlakVueControl<T> {
+  (): {
+    state: PureState<Instance<T>>
+    core: IAtomCore<Instance<T>>
+  }
+}
+
+
+export function vueController<T>(c: AlakVueStateOption<T>): AlakVueControl<T>{
 
   function ctr() {
     const uc = GetUnionCore(c.namespace)
@@ -23,11 +36,10 @@ export function vueController<T>(c: {
       a = uc.services.atoms[c.name]
     }
     return {
-      state: c.sync ? watchVueAtom(a) : vueAtom(a) as Reactive<PureState<Instance<T>>>,
+      state: c.sync ? watchVueAtom(a) : vueAtom(a) as PureState<Instance<T>>,
       core: a.core as IAtomCore<Instance<T>>,
     }
   }
-
   return ctr
 }
 

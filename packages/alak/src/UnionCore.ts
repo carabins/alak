@@ -61,7 +61,6 @@ const facadeHandlers = {
 export function GetUnionCore<N extends keyof UnionNamespaces>(namespace?: N): UnionNamespaces[N] {
   const ns = namespace || defaultNamespace
   const namespaces = getNamespaces()
-
   if (namespaces[ns]) {
     return namespaces[ns]
   }
@@ -73,6 +72,7 @@ export function GetUnionCore<N extends keyof UnionNamespaces>(namespace?: N): Un
     activeFacades:{}
   }
   const uc = {
+    uid:Math.random().toString(3),
     namespace: ns,
     services,
     facade: new Proxy(services, facadeHandlers),

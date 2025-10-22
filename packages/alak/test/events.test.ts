@@ -1,11 +1,18 @@
-import { injectFacade, UnionConstructor, UnionModel } from 'alak/index'
-import { test } from 'tap'
+import {injectFacade, UnionConstructor, UnionModel} from 'alak/index'
+import {test} from 'tap'
 
 class model extends UnionModel<any> {
   eventState: string
   isInit: boolean = false
   lastInit: string
   finalInit: boolean
+
+  betweenOne = 1
+  mirrorOneFromA: number
+
+  _$a_betweenOne_up(v) {
+    this.mirrorOneFromA = v
+  }
 
   _on_helloWorld(data) {
     this.eventState = data
@@ -22,11 +29,12 @@ class model extends UnionModel<any> {
   _isInit_up(v) {
     this.finalInit = true
   }
+
 }
 
 const uc = UnionConstructor({
   namespace: 'eventsTests',
-  models: { a: model, b: model },
+  models: {a: model, b: model},
   events: {} as {
     HELLO_WORLD(s: string): void
   },
@@ -70,14 +78,24 @@ test('atom events', (t) => {
   t.end()
 })
 
+test('beetwen atom events', (t) => {
+  const u = injectFacade('eventsTests')
+  t.equal(u.states.b.mirrorOneFromA, 1)
+  u.cores.a.betweenOne(10)
+  t.equal(u.states.b.mirrorOneFromA, 10)
+  t.plan(2)
+  t.end()
+})
+
+//
 test('atom events proxy silent', (t) => {
   class model {
     one = 1
   }
 
-  const { facade } = UnionConstructor({
+  const {facade} = UnionConstructor({
     namespace: 'eventsTests',
-    models: { z: model },
+    models: {z: model},
     events: {
       HELLO_WORLD(data) {
         t.pass(this.states.a.init)

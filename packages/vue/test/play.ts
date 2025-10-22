@@ -39,9 +39,11 @@ b.core.one(10)
 // const b2 = bc()
 b.state.one = 100
 b.state.two = 2
+console.log("::::", b.core.two.value)
 b.core.two.up(v=>{
   console.log(":::", v)
 })
+
 
 
 
