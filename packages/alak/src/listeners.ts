@@ -13,53 +13,37 @@ const subscribeAtom = (atom, nucleusName, listener, listenerType) => {
 }
 export default function (q: QuantumAtom) {
   const eventListeners = {}
-  let _, moduleName, nucleusName, listenerType
-  Object.keys(q.atom.actions).forEach((actionName) => {
+
+  for (const actionName of Object.keys(q.atom.actions)) {
     if (!actionName.startsWith('_')) {
-      return
+      continue
+    }
+    if (actionName.startsWith(pattern4Event)) {
+      // const eventName = camelToSnakeCase(actionName.replace(pattern4Event, '')).toUpperCase()
+      const eventName = actionName.replace(pattern4Event, '')
+      eventListeners[eventName] = actionName
+      continue
     }
     const parts = actionName.split("_")
     parts.shift()
     if (parts.length < 2) {
-      return;
+      continue;
     }
-
-    switch (true) {
-      case actionName.startsWith(pattern4Event):
-        const eventName = camelToSnakeCase(actionName.replace(pattern4Event, '')).toUpperCase()
-        eventListeners[eventName] = actionName
-        break
-      case actionName.startsWith(pattern4Atom):
-        ; [moduleName, nucleusName, listenerType] = parts
-        moduleName = moduleName.replace('$', '')
-        const atom = q.union.facade.atoms[moduleName]
-        // console.log(":::", q.name, q.union.namespace, q)
-        // console.log("---",  moduleName, nucleusName, atom.core[nucleusName].uid)
-        atom && subscribeAtom(atom, nucleusName, q.atom.actions[actionName], listenerType)
-      break
-      default:
-        ; [nucleusName, listenerType] = parts
-        subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
+    let _, moduleName, nucleusName, listenerType
+    if (actionName.startsWith(pattern4Atom)) {
+      ;[moduleName, nucleusName, listenerType] = parts
+      moduleName = moduleName.replace('$', '')
+      const atom = q.union.facade.atoms[moduleName]
+      // console.log({parts})
+      // console.log({moduleName, nucleusName, actionName})
+      atom && subscribeAtom(atom, nucleusName, q.atom.actions[actionName], listenerType)
+      continue
     }
-  })
+    ;[nucleusName, listenerType] = parts
+    subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
+  }
   return Object.keys(eventListeners).length ? eventListeners : false
 }
-
-// function getNucleusName(str, pattern) {
-//   str = str.replace(pattern, '')
-//   if (str.startsWith('_')) {
-//     str = str.slice(0, -1)
-//   }
-//   return str.replaceAt(0, str[0].toLowerCase())
-// }
-//
-//
-// function getMiddleName(str, rm: string[]) {
-//   rm.forEach((v) => {
-//     str = str.replace(v, '')
-//   })
-//   return str.substring(0, 0) + str[0].toLowerCase() + str.substring(1)
-// }
 
 function cap(str) {
   return str.substring(0, 0) + str[0].toUpperCase() + str.substring(1)

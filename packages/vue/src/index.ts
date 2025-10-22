@@ -61,15 +61,15 @@ export default function vueAtom<M>(
   return r
 }
 
-export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<M, any>) {
+export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<M, any>, dedup= true) {
   const vueReactive = vueAtom(atom)
-  return proxyReactiveSyncedWithAtom(vueReactive, atom.core) as UnwrapNestedRefs<ClassToKV<M>>
+  return proxyReactiveSyncedWithAtom(vueReactive, atom.core, dedup) as UnwrapNestedRefs<ClassToKV<M>>
 }
 
 const skip = {
   __v_raw: true
 }
-function proxyReactiveSyncedWithAtom(vueReactive, atomCore) {
+function proxyReactiveSyncedWithAtom(vueReactive, atomCore, dedup) {
 
   return new Proxy(vueReactive, {
     get(vueReactive, k) {
@@ -83,8 +83,10 @@ function proxyReactiveSyncedWithAtom(vueReactive, atomCore) {
       // console.log("set", k, typeof k, newValue)
       target[k] = newValue
       if (typeof k == 'string') {
-        atomCore[k](newValue)
-        // console.log("+", atomCore[k].name)
+        const a = atomCore[k]
+        if (dedup && a.value == newValue) {
+          return true
+        }
         atomCore[k](newValue)
       }
       return true
