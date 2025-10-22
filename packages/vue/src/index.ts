@@ -5,8 +5,7 @@
  */
 
 
-const Vue = require('vue')
-const { ref, reactive, watch } = Vue
+import { ref, reactive, watch } from 'vue'
 import {UnwrapNestedRefs} from '@vue/reactivity'
 
 export {vueController} from "./vueController";

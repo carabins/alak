@@ -3,7 +3,9 @@ import { storage } from './storage'
 
 import N from '@alaq/nucleus/index'
 import { savedSym, tagSym, statelessSym, mixedSym, finiteSym, wrapSym } from '@alaq/atom/property'
-import isDefined from '@alaq/rune/isDefined'
+
+export const isDefined = (v) => v !== undefined && v !== null
+
 import { coreAtom } from '@alaq/atom/index'
 
 const nonNucleons = ['constructor']
