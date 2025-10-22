@@ -12,6 +12,14 @@ class LocalListenerModel extends UnionModel<any> {
   nameChanged = false
   lastName = null
 
+  betweenOne = 1
+  betweenTwo = 2
+
+  _$a_betweenOne_up(v) {
+    console.log('+_$a_betweenOne_up',v, this._modelName)
+    this.betweenTwo = v
+  }
+
   // Слушатель для собственного нуклеона count
   _count_next(value) {
     console.log(":::::::", value)
@@ -26,31 +34,24 @@ class LocalListenerModel extends UnionModel<any> {
   }
 }
 
-UnionConstructor({
-  namespace: 'xasd',
-  models: { a: LocalListenerModel },
-})
 
 const uc = UnionConstructor({
-  namespace: 'localTest',
-  models: { test: LocalListenerModel },
-})
-
-UnionConstructor({
-  namespace: 'ddd',
-  models: { a: LocalListenerModel },
+  namespace: 'same',
+  models: {
+    a: LocalListenerModel,
+    b: LocalListenerModel
+  },
 })
 // t.plan(4)
 // Изменяем count
 const {atoms, cores, states} = uc.facade
-cores.test.count(5)
-console.log(states.test.count)
-// t.ok(facade.states.test.countChanged, 'count listener triggered')
-// t.equal(facade.states.test.lastCount, 5, 'count value passed correctly')
-//
-// // Изменяем name
-// facade.atoms.test.core.name('updated')
-// t.ok(facade.states.test.nameChanged, 'name listener triggered')
-// t.equal(facade.states.test.lastName, 'updated', 'name value passed correctly')
 
-console.log(":+++:", {cores})
+cores.a.betweenOne(10)
+cores.a.betweenOne(20)
+console.log(states.b.betweenTwo)
+console.log("a.betweenOne uid", cores.a.betweenOne.uid)
+// console.log("b.betweenOne uid", cores.b.betweenOne.uid)
+// console.log("a.betweenTwo uid", cores.a.betweenTwo.uid)
+console.log("b.betweenTwo uid", cores.b.betweenTwo.uid)
+
+

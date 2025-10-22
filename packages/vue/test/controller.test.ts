@@ -26,6 +26,7 @@ test('vue constructor', (t) => {
     namespace: 'vue_test',
     sync: true
   })()
+
   const b = vueController({
     name: "b", model,
     namespace: 'vue_test',

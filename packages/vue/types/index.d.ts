@@ -1,3 +1,5 @@
+
+
 declare interface ARef<T = any> {
   value: T
 }
@@ -27,3 +29,5 @@ declare module '@alaq/nucleus/' {
     vueWatch: Boolean
   }
 }
+
+

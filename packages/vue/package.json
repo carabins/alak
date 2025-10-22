@@ -1,6 +1,6 @@
 {
     "name": "@alaq/vue",
-    "version": "5.0.52",
+    "version": "5.0.54",
     "description": "vue3 extension for alak atoms",
     "peerDependencies": {
         "vue": "latest"

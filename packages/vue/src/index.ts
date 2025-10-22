@@ -73,18 +73,18 @@ function proxyReactiveSyncedWithAtom(vueReactive, atomCore) {
 
   return new Proxy(vueReactive, {
     get(vueReactive, k) {
+      // console.log("get", k, vueReactive[k])
       if (!skip[k] && typeof k === 'string') {
         atomCore[k]
       }
-      console.log("get", k, vueReactive[k])
       return vueReactive[k]
     },
     set(target: any, k: string | symbol, newValue: any, receiver: any): boolean {
+      // console.log("set", k, typeof k, newValue)
       target[k] = newValue
-      console.log("set", k, typeof k, newValue)
-      if (k == 'string') {
+      if (typeof k == 'string') {
         atomCore[k](newValue)
-        console.log("+", atomCore[k].name)
+        // console.log("+", atomCore[k].name)
         atomCore[k](newValue)
       }
       return true

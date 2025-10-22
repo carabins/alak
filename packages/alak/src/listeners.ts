@@ -4,11 +4,11 @@ const pattern4Event = "_on_"
 
 // const upEnds = new Set(['up', 'upSome', 'upTrue', 'upFalse', 'upSomeFalse', 'upNone', 'upDown'])
 
-const subscribeAtom = (atom, nucleusName, actionName, listenerType) => {
+const subscribeAtom = (atom, nucleusName, listener, listenerType) => {
   if (listenerType) {
-    atom.core[nucleusName][listenerType](atom.actions[actionName])
+    atom.core[nucleusName][listenerType](listener)
   } else {
-    atom.core[nucleusName].up(atom.actions[actionName])
+    atom.core[nucleusName](listener)
   }
 }
 export default function (q: QuantumAtom) {
@@ -31,13 +31,15 @@ export default function (q: QuantumAtom) {
         break
       case actionName.startsWith(pattern4Atom):
         ; [moduleName, nucleusName, listenerType] = parts
-        moduleName = moduleName.replace(pattern4Atom, '')
-        const atom = q.union.services.atoms[moduleName]
-        atom && subscribeAtom(atom, nucleusName, actionName, listenerType)
+        moduleName = moduleName.replace('$', '')
+        const atom = q.union.facade.atoms[moduleName]
+        // console.log(":::", q.name, q.union.namespace, q)
+        // console.log("---",  moduleName, nucleusName, atom.core[nucleusName].uid)
+        atom && subscribeAtom(atom, nucleusName, q.atom.actions[actionName], listenerType)
       break
       default:
         ; [nucleusName, listenerType] = parts
-        subscribeAtom(q.atom, nucleusName, actionName, listenerType)
+        subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
     }
   })
   return Object.keys(eventListeners).length ? eventListeners : false

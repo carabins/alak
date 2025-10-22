@@ -7,7 +7,7 @@
     "start": "node -r @swc-node/register -r tsconfig-paths/register scripts ",
     "next": "node --watch -r @swc-node/register -r tsconfig-paths/register scripts x",
     "dev": "node -r @swc-node/register -r tsconfig-paths/register scripts dev",
-    "test": "tap ./packages/*/test/*.test.ts"
+    "test": "node -r @swc-node/register -r tsconfig-paths/register scripts  test"
   },
   "devDependencies": {
     "@babel/types": "^7.28.4",
