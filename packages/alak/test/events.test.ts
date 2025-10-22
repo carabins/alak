@@ -14,15 +14,15 @@ class model extends UnionModel<any> {
     this.mirrorOneFromA = v
   }
 
-  _on_helloWorld(data) {
+  _on_HELLO_WORLD(data) {
     this.eventState = data
   }
 
-  _on_AtomInit(data) {
+  _on_ATOM_INIT(data) {
     this.lastInit = data.name
   }
 
-  _on_init(data) {
+  _on_INIT(data) {
     this.isInit = true
   }
 
