@@ -62,31 +62,83 @@ export default function vueAtom<M>(
 
 export function watchVueAtom<M>(atom: IAtom<M> | IUnionAtom<M, any>, dedup= true) {
   const vueReactive = vueAtom(atom)
-  return proxyReactiveSyncedWithAtom(vueReactive, atom.core, dedup) as UnwrapNestedRefs<ClassToKV<M>>
+  return proxyReactiveSyncedWithAtom(vueReactive, atom, dedup) as UnwrapNestedRefs<ClassToKV<M>>
 }
 
 const skip = {
-  __v_raw: true
+  __v_raw: true,
+  __v_isRef: true,
+  __v_isReactive: true,
+  __v_skip: true,
 }
-function proxyReactiveSyncedWithAtom(vueReactive, atomCore, dedup) {
+
+function isComplexValue(value: any): boolean {
+  return value !== null && (typeof value === 'object' || Array.isArray(value))
+}
+
+function proxyReactiveSyncedWithAtom(vueReactive, atom, dedup) {
+  const atomCore = atom.core
+  const watchers = new Map()
+
+  // Setup deep watchers for complex values (objects and arrays)
+  const values = atom.known.values()
+  Object.keys(values).forEach((k) => {
+    const currentValue = values[k]
+    if (isComplexValue(currentValue)) {
+      setupDeepWatcher(k, vueReactive, atomCore)
+    }
+  })
+
+  function setupDeepWatcher(key: string, reactive: any, core: any) {
+    // Remove old watcher if exists
+    if (watchers.has(key)) {
+      watchers.get(key)()
+      watchers.delete(key)
+    }
+
+    // Setup new deep watcher
+    const stopWatch = watch(
+      () => reactive[key],
+      (newValue) => {
+        const nucleus = core[key]
+        if (!nucleus) return
+
+        // For complex values, always sync (deep changes won't be caught by simple equality)
+        // For simple values, check dedup
+        if (!dedup || !isComplexValue(newValue) || nucleus.value !== newValue) {
+          nucleus(newValue)
+        }
+      },
+      { deep: true }
+    )
+    watchers.set(key, stopWatch)
+  }
 
   return new Proxy(vueReactive, {
     get(vueReactive, k) {
-      // console.log("get", k, vueReactive[k])
       if (!skip[k] && typeof k === 'string') {
         atomCore[k]
       }
       return vueReactive[k]
     },
     set(target: any, k: string | symbol, newValue: any, receiver: any): boolean {
-      // console.log("set", k, typeof k, newValue)
+      const oldValue = target[k]
       target[k] = newValue
-      if (typeof k == 'string') {
-        const a = atomCore[k]
-        if (dedup && a.value == newValue) {
+
+      if (typeof k === 'string') {
+        const nucleus = atomCore[k]
+        if (!nucleus) return true
+
+        // Setup deep watcher for new complex values
+        if (isComplexValue(newValue) && (!isComplexValue(oldValue) || oldValue !== newValue)) {
+          setupDeepWatcher(k, target, atomCore)
+        }
+
+        // Sync with atom using strict equality for dedup
+        if (dedup && nucleus.value === newValue) {
           return true
         }
-        atomCore[k](newValue)
+        nucleus(newValue)
       }
       return true
     }

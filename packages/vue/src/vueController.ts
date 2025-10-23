@@ -1,9 +1,8 @@
 import {GetUnionCore} from 'alak/UnionCore'
-
-const Vue = require('vue')
+import * as Vue from 'vue'
 import vueAtom, {watchVueAtom} from '.'
 
-type Reactive<T> = typeof Vue.Reactive
+type Reactive<T> = typeof Vue.reactive
 
 
 interface AlakVueControllerConstructor<T> {
