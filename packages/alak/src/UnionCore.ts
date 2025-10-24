@@ -5,27 +5,13 @@ import { unionAtom } from './unionAtom'
 const atomLinked = {
   buses: 'bus',
   cores: 'core',
-  actions: 'action',
+  actions: 'actions',
   states: 'state',
 }
 
 
 const linkedFacadeHandler = {
   get(o, key) {
-    // let q = o.atoms[key]
-    // if (q && q.atom) {
-    //   console.log("::::::::::::~!!!!!", typeof q)
-    //   console.log("::::::::::::~!!!!!", o.key)
-    //   let a = q.atom[o.key]
-    //   console.log("::::::::::::~~~~~~~", a)
-    //   if (a) {
-    //     return a
-    //   } else {
-    //     console.error('::: linkedProxyHandler', o.key)
-    //   }
-    // }
-    // console.error(`ошибка вызова свойства [${o.key}] у несушествующего атома [${key}], доступные атомы ${Object.keys(o.atoms)}`)
-
     return o.atoms[key][o.key]
   },
 }
