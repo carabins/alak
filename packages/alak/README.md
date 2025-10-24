@@ -367,6 +367,103 @@ facade.actions.counter.increment()
 
 Рекомендуется использовать **Q API** для более гибкой и элегантной работы.
 
+### UnionConstructor с деструктуризацией facade
+
+Альтернативный паттерн для централизованной настройки:
+
+```typescript
+import { UnionConstructor, UnionModel } from 'alak'
+
+class SessionModel extends UnionModel {
+  userId = undefined
+  isAuthenticated = false
+
+  init() {
+    this.userId = 'default-user'
+    this.isAuthenticated = true
+  }
+
+  login(userId: string) {
+    this.userId = userId
+    this.isAuthenticated = true
+  }
+}
+
+class ChatModel extends UnionModel {
+  activeRoom = undefined
+
+  init() {
+    this.activeRoom = 'lobby'
+  }
+}
+
+// Создание union с деструктуризацией
+export const uc = UnionConstructor({
+  namespace: 'default',
+  models: {
+    session: SessionModel,
+    chat: ChatModel
+  }
+})
+
+// Деструктурируем facade для удобного доступа
+export const { atoms, cores, states, actions, bus } = uc.facade
+
+// Централизованная инициализация через _on_ATOM_INIT в моделях
+// или вручную после создания union
+```
+
+#### Инициализация через _on_ATOM_INIT
+
+Автоматическая инициализация при создании atom'а:
+
+```typescript
+class AutoInitModel extends UnionModel {
+  isReady = false
+
+  init() {
+    this.isReady = true
+  }
+
+  // Вызывается автоматически при создании atom'а
+  _on_ATOM_INIT() {
+    this.init()
+  }
+}
+```
+
+#### Ручная инициализация
+
+Если нужна инициализация после создания union:
+
+```typescript
+const { atoms } = uc.facade
+
+// Вручную вызываем init() для каждого atom'а
+if (atoms.session.actions.init) {
+  atoms.session.actions.init()
+}
+if (atoms.chat.actions.init) {
+  atoms.chat.actions.init()
+}
+```
+
+#### TypeScript типизация
+
+```typescript
+type NS = typeof uc
+
+declare module 'alak/namespaces' {
+  interface ActiveUnions {
+    default: NS
+  }
+}
+
+// Теперь Q типизирован для этого namespace
+import { Q } from 'alak'
+const session = Q('sessionAtom') // ✅ Типы работают
+```
+
 ## Зависимости
 
 Включает `@alaq/nucleus`, `@alaq/atom`, `@alaq/rune`
