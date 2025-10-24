@@ -17,6 +17,7 @@ import { storage } from '@alaq/atom/storage'
 import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
 
 export { injectFacade } from 'alak/facadeInjector'
+export { Q, QRealm } from 'alak/inject'
 
 export const NStored = (name, value) => {
   const n = N(value)

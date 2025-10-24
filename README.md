@@ -1,101 +1,97 @@
 # Alak
 
-> Модульная реактивная библиотека управления состоянием для JavaScript/TypeScript
+> Реактивная система управления состоянием для JavaScript/TypeScript
 
-Alak — это ecosystem для построения реактивных приложений с акцентом на модульность, типобезопасность и гибкость. Построена на трех основных слоях: **Nucleus** → **Atom** → **Union**.
+Alak — это библиотека управления состоянием с реактивностью, типизацией и dependency injection.
 
-## Быстрый старт
+## Установка
 
 ```bash
 npm install alak
 ```
 
-```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+## Быстрый старт
 
-class CounterModel extends UnionModel<'app'> {
+```typescript
+import { UnionModel, GetUnionCore, Q } from 'alak'
+
+// 1. Создайте модель
+class CounterModel extends UnionModel {
   count = 0
+  countX10 = 0
 
   increment() {
     this.count++
   }
+
+  _count_up(v){
+    this.countX10 = v*10
+  }
+
+  _on_INIT(){
+    this.count = 1
+  }
+  _on_SET_COUNT(v){
+    this.count = v
+  }
 }
 
-const { facade } = UnionConstructor({
-  namespace: 'app',
-  models: { counter: CounterModel }
-})
+// 2. Зарегистрируйте в union
+const union = GetUnionCore('default')
+union.addAtom({ model: CounterModel, name: 'counter' })
 
-// Подписка на изменения
-facade.cores.counter.count.up((value) => {
-  console.log('Count:', value)
-})
+// 3. Используйте через Q
+const core = Q('counterCore')
+const actions = Q('counterActions')
 
-// Обновление состояния
-facade.actions.counter.increment()
+core.countX10.up(value => console.log('Count:', value))
+actions.increment()
+union.bus.dispatchEvent("SET_COUNT", 0)
+core.count(10)
+
+// Count: 10
+// Count: 20
+// Count: 0
+// Count: 100
+```
+
+## Q API — основной способ использования
+
+```typescript
+import { Q } from 'alak'
+
+// Суффиксы для выбора части atom'а
+Q('counter')         // → { atom, core, state, actions }
+Q('counterAtom')     // → полный atom
+Q('counterCore')     // → nucleus'ы для подписок
+Q('counterState')    // → текущие значения
+Q('counterActions')  // → методы модели
 ```
 
 ## Архитектура
 
-Alak состоит из нескольких уровней абстракции:
-
 ```
 ┌─────────────────────────────────────┐
-│          Union (alak)               │  ← DI контейнер + facade
-│  Namespace, Events, Auto-listeners  │
+│          Union (alak)               │  ← DI + namespace
 ├─────────────────────────────────────┤
 │        Atom (@alaq/atom)            │  ← State management
-│   Model → Reactive properties       │
 ├─────────────────────────────────────┤
-│      Nucleus (@alaq/nucleus)        │  ← Core reactive primitive
-│    Observable-like container        │
+│      Nucleus (@alaq/nucleus)        │  ← Реактивный примитив
 └─────────────────────────────────────┘
 ```
 
-## Основные пакеты
-
-### Ядро
-
-| Пакет | Версия | Описание |
-|-------|--------|----------|
-| [`@alaq/nucleus`](./packages/nucleus) | 5.0.30 | Реактивный контейнер (Observable-like) |
-| [`@alaq/atom`](./packages/atom) | 5.0.37 | State management через модели |
-| [`alak`](./packages/alak) | 5.0.66 | Union система с DI и events |
-
-### Интеграции
-
-| Пакет | Версия | Описание |
-|-------|--------|----------|
-| [`@alaq/vue`](./packages/vue) | 5.0.55 | Vue 3 реактивная интеграция |
-| [`@alaq/vite`](./packages/vite) | - | Vite плагин для кодогенерации |
-
-### Утилиты
-
-| Пакет | Описание |
-|-------|----------|
-| [`@alaq/rune`](./packages/rune) | Генерация случайных строк |
-| [`@alaq/ws`](./packages/ws) | WebSocket клиент с автореконнектом |
-| [`@alaq/bitmask`](./packages/bitmask) | Работа с битовыми масками |
-| [`@alaq/datastruct`](./packages/datastruct) | Структуры данных |
-| [`@alaq/svg`](./packages/svg) | SVG утилиты |
-
-## Примеры использования
-
-### Nucleus: Базовая реактивность
+### Nucleus — реактивный контейнер
 
 ```typescript
 import { N } from '@alaq/nucleus'
 
 const count = N(0)
 
-count.up((value) => {
-  console.log('Count:', value)
-})
-
+count.up(value => console.log('Count:', value))
 count(5) // → Count: 5
 ```
 
-### Atom: Модели с состоянием
+### Atom — модель с состоянием
 
 ```typescript
 import { Atom } from '@alaq/atom'
@@ -113,121 +109,67 @@ const todo = Atom({ model: TodoModel })
 
 todo.core.text('Buy milk')
 todo.actions.toggle()
-
 console.log(todo.state.completed) // true
 ```
 
-### Union: DI и организация
+### Union — namespace и DI
 
 ```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+import { UnionModel, GetUnionCore } from 'alak'
 
-class TodosModel extends UnionModel<'app'> {
+class TodosModel extends UnionModel {
   items = []
 
-  // Автоматически подписывается на изменения this.items
+  // Автоподписка на this.items
   _items_up(value) {
-    console.log('Items changed:', value.length)
+    console.log('Items:', value.length)
   }
 }
 
-class FilterModel extends UnionModel<'app'> {
-  current = 'all'
+const union = GetUnionCore('default')
+union.addAtom({ model: TodosModel, name: 'todos' })
+```
 
-  // Подписка на другой atom
-  _$todos_items_up(items) {
-    console.log('Todos updated from filter')
+## TypeScript типизация
+
+```typescript
+declare module 'alak/namespaces' {
+  interface QNamespace {
+    current: 'myApp'
+  }
+
+  interface ActiveUnions {
+    myApp: IUnionCore<{
+      Counter: typeof CounterModel
+    }, {}, {}, {}>
   }
 }
 
-const { facade } = UnionConstructor({
-  namespace: 'app',
-  models: {
-    todos: TodosModel,
-    filter: FilterModel
-  }
-})
+// Теперь Q полностью типизирован
+const core = Q('counterCore') // ✅ Автодополнение работает
 ```
 
-### Vue интеграция
+## Основные пакеты
 
-```vue
-<script setup>
-import { watchVueAtom } from '@alaq/vue'
-import { injectFacade } from 'alak'
-
-const u = injectFacade('app')
-const todos = watchVueAtom(u.atoms.todos)
-</script>
-
-<template>
-  <div v-for="item in todos.items">
-    {{ item.text }}
-  </div>
-</template>
-```
-
-## Ключевые возможности
-
-✅ **Модульность** — используйте только нужные слои
-✅ **TypeScript** — полная типизация из коробки
-✅ **Автоматические подписки** — через naming convention
-✅ **DI система** — через union namespaces
-✅ **Vue интеграция** — двусторонняя синхронизация
-✅ **Persistence** — автосохранение в localStorage
-✅ **Computed values** — реактивные геттеры
-✅ **Event bus** — глобальные и локальные события
+| Пакет | Описание |
+|-------|----------|
+| `alak` | Union система с DI |
+| `@alaq/atom` | State management |
+| `@alaq/nucleus` | Реактивный примитив |
+| `@alaq/vue` | Vue 3 интеграция |
 
 ## Документация
 
-- [Архитектура](./docs/ARCHITECTURE.md)
-- [Инструкции для разработки](./CLAUDE.md)
-
-Документация по каждому пакету доступна в соответствующей папке `packages/*/README.md`
+Подробная документация в `packages/alak/README.md`
 
 ## Разработка
 
 ```bash
-# Установить зависимости
 npm install
-
-# Запустить интерактивную build-систему
-npm start
-
-# Тесты
+npm start  # интерактивная build-система
 npm test
-
-# Форматирование
-npm run format
-```
-
-## Структура монорепо
-
-```
-alak/
-├── packages/
-│   ├── nucleus/      # @alaq/nucleus - реактивный примитив
-│   ├── atom/         # @alaq/atom - state management
-│   ├── alak/         # alak - union система
-│   ├── vue/          # @alaq/vue - Vue 3 интеграция
-│   ├── vite/         # @alaq/vite - Vite плагин
-│   ├── rune/         # @alaq/rune - утилиты
-│   ├── ws/           # @alaq/ws - WebSocket
-│   ├── bitmask/      # @alaq/bitmask - битовые маски
-│   ├── datastruct/   # @alaq/datastruct - структуры данных
-│   └── svg/          # @alaq/svg - SVG утилиты
-└── scripts/          # Кастомная build-система
 ```
 
 ## Лицензия
 
 TVR
-
-## Автор
-
-Gleb Panteleev
-
-## Ссылки
-
-- [GitHub](https://github.com/carabins/alak)
-- [Issues](https://github.com/carabins/alak/issues)

@@ -1,8 +1,8 @@
 # alak
 
-> Система управления состоянием с dependency injection через unions и namespaces
+> Реактивная система управления состоянием с dependency injection через unions и namespaces
 
-Alak — это полнофункциональная библиотека управления состоянием, объединяющая несколько atom'ов в namespace с автоматической регистрацией зависимостей и умным фасадом доступа.
+Alak — это библиотека управления состоянием, объединяющая atom'ы в namespace с автоматической регистрацией зависимостей и элегантным Q API для доступа.
 
 ## Установка
 
@@ -10,21 +10,14 @@ Alak — это полнофункциональная библиотека уп
 npm install alak
 ```
 
-## Основные концепции
+## Быстрый старт
 
-- **Union** — namespace для группировки atom'ов
-- **Facade** — умный Proxy для удобного доступа к atom'ам
-- **Listeners** — автоматическая подписка через naming convention
-- **Events** — глобальная шина событий для union
-
-## Примеры использования
-
-### Пример 1: Простой Union с моделями
+### 1. Создайте модели
 
 ```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+import { UnionModel } from 'alak'
 
-class CounterModel extends UnionModel<'myApp'> {
+class CounterModel extends UnionModel {
   count = 0
 
   increment() {
@@ -36,7 +29,7 @@ class CounterModel extends UnionModel<'myApp'> {
   }
 }
 
-class UserModel extends UnionModel<'myApp'> {
+class UserModel extends UnionModel {
   name = 'Guest'
   isLoggedIn = false
 
@@ -45,37 +38,209 @@ class UserModel extends UnionModel<'myApp'> {
     this.isLoggedIn = true
   }
 }
+```
 
-const { facade } = UnionConstructor({
-  namespace: 'myApp',
-  models: {
-    counter: CounterModel,
-    user: UserModel
-  }
-})
+### 2. Зарегистрируйте atom'ы в union
 
-// Доступ через facade (4 способа!)
-facade.counterState.count        // → 0
-facade.states.counter.count      // → 0
-facade.counterCore.count.value   // → 0
-facade.cores.counter.count.value // → 0
+```typescript
+import { GetUnionCore } from 'alak'
 
-// Вызов actions
-facade.counterCore.increment()   // → count = 1
-facade.actions.counter.increment() // → count = 2
+const union = GetUnionCore('default')
+
+union.addAtom({ model: CounterModel, name: 'counter' })
+union.addAtom({ model: UserModel, name: 'user' })
+```
+
+### 3. Используйте Q для доступа (основной способ)
+
+```typescript
+import { Q } from 'alak'
+
+// Получить atom
+const atom = Q('counterAtom')
+
+// Получить core (nucleus'ы для подписок)
+const core = Q('counterCore')
+core.count.up(v => console.log('Count:', v))
+
+// Получить state (текущие значения)
+const state = Q('counterState')
+console.log(state().count) // 0
+
+// Получить actions (методы)
+const actions = Q('counterActions')
+actions.increment()
+
+// Или получить всё сразу
+const { atom, core, state, actions } = Q('counter')
+```
+
+## Q API — основной способ использования
+
+Q — это типизированный инжектор для доступа к atom'ам из любого места приложения.
+
+### Суффиксы для выбора части atom'а
+
+```typescript
+import { Q } from 'alak'
+
+Q('counter')         // → { atom, core, state, actions }
+Q('counterAtom')     // → IAtom<CounterModel>
+Q('counterCore')     // → IAtomCore (nucleus'ы для подписок)
+Q('counterState')    // → () => State (текущие значения)
+Q('counterActions')  // → Actions (методы модели)
+```
+
+### Работа с Core (подписки и реактивность)
+
+```typescript
+const core = Q('counterCore')
 
 // Подписка на изменения
-facade.cores.counter.count.up((v) => {
-  console.log('Count changed:', v)
+core.count.up(value => {
+  console.log('Count changed:', value)
+})
+
+// Изменение значения (вызовет подписчиков)
+core.count(10)
+
+// Текущее значение
+console.log(core.count.value) // 10
+```
+
+### Работа с State (геттер текущих значений)
+
+```typescript
+const state = Q('counterState')
+
+// State — это функция, возвращающая прокси
+console.log(state().count)    // 10
+console.log(state().doubled)  // 20
+
+// Каждый вызов возвращает свежие значения
+core.count(5)
+console.log(state().count)    // 5
+```
+
+### Работа с Actions (методы модели)
+
+```typescript
+const actions = Q('counterActions')
+
+// Вызов методов
+actions.increment()
+actions.increment()
+
+console.log(state().count) // 7
+```
+
+## TypeScript типизация
+
+### Объявление namespace и моделей
+
+```typescript
+import { IUnionCore } from 'alak'
+
+declare module 'alak/namespaces' {
+  interface QNamespace {
+    current: 'myApp'  // Текущий namespace для Q
+  }
+
+  interface ActiveUnions {
+    myApp: IUnionCore<{
+      Counter: typeof CounterModel
+      User: typeof UserModel
+    }, {}, {}, {}>
+  }
+}
+```
+
+Теперь Q полностью типизирован:
+
+```typescript
+import { Q } from 'alak'
+
+// TypeScript знает все доступные atom'ы
+const atom = Q('counterAtom')  // ✅ IAtom<CounterModel>
+const atom = Q('productAtom')  // ❌ Error: 'productAtom' не существует
+
+// Автодополнение работает
+const core = Q('counterCore')
+core.count.up(v => {
+  // v автоматически типизирован как number
 })
 ```
 
-### Пример 2: Автоматические listeners (через naming convention)
+### Опциональный namespace в моделях
 
 ```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+// Без параметра — использует QNamespace.current (default: 'default')
+class CounterModel extends UnionModel {
+  count = 0
+}
 
-class StatsModel extends UnionModel<'myApp'> {
+// С явным namespace
+class AdminModel extends UnionModel<'admin'> {
+  role = 'admin'
+}
+```
+
+## Мультиконтекстные приложения
+
+### QRealm для работы с несколькими namespace
+
+```typescript
+import { Q, QRealm } from 'alak'
+
+// Q работает с текущим namespace (из QNamespace.current)
+const counter = Q('counterAtom')
+
+// QRealm создаёт Q для другого namespace
+const AdminQ = QRealm('admin')
+const dashboard = AdminQ('dashboardAtom')
+const adminCore = AdminQ('dashboardCore')
+
+// Или через Q.realm()
+const PublicQ = Q.realm('public')
+const landing = PublicQ('landingState')
+```
+
+### Типизация для мультиконтекста
+
+```typescript
+declare module 'alak/namespaces' {
+  interface QNamespace {
+    current: 'myApp'  // Основной namespace
+  }
+
+  interface ActiveUnions {
+    myApp: IUnionCore<{
+      Counter: typeof CounterModel
+      User: typeof UserModel
+    }, {}, {}, {}>
+
+    admin: IUnionCore<{
+      Dashboard: typeof DashboardModel
+    }, {}, {}, {}>
+
+    public: IUnionCore<{
+      Landing: typeof LandingModel
+    }, {}, {}, {}>
+  }
+}
+
+// Теперь все QRealm типизированы
+const AdminQ = QRealm('admin')
+AdminQ('dashboardAtom')  // ✅ Типы работают
+AdminQ('counterAtom')    // ❌ Error: counter не в admin namespace
+```
+
+## Автоматические Listeners
+
+Alak автоматически подписывается на изменения через naming convention:
+
+```typescript
+class StatsModel extends UnionModel {
   clicks = 0
   lastClickTime = null
 
@@ -86,86 +251,22 @@ class StatsModel extends UnionModel<'myApp'> {
   }
 }
 
-class CounterModel extends UnionModel<'myApp'> {
+class CounterModel extends UnionModel {
   count = 0
 
-  increment() { this.count++ }
-
-  // Автоматически подписывается на stats.clicks из другого atom
+  // Подписка на clicks из stats atom
   _$stats_clicks_up(value) {
     console.log('Stats clicks from counter:', value)
   }
-}
-
-const { facade } = UnionConstructor({
-  namespace: 'myApp',
-  models: {
-    stats: StatsModel,
-    counter: CounterModel
-  }
-})
-
-facade.cores.stats.clicks(5)
-// → Clicks updated: 5
-// → Stats clicks from counter: 5
-```
-
-### Пример 3: События и фабрики atom'ов
-
-```typescript
-import { UnionConstructor, UnionMultiModel } from 'alak'
-
-// Модель для создания множества экземпляров
-class TodoModel extends UnionMultiModel<'todoApp'> {
-  text = ''
-  completed = false
-
-  toggle() {
-    this.completed = !this.completed
-  }
 
   // Обработчик события
-  _on_CLEAR_COMPLETED() {
-    if (this.completed) {
-      this.text = ''
-    }
+  _on_USER_LOGIN(data) {
+    console.log('User logged in:', data)
   }
 }
-
-class AppModel extends UnionModel<'todoApp'> {
-  filter = 'all'
-
-  clearCompleted() {
-    // Отправить событие всем todo
-    this._.bus.dispatchEvent('CLEAR_COMPLETED')
-  }
-}
-
-const { facade } = UnionConstructor({
-  namespace: 'todoApp',
-  models: {
-    app: AppModel
-  },
-  factories: {
-    todo: TodoModel  // Фабрика для создания экземпляров
-  }
-})
-
-// Создать todo экземпляры
-const todo1 = facade.atoms.todo.get(1)
-const todo2 = facade.atoms.todo.get(2)
-
-todo1.core.text('Buy milk')
-todo2.core.text('Learn Alak')
-todo1.actions.toggle() // completed = true
-
-// Очистить все завершенные
-facade.actions.app.clearCompleted()
 ```
 
-## Naming Convention для Listeners
-
-Alak автоматически подписывается на nucleus через имена методов:
+### Naming Convention
 
 | Паттерн | Описание | Пример |
 |---------|----------|--------|
@@ -174,61 +275,97 @@ Alak автоматически подписывается на nucleus чере
 | `_$atomName_property_up(v)` | Подписка на другой atom | `_$user_name_up(v)` |
 | `_on_EVENT_NAME(data)` | Обработчик события | `_on_USER_LOGIN(data)` |
 
-## Facade API
+## Отличия Atom, Core, State, Actions
 
-Умный Proxy предоставляет несколько способов доступа:
+### Atom — полный объект
 
 ```typescript
-const { facade } = UnionConstructor({ ... })
+const atom = Q('counterAtom')
 
-// Суффиксы для доступа
-facade.modelNameCore     // → atom.core
-facade.modelNameState    // → atom.state
-facade.modelNameAtom     // → atom
-facade.modelNameBus      // → atom.bus
+atom.core        // Nucleus'ы для подписок
+atom.state       // Прокси с текущими значениями
+atom.actions     // Методы модели
+atom.bus         // Шина событий
+atom.known       // Метаданные
+```
 
-// Сгруппированный доступ
-facade.cores.modelName   // → atom.core
-facade.states.modelName  // → atom.state
-facade.atoms.modelName   // → atom
-facade.buses.modelName   // → atom.bus
-facade.actions.modelName // → atom.actions
+### Core — nucleus'ы для реактивности
+
+```typescript
+const core = Q('counterCore')
+
+core.count          // Nucleus<number>
+core.count.value    // Текущее значение (геттер)
+core.count(10)      // Установить значение (вызовет подписчиков)
+core.count.up(fn)   // Подписаться на изменения
+```
+
+### State — геттер значений
+
+```typescript
+const state = Q('counterState')
+
+state()         // { count: 0, name: 'counter', doubled: 0 }
+state().count   // 0
+state().doubled // 0 (computed)
+
+// Каждый вызов возвращает актуальный state
+```
+
+### Actions — методы модели
+
+```typescript
+const actions = Q('counterActions')
+
+actions.increment()   // Вызов метода
+actions.decrement()   // Вызов метода
+```
+
+## Продвинутые возможности
+
+### Facade API (альтернативный способ)
+
+Если вам нужен прямой доступ к union, используйте facade:
+
+```typescript
+import { GetUnionCore } from 'alak'
+
+const union = GetUnionCore('myApp')
+
+// Facade предоставляет несколько способов доступа
+union.facade.counterCore          // → atom.core
+union.facade.counterState         // → atom.state
+union.facade.counterAtom          // → atom
+union.facade.cores.counter        // → atom.core
+union.facade.states.counter       // → atom.state
+union.facade.actions.counter      // → atom.actions
 
 // Глобальная шина событий
-facade.bus.dispatchEvent('MY_EVENT', data)
-facade.bus.addEventListener('MY_EVENT', handler)
+union.facade.bus.dispatchEvent('MY_EVENT', data)
+union.facade.bus.addEventListener('MY_EVENT', handler)
 ```
 
-## Dependency Injection
+### UnionConstructor (для миграции)
 
-```typescript
-import { injectFacade } from 'alak'
-
-// В другом модуле
-const u = injectFacade('myApp')
-u.states.counter.count // Доступ к уже созданному union
-```
-
-## TypeScript Support
+Старый способ создания union с предрегистрацией моделей:
 
 ```typescript
 import { UnionConstructor } from 'alak'
 
-const uc = UnionConstructor({
+const { facade } = UnionConstructor({
   namespace: 'myApp',
-  models: { counter: CounterModel }
+  models: {
+    counter: CounterModel,
+    user: UserModel
+  }
 })
 
-// Регистрация для автодополнения
-declare module 'alak/namespaces' {
-  interface ActiveUnions {
-    myApp: typeof uc
-  }
-}
-
-// Теперь injectFacade знает типы!
-const u = injectFacade('myApp')
+// Использование через facade
+facade.counterState.count
+facade.actions.counter.increment()
 ```
+
+Рекомендуется использовать **Q API** для более гибкой и элегантной работы.
 
 ## Зависимости
 

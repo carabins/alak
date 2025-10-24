@@ -1,40 +1,36 @@
-import { UnionAtom, UnionModel } from 'alak/index'
 
-class ParentModel extends UnionModel<any> {
-  get parentCallChild() {
-    return this['birds'] as number
-  }
-  get parentName() {
-    return this._
-  }
-}
+import { UnionModel, GetUnionCore, Q } from 'alak/index'
 
-class BaseModel extends ParentModel {
-  birds = 10
-  add() {
-    this.birds++
+// 1. Создайте модель
+class CounterModel extends UnionModel {
+  count = 0
+  countX10 = 0
+
+  increment() {
+    this.count++
   }
 
-  get parentValue() {
-    return this.parentCallChild
+  _count_up(v){
+    this.countX10 = v*10
   }
-  // oneReturnMethod() {
-  //   // return this.parentOne
-  // }
-  // constructor(...a) {
-  //   super()
-  //   // console.log('constructor', a)
-  // }
 
-  onEventHelloWorld(data) {
-    // console.log(this._.name, 'hi event', data)
+  _on_INIT(){
+    this.count = 1
+  }
+  _on_SET_COUNT(v){
+    this.count = v
   }
 }
-const a = UnionAtom({
-  name: 'a',
-  model: BaseModel,
-})
 
-// console.log("::", a.core.birds)
-// console.log("::parentCallChild", a.state.parentCallChild)
-// console.log("::", a.state.parentname)
+// 2. Зарегистрируйте в union
+const union = GetUnionCore('default')
+union.addAtom({ model: CounterModel, name: 'counter' })
+
+// 3. Используйте через Q
+const core = Q('counterCore')
+const actions = Q('counterActions')
+
+core.countX10.up(value => console.log('Count:', value))
+actions.increment()
+union.bus.dispatchEvent("SET_COUNT", 0)
+core.count(10)
