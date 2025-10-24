@@ -352,8 +352,8 @@ union.facade.bus.addEventListener('MY_EVENT', handler)
 ```typescript
 import { UnionConstructor } from 'alak'
 
+// namespace опционален, по умолчанию 'default'
 const { facade } = UnionConstructor({
-  namespace: 'myApp',
   models: {
     counter: CounterModel,
     user: UserModel
@@ -398,8 +398,8 @@ class ChatModel extends UnionModel {
 }
 
 // Создание union с деструктуризацией
+// namespace опционален, по умолчанию 'default'
 export const uc = UnionConstructor({
-  namespace: 'default',
   models: {
     session: SessionModel,
     chat: ChatModel

@@ -36,7 +36,6 @@ class ChatSessionModel extends UnionModel {
 
 test('UnionConstructor with facade destructuring', (t) => {
   const uc = UnionConstructor({
-    namespace: 'app',
     models: {
       session: SessionModel,
       chat: ChatSessionModel
