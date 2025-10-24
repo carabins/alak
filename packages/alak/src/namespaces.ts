@@ -1,7 +1,7 @@
 // import { alakFactory, alakModel, QuarkEventBus } from 'alak/index'
 import isBrowser from '@alaq/rune/isBrowser'
 
-export const defaultNamespace = 'defaultUnion'
+export const defaultNamespace = 'default'
 const AlakUnionNamespace = 'AlakUnionNamespace'
 const AlakUnion = {
   namespaces: {} as Record<string, IUnionCore<any, any, any, any>>,
@@ -19,8 +19,14 @@ export const getNamespaces = () =>
 
 export interface ActiveUnions {}
 
+export interface QNamespace {
+  current: 'default'
+}
+
+export type CurrentNamespace = QNamespace['current']
+
 type DefaultUnions = {
-  defaultUnion: IUnionCore<any, any, any, any>
+  [K in typeof defaultNamespace]: IUnionCore<any, any, any, any>
 } & Record<string, IUnionCore<any, any, any, any>>
 
 export type UnionNamespaces = DefaultUnions & ActiveUnions
