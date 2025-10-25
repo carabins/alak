@@ -12,7 +12,7 @@ export function setNucleonValue(quark: Quark, value?) {
     }
 
     if (quark.isFinite && quark.value == finalValue) {
-      return
+      return finalValue
     }
     quark.prev = quark.value
     quark.value = finalValue
