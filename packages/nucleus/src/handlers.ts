@@ -61,6 +61,7 @@ export const handlers: any = {
     this.haveFrom && delete this.haveFrom
     delete this.value
     this.risen && this.risen.forEach((f) => f())
+    this.decayHooks && this.decayHooks.forEach((f) => f())
     deleteParams(this)
   },
   clearValue() {

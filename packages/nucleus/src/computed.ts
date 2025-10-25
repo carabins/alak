@@ -36,7 +36,7 @@ export function from(...fromNucleons: INucleus<any>[]) {
   const makeMix = (mixFn) => {
     const inAwaiting: INucleus<any>[] = []
     const { strong, some } = mixFn
-    const needFull = strong || some
+    const needFull = strong // только strong требует все значения, some - нет
     const values = fromNucleons.map((a) => {
       if (a.isAwaiting) {
         inAwaiting.push(a)
@@ -59,16 +59,12 @@ export function from(...fromNucleons: INucleus<any>[]) {
     quark.decayHooks.push(() => a.down(fn))
   }
 
-  function weak(mixFn, finiteLoop) {
+  function weak(mixFn) {
     function mixer(v, a) {
-      if (finiteLoop) {
-        const linkedValue = linkedValues[a.uid]
-        if (v !== linkedValue) {
-          makeMix(mixFn)
-          linkedValues[a.uid] = v
-        }
-      } else {
+      const linkedValue = linkedValues[a.uid]
+      if (v !== linkedValue) {
         makeMix(mixFn)
+        linkedValues[a.uid] = v
       }
     }
 
@@ -78,25 +74,31 @@ export function from(...fromNucleons: INucleus<any>[]) {
         listen(a, mixer)
       }
     })
-    makeMix(mixFn)
+
+    // Для .some() вычисляем только если есть хотя бы одно значение
+    if (mixFn.some) {
+      const hasAnyValue = fromNucleons.some((a) => alive(a.value))
+      if (hasAnyValue) {
+        makeMix(mixFn)
+      }
+    } else {
+      makeMix(mixFn)
+    }
+
     return quark._
   }
 
   function some(mixFn) {
     mixFn.some = true
-    return weak(mixFn, false)
+    return weak(mixFn)
   }
 
-  function someFinite(mixFn) {
-    mixFn.some = true
-    return weak(mixFn, true)
-  }
 
-  function strong(mixFn, finite) {
+  function strong(mixFn) {
     // let firstRun = true
     let getting = {}
     let rune = false
-    quark._.finite(finite)
+    quark._.finite(true)
 
     function getterFn(callerUid?) {
       // console.log('getterFn()')
@@ -129,6 +131,12 @@ export function from(...fromNucleons: INucleus<any>[]) {
               }
             }
           })
+        } else if (!alive(v) && !a.isStateless) {
+          // Для .strong() если значение не alive и не stateless - ждем
+          // НО не ждем, если это текущий caller (он только что установил значение)
+          if (!callerUid || callerUid !== a.uid) {
+            waiters[a.uid] = true
+          }
         }
         {
           linkedValues[a.uid] = v
@@ -171,22 +179,25 @@ export function from(...fromNucleons: INucleus<any>[]) {
       const linkedValue = linkedValues[a.uid]
       // console.log("mixer")
 
-      if (!finite || v !== linkedValue) {
+      if (v !== linkedValue) {
         linkedValues[a.uid] = v
-        if (finite && !isChanged()) {
+        if (!isChanged()) {
           return
         }
-        if (rune) {
-          // console.log("calling ::: ->")
-          const args = getterFn(a.uid)
-          if (isPromise(args)) args.then(quark)
-          else quark(args)
+        // Вычисляем когда значение изменилось
+        // console.log("calling ::: ->")
+        const args = getterFn(a.uid)
+        // getterFn возвращает Promise если ждет значений - не вызываем quark
+        // Вызываем только если получили реальное значение
+        if (!isPromise(args) && args !== undefined) {
+          quark(args)
         }
       }
     }
 
     fromNucleons.forEach((a) => {
       if (a.uid !== quark._.uid) {
+        linkedValues[a.uid] = a.value
         listen(a, mixer)
       }
     })
@@ -198,8 +209,8 @@ export function from(...fromNucleons: INucleus<any>[]) {
   }
 
   return {
-    some: someFinite,
-    weak: (f) => weak(f, true),
-    strong: (f) => strong(f, true),
+    some,
+    weak: (f) => weak(f),
+    strong: (f) => strong(f),
   }
 }
