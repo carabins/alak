@@ -1,0 +1,26 @@
+{
+  "name": "@alaq/quark",
+  "version": "1.0.0",
+  "description": "High-performance reactive container with powerful plugin system",
+  "keywords": [
+    "reactive",
+    "state",
+    "observable",
+    "quark",
+    "plugins"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/es.js",
+      "require": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "./bus": {
+      "import": "./lib/bus.js",
+      "require": "./lib/bus.js",
+      "types": "./lib/bus.d.ts"
+    }
+  }
+}
