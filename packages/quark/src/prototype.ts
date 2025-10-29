@@ -2,7 +2,7 @@
  * Quark Prototype - методы кварка
  */
 
-import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, DEDUP, STATELESS } from './flags'
+import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, DEDUP, STATELESS, WAS_SET } from './flags'
 import { quantumBus } from './quantum-bus'
 
 type AnyFunction = (...args: any[]) => any
@@ -11,25 +11,30 @@ type Listener<T> = (value: T, quark: any) => void
 /** Базовый прототип кварка */
 export const quarkProto = {
   up(this: any, listener: Listener<any>) {
-    // Lazy init listeners
+    // Lazy init listeners - используем массив вместо Set (быстрее для <10 listeners)
     if (!this.listeners) {
-      this.listeners = new Set()
+      this.listeners = []
       this._flags |= HAS_LISTENERS
     }
 
-    this.listeners.add(listener)
+    this.listeners.push(listener)
 
-    // Немедленно вызываем если есть значение
-    if ('value' in this) {
+    // Немедленно вызываем если значение существует (не undefined)
+    // Проверяем значение, а не WAS_SET флаг, потому что значение может быть установлено в конструкторе
+    if (this.value !== undefined) {
       listener(this.value, this)
     }
     return this
   },
 
   down(this: any, listener: Listener<any>) {
-    if (this.listeners?.delete(listener)) {
-      if (this.listeners.size === 0) {
-        this._flags &= ~HAS_LISTENERS
+    if (this.listeners) {
+      const index = this.listeners.indexOf(listener)
+      if (index !== -1) {
+        this.listeners.splice(index, 1)
+        if (this.listeners.length === 0) {
+          this._flags &= ~HAS_LISTENERS
+        }
       }
     }
     return this
@@ -147,7 +152,15 @@ export const quarkProto = {
   },
 
   emit(this: any, event: string, data?: any) {
-    // Подготовка данных для события
+    const hasLocalListeners = (this._flags & HAS_EVENTS) && this._eventCounts[event]
+    const hasWildcard = this._wildcardListeners?.size > 0
+    const hasRealmBus = this._flags & HAS_REALM
+
+    // Создаем eventData только если есть хотя бы один listener (lazy allocation)
+    if (!hasLocalListeners && !hasWildcard && !hasRealmBus) {
+      return this
+    }
+
     const eventData = {
       id: this.id,
       value: this.value,
@@ -155,18 +168,18 @@ export const quarkProto = {
     }
 
     // Локальные слушатели
-    if ((this._flags & HAS_EVENTS) && this._eventCounts[event]) {
+    if (hasLocalListeners) {
       const listeners = this._events.get(event)!
       listeners.forEach(fn => fn(eventData))
     }
 
     // Wildcard слушатели текущего realm
-    if (this._wildcardListeners?.size > 0) {
+    if (hasWildcard) {
       this._wildcardListeners.forEach(fn => fn({ event, ...eventData }))
     }
 
     // Emit в realm bus (если есть realm)
-    if (this._flags & HAS_REALM) {
+    if (hasRealmBus) {
       quantumBus.emit(this._realm, event, eventData)
     }
 
@@ -209,8 +222,8 @@ export const quarkProto = {
   },
 
   decay(this: any) {
-    // Очистка listeners
-    this.listeners?.clear()
+    // Очистка listeners (массив)
+    this.listeners = null
 
     // Очистка events
     this._events?.clear()

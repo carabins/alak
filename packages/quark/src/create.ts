@@ -49,13 +49,19 @@ function setValue(quark: any, value: any) {
 
   // Fast path: только listeners
   if (flags === (HAS_LISTENERS | WAS_SET)) {
-    quark.listeners.forEach((fn: Listener<any>) => fn(value, quark))
+    const listeners = quark.listeners
+    for (let i = 0, len = listeners.length; i < len; i++) {
+      listeners[i](value, quark)
+    }
     return value
   }
 
   // Notify listeners
   if (flags & HAS_LISTENERS) {
-    quark.listeners.forEach((fn: Listener<any>) => fn(value, quark))
+    const listeners = quark.listeners
+    for (let i = 0, len = listeners.length; i < len; i++) {
+      listeners[i](value, quark)
+    }
   }
 
   // Emit change event (если есть слушатели)
@@ -98,36 +104,47 @@ export function createQu<T>(options?: QuOptions<T>): any {
     }
   } as any
 
-  // Базовая инициализация
+  // MONOMORPHIC SHAPE: Всегда инициализируем ВСЕ поля в одинаковом порядке
+  // Это позволяет V8 создать единую hidden class для всех кварков
+
+  // Базовые поля (всегда)
   quark.uid = ++uidCounter
   quark._flags = 0
-  quark.id = options?.id
-  quark._pipeFn = options?.pipe || null
+  quark.id = options?.id || null
+  quark.value = options?.value
 
-  // Realm
+  // Realm поля (всегда, даже если null)
+  quark._realm = options?.realm || null
+  quark._realmPrefix = options?.realm ? options.realm + ':' : null
   if (options?.realm) {
-    quark._realm = options.realm
-    quark._realmPrefix = options.realm + ':'
     quark._flags |= HAS_REALM
   }
 
-  // Dedup
+  // Listeners поля (всегда, даже если null)
+  quark.listeners = null
+
+  // Events поля (всегда, даже если null)
+  quark._events = null
+  quark._eventCounts = null
+  quark._wildcardListeners = null
+
+  // Pipe функция (всегда, даже если null)
+  quark._pipeFn = options?.pipe || null
+
+  // Флаги опций
   if (options?.dedup) {
     quark._flags |= DEDUP
   }
-
-  // Stateless
   if (options?.stateless) {
     quark._flags |= STATELESS
   }
 
-  // Прототип
-  Object.setPrototypeOf(quark, quarkProto)
+  // WAS_SET НЕ устанавливаем в конструкторе!
+  // Он будет установлен только при первом вызове setValue
+  // Это позволяет QUARK_AWAKE эмититься при первом q(value), даже если value был в конструкторе
 
-  // Начальное значение (без setValue чтобы не тригерить QUARK_AWAKE)
-  if (options?.value !== undefined) {
-    quark.value = options.value
-  }
+  // Прототип (setPrototypeOf пока оставляем, getters не копируются через assign)
+  Object.setPrototypeOf(quark, quarkProto)
 
   return quark
 }
