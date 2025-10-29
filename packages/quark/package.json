@@ -11,6 +11,10 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "bun test",
+    "bench": "bun run benchmark/run.ts"
+  },
   "exports": {
     ".": {
       "import": "./lib/es.js",
