@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V8 Prototype Overhead Microbenchmark</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 { color: #60a5fa; text-align: center; }
+    .test-section {
+      background: #2a2a3e;
+      border: 2px solid #60a5fa;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+    }
+    .test-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 15px;
+    }
+    .result {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(96, 165, 250, 0.1);
+      border-radius: 5px;
+    }
+    .result-label { font-weight: 600; }
+    .result-value { font-family: monospace; }
+    .winner { background: rgba(16, 185, 129, 0.2); border-left: 3px solid #10b981; }
+    .loser { background: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; }
+    button {
+      background: #60a5fa;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+    button:hover { background: #3b82f6; }
+    pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ V8 Prototype Overhead Microbenchmark</h1>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const ITERATIONS = 1000000;
+    const WARMUP = 10000;
+
+    function bench(name, fn) {
+      // Warmup
+      for (let i = 0; i < WARMUP; i++) fn();
+
+      // Clear optimizations
+      if (typeof gc === 'function') gc();
+
+      // Measure
+      const start = performance.now();
+      for (let i = 0; i < ITERATIONS; i++) fn();
+      const time = performance.now() - start;
+
+      return {
+        name,
+        time: time.toFixed(2),
+        opsPerMs: Math.round((ITERATIONS / time) * 100) / 100
+      };
+    }
+
+    function formatNumber(num) {
+      return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    }
+
+    function showResults(testName, results) {
+      const resultsDiv = document.getElementById('results');
+      const section = document.createElement('div');
+      section.className = 'test-section';
+
+      const maxOps = Math.max(...results.map(r => r.opsPerMs));
+
+      let html = `<div class="test-name">${testName}</div>`;
+
+      results.forEach(r => {
+        const isWinner = r.opsPerMs === maxOps;
+        const diff = ((r.opsPerMs - results[0].opsPerMs) / results[0].opsPerMs * 100).toFixed(1);
+        const diffStr = diff > 0 ? `+${diff}%` : `${diff}%`;
+
+        html += `
+          <div class="result ${isWinner ? 'winner' : (r.opsPerMs < maxOps * 0.8 ? 'loser' : '')}">
+            <span class="result-label">${r.name}</span>
+            <span class="result-value">${formatNumber(r.opsPerMs)} ops/ms (${diffStr})</span>
+          </div>
+        `;
+      });
+
+      section.innerHTML = html;
+      resultsDiv.appendChild(section);
+    }
+
+    // TEST 1: Object.setPrototypeOf overhead
+    function test1_setPrototypeOf() {
+      const baseProto = {
+        method1() { return 1; },
+        method2() { return 2; },
+        get value() { return this._value; },
+        set value(v) { this._value = v; }
+      };
+
+      const results = [];
+
+      // A: No prototype change
+      results.push(bench('A: No setPrototypeOf (baseline)', () => {
+        const obj = function() { return 42; };
+        Object.setPrototypeOf(obj, Function.prototype);
+        obj._value = 10;
+      }));
+
+      // B: setPrototypeOf to custom proto
+      results.push(bench('B: setPrototypeOf to custom proto', () => {
+        const obj = function() { return 42; };
+        Object.setPrototypeOf(obj, baseProto);
+        obj._value = 10;
+      }));
+
+      // C: setPrototypeOf after properties added
+      results.push(bench('C: setPrototypeOf after adding props', () => {
+        const obj = function() { return 42; };
+        obj._value = 10;
+        obj.uid = 123;
+        obj._flags = 0;
+        Object.setPrototypeOf(obj, baseProto);
+      }));
+
+      // D: Object.create instead
+      results.push(bench('D: Object.create with proto', () => {
+        const obj = Object.create(baseProto);
+        obj._value = 10;
+      }));
+
+      showResults('Test 1: Object.setPrototypeOf Overhead', results);
+    }
+
+    // TEST 2: Property access through prototype
+    function test2_propertyAccess() {
+      const proto = {
+        get value() { return this._value; },
+        set value(v) { this._value = v; }
+      };
+
+      const results = [];
+
+      // A: Direct property
+      const objA = function() {};
+      objA._value = 42;
+      results.push(bench('A: Direct property access', () => {
+        const v = objA._value;
+      }));
+
+      // B: Getter through prototype
+      const objB = function() {};
+      Object.setPrototypeOf(objB, proto);
+      objB._value = 42;
+      results.push(bench('B: Getter through prototype', () => {
+        const v = objB.value;
+      }));
+
+      // C: Own getter
+      const objC = function() {};
+      Object.defineProperty(objC, 'value', {
+        get() { return this._value; },
+        set(v) { this._value = v; }
+      });
+      objC._value = 42;
+      results.push(bench('C: Own property getter', () => {
+        const v = objC.value;
+      }));
+
+      showResults('Test 2: Property Access Performance', results);
+    }
+
+    // TEST 3: Function creation patterns
+    function test3_functionCreation() {
+      const proto = {
+        method1() { return 1; },
+        method2() { return 2; }
+      };
+
+      const results = [];
+
+      // A: Function + setPrototypeOf (current Nucl)
+      results.push(bench('A: Function + setPrototypeOf (Nucl)', () => {
+        const fn = function(v) { return v; };
+        fn._flags = 0;
+        fn.uid = 123;
+        Object.setPrototypeOf(fn, proto);
+      }));
+
+      // B: Function without setPrototypeOf (Quark)
+      results.push(bench('B: Function no prototype (Quark)', () => {
+        const fn = function(v) { return v; };
+        fn._flags = 0;
+        fn.uid = 123;
+      }));
+
+      // C: Function + Object.assign
+      results.push(bench('C: Function + Object.assign', () => {
+        const fn = function(v) { return v; };
+        fn._flags = 0;
+        fn.uid = 123;
+        Object.assign(fn, proto);
+      }));
+
+      // D: Function + manual copy
+      results.push(bench('D: Function + manual copy', () => {
+        const fn = function(v) { return v; };
+        fn._flags = 0;
+        fn.uid = 123;
+        fn.method1 = proto.method1;
+        fn.method2 = proto.method2;
+      }));
+
+      showResults('Test 3: Function Creation Patterns', results);
+    }
+
+    // TEST 4: Method calls through prototype
+    function test4_methodCalls() {
+      const proto = {
+        method() { return this._value * 2; }
+      };
+
+      const results = [];
+
+      // A: Method on prototype
+      const objA = function() {};
+      Object.setPrototypeOf(objA, proto);
+      objA._value = 21;
+      results.push(bench('A: Method through prototype', () => {
+        const v = objA.method();
+      }));
+
+      // B: Own method
+      const objB = function() {};
+      objB._value = 21;
+      objB.method = function() { return this._value * 2; };
+      results.push(bench('B: Own method', () => {
+        const v = objB.method();
+      }));
+
+      // C: Copied method from proto
+      const objC = function() {};
+      objC._value = 21;
+      objC.method = proto.method;
+      results.push(bench('C: Copied method from proto', () => {
+        const v = objC.method();
+      }));
+
+      showResults('Test 4: Method Call Performance', results);
+    }
+
+    // TEST 5: Hook execution overhead
+    function test5_hookOverhead() {
+      const hooks = [
+        (obj) => { obj.hook1 = true; },
+        (obj) => { obj.hook2 = true; },
+        (obj) => { obj.hook3 = true; }
+      ];
+
+      const results = [];
+
+      // A: No hooks
+      results.push(bench('A: No hooks (baseline)', () => {
+        const obj = function() {};
+        obj._value = 42;
+      }));
+
+      // B: forEach hooks
+      results.push(bench('B: forEach hooks', () => {
+        const obj = function() {};
+        obj._value = 42;
+        hooks.forEach(hook => hook(obj));
+      }));
+
+      // C: for loop hooks
+      results.push(bench('C: for loop hooks', () => {
+        const obj = function() {};
+        obj._value = 42;
+        for (let i = 0; i < hooks.length; i++) {
+          hooks[i](obj);
+        }
+      }));
+
+      // D: Empty array (no hooks installed)
+      const emptyHooks = [];
+      results.push(bench('D: Empty hooks array', () => {
+        const obj = function() {};
+        obj._value = 42;
+        emptyHooks.forEach(hook => hook(obj));
+      }));
+
+      showResults('Test 5: Hook Execution Overhead', results);
+    }
+
+    // TEST 6: Combined realistic scenario
+    function test6_realistic() {
+      const quarkProto = {
+        up(fn) { this.listeners = this.listeners || []; this.listeners.push(fn); },
+        get value() { return this._value; },
+        set value(v) { this._value = v; }
+      };
+
+      const nuclProto = Object.create(quarkProto);
+      const hooks = [];
+
+      const results = [];
+
+      // A: Quark pattern
+      results.push(bench('A: Quark pattern', () => {
+        const q = function(v) { if (v !== undefined) this._value = v; return this._value; };
+        q.uid = 123;
+        q._flags = 0;
+        q._value = 42;
+        Object.setPrototypeOf(q, quarkProto);
+      }));
+
+      // B: Nucl pattern (current)
+      results.push(bench('B: Nucl pattern (current)', () => {
+        const q = function(v) { if (v !== undefined) this._value = v; return this._value; };
+        q.uid = 123;
+        q._flags = 0;
+        q._value = 42;
+        Object.setPrototypeOf(q, quarkProto);
+        Object.setPrototypeOf(q, nuclProto);
+        hooks.forEach(hook => hook(q));
+      }));
+
+      // C: Optimized - single setPrototypeOf
+      results.push(bench('C: Single setPrototypeOf', () => {
+        const q = function(v) { if (v !== undefined) this._value = v; return this._value; };
+        q.uid = 123;
+        q._flags = 0;
+        q._value = 42;
+        Object.setPrototypeOf(q, nuclProto);
+        hooks.forEach(hook => hook(q));
+      }));
+
+      showResults('Test 6: Realistic Scenario', results);
+    }
+
+    function runAllTests() {
+      document.getElementById('results').innerHTML = '';
+
+      console.log('🔬 Running microbenchmarks...');
+
+      test1_setPrototypeOf();
+      test2_propertyAccess();
+      test3_functionCreation();
+      test4_methodCalls();
+      test5_hookOverhead();
+      test6_realistic();
+
+      console.log('✅ All tests complete!');
+    }
+
+    // Auto-run on load
+    window.addEventListener('load', () => {
+      console.log('%c💡 Tip: Run Chrome with --js-flags="--trace-deopt" to see deoptimizations', 'color: #60a5fa; font-weight: bold;');
+    });
+  </script>
+</body>
+</html>
