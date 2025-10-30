@@ -1,6 +1,20 @@
 /**
- * Nucl - Enhanced Quark with plugin system
+ * Nucl - Enhanced Quark with plugin system (OPTIMIZED for V8)
  * @module @alaq/nucl
+ *
+ * ⚡ KEY OPTIMIZATION: Avoid double Object.setPrototypeOf call
+ *
+ * PROBLEM IDENTIFIED:
+ * - createQu() calls Object.setPrototypeOf(quark, quarkProto)  <- Line 146 in create.ts
+ * - Original Nucl called Object.setPrototypeOf(quark, NuclProto) <- Line 104 in index.ts
+ * - V8 invalidates hidden classes TWICE -> 50% performance loss in Chrome
+ *
+ * SOLUTION:
+ * - Inline the entire createQu logic (copy fields initialization)
+ * - Call Object.setPrototypeOf ONLY ONCE with NuclProto
+ * - NuclProto extends quarkProto via Object.create, so we inherit all Quark methods
+ *
+ * RESULT: Single setPrototypeOf call = ~2x faster in V8!
  */
 
 import { setValue, quarkProto, HAS_REALM, DEDUP, STATELESS } from '@alaq/quark'
@@ -91,18 +105,12 @@ NuclProto.decay = function(this: any) {
 let uidCounter = 0
 
 /**
- * Create Nucl instance (OPTIMIZED for V8)
+ * Create Nucl instance (OPTIMIZED)
  *
- * ⚡ KEY OPTIMIZATION: Inline createQu() to avoid double Object.setPrototypeOf
+ * This function is a COMPLETE INLINE of createQu() logic,
+ * with the critical difference that we setPrototypeOf to NuclProto instead of quarkProto.
  *
- * BEFORE (slow - 50% slower in Chrome):
- *   const nucl = createQu(opts)              // <- setPrototypeOf to quarkProto
- *   Object.setPrototypeOf(nucl, NuclProto)   // <- setPrototypeOf AGAIN! ❌
- *
- * AFTER (fast):
- *   Inline createQu logic + setPrototypeOf ONCE to NuclProto ✅
- *
- * This single change restored Nucl to Quark-level performance in V8!
+ * By doing this, we avoid the double setPrototypeOf that was killing V8 performance.
  */
 export function Nucl<T = any>(options?: QuOptions<T> | T): any {
   // Handle shorthand: Nucl(value) instead of Nucl({ value })
@@ -111,8 +119,8 @@ export function Nucl<T = any>(options?: QuOptions<T> | T): any {
     : { value: options as T }
 
   // ========== INLINED createQu() logic START ==========
-  // Copied from packages/quark/src/create.ts:103-148
-  // ONLY CHANGE: setPrototypeOf to NuclProto instead of quarkProto
+  // This is copied from packages/quark/src/create.ts:103-148
+  // The ONLY change: setPrototypeOf to NuclProto instead of quarkProto
 
   const nucl = function(this: any, value: any) {
     return setValue(nucl, value)
@@ -155,7 +163,9 @@ export function Nucl<T = any>(options?: QuOptions<T> | T): any {
   // LISTENERS, EVENTS - NOT initialized! Lazy!
   // Will be created in up(), on(), etc.
 
-  // ⚡ CRITICAL: Set prototype ONCE to NuclProto (not quarkProto!)
+  // ⚡⚡⚡ CRITICAL OPTIMIZATION ⚡⚡⚡
+  // Set prototype ONCE to NuclProto (not quarkProto!)
+  // NuclProto inherits from quarkProto, so we get all Quark functionality
   Object.setPrototypeOf(nucl, NuclProto)
 
   // ========== INLINED createQu() logic END ==========

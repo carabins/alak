@@ -11,7 +11,7 @@ type Listener<T> = (value: T, quark: any) => void
 let uidCounter = 0
 
 /** Установка значения (максимально оптимизированная) */
-function setValue(quark: any, value: any) {
+export function setValue(quark: any, value: any) {
   const flags = quark._flags
 
   // Pipe: трансформация/валидация
@@ -90,7 +90,7 @@ function setValue(quark: any, value: any) {
 }
 
 /** Опции создания */
-interface QuOptions<T = any> {
+export interface QuOptions<T = any> {
   value?: T
   realm?: string
   id?: string

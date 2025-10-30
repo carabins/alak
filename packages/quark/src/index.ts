@@ -17,6 +17,8 @@ export const Qv = Object.assign(
 export default Qu
 
 // Export for library authors (like @alaq/nucl)
-export { createQu }
+export { createQu, setValue } from './create'
+export { quarkProto } from './prototype'
+export { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, WAS_SET, DEDUP, STATELESS, SILENT } from './flags'
 export type { QuOptions }
 
