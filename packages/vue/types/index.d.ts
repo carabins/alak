@@ -14,6 +14,9 @@ declare interface INucleus<T> {
 declare interface Quark {
   vueRef: ARef
   vueWatch: Boolean
+  __v_isRef?: boolean
+  __v_isShallow?: boolean
+  __v_isReadonly?: boolean
 }
 
 declare module '@alaq/nucleus/' {
@@ -27,6 +30,9 @@ declare module '@alaq/nucleus/' {
   interface Quark {
     vueRef: ARef
     vueWatch: Boolean
+    __v_isRef?: boolean
+    __v_isShallow?: boolean
+    __v_isReadonly?: boolean
   }
 }
 

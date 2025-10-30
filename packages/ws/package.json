@@ -1,36 +1,12 @@
 {
     "name": "@alaq/ws",
-    "version": "1.0.10",
+    "version": "1.0.33",
     "description": "Alak websockets",
-    "main": "index.js",
-    "types": "index.d.ts",
     "keywords": [
         "alak",
         "streams",
         "channels",
         "dataflow",
         "flow"
-    ],
-    "author": "Gleb Panteleev",
-    "license": "TVR",
-    "repository": "https://github.com/carabins/alak",
-    "typings": "index.d.ts",
-    "module": "index.mjs",
-    "unpkg": "dist/ws.global.js",
-    "sideEffects": false,
-    "exports": {
-        ".": {
-            "types": "./index.d.ts",
-            "import": "./index.mjs",
-            "require": "./index.js",
-            "default": "./index.js"
-        },
-        "./*": "./*"
-    },
-    "buildOptions": {
-        "name": "ws",
-        "formats": [
-            "global"
-        ]
-    }
+    ]
 }

@@ -2,9 +2,9 @@ export const alive = (v) => (v !== undefined && v !== null) as boolean
 export const isTruth = (v) => !!v
 export const noneFilter = (f) => (v) => (!alive(v) ? f(v) : null)
 export const someFilter = (f) => (v) => (alive(v) ? f(v) : null)
-export const trueFilter = (f) => (v) => (isTruth(v) ? f(v) : null)
+export const trueFilter = (f) => (v) => (v === true ? f(v) : null)
 export const someFalseFilter = (f) => (v) => (alive(v) && !isTruth(v) ? f(v) : null)
-export const falseFilter = (f) => (v) => (!isTruth(v) ? f(v) : null)
+export const falseFilter = (f) => (v) => (v === false ? f(v) : null)
 export const upDownFilter = (fun) => (f) => {
   const down = (a) => () => a.down(fun)
   return (v, a) => {

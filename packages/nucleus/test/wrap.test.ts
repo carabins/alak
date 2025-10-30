@@ -1,13 +1,11 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Nucleus } from '@alaq/nucleus/index'
 
-test('wrap', (t) => {
+test('wrap', () => {
   const n = Nucleus()
   n.setWrapper((v) => v * 2)
   n.up((v) => {
-    t.equal(v, 4)
+    expect(v).toBe(4)
   })
   n(2)
-  t.plan(1)
-  t.end()
 })

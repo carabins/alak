@@ -1,4 +1,4 @@
-import {test} from 'tap'
+import {test, expect} from 'bun:test'
 import {UnionModel} from 'alak/index'
 import {vueController} from '../src/vueController'
 
@@ -23,7 +23,7 @@ class model extends UnionModel<any> {
   }
 }
 
-test('vue constructor', (t) => {
+test('vue constructor', () => {
   const a = vueController({
     name: "a", model,
     namespace: 'vue_test',
@@ -36,17 +36,16 @@ test('vue constructor', (t) => {
   })()
 
   // console.log(a.state)
-  t.ok(a.state.one == 1)
+  expect(a.state.one == 1).toBeTruthy()
   a.core.doIt()
-  t.ok(a.state.two == 2)
+  expect(a.state.two == 2).toBeTruthy()
   b.core.setA20()
-  t.ok(a.state.one == 10)
-  t.ok(a.state.two == 20)
+  expect(a.state.one == 10).toBeTruthy()
+  expect(a.state.two == 20).toBeTruthy()
   a.state.two = 2
 
-  t.ok(a.core.two.value == 2)
+  expect(a.core.two.value == 2).toBeTruthy()
   a.core.one(10)
-  t.equal(b.state.three, 30)
-  t.end()
+  expect(b.state.three).toBe(30)
 })
 

@@ -1,4 +1,4 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Atom, UnionAtom, UnionConstructor } from 'alak/index'
 import vueAtom, { watchVueAtom } from '../src'
 
@@ -11,29 +11,27 @@ class Model {
   }
 }
 
-test('reactive atom', (t) => {
+test('reactive atom', () => {
   const a = Atom({ model: Model, name: 'one' })
   const r = vueAtom(a)
-  t.equal(r.one, 1)
+  expect(r.one).toBe(1)
   a.core.one(10)
   a.core.doIt()
-  t.equal(a.state.one, r.one)
-  t.equal(a.state.two, 2)
-  t.end()
+  expect(a.state.one).toBe(r.one)
+  expect(a.state.two).toBe(2)
 })
 
-test('reactive union atom', (t) => {
+test('reactive union atom', () => {
   const a = UnionAtom({ model: Model, name: 'one' })
   const r = vueAtom(a)
-  t.equal(r.one, 1)
+  expect(r.one).toBe(1)
   a.core.one(10)
   a.core.doIt()
-  t.equal(a.state.one, r.one)
-  t.equal(a.state.two, 2)
-  t.end()
+  expect(a.state.one).toBe(r.one)
+  expect(a.state.two).toBe(2)
 })
 
-test('reactive union atom', (t) => {
+test('reactive union atom', () => {
   const { facade } = UnionConstructor({
     namespace: 'factory_test',
     models: {
@@ -42,12 +40,11 @@ test('reactive union atom', (t) => {
   })
   const a = facade.atoms.a
   const r = watchVueAtom(a)
-  t.equal(r.one, 1)
+  expect(r.one).toBe(1)
   a.core.one(10)
   a.core.doIt()
-  t.equal(a.state.one, r.one)
-  t.equal(a.state.two, 2)
-  t.end()
+  expect(a.state.one).toBe(r.one)
+  expect(a.state.two).toBe(2)
 })
 
 // test("nuclon", (t)=>{

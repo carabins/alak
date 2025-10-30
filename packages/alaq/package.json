@@ -1,10 +1,7 @@
 {
-    "name": "alak",
-    "version": "5.0.69",
+    "name": "alaq",
+    "version": "0.0.23",
     "description": "Alak Last Atom",
-    "typings": "index.d.ts",
-    "main": "index.js",
-    "unpkg": "dist/alak.global.js",
     "keywords": [
         "alak",
         "reactive",
@@ -13,28 +10,5 @@
         "channels",
         "dataflow",
         "flow"
-    ],
-    "dependencies": {
-        "@alaq/nucleus": "5.0.30",
-        "@alaq/atom": "5.0.38",
-        "@alaq/rune": "0.0.14"
-    },
-    "license": "TVR",
-    "module": "index.mjs",
-    "types": "index.d.ts",
-    "sideEffects": false,
-    "exports": {
-        ".": {
-            "types": "./index.d.ts",
-            "import": "./index.mjs",
-            "require": "./index.js"
-        },
-        "./*": "./*"
-    },
-    "buildOptions": {
-        "name": "alak",
-        "formats": [
-            "global"
-        ]
-    }
+    ]
 }

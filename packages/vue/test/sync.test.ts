@@ -1,4 +1,4 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Atom } from 'alak/index'
 import { watchVueAtom } from '../src'
 import { nextTick } from 'vue'
@@ -19,7 +19,7 @@ class ModelMixed {
   user = { name: 'John', age: 30 }
 }
 
-test('sync: object property change', async (t) => {
+test('sync: object property change', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test1' })
   const reactive = watchVueAtom(atom)
 
@@ -28,11 +28,10 @@ test('sync: object property change', async (t) => {
   await nextTick()
 
   // Should sync to atom
-  t.equal(atom.state.user.name, 'Jane', 'nested property synced to atom')
-  t.end()
+  expect(atom.state.user.name).toBe('Jane')
 })
 
-test('sync: deep nested object property change', async (t) => {
+test('sync: deep nested object property change', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test2' })
   const reactive = watchVueAtom(atom)
 
@@ -40,11 +39,10 @@ test('sync: deep nested object property change', async (t) => {
   reactive.config.settings.fontSize = 16
   await nextTick()
 
-  t.equal(atom.state.config.settings.fontSize, 16, 'deeply nested property synced')
-  t.end()
+  expect(atom.state.config.settings.fontSize).toBe(16)
 })
 
-test('sync: replace entire object', async (t) => {
+test('sync: replace entire object', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test3' })
   const reactive = watchVueAtom(atom)
 
@@ -52,12 +50,11 @@ test('sync: replace entire object', async (t) => {
   reactive.user = { name: 'Alice', age: 25 }
   await nextTick()
 
-  t.equal(atom.state.user.name, 'Alice', 'replaced object name synced')
-  t.equal(atom.state.user.age, 25, 'replaced object age synced')
-  t.end()
+  expect(atom.state.user.name).toBe('Alice')
+  expect(atom.state.user.age).toBe(25)
 })
 
-test('sync: object change from atom to vue', async (t) => {
+test('sync: object change from atom to vue', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test4' })
   const reactive = watchVueAtom(atom)
 
@@ -65,12 +62,11 @@ test('sync: object change from atom to vue', async (t) => {
   atom.core.user({ name: 'Bob', age: 40 })
   await nextTick()
 
-  t.equal(reactive.user.name, 'Bob', 'atom change reflected in vue')
-  t.equal(reactive.user.age, 40, 'atom change reflected in vue')
-  t.end()
+  expect(reactive.user.name).toBe('Bob')
+  expect(reactive.user.age).toBe(40)
 })
 
-test('sync: array push', async (t) => {
+test('sync: array push', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test5' })
   const reactive = watchVueAtom(atom)
 
@@ -78,12 +74,11 @@ test('sync: array push', async (t) => {
   reactive.items.push(4)
   await nextTick()
 
-  t.equal(atom.state.items.length, 4, 'array length after push')
-  t.equal(atom.state.items[3], 4, 'pushed item value')
-  t.end()
+  expect(atom.state.items.length).toBe(4)
+  expect(atom.state.items[3]).toBe(4)
 })
 
-test('sync: array splice', async (t) => {
+test('sync: array splice', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test6' })
   const reactive = watchVueAtom(atom)
 
@@ -91,12 +86,11 @@ test('sync: array splice', async (t) => {
   reactive.items.splice(0, 1)
   await nextTick()
 
-  t.equal(atom.state.items.length, 2, 'array length after splice')
-  t.equal(atom.state.items[0], 2, 'first item after splice')
-  t.end()
+  expect(atom.state.items.length).toBe(2)
+  expect(atom.state.items[0]).toBe(2)
 })
 
-test('sync: array item property change', async (t) => {
+test('sync: array item property change', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test7' })
   const reactive = watchVueAtom(atom)
 
@@ -104,11 +98,10 @@ test('sync: array item property change', async (t) => {
   reactive.users[0].name = 'Alicia'
   await nextTick()
 
-  t.equal(atom.state.users[0].name, 'Alicia', 'array item property synced')
-  t.end()
+  expect(atom.state.users[0].name).toBe('Alicia')
 })
 
-test('sync: array replace', async (t) => {
+test('sync: array replace', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test8' })
   const reactive = watchVueAtom(atom)
 
@@ -116,12 +109,11 @@ test('sync: array replace', async (t) => {
   reactive.items = [10, 20, 30]
   await nextTick()
 
-  t.equal(atom.state.items.length, 3, 'replaced array length')
-  t.equal(atom.state.items[0], 10, 'replaced array first item')
-  t.end()
+  expect(atom.state.items.length).toBe(3)
+  expect(atom.state.items[0]).toBe(10)
 })
 
-test('sync: array unshift', async (t) => {
+test('sync: array unshift', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test9' })
   const reactive = watchVueAtom(atom)
 
@@ -129,12 +121,11 @@ test('sync: array unshift', async (t) => {
   reactive.items.unshift(0)
   await nextTick()
 
-  t.equal(atom.state.items.length, 4, 'array length after unshift')
-  t.equal(atom.state.items[0], 0, 'first item after unshift')
-  t.end()
+  expect(atom.state.items.length).toBe(4)
+  expect(atom.state.items[0]).toBe(0)
 })
 
-test('sync: array pop', async (t) => {
+test('sync: array pop', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test10' })
   const reactive = watchVueAtom(atom)
 
@@ -142,57 +133,52 @@ test('sync: array pop', async (t) => {
   const popped = reactive.items.pop()
   await nextTick()
 
-  t.equal(popped, 3, 'popped value')
-  t.equal(atom.state.items.length, 2, 'array length after pop')
-  t.end()
+  expect(popped).toBe(3)
+  expect(atom.state.items.length).toBe(2)
 })
 
-test('sync: mixed primitives and complex types', async (t) => {
+test('sync: mixed primitives and complex types', async () => {
   const atom = Atom({ model: ModelMixed, name: 'test11' })
   const reactive = watchVueAtom(atom)
 
   // Change primitive
   reactive.count = 5
   await nextTick()
-  t.equal(atom.state.count, 5, 'primitive synced')
+  expect(atom.state.count).toBe(5)
 
   // Change array
   reactive.items.push(4)
   await nextTick()
-  t.equal(atom.state.items.length, 4, 'array synced')
+  expect(atom.state.items.length).toBe(4)
 
   // Change object
   reactive.user.name = 'Jane'
   await nextTick()
-  t.equal(atom.state.user.name, 'Jane', 'object synced')
-
-  t.end()
+  expect(atom.state.user.name).toBe('Jane')
 })
 
-test('sync: bidirectional sync', async (t) => {
+test('sync: bidirectional sync', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test12' })
   const reactive = watchVueAtom(atom)
 
   // Vue -> Atom
   reactive.user.name = 'Alice'
   await nextTick()
-  t.equal(atom.state.user.name, 'Alice', 'vue to atom')
+  expect(atom.state.user.name).toBe('Alice')
 
   // Atom -> Vue
   atom.core.user({ name: 'Bob', age: 50 })
   await nextTick()
-  t.equal(reactive.user.name, 'Bob', 'atom to vue name')
-  t.equal(reactive.user.age, 50, 'atom to vue age')
+  expect(reactive.user.name).toBe('Bob')
+  expect(reactive.user.age).toBe(50)
 
   // Vue -> Atom again
   reactive.user.age = 55
   await nextTick()
-  t.equal(atom.state.user.age, 55, 'vue to atom again')
-
-  t.end()
+  expect(atom.state.user.age).toBe(55)
 })
 
-test('sync: no infinite loops with dedup', async (t) => {
+test('sync: no infinite loops with dedup', async () => {
   const atom = Atom({ model: ModelWithObject, name: 'test13' })
   const reactive = watchVueAtom(atom, true) // dedup enabled
 
@@ -206,23 +192,21 @@ test('sync: no infinite loops with dedup', async (t) => {
   reactive.user = currentUser
   await nextTick()
 
-  t.ok(atomUpdateCount <= 2, 'no infinite loop with dedup')
-  t.end()
+  expect(atomUpdateCount <= 2).toBeTruthy()
 })
 
-test('sync: array reverse', async (t) => {
+test('sync: array reverse', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test14' })
   const reactive = watchVueAtom(atom)
 
   reactive.items.reverse()
   await nextTick()
 
-  t.equal(atom.state.items[0], 3, 'first item after reverse')
-  t.equal(atom.state.items[2], 1, 'last item after reverse')
-  t.end()
+  expect(atom.state.items[0]).toBe(3)
+  expect(atom.state.items[2]).toBe(1)
 })
 
-test('sync: array sort', async (t) => {
+test('sync: array sort', async () => {
   const atom = Atom({ model: ModelWithArray, name: 'test15' })
   const reactive = watchVueAtom(atom)
 
@@ -232,7 +216,6 @@ test('sync: array sort', async (t) => {
   reactive.items.sort()
   await nextTick()
 
-  t.equal(atom.state.items[0], 1, 'first item after sort')
-  t.equal(atom.state.items[2], 3, 'last item after sort')
-  t.end()
+  expect(atom.state.items[0]).toBe(1)
+  expect(atom.state.items[2]).toBe(3)
 })

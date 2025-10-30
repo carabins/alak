@@ -1,27 +1,28 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import IndexedVertexMap from '../src/IndexedVertexMap'
 
-test('IndexedVertexMap', (t) => {
+test('IndexedVertexMap', () => {
   const ivm = IndexedVertexMap()
   ivm.push('one', 1)
   const indexOne = ivm.push('one', 11)
+  let forEachCount = 0
   ivm.forEach('one', (value, index) => {
     if (index == '0' || index == '1') {
-      t.pass()
+      forEachCount++
     }
   })
 
-  t.ok(ivm.get('one').length === 2)
+  expect(ivm.get('one').length === 2).toBeTruthy()
 
   ivm.remove('one', indexOne)
-  t.ok(ivm.size('one') === 1)
+  expect(ivm.size('one') === 1).toBeTruthy()
   ivm.clearKey('one')
-  t.ok(ivm.size('one') === 0)
+  expect(ivm.size('one') === 0).toBeTruthy()
 
   ivm.push('two', 2)
   ivm.clearAll()
-  t.ok(ivm.size('two') === 0)
-  t.ok(ivm.size('tree') === 0)
+  expect(ivm.size('two') === 0).toBeTruthy()
+  expect(ivm.size('tree') === 0).toBeTruthy()
 
-  t.end()
+  expect(forEachCount).toBe(2)
 })

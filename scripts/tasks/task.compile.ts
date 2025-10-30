@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as fs from 'fs-extra'
 import { runTsc } from '~/scripts/common/tsc'
 import { readFileSync, writeFileSync } from 'fs'
-import { transformSync } from '@swc-node/core'
+import { transform } from 'oxc-transform'
 
 const tscState = {
   promise: undefined,
@@ -45,9 +45,22 @@ export async function compile(project: Project) {
   if (declarationsMix) {
     let declarationSource = ''
     log('mixin declarations...')
+
+    // Copy types folder to artifacts
+    const artTypesPath = path.join(project.artPatch, 'types')
+    fs.mkdirpSync(artTypesPath)
+
     fs.readdirSync(declarationsPath).forEach((f) => {
-      declarationSource += fs.readFileSync(path.resolve(declarationsPath, f))
+      const sourceContent = fs.readFileSync(path.resolve(declarationsPath, f))
+      declarationSource += sourceContent
+
+      // Copy individual .d.ts file to artifacts/types/
+      fs.copyFileSync(
+        path.resolve(declarationsPath, f),
+        path.join(artTypesPath, f)
+      )
     })
+
     const refs = []
     project.packageJson?.dependencies &&
       Object.keys(project.packageJson?.dependencies).forEach((p) => {
@@ -119,22 +132,86 @@ export async function compile(project: Project) {
     if (!src.isDeclaration) {
       const sourceCode = readFileSync(srcFile).toString()
 
-      // Generate CommonJS version (.js)
-      const cjs = transformSync(sourceCode, src.name, {
-        module: 'commonjs',
-        sourcemap: false,
+      // Generate CommonJS version (.js) using oxc-transform
+      const cjsResult = transform(src.name + '.ts', sourceCode, {
+        lang: 'ts',
+        target: 'es2015',
       })
-      totalSizeCjs += cjs.code.length
-      writeFileSync(path.join(project.artPatch, src.name + '.js'), cjs.code)
+
+      if (cjsResult.errors && cjsResult.errors.length > 0) {
+        log.error(`Errors in ${src.name}:`, cjsResult.errors)
+      }
+
+      // Note: oxc-transform outputs ESM by default, we'll need to convert to CJS manually
+      let cjsCode = cjsResult.code
+
+      // ESM to CJS conversion
+      // Process line by line to avoid regex issues
+      const lines = cjsCode.split('\n')
+      const cjsLines = []
+
+      for (let line of lines) {
+        // Handle imports
+        if (line.match(/^import\s+\{[^}]+\}\s+from/)) {
+          // import { x, y } from 'z' -> const { x, y } = require('z')
+          line = line.replace(/^import\s+(\{[^}]+\})\s+from\s+(['"][^'"]+['"])/, 'const $1 = require($2)')
+        } else if (line.match(/^import\s+\*\s+as\s+\w+\s+from/)) {
+          // import * as x from 'y' -> const x = require('y')
+          line = line.replace(/^import\s+\*\s+as\s+(\w+)\s+from\s+(['"][^'"]+['"])/, 'const $1 = require($2)')
+        } else if (line.match(/^import\s+\w+\s+from/)) {
+          // import x from 'y' -> const x = require('y')
+          line = line.replace(/^import\s+(\w+)\s+from\s+(['"][^'"]+['"])/, 'const $1 = require($2)')
+        }
+
+        // Handle exports
+        if (line.match(/^export\s+\{[^}]+\}\s+from/)) {
+          // export { x } from 'y' -> const { x } = require('y'); exports.x = x
+          const match = line.match(/^export\s+\{([^}]+)\}\s+from\s+(['"][^'"]+['"])/)
+          if (match) {
+            const names = match[1].split(',').map(n => n.trim())
+            cjsLines.push(`const { ${match[1]} } = require(${match[2]})`)
+            names.forEach(name => {
+              cjsLines.push(`exports.${name} = ${name};`)
+            })
+            continue
+          }
+        } else if (line.match(/^export\s+(const|let|var|function|class)\s+/)) {
+          // export const x = 1 -> const x = 1; exports.x = x
+          const match = line.match(/^export\s+(const|let|var|function|class)\s+(\w+)/)
+          if (match) {
+            line = line.replace(/^export\s+/, '')
+            cjsLines.push(line)
+            cjsLines.push(`exports.${match[2]} = ${match[2]};`)
+            continue
+          }
+        } else if (line.match(/^export\s+default\s+/)) {
+          // export default x -> exports.default = x
+          line = line.replace(/^export\s+default\s+/, 'exports.default = ')
+        } else if (line.match(/^export\s+\{[^}]+\}/)) {
+          // export { x, y } -> exports.x = x; exports.y = y
+          const match = line.match(/^export\s+\{([^}]+)\}/)
+          if (match) {
+            const names = match[1].split(',').map(n => n.trim())
+            names.forEach(name => {
+              cjsLines.push(`exports.${name} = ${name};`)
+            })
+            continue
+          }
+        }
+
+        cjsLines.push(line)
+      }
+
+      cjsCode = cjsLines.join('\n')
+
+      totalSizeCjs += cjsCode.length
+      writeFileSync(path.join(project.artPatch, src.name + '.js'), cjsCode)
 
       // Generate ESM version (.mjs)
-      const esm = transformSync(sourceCode, src.name, {
-        module: 'es6',
-        sourcemap: false,
-      })
+      const esmCode = cjsResult.code  // oxc-transform outputs ESM by default
 
       // Fix ESM imports to use relative paths with .mjs extension
-      const esmCodeFixed = fixEsmImports(esm.code, project.dir, project.packageJson.name as string)
+      const esmCodeFixed = fixEsmImports(esmCode, project.dir, project.packageJson.name as string)
 
       totalSizeEsm += esmCodeFixed.length
       writeFileSync(path.join(project.artPatch, src.name + '.mjs'), esmCodeFixed)

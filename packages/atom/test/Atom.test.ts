@@ -1,42 +1,41 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 
 import bid from './bud'
 import Model from './bud/model'
 
-test('core and state', async (t) => {
+test('core and state', async () => {
   const classInstance = new Model()
 
-  t.equal(bid.core.everCount.value, classInstance.everCount)
-  t.equal(bid.state.everCount, classInstance.everCount)
+  expect(bid.core.everCount.value).toBe(classInstance.everCount)
+  expect(bid.state.everCount).toBe(classInstance.everCount)
 
   bid.core.addEverCount(1)
   classInstance.addEverCount(1)
-  t.equal(bid.core.everCount.value, classInstance.everCount)
-  t.equal(bid.state.everCount, classInstance.everCount)
-  t.equal(classInstance.multiCount, bid.state.multiCount)
-  t.equal(classInstance.multiCount, bid.core.multiCount.value)
+  expect(bid.core.everCount.value).toBe(classInstance.everCount)
+  expect(bid.state.everCount).toBe(classInstance.everCount)
+  expect(classInstance.multiCount).toBe(bid.state.multiCount)
+  expect(classInstance.multiCount).toBe(bid.core.multiCount.value)
 
-  t.equal(classInstance.multiMethod(), bid.actions.multiMethod())
+  expect(classInstance.multiMethod()).toBe(bid.actions.multiMethod())
 
-  t.equal(bid.state.taggedVar, 12)
-  t.end()
+  expect(bid.state.taggedVar).toBe(12)
 })
 
 // test('atom eves
-test('atom events', async (t) => {
+test('atom events', async () => {
   bid.bus.addEverythingListener((event, data) => {
     switch (event) {
       case 'init':
-        t.equal(data.external, 'some')
-        t.equal(data.nucleon.value, '+')
-        t.equal(data.nucleon.id, bid.core.someOtherVar.id)
+        expect(data.external).toBe('some')
+        expect(data.nucleon.value).toBe('+')
+        expect(data.nucleon.id).toBe(bid.core.someOtherVar.id)
         break
       case 'some':
-        t.equal(event, 'some')
+        expect(event).toBe('some')
         break
       case 'someData':
-        t.equal(event, 'someData')
-        t.equal(data, '+')
+        expect(event).toBe('someData')
+        expect(data).toBe('+')
         break
     }
   })

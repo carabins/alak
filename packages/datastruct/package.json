@@ -1,15 +1,9 @@
 {
-  "name": "@alaq/datastruct",
-  "version": "0.0.1",
-  "description": "Alak datastructures",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "keywords": [
-    "alak",
-    "datastructures"
-  ],
-  "browser": true,
-  "author": "Gleb Panteleev",
-  "license": "MIT & TRU",
-  "repository": "https://github.com/carabins/alak"
+    "name": "@alaq/datastruct",
+    "version": "0.0.24",
+    "description": "Alak datastructures",
+    "keywords": [
+        "alak",
+        "datastructures"
+    ]
 }

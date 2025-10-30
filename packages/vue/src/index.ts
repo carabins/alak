@@ -9,6 +9,8 @@ import { ref, reactive, watch } from 'vue'
 import {UnwrapNestedRefs} from '@vue/reactivity'
 
 export {vueController} from "./vueController";
+export { VueNucleusPlugin } from './nucleusPlugin';
+export { VueRefPlugin } from './vueRefPlugin';
 
 const vueKey = 'vueKey'
 

@@ -10,6 +10,8 @@ import { commitAndPush } from '~/scripts/tasks/task.commitAndPush'
 import { Log } from '~/scripts/log'
 import { bench } from '~/scripts/common/bench'
 import { browser } from '~/scripts/tasks/task.browser'
+import { buildWithRolldown } from '~/scripts/tasks/task.rolldown'
+import {check} from "~/scripts/tasks/task.check";
 
 type ITaskProcess = (p: Project) => Promise<any>
 
@@ -28,11 +30,15 @@ export const buildTask = {
   // pipeline: [ compile ],
 }
 export const xTask = {
-  pipeline: [upver, syncDeps, browser, compile],
+  pipeline: [syncDeps, buildWithRolldown, publish, upver],
+}
+export const rolldownTask = {
+  // prepare: testProjects,
+  pipeline: [buildWithRolldown],
 }
 
 export function getTaskChoices(affectedStr) {
-  const publishPipeline = [upver, syncDeps, compile, browser, publish]
+  const publishPipeline = [upver, syncDeps, compile, publish]
   return [
     // {
     //   name: "build & publish changes (" + affectedStr + ")",
@@ -72,12 +78,20 @@ export function getTaskChoices(affectedStr) {
         finalize: commitAndPush,
       },
     },
+    // {
+    //   name: 'build',
+    //   description: 'local compile bundles',
+    //   value: {
+    //     prepare: testProjects,
+    //     pipeline: [upver, syncDeps, compile, browser],
+    //   },
+    // },
     {
-      name: 'build',
-      description: 'local compile bundles',
+      name: 'rolldown',
+      description: 'build with Rolldown (new bundler)',
       value: {
-        prepare: testProjects,
-        pipeline: [upver, syncDeps, compile, browser],
+        selectProjectsDialog: true,
+        pipeline: [buildWithRolldown],
       },
     },
     {

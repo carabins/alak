@@ -2,25 +2,24 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Atom } from '@alaq/atom/index'
 
 class model {
   one = 1
 }
 
-test('nucleus strategy', (t) => {
+test('nucleus strategy', () => {
   const statelessAtom = Atom({
     model,
     nucleusStrategy: 'stateless',
   })
-  t.equal(statelessAtom.core.one.isStateless, true)
-  t.equal(statelessAtom.state.one, undefined)
+  expect(statelessAtom.core.one.isStateless).toBe(true)
+  expect(statelessAtom.state.one).toBe(undefined)
   const holyStateAtom = Atom({
     model,
     nucleusStrategy: 'holystate',
   })
-  t.equal(holyStateAtom.core.one.isHoly, true)
-  t.equal(holyStateAtom.core.one.isStateless, true)
-  t.end()
+  expect(holyStateAtom.core.one.isHoly).toBe(true)
+  expect(holyStateAtom.core.one.isStateless).toBe(true)
 })

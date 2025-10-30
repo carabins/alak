@@ -81,19 +81,25 @@ export async function browser(project: Project) {
     for (const format of formats) {
       const plugins: Plugin[] = [
         typescript({
-          noEmitOnError: true,
-          skipLibCheck: true,
-          skipDefaultLibCheck: true,
-          declaration: false,
-          exclude: [path.resolve(project.dir, 'test')],
-          outDir: outDir,
+          tsconfig: path.resolve('./tsconfig.json'),
+          compilerOptions: {
+            target: 'ES2015',
+            module: 'ESNext',
+            lib: ['ES2015', 'DOM'],
+            moduleResolution: 'node',
+            allowSyntheticDefaultImports: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            declaration: false,
+            sourceMap: true,
+          },
         }),
         // Always minify browser builds
         terser(),
       ]
 
-      // Keep only Vue external (bundle internal dependencies for browser)
-      const external = ['vue']
+      // External dependencies (Vue and internal @alaq/* packages)
+      const external = ['vue', /^@alaq\//]
 
       const bundle = await rollup({
         input,
@@ -116,6 +122,20 @@ export async function browser(project: Project) {
       await bundle.close()
 
       log.info(`Built ${getFileName(format)} (minified with sourcemap)`)
+    }
+
+    // Copy types folder if exists
+    const declarationsPath = path.join(project.packagePath, 'types')
+    if (fs.existsSync(declarationsPath)) {
+      const artTypesPath = path.join(outDir, '..', 'types')
+      fs.mkdirpSync(artTypesPath)
+      fs.readdirSync(declarationsPath).forEach((f) => {
+        fs.copyFileSync(
+          path.resolve(declarationsPath, f),
+          path.join(artTypesPath, f)
+        )
+      })
+      log.info('Copied types folder')
     }
 
     // Update package.json - dual package support (CJS + ESM)
@@ -148,7 +168,7 @@ export async function browser(project: Project) {
       formats,
       ...buildOptions,
     }
-    project.savePackageJsonTo.art()
+    project.savePackageJsonTo.artifacts()
 
     log.info(`✓ Built browser bundles: ${formats.join(', ')}`)
     log.info(`✓ CommonJS (require): index.js`)

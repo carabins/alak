@@ -2,7 +2,7 @@
  * Copyright (c) 2022. Only the truth - liberates.
  */
 
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Atom } from '@alaq/atom/index'
 
 class model {
@@ -17,7 +17,7 @@ class model {
   }
 }
 
-test('', (t) => {
+test('', () => {
   const a = Atom({
     model,
     thisExtension: new Proxy(
@@ -34,6 +34,5 @@ test('', (t) => {
   })
 
   a.actions.defineZtoV()
-  t.equal(a.state.v, 'Z')
-  t.end()
+  expect(a.state.v).toBe('Z')
 })

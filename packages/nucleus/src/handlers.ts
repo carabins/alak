@@ -9,7 +9,7 @@ import {
   trueFilter,
   upDownFilter,
 } from './utils'
-import { from } from './computed'
+import { pluginRegistry } from './plugin'
 
 const valueProp = 'value'
 
@@ -63,6 +63,9 @@ export const handlers: any = {
     this.risen && this.risen.forEach((f) => f())
     this.decayHooks && this.decayHooks.forEach((f) => f())
     deleteParams(this)
+
+    // Вызываем decay hooks плагинов
+    pluginRegistry.decayHooks.forEach(hook => hook(this))
   },
   clearValue() {
     dispatchEvent(this, QState.CLEAR, ClearState.VALUE)
@@ -181,13 +184,11 @@ export const handlers: any = {
     return this._
   },
   bind(context) {
-    if (this._context != context) {
-      this._context = context
-      this.bind(context)
-    }
+    this._context = context
+    return this._
   },
   apply(context, v) {
-    this.bind(context)
+    this._.bind(context)
     setNucleonValue(this, v[0])
   },
   call(context, ...v) {
@@ -243,12 +244,12 @@ export const handlers: any = {
   },
 
   tuneTo(a: INucleus<any>) {
-    this.tuneOff()
+    this._.tuneOff()
     this.tunedTarget = a
     a.up(this._)
   },
   tuneOff() {
-    this.tunedTarget && this.tunedTarget.down(this.tunedTarget)
+    this.tunedTarget && this.tunedTarget.down(this._)
   },
 
   injectTo(o, key) {
@@ -275,5 +276,4 @@ export const handlers: any = {
   valueOf() {
     return `nucleon:${this._.uid}`
   },
-  from,
 }

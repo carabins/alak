@@ -4,7 +4,7 @@ import { FileLog } from '~/scripts/log'
 import { versions } from '~/scripts/now'
 
 export async function syncDeps(project: Project) {
-  const log = FileLog('sync dependencies for ' + project.dir)
+  const log = FileLog('sync ' + project.dir)
   const deps = project.packageJson.dependencies
   deps &&
     Object.keys(deps).forEach((name) => {
