@@ -2,7 +2,7 @@
  * Quark Creation - создание кварка с оптимизациями
  */
 
-import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, WAS_SET, DEDUP, STATELESS } from './flags'
+import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, WAS_SET, DEDUP, STATELESS, SILENT } from './flags'
 import { quantumBus } from './quantum-bus'
 import { quarkProto } from './prototype'
 
@@ -34,6 +34,11 @@ function setValue(quark: any, value: any) {
   }
 
   quark._flags |= WAS_SET
+
+  // SILENT: пропустить все уведомления
+  if (flags & SILENT) {
+    return value
+  }
 
   // Первая установка → QUARK_AWAKE
   if (!wasSet && (flags & HAS_REALM)) {
