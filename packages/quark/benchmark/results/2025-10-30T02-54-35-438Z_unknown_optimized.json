@@ -1,0 +1,108 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+  "bundleType": "optimized",
+  "timestamp": "2025-10-30T02:54:35.437Z",
+  "browser": "Unknown",
+  "results": [
+    {
+      "name": "Create empty quark",
+      "ops": 100000,
+      "time": 7.7,
+      "opsPerMs": 12987.01
+    },
+    {
+      "name": "Create with value",
+      "ops": 100000,
+      "time": 9.2,
+      "opsPerMs": 10869.57
+    },
+    {
+      "name": "Create with options",
+      "ops": 100000,
+      "time": 10.1,
+      "opsPerMs": 9900.99
+    },
+    {
+      "name": "Create with realm",
+      "ops": 100000,
+      "time": 11.2,
+      "opsPerMs": 8928.57
+    },
+    {
+      "name": "Create with all options",
+      "ops": 100000,
+      "time": 14.3,
+      "opsPerMs": 6993.01
+    },
+    {
+      "name": "Get value",
+      "ops": 1000000,
+      "time": 81.9,
+      "opsPerMs": 12210.01
+    },
+    {
+      "name": "Set value (no listeners)",
+      "ops": 1000000,
+      "time": 115.1,
+      "opsPerMs": 8688.1
+    },
+    {
+      "name": "Set value (1 listener)",
+      "ops": 100000,
+      "time": 10.5,
+      "opsPerMs": 9523.81
+    },
+    {
+      "name": "Set value (5 listeners)",
+      "ops": 100000,
+      "time": 20,
+      "opsPerMs": 5000
+    },
+    {
+      "name": "Set value (10 listeners)",
+      "ops": 100000,
+      "time": 30.1,
+      "opsPerMs": 3322.26
+    },
+    {
+      "name": "Add listener",
+      "ops": 100000,
+      "time": 9.9,
+      "opsPerMs": 10101.01
+    },
+    {
+      "name": "Remove listener",
+      "ops": 100000,
+      "time": 11.8,
+      "opsPerMs": 8474.58
+    },
+    {
+      "name": "Set with dedup (same value)",
+      "ops": 100000,
+      "time": 12.4,
+      "opsPerMs": 8064.52
+    },
+    {
+      "name": "Set with dedup (different value)",
+      "ops": 100000,
+      "time": 16.1,
+      "opsPerMs": 6211.18
+    },
+    {
+      "name": "Set with stateless",
+      "ops": 100000,
+      "time": 11.6,
+      "opsPerMs": 8620.69
+    },
+    {
+      "name": "Set with pipe transform",
+      "ops": 100000,
+      "time": 17.6,
+      "opsPerMs": 5681.82
+    }
+  ],
+  "summary": {
+    "totalOps": 3400000,
+    "avgOpsPerMs": 8473.570625
+  }
+}

@@ -8,3 +8,4 @@ export const HAS_REALM = 4       // 0000 0100
 export const WAS_SET = 8         // 0000 1000
 export const DEDUP = 16          // 0001 0000
 export const STATELESS = 32      // 0010 0000
+export const SILENT = 64         // 0100 0000

@@ -2,7 +2,7 @@
  * Quark Prototype - методы кварка
  */
 
-import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, DEDUP, STATELESS, WAS_SET } from './flags'
+import { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, DEDUP, STATELESS, WAS_SET, SILENT } from './flags'
 import { quantumBus } from './quantum-bus'
 
 type AnyFunction = (...args: any[]) => any
@@ -41,15 +41,12 @@ export const quarkProto = {
   },
 
   silent(this: any, fn: () => void) {
-    const oldListeners = this.listeners
-    this.listeners = null
-    const oldFlags = this._flags
-    this._flags &= ~HAS_LISTENERS
-
-    fn()
-
-    this.listeners = oldListeners
-    this._flags = oldFlags
+    this._flags |= SILENT
+    try {
+      fn()
+    } finally {
+      this._flags &= ~SILENT
+    }
     return this
   },
 
