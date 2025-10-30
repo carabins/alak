@@ -8,11 +8,11 @@ import { Qu, Qv } from '../src/index'
 test('Coverage: createQu - все опции', () => {
   // Пустой кварк
   const empty = Qu()
-  if (empty() !== undefined) throw new Error('Empty quark should be undefined')
+  if (empty.value !== undefined) throw new Error('Empty quark should be undefined')
 
   // Со значением
   const withValue = Qu({ value: 42 })
-  if (withValue() !== 42) throw new Error('Should have value 42')
+  if (withValue.value !== 42) throw new Error('Should have value 42')
 
   // С realm
   const withRealm = Qu({ realm: 'test' })
@@ -51,13 +51,13 @@ test('Coverage: createQu - все опции', () => {
 
 test('Coverage: Qv alias', () => {
   const q1 = Qv()
-  if (q1() !== undefined) throw new Error('Qv() should be empty')
+  if (q1.value !== undefined) throw new Error('Qv() should be empty')
 
   const q2 = Qv(42)
-  if (q2() !== 42) throw new Error('Qv(42) should have value')
+  if (q2.value !== 42) throw new Error('Qv(42) should have value')
 
   const q3 = Qv(10, { realm: 'test', dedup: true })
-  if (q3() !== 10) throw new Error('Qv with options should work')
+  if (q3.value !== 10) throw new Error('Qv with options should work')
   if ((q3 as any)._realm !== 'test') throw new Error('Qv should pass options')
 
   console.log('✅ Coverage: Qv alias')
@@ -71,10 +71,10 @@ test('Coverage: setValue - pipe reject', () => {
   })
 
   q(-5)
-  if (q() !== 10) throw new Error('Pipe should reject negative value')
+  if (q.value !== 10) throw new Error('Pipe should reject negative value')
 
   q(20)
-  if (q() !== 20) throw new Error('Pipe should accept positive value')
+  if (q.value !== 20) throw new Error('Pipe should accept positive value')
 
   console.log('✅ Coverage: pipe reject')
 })
@@ -97,10 +97,10 @@ test('Coverage: setValue - dedup', () => {
 test('Coverage: setValue - stateless', () => {
   const q = Qu({ stateless: true })
   q(10)
-  if (q() !== undefined) throw new Error('Stateless should not store value')
+  if (q.value !== undefined) throw new Error('Stateless should not store value')
 
   q(20)
-  if (q() !== undefined) throw new Error('Stateless should not store value')
+  if (q.value !== undefined) throw new Error('Stateless should not store value')
 
   console.log('✅ Coverage: stateless')
 })
@@ -125,7 +125,7 @@ test('Coverage: setValue - fast paths', () => {
   // Fast path 1: только WAS_SET
   const q1 = Qu({ value: 0 })
   q1(10)
-  if (q1() !== 10) throw new Error('Fast path WAS_SET failed')
+  if (q1.value !== 10) throw new Error('Fast path WAS_SET failed')
 
   // Fast path 2: WAS_SET + HAS_LISTENERS
   const q2 = Qu({ value: 0 })
@@ -235,7 +235,7 @@ test('Coverage: silent', () => {
   })
 
   if (count !== 0) throw new Error('silent should prevent notifications')
-  if (q() !== 20) throw new Error('silent should still set value')
+  if (q.value !== 20) throw new Error('silent should still set value')
 
   q(30)
   if (count !== 1) throw new Error('After silent, notifications should work')
@@ -444,7 +444,7 @@ test('Coverage: pipe метод', () => {
 
   q.pipe((v) => v * 2)
   q(5)
-  if (q() !== 10) throw new Error('pipe method should transform')
+  if (q.value !== 10) throw new Error('pipe method should transform')
 
   console.log('✅ Coverage: pipe method')
 })
@@ -475,11 +475,11 @@ test('Coverage: stateless метод', () => {
 
   q.stateless(true)
   q(20)
-  if (q() !== 10) throw new Error('stateless(true) should not store value')
+  if (q.value !== 10) throw new Error('stateless(true) should not store value')
 
   q.stateless(false)
   q(30)
-  if (q() !== 30) throw new Error('stateless(false) should store value')
+  if (q.value !== 30) throw new Error('stateless(false) should store value')
 
   console.log('✅ Coverage: stateless method')
 })
@@ -528,7 +528,7 @@ test('Coverage: комбинированные флаги', () => {
 
   q(20) // stateless - не сохранится, но listener вызовется -> count = 2
   if (count !== 2) throw new Error('Listener should be called')
-  if (q() !== 10) throw new Error('Stateless should not update value')
+  if (q.value !== 10) throw new Error('Stateless should not update value')
 
   q(-5) // pipe rejects -> count = 2
   if (count !== 2) throw new Error('Pipe should reject')

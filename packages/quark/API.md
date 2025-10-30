@@ -71,11 +71,11 @@ Qu({value: 0, realm: 'counters'})
 ### Get/Set значения
 
 ```typescript
-const value = counter()           // Получить значение
+const value = counter.value       // Получить значение
 counter(10)                       // Установить значение
 ```
 
-Кварк - это функция. Вызов без аргументов возвращает значение, с аргументом - устанавливает.
+Для чтения используйте свойство `.value`, для записи - вызов функции с аргументом.
 
 **Особенности:**
 - При первой установке значения в realm эмитится событие `QUARK_AWAKE`
@@ -529,8 +529,7 @@ interface QuarkOptions<T> {
 }
 
 interface Quark<T> {
-  // Callable
-  (): T
+  // Callable (setter only)
   (value: T): T
 
   // Subscriptions
@@ -555,7 +554,7 @@ interface Quark<T> {
 
   // Properties
   uid: number
-  value: T
+  value: T              // Getter: читайте значение через quark.value
   id?: string
   readonly _flags: number
   readonly _realm?: string
@@ -585,7 +584,7 @@ counter.up((value) => {
   console.log('Count:', value)
 })
 
-counter(counter() + 1)  // Count: 1
+counter(counter.value + 1)  // Count: 1
 ```
 
 ### С дедупликацией
@@ -638,7 +637,7 @@ bus.up((value) => {
 
 bus('event1')  // Event: event1
 bus('event2')  // Event: event2
-console.log(bus())  // undefined (значение не сохраняется)
+console.log(bus.value)  // undefined (значение не сохраняется)
 ```
 
 ---

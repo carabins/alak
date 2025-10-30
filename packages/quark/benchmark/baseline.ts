@@ -81,7 +81,7 @@ console.log('\n📝 GET/SET:')
 
 const getSetQ = Qv(0)
 bench('Get value', 1000000, () => {
-  const v = getSetQ()
+  const v = getSetQ.value
 })
 
 bench('Set value (no listeners)', 1000000, () => {

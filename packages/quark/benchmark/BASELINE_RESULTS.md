@@ -1,14 +1,14 @@
 # Quark Baseline Performance Results
 
-**Date:** 29.10.2025, 21:05:02
+**Date:** 30.10.2025, 05:06:28
 **Runtime:** Bun 1.3.0
 **Platform:** win32 (x64)
 
 ## Summary
 
 - **Total Operations:** 5 570 000
-- **Total Time:** 553.22ms
-- **Average Performance:** 10 068,33 ops/ms
+- **Total Time:** 516.68ms
+- **Average Performance:** 10 780,37 ops/ms
 
 ## Detailed Results
 
@@ -16,82 +16,82 @@
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Create empty quark | 100 000 | 16.05 | 6 232,08 |
-| Create with value | 100 000 | 6.08 | 16 450,89 |
-| Create with options | 100 000 | 5.56 | 17 982,05 |
-| Create with realm | 100 000 | 6.60 | 15 151,97 |
-| Create with all options | 100 000 | 7.03 | 14 217,47 |
+| Create empty quark | 100 000 | 14.35 | 6 967,52 |
+| Create with value | 100 000 | 5.27 | 18 968,13 |
+| Create with options | 100 000 | 5.19 | 19 277,11 |
+| Create with realm | 100 000 | 5.55 | 18 026,14 |
+| Create with all options | 100 000 | 6.19 | 16 145,44 |
 
 ### Get/Set
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Get value | 1 000 000 | 4.57 | 218 598,35 |
-| Set value (no listeners) | 1 000 000 | 6.24 | 160 379,78 |
-| Set value (1 listener) | 100 000 | 1.27 | 79 020,15 |
-| Set value (5 listeners) | 100 000 | 1.55 | 64 653,78 |
-| Set value (10 listeners) | 100 000 | 2.15 | 46 522,45 |
+| Get value | 1 000 000 | 2.64 | 378 501,14 |
+| Set value (no listeners) | 1 000 000 | 3.82 | 261 978,99 |
+| Set value (1 listener) | 100 000 | 1.12 | 89 166,3 |
+| Set value (5 listeners) | 100 000 | 1.43 | 69 876,32 |
+| Set value (10 listeners) | 100 000 | 2.07 | 48 374,61 |
 
 ### Listeners
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Set value (no listeners) | 1 000 000 | 6.24 | 160 379,78 |
-| Set value (1 listener) | 100 000 | 1.27 | 79 020,15 |
-| Set value (5 listeners) | 100 000 | 1.55 | 64 653,78 |
-| Set value (10 listeners) | 100 000 | 2.15 | 46 522,45 |
-| Add listener | 100 000 | 7.73 | 12 937,78 |
-| Remove listener | 100 000 | 9.82 | 10 187,45 |
-| Notify 1 listener | 100 000 | 1.34 | 74 576,78 |
-| Notify 5 listeners | 100 000 | 1.98 | 50 380,37 |
-| Notify 10 listeners | 100 000 | 2.75 | 36 417,93 |
-| Add event listener | 50 000 | 6.83 | 7 316,57 |
-| Remove event listener | 50 000 | 8.11 | 6 167,97 |
-| Emit with wildcard listener | 50 000 | 4.34 | 11 508,01 |
+| Set value (no listeners) | 1 000 000 | 3.82 | 261 978,99 |
+| Set value (1 listener) | 100 000 | 1.12 | 89 166,3 |
+| Set value (5 listeners) | 100 000 | 1.43 | 69 876,32 |
+| Set value (10 listeners) | 100 000 | 2.07 | 48 374,61 |
+| Add listener | 100 000 | 8.00 | 12 503,75 |
+| Remove listener | 100 000 | 7.59 | 13 171,24 |
+| Notify 1 listener | 100 000 | 1.40 | 71 418,37 |
+| Notify 5 listeners | 100 000 | 1.71 | 58 366,89 |
+| Notify 10 listeners | 100 000 | 2.58 | 38 738,67 |
+| Add event listener | 50 000 | 6.48 | 7 715,81 |
+| Remove event listener | 50 000 | 6.83 | 7 318,5 |
+| Emit with wildcard listener | 50 000 | 3.99 | 12 545,48 |
 
 ### Events
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Add event listener | 50 000 | 6.83 | 7 316,57 |
-| Remove event listener | 50 000 | 8.11 | 6 167,97 |
-| Emit local event | 50 000 | 2.80 | 17 855,23 |
-| Emit realm event | 50 000 | 4.01 | 12 462,3 |
-| Emit with wildcard listener | 50 000 | 4.34 | 11 508,01 |
+| Add event listener | 50 000 | 6.48 | 7 715,81 |
+| Remove event listener | 50 000 | 6.83 | 7 318,5 |
+| Emit local event | 50 000 | 2.67 | 18 699,28 |
+| Emit realm event | 50 000 | 3.96 | 12 639,35 |
+| Emit with wildcard listener | 50 000 | 3.99 | 12 545,48 |
 
 ### Special Modes
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Set with dedup (same value) | 100 000 | 1.00 | 99 760,57 |
-| Set with dedup (different value) | 100 000 | 2.02 | 49 544,19 |
-| Set with stateless | 100 000 | 2.02 | 49 458,43 |
-| Set with pipe transform | 100 000 | 1.13 | 88 472,09 |
-| Set with pipe reject | 100 000 | 1.28 | 78 051,83 |
+| Set with dedup (same value) | 100 000 | 0.90 | 110 692,94 |
+| Set with dedup (different value) | 100 000 | 1.97 | 50 735,67 |
+| Set with stateless | 100 000 | 1.99 | 50 311,93 |
+| Set with pipe transform | 100 000 | 1.00 | 100 050,03 |
+| Set with pipe reject | 100 000 | 1.27 | 78 814,63 |
 
 ### Combined Operations
 
 | Operation | Ops | Time (ms) | Ops/ms |
 |-----------|----:|----------:|-------:|
-| Full workflow (create + subscribe + set) | 50 000 | 5.82 | 8 598,3 |
-| Realm communication | 10 000 | 395.55 | 25,28 |
-| Complex quark lifecycle | 10 000 | 7.10 | 1 409,42 |
+| Full workflow (create + subscribe + set) | 50 000 | 6.20 | 8 064,65 |
+| Realm communication | 10 000 | 378.73 | 26,4 |
+| Complex quark lifecycle | 10 000 | 6.04 | 1 655,38 |
 
 ## Key Findings
 
 ### Fastest Operations
-- **Get value**: 218 598,35 ops/ms
-- **Set value (no listeners)**: 160 379,78 ops/ms
-- **Set with dedup (same value)**: 99 760,57 ops/ms
-- **Set with pipe transform**: 88 472,09 ops/ms
-- **Set value (1 listener)**: 79 020,15 ops/ms
+- **Get value**: 378 501,14 ops/ms
+- **Set value (no listeners)**: 261 978,99 ops/ms
+- **Set with dedup (same value)**: 110 692,94 ops/ms
+- **Set with pipe transform**: 100 050,03 ops/ms
+- **Set value (1 listener)**: 89 166,3 ops/ms
 
 ### Slowest Operations
-- **Realm communication**: 25,28 ops/ms
-- **Complex quark lifecycle**: 1 409,42 ops/ms
-- **Remove event listener**: 6 167,97 ops/ms
-- **Create empty quark**: 6 232,08 ops/ms
-- **Add event listener**: 7 316,57 ops/ms
+- **Realm communication**: 26,4 ops/ms
+- **Complex quark lifecycle**: 1 655,38 ops/ms
+- **Create empty quark**: 6 967,52 ops/ms
+- **Remove event listener**: 7 318,5 ops/ms
+- **Add event listener**: 7 715,81 ops/ms
 
 ## Notes
 
