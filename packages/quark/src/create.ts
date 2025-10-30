@@ -96,12 +96,8 @@ interface QuOptions<T = any> {
 
 /** Создание кварка */
 export function createQu<T>(options?: QuOptions<T>): any {
-  const quark = function(this: any, ...args: any[]) {
-    if (args.length > 0) {
-      return setValue(quark, args[0])
-    } else {
-      return quark.value
-    }
+  const quark = function(this: any, value: any) {
+    return setValue(quark, value)
   } as any
 
   // MONOMORPHIC SHAPE: Всегда инициализируем ВСЕ поля в одинаковом порядке

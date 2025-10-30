@@ -8,7 +8,7 @@ import { Qu, Qv } from '../src/index'
 test('ESSENCE 1: High-Performance Reactive Container', () => {
   // Создание с пустым значением
   const counter = Qu()
-  if (counter() !== undefined) throw new Error('Empty quark should be undefined')
+  if (counter.value !== undefined) throw new Error('Empty quark should be undefined')
 
   // Lazy initialization - listeners создаются только когда нужны
   if (counter.hasListeners) throw new Error('Should not have listeners initially')
@@ -122,13 +122,13 @@ test('ESSENCE 3: pipe, dedup, stateless', () => {
   })
 
   age(25.7)
-  if (age() !== 26) throw new Error('pipe should round value')
+  if (age.value !== 26) throw new Error('pipe should round value')
 
   age(-5)
-  if (age() !== 26) throw new Error('pipe should reject negative value')
+  if (age.value !== 26) throw new Error('pipe should reject negative value')
 
   age(200)
-  if (age() !== 26) throw new Error('pipe should reject value > 150')
+  if (age.value !== 26) throw new Error('pipe should reject value > 150')
 
   // 2. dedup - дедупликация
   const name = Qv('John', { dedup: true })
@@ -159,7 +159,7 @@ test('ESSENCE 3: pipe, dedup, stateless', () => {
 
   if (busValues.length !== 2) throw new Error('stateless should still notify listeners')
   if (busValues[0] !== 'event1') throw new Error('stateless should pass correct value')
-  if (bus() !== undefined) throw new Error('stateless should not store value')
+  if (bus.value !== undefined) throw new Error('stateless should not store value')
 
   // 4. Методы для динамического изменения
   const counter = Qv(0)
