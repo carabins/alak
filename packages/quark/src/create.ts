@@ -94,40 +94,39 @@ interface QuOptions<T = any> {
   pipe?: (value: T) => T | undefined
 }
 
-/** Создание кварка */
+/** Создание кварка - HYBRID */
 export function createQu<T>(options?: QuOptions<T>): any {
   const quark = function(this: any, value: any) {
     return setValue(quark, value)
   } as any
 
-  // MONOMORPHIC SHAPE: Всегда инициализируем ВСЕ поля в одинаковом порядке
-  // Это позволяет V8 создать единую hidden class для всех кварков
-
-  // Базовые поля (всегда)
+  // CRITICAL FIELDS - всегда для monomorphic shape
   quark.uid = ++uidCounter
   quark._flags = 0
-  quark.id = options?.id || null
-  quark.value = options?.value
 
-  // Realm поля (всегда, даже если null)
-  quark._realm = options?.realm || null
-  quark._realmPrefix = options?.realm ? options.realm + ':' : null
+  // VALUE - только если есть
+  if (options?.value !== undefined) {
+    quark.value = options.value
+  }
+
+  // ID - только если есть
+  if (options?.id) {
+    quark.id = options.id
+  }
+
+  // REALM - условно (только если нужен)
   if (options?.realm) {
+    quark._realm = options.realm
+    quark._realmPrefix = options.realm + ':'
     quark._flags |= HAS_REALM
   }
 
-  // Listeners поля (всегда, даже если null)
-  quark.listeners = null
+  // PIPE - только если есть
+  if (options?.pipe) {
+    quark._pipeFn = options.pipe
+  }
 
-  // Events поля (всегда, даже если null)
-  quark._events = null
-  quark._eventCounts = null
-  quark._wildcardListeners = null
-
-  // Pipe функция (всегда, даже если null)
-  quark._pipeFn = options?.pipe || null
-
-  // Флаги опций
+  // FLAGS - устанавливаем если нужны
   if (options?.dedup) {
     quark._flags |= DEDUP
   }
@@ -135,11 +134,10 @@ export function createQu<T>(options?: QuOptions<T>): any {
     quark._flags |= STATELESS
   }
 
-  // WAS_SET НЕ устанавливаем в конструкторе!
-  // Он будет установлен только при первом вызове setValue
-  // Это позволяет QUARK_AWAKE эмититься при первом q(value), даже если value был в конструкторе
+  // LISTENERS, EVENTS - НЕ инициализируем! Lazy!
+  // Будут созданы в up(), on() и т.д.
 
-  // Прототип (setPrototypeOf пока оставляем, getters не копируются через assign)
+  // Прототип
   Object.setPrototypeOf(quark, quarkProto)
 
   return quark
