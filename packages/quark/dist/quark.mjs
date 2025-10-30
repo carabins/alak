@@ -5,6 +5,7 @@ var HAS_REALM = 4;
 var WAS_SET = 8;
 var DEDUP = 16;
 var STATELESS = 32;
+var SILENT = 64;
 
 // src/quantum-bus.ts
 class RealmBus {
@@ -102,14 +103,10 @@ var quarkProto = {
     }
     return this;
   },
-  silent(fn) {
-    const oldListeners = this.listeners;
-    this.listeners = null;
-    const oldFlags = this._flags;
-    this._flags &= ~HAS_LISTENERS;
-    fn();
-    this.listeners = oldListeners;
-    this._flags = oldFlags;
+  silent(value) {
+    this._flags |= SILENT;
+    Reflect.apply(this, null, [value]);
+    this._flags &= ~SILENT;
     return this;
   },
   on(event, listener) {
@@ -277,6 +274,9 @@ function setValue(quark, value) {
     quark.value = value;
   }
   quark._flags |= WAS_SET;
+  if (flags & SILENT) {
+    return value;
+  }
   if (!wasSet && flags & HAS_REALM) {
     quantumBus.emit(quark._realm, "QUARK_AWAKE", {
       id: quark.id,
@@ -320,18 +320,20 @@ function createQu(options) {
   };
   quark.uid = ++uidCounter;
   quark._flags = 0;
-  quark.id = options?.id || null;
-  quark.value = options?.value;
-  quark._realm = options?.realm || null;
-  quark._realmPrefix = options?.realm ? options.realm + ":" : null;
+  if (options?.value !== undefined) {
+    quark.value = options.value;
+  }
+  if (options?.id) {
+    quark.id = options.id;
+  }
   if (options?.realm) {
+    quark._realm = options.realm;
+    quark._realmPrefix = options.realm + ":";
     quark._flags |= HAS_REALM;
   }
-  quark.listeners = null;
-  quark._events = null;
-  quark._eventCounts = null;
-  quark._wildcardListeners = null;
-  quark._pipeFn = options?.pipe || null;
+  if (options?.pipe) {
+    quark._pipeFn = options.pipe;
+  }
   if (options?.dedup) {
     quark._flags |= DEDUP;
   }

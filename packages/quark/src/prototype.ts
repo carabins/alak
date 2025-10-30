@@ -40,13 +40,11 @@ export const quarkProto = {
     return this
   },
 
-  silent(this: any, fn: () => void) {
+  silent(this: any, value: any) {
     this._flags |= SILENT
-    try {
-      fn()
-    } finally {
-      this._flags &= ~SILENT
-    }
+    // Вызываем quark как функцию напрямую
+    Reflect.apply(this, null, [value])
+    this._flags &= ~SILENT
     return this
   },
 

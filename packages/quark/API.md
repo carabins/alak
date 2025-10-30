@@ -131,24 +131,24 @@ counter.down(listener)
 
 ---
 
-### `quark.silent(fn)`
+### `quark.silent(value)`
 
-Выполнить функцию без триггера listeners.
+Установить значение без триггера listeners.
 
 ```typescript
-counter.silent(() => {
-  counter(100)  // Listeners не будут вызваны
-})
+counter.silent(100)  // Устанавливаем без уведомлений
+counter.silent(200)
+counter.silent(300)
 ```
 
 **Параметры:**
-- `fn: () => void` - Функция для выполнения
+- `value: T` - Значение для установки
 
 **Возвращает:** `quark` (для chaining)
 
 **Применение:**
 - Инициализация без уведомлений
-- Batch updates
+- Batch updates (несколько silent подряд)
 - Избежание циклических зависимостей
 
 ---
@@ -549,7 +549,7 @@ interface Quark<T> {
   // Subscriptions
   up(listener: Listener<T>): this
   down(listener: Listener<T>): this
-  silent(fn: () => void): this
+  silent(value: T): this
 
   // Events
   on(event: string, listener: EventListener): this
