@@ -1,196 +1,147 @@
+/**
+ * New Build System CLI
+ * Step-by-step incremental build pipeline
+ */
+
 import select from '@inquirer/select'
 import checkbox from '@inquirer/checkbox'
-import { buildTask, getProjectChoices, getTaskChoices, startTask, xTask } from '~/scripts/tasks'
-import { getAffected } from '~/scripts/common/git'
-import { projects } from '~/scripts/now'
-import { coverageTest, testProjects } from '~/scripts/tasks/task.test'
-import { bench } from '~/scripts/common/bench'
-import { Log } from '~/scripts/log'
-import { dev } from '~/scripts/tasks/task.dev'
+import * as path from 'path'
+import * as fs from 'fs'
 
-async function start() {
+// ASCII art logo
+const LOGO = `
+      o
+       o
+     ___
+     | |
+     | |
+     |o|
+    .' '.
+   /  o  \\
+  :____o__:
+  '._____.'
+`
+
+/**
+ * V6 packages ready for build
+ */
+const V6_PACKAGES = ['quark', 'nucl', 'rune'] as const
+
+async function main() {
   console.clear()
-  const fullBench = bench()
-  const allProjects = Object.values(projects)
-  const affectedList = await getAffected()
-  const affectedObj = affectedList.map((id) => projects[id])
-  const affectedStr = affectedList.join(', ')
+  console.log(LOGO)
 
-  let selectedTask
-  switch (process.argv[2]) {
-    case 'build':
-      return await startTask(buildTask, [projects['vue'], projects['alak'], projects['nucleus'], projects['atom']])
-    case 'cover':
-      return coverageTest()
-    case 'test':
-      return testProjects(allProjects)
-    case 'dev':
-      return dev()
-    case 'up':
-      selectedTask = getTaskChoices(affectedStr)[0].value
-    case 'x':
-      return await startTask(xTask, [projects['alak'], projects['atom']])
-  }
-  if (!selectedTask) {
-    selectedTask = await select({
-      message: 'Select a task',
-      choices: getTaskChoices(affectedStr),
-    })
+  // Quick commands
+  const quickCommand = process.argv[2]
+  if (quickCommand === 'gen-pkg') {
+    return await generatePackageJson()
   }
 
-  let selectedProjects: any = selectedTask.affected ? affectedObj : Object.values(projects)
+  // Main menu
+  const task = await select({
+    message: 'Select a task',
+    choices: [
+      {
+        name: 'Generate package.json',
+        description: 'Auto-generate package.json for v6 packages',
+        value: 'gen-pkg'
+      },
+      {
+        name: 'Test (old system)',
+        description: 'Run tests using existing test runner',
+        value: 'test-old'
+      },
+    ]
+  })
 
-  if (selectedTask.selectProjectsDialog) {
-    selectedProjects = await select({
-      message: 'Select a project',
-      choices: getProjectChoices(affectedObj, affectedStr),
-    })
-
-    if (!selectedProjects) {
-      selectedProjects = await checkbox({
-        message: 'Select a project',
-        choices: Object.values(projects).map((p) => {
-          return {
-            name: p.packageJson.name,
-            description: p.packageJson.description,
-            value: p,
-          }
-        }),
-        pageSize: Object.keys(projects).length,
-      })
-    }
+  switch (task) {
+    case 'gen-pkg':
+      await generatePackageJson()
+      break
+    case 'test-old':
+      await runOldTests()
+      break
   }
-  await startTask(selectedTask, selectedProjects)
-  Log.info('total time ', fullBench())
 }
 
-start()
+/**
+ * Generate package.json for v6 packages
+ */
+async function generatePackageJson() {
+  console.log('\n📦 Generating package.json for v6 packages...\n')
 
-// import { Log } from './log'
-// import * as fs from 'fs'
-// import { Const } from './common/constants'
-// import { initProject } from './common/project'
-// import { compile } from './task.compile'
-//
-// import * as color from 'colorette'
-// import { publish, upver } from './task.publish'
-// import { test } from './task.test'
-// import { syncDeps } from '~/scripts/task.syncDeps'
-// import { push } from '~/scripts/task.push'
-// import { initGit } from '~/scripts/common/git'
-// import { getLine } from '~/scripts/common/oneLine'
-// import * as process from 'process'
-// import { doc } from '~/scripts/common/doc'
-//
-// const task = process.argv[2] || 'test'
-//
-// const commit = {
-//   name: 'commit',
-//   isCommit: true,
-// }
-//
-// const pre = [upver, syncDeps, test, compile]
-// const up = [upver, syncDeps, test, compile, publish, commit]
-// const pipeLines = { pre, up }
-//
-// const tasks = {
-//   compile,
-//   upver,
-//   publish,
-//   test,
-//   doc,
-//   sync: syncDeps,
-//   commit,
-// }
-//
-// const taskName = task.toLowerCase()
-// const job = {
-//   projects: [],
-//   pipeLine: tasks[taskName] ? [tasks[taskName]] : pipeLines[taskName],
-// }
-// if (!job.pipeLine?.length) {
-//   console.log(`
-// (╯°□°)╯︵ ${task}
-// `)
-//   Log.error(`not found pipeline/task`, `${task}`.toUpperCase())
-//   Log('Commands', Object.keys(tasks))
-//   Log('Pipelines', Object.keys(pipeLines))
-//   throw 'wrong command'
-// }
-//
-// const packs = fs.readdirSync(Const.PACKAGES)
-// const projects = {}
-// export const versions = {}
-//
-// packs.forEach((f) => {
-//   const p = initProject(f)
-//   if (p) {
-//     projects[f] = p
-//     versions[p.packageJson.name] = p.packageJson.version
-//   }
-// })
-//
-// function getProject(target) {
-//   const p = projects[target]
-//   if (!p) {
-//     console.log(`
-// (╯°□°)╯︵ ${target}
-// `)
-//     Log.error(`not found project`, `${target}`.toUpperCase())
-//     process.exit()
-//   }
-//   return p
-// }
-//
-// initGit(projects).then(async (git) => {
-//   let changes = git.affected.join(',')
-//   if (!changes) {
-//     Log.info('no one changes')
-//   }
-//   const target = (function () {
-//     switch (task) {
-//       case 'commit':
-//         return process.argv[3]
-//       case 'test':
-//         return Object.keys(projects).join(',')
-//       default :
-//         return process.argv[3] ? process.argv[3] : changes
-//     }
-//   })()
-//
-//   console.log(`
-//       o
-//        o
-//      ___
-//      | |
-//      | |
-//      |o|
-//     .' '.
-//    /  o  \\
-//   :____o__:
-//   '._____.'`)
-//
-//   console.log(color.dim('tasks'), '\t\t', color.bold(task.toUpperCase()))
-//   console.log('\t\t', color.bold(target))
-//
-//   const targets = target.toLowerCase().split(',')
-//   if (targets.length) {
-//     job.projects = targets.map(getProject)
-//   } else {
-//     job.projects.push(getProject(target))
-//   }
-//
-//   async function runPipeLine() {
-//     for (const t of job.pipeLine) {
-//       Log(color.bold( t.name), )
-//       if (t.isCommit) {
-//         await git.commit(task == 'commit' ? process.argv[3] : false)
-//       } else {
-//         await Promise.all(job.projects.map(t))
-//       }
-//     }
-//   }
-//
-//   await runPipeLine()
-//   Log(color.bold('Complete'))
-// })
+  // Import generator
+  const { PackageJsonGenerator, detectEntryPoints, readRootPackageJson } = await import('./generators/PackageJsonGenerator')
+
+  for (const pkgName of V6_PACKAGES) {
+    const sourceDir = path.join(process.cwd(), 'packages', pkgName)
+    const artifactsDir = path.join(process.cwd(), 'artifacts', pkgName)
+
+    if (!fs.existsSync(sourceDir)) {
+      console.log(`⚠️  ${pkgName}: package not found, skipping`)
+      continue
+    }
+
+    const sourcePackageJsonPath = path.join(sourceDir, 'package.json')
+    if (!fs.existsSync(sourcePackageJsonPath)) {
+      console.log(`⚠️  ${pkgName}: package.json not found, skipping`)
+      continue
+    }
+
+    // Read source package.json
+    const sourcePackageJson = JSON.parse(
+      fs.readFileSync(sourcePackageJsonPath, 'utf-8')
+    )
+    const rootPackageJson = readRootPackageJson()
+
+    // Detect entry points
+    const entryPoints = detectEntryPoints(sourceDir)
+
+    console.log(`📦 ${pkgName}:`)
+    console.log(`   Entry points: ${entryPoints.map(e => e.exportPath).join(', ')}`)
+
+    // Generate package.json
+    const generator = new PackageJsonGenerator({
+      sourceDir,
+      artifactsDir,
+      sourcePackageJson,
+      rootPackageJson,
+      entryPoints
+    })
+
+    const generated = generator.generate()
+
+    // Save to artifacts
+    fs.mkdirSync(artifactsDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(artifactsDir, 'package.json'),
+      JSON.stringify(generated, null, 2)
+    )
+
+    console.log(`   ✅ Saved to artifacts/${pkgName}/package.json\n`)
+  }
+
+  console.log('✅ All package.json files generated!')
+}
+
+/**
+ * Run old test system
+ */
+async function runOldTests() {
+  console.log('\n🧪 Running tests with old system...\n')
+
+  // Import old test runner
+  const { testProjects } = await import('./tasks/task.test')
+
+  // Load old projects config
+  const { projects } = await import('./now')
+  const allProjects = Object.values(projects)
+
+  await testProjects(allProjects)
+}
+
+// Run CLI
+main().catch((error) => {
+  console.error('❌ Fatal error:', error)
+  process.exit(1)
+})

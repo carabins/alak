@@ -20,6 +20,7 @@ import {
 } from '@alaq/nucleus/events'
 import { createNucleus, nucleonExtensions } from './create'
 import { alive } from './utils'
+
 export { QuarkEventBus, Q } from '@alaq/nucleus/bus'
 
 export const installNucleonExtensions = nucleonExtensions
@@ -52,3 +53,7 @@ export const N = Object.assign(createNucleus, {
 
 export const Nucleus = (globalThis['Nucleus'] = N)
 export default N
+
+// Экспортируем API плагинов
+export { installPlugin, installPlugins } from './plugin'
+export type { NucleusPlugin } from './plugin'

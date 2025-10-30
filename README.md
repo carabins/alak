@@ -1,8 +1,8 @@
 # Alak
 
-> Реактивная система управления состоянием для JavaScript/TypeScript
+> Проактивная система управления состоянием для JavaScript/TypeScript
 
-Alak — это библиотека управления состоянием с реактивностью, типизацией и dependency injection.
+Alak — это библиотека управления состоянием с проактивностью, типизацией и dependency injection.
 
 ## Установка
 
@@ -76,11 +76,11 @@ Q('counterActions')  // → методы модели
 ├─────────────────────────────────────┤
 │        Atom (@alaq/atom)            │  ← State management
 ├─────────────────────────────────────┤
-│      Nucleus (@alaq/nucleus)        │  ← Реактивный примитив
+│      Nucleus (@alaq/nucleus)        │  ← Проактивный примитив
 └─────────────────────────────────────┘
 ```
 
-### Nucleus — реактивный контейнер
+### Nucleus — проактивный контейнер
 
 ```typescript
 import { N } from '@alaq/nucleus'
@@ -155,7 +155,7 @@ const core = Q('counterCore') // ✅ Автодополнение работае
 |-------|----------|
 | `alak` | Union система с DI |
 | `@alaq/atom` | State management |
-| `@alaq/nucleus` | Реактивный примитив |
+| `@alaq/nucleus` | Проактивный примитив |
 | `@alaq/vue` | Vue 3 интеграция |
 
 ## Документация

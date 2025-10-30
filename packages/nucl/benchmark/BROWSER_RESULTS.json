@@ -1,0 +1,120 @@
+{
+  "timestamp": 1761843722159,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+  "results": [
+    {
+      "name": "Create empty",
+      "quark": {
+        "opsPerMs": 12658.23
+      },
+      "nucl": {
+        "opsPerMs": 6849.32
+      },
+      "plugins": {
+        "opsPerMs": 6802.72
+      },
+      "heavy": {
+        "opsPerMs": 7462.69
+      }
+    },
+    {
+      "name": "Create with value",
+      "quark": {
+        "opsPerMs": 14492.75
+      },
+      "nucl": {
+        "opsPerMs": 6410.26
+      },
+      "plugins": {
+        "opsPerMs": 6535.95
+      },
+      "heavy": {
+        "opsPerMs": 6493.51
+      }
+    },
+    {
+      "name": "Get value",
+      "quark": {
+        "opsPerMs": 14619.88
+      },
+      "nucl": {
+        "opsPerMs": 6561.68
+      },
+      "plugins": {
+        "opsPerMs": 6544.5
+      },
+      "heavy": {
+        "opsPerMs": 6468.31
+      }
+    },
+    {
+      "name": "Set value",
+      "quark": {
+        "opsPerMs": 13215.86
+      },
+      "nucl": {
+        "opsPerMs": 6147.54
+      },
+      "plugins": {
+        "opsPerMs": 6329.11
+      },
+      "heavy": {
+        "opsPerMs": 5769.23
+      }
+    },
+    {
+      "name": "Add listener",
+      "quark": {
+        "opsPerMs": 13157.89
+      },
+      "nucl": {
+        "opsPerMs": 6172.84
+      },
+      "plugins": {
+        "opsPerMs": 6097.56
+      },
+      "heavy": {
+        "opsPerMs": 6097.56
+      }
+    },
+    {
+      "name": "Notify 1 listener",
+      "quark": {
+        "opsPerMs": 10638.3
+      },
+      "nucl": {
+        "opsPerMs": 5555.56
+      },
+      "plugins": {
+        "opsPerMs": 5747.13
+      },
+      "heavy": {
+        "opsPerMs": 5813.95
+      }
+    },
+    {
+      "name": "Notify 5 listeners",
+      "quark": {
+        "opsPerMs": 7142.86
+      },
+      "nucl": {
+        "opsPerMs": 4411.76
+      },
+      "plugins": {
+        "opsPerMs": 4225.35
+      },
+      "heavy": {
+        "opsPerMs": 4109.59
+      }
+    }
+  ],
+  "summary": {
+    "avgQuark": 12275.11,
+    "avgNucl": 6015.565714285715,
+    "avgPlugins": 6040.331428571429,
+    "avgHeavy": 6030.691428571428,
+    "nuclDelta": "-50.99",
+    "pluginsDelta": "-50.79",
+    "heavyDelta": "-50.87"
+  }
+}

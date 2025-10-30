@@ -2,9 +2,8 @@ import { Project } from '../common/project'
 import * as path from 'path'
 import * as fs from 'fs'
 import { FileLog, Log } from '../log'
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process'
 
-import { Worker } from 'node:worker_threads'
 import { bench } from '~/scripts/common/bench'
 
 import * as process from 'process'
@@ -15,7 +14,10 @@ export async function devTestFile(f, project, trace) {
   const id = f.replace('.test.ts', '')
   const fp = `./packages/${project.dir}/test/${f}`
   return new Promise((done) => {
-    const child = exec('node -r @swc-node/register -r tsconfig-paths/register ' + fp)
+    const child = spawn('bun', [fp], {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      shell: true,
+    })
     const p = new Parser((results) => {
       trace.debug(results.time)
       if (results.failures) {
@@ -45,26 +47,41 @@ export async function testFileWorker(f, project, log) {
   return new Promise((resolve, reject) => {
     const id = f.replace('.test.ts', '')
     const fp = `./packages/${project.dir}/test/${f}`
-    const worker = new Worker(fp, {
-      stdout: true,
-      stderr: true,
-      name: f,
+
+    const child = spawn('bun', [fp], {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      shell: true,
     })
-    worker.stderr.on('data', (chunk) => {
+
+    let hasErrors = false
+
+    child.stderr.on('data', (chunk) => {
       log.warn(id + ' : ' + chunk.toString())
+      hasErrors = true
     })
-    worker.on('error', (code) => {
-      log.error(id)
+
+    child.stdout.on('data', (chunk) => {
+      // Capture test output to check for failures
+      const output = chunk.toString()
+      if (output.includes('FAIL') || output.includes('✖')) {
+        hasErrors = true
+      }
     })
-    worker.on('exit', (fall) => {
-      if (!fall) {
+
+    child.on('error', (error) => {
+      log.error(id, error.message)
+      hasErrors = true
+    })
+
+    child.on('exit', (code) => {
+      if (code === 0 && !hasErrors) {
         resolve(false)
         log.trace('PASS', id)
       } else {
         resolve(fp)
+        log.error('FAIL', id)
       }
     })
-    // console.log(worker.emit("exit"))
   })
 }
 

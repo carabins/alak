@@ -1,34 +1,30 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import N, { Q } from '@alaq/nucleus/index'
 
 const startValue = 'startValue'
 const finalValue = 'finalValue'
 
-const beStart = (t) => (v) => t.equal(v, startValue)
-const beFinal = (t) => (v) => t.equal(v, finalValue)
-// const neverBe = (v) => expect(v).toThrow
+const beStart = (v) => expect(v).toBe(startValue)
+const beFinal = (v) => expect(v).toBe(finalValue)
 
-test('basic', (t) => {
-  t.plan(4)
+test('basic', () => {
   let n = N()
-  t.equal(n.haveListeners, false)
+  expect(n.haveListeners).toBe(false)
   n.up((v) => {
-    t.equal(v, startValue)
+    expect(v).toBe(startValue)
   })
   n(startValue)
-  t.equal(n.value, startValue)
-  t.equal(n.haveListeners, true)
-  t.end()
+  expect(n.value).toBe(startValue)
+  expect(n.haveListeners).toBe(true)
 })
 
-test('bus', (t) => {
-  t.plan(4)
+test('bus', () => {
   const listener = (data) => {
-    t.equal(data, 'z')
+    expect(data).toBe('z')
   }
   const everyThingListener = (event, data) => {
-    t.equal(data, 'z')
-    t.equal(event, 'every')
+    expect(data).toBe('z')
+    expect(event).toBe('every')
   }
   let q = Q()
   q.addEverythingListener(everyThingListener)
@@ -43,10 +39,9 @@ test('bus', (t) => {
 
   q.addEverythingListener(everyThingListener)
   q.dispatchEvent('every', 'z')
-  t.end()
 })
 
-test('bus connections', (t) => {
+test('bus connections', () => {
   const a = Q()
   const b = Q()
 
@@ -56,5 +51,4 @@ test('bus connections', (t) => {
   })
 
   b.dispatchEvent('E1', 1)
-  t.end()
 })

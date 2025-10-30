@@ -1,6 +1,6 @@
 import { mixed, saved, tag, wrap } from '@alaq/atom/property'
 import { Atom } from '@alaq/atom/index'
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 
 const sqrtWrapper = (v) => v * v
 const sqrtArrayWrapper = (a) => a.map(sqrtWrapper)
@@ -16,22 +16,20 @@ const a = Atom({
   model: AllPropertyModel,
 })
 
-test('property', (t) => {
+test('property', () => {
   a.core.a.up((v) => {
-    t.equal(v, 9)
+    expect(v).toBe(9)
   })
   a.core.a(3)
-  t.equal(a.state.a, 9)
-  t.equal(a.state.b, 4)
+  expect(a.state.a).toBe(9)
+  expect(a.state.b).toBe(4)
   a.core.b.up((v) => {
-    t.equal(v, 4)
+    expect(v).toBe(4)
   })
-  t.end()
 })
 
-test('tags', (t) => {
-  t.ok(a.core.d.hasMeta('tag'))
-  t.equal(a.core.d.getMeta('tag'), 'zz')
-  t.equal(a.state.d, 10)
-  t.end()
+test('tags', () => {
+  expect(a.core.d.hasMeta('tag')).toBeTruthy()
+  expect(a.core.d.getMeta('tag')).toBe('zz')
+  expect(a.state.d).toBe(10)
 })

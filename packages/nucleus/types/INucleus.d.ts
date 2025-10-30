@@ -304,19 +304,6 @@ interface INucleus<T> {
   injectTo(targetObject: any, key?: string): INucleus<T>
 
   /**
-   * Создать нуклон из нескольких других нуклонов и стратегии вычисления.
-   * @param nucleons - набор входных нуклонов для вычисления значения
-   * @returns {@link ext-computed#ComputeStrategy}
-   */
-  from<IN extends INucleus<any>[]>(...nucleons: IN): ComputeStrategicNucleon<IN>
-
-  /**
-   * Список производных нуклонов {@link from}
-   * @returns INucleus<any>[]
-   */
-  parents: INucleus<any>[]
-
-  /**
    * Подписать текущий нуклон на друой нуклон
    * Отписав его от прошлой настройки
    * Работает как переключить источник
@@ -331,3 +318,11 @@ interface INucleus<T> {
 
   haveListeners: boolean
 }
+
+/**
+ * INucleus с методами плагинов
+ * @remarks
+ * Этот интерфейс объединяет базовые методы INucleus с методами,
+ * добавленными через плагины (INucleusPluginMethods)
+ */
+interface INucleus<T> extends INucleusPluginMethods<T> {}

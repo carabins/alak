@@ -16,10 +16,23 @@ export type Project = {
   copyToArt(filename: string)
   resolveInPackage(name: string): string
   savePackageJsonTo: {
-    art(): void
+    artifacts(): void
     source(): void
   }
 }
+
+function pick(obj, ...keys) {
+  const result = {};
+
+  for (const key of keys) {
+    if (key in obj) {
+      result[key] = obj[key];
+    }
+  }
+
+  return result;
+}
+
 
 export function initProject(dir) {
   const log = FileLog('project:' + dir)
@@ -46,14 +59,20 @@ export function initProject(dir) {
         copyFileSync(filePath(Const.PACKAGES), filePath(Const.ARTIFACTS))
       },
       savePackageJsonTo: {
-        art() {
+        artifacts() {
+
+          packageJson.repository = "https://github.com/carabins/alak"
           writeFileSync(path.resolve(artPatch, Const.PK_JSON), JSON.stringify(packageJson, null, 4))
         },
         source() {
-          writeFileSync(
-            path.resolve(packagePath, Const.PK_JSON),
-            JSON.stringify(packageJson, null, 4),
-          )
+
+            // path.resolve(packagePath, Const.PK_JSON),
+            const clearJson = pick(packageJson, "name", "version", "description", "keywords")
+
+
+            writeFileSync(path.resolve(packagePath, Const.PK_JSON), JSON.stringify(clearJson, null, 4))
+            // JSON.stringify(packageJson, null, 4),
+
         },
       },
     } as Project

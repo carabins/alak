@@ -19,5 +19,5 @@ export async function upver(project: Project) {
   log('set version', nv)
   project.packageJson.version = nv
   versions[project.packageJson.name] = nv
-  // project.savePackageJsonTo.art()
+  project.savePackageJsonTo.source()
 }

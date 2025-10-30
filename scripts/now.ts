@@ -1,6 +1,6 @@
 import fs from 'fs'
-import { Const } from '~/scripts/common/constants'
-import { initProject, Project } from '~/scripts/common/project'
+import { Const } from './common/constants.js'
+import { initProject, Project } from './common/project.js'
 
 export const versions = {} as Record<string, string>
 export const projects = {} as Record<string, Project>

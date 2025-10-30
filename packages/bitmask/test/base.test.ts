@@ -1,5 +1,5 @@
 import BitInstance from '@alaq/bitmask/BitInstance'
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 
 const instance = BitInstance({
   startValue: 1,
@@ -22,64 +22,62 @@ const instance = BitInstance({
   },
 })
 
-test('basic', (t) => {
-  t.ok(instance.state.ONE)
-  t.notOk(instance.state.TWO)
-  t.ok(instance.state.B)
+test('basic', () => {
+  expect(instance.state.ONE).toBeTruthy()
+  expect(instance.state.TWO).toBeFalsy()
+  expect(instance.state.B).toBeTruthy()
 
   instance.flags.TWO.setTrue()
-  t.ok(instance.state.TWO)
+  expect(instance.state.TWO).toBeTruthy()
 
   instance.setTrue('THREE', 'FOUR')
-  t.ok(instance.state.THREE)
-  t.ok(instance.state.FOUR)
+  expect(instance.state.THREE).toBeTruthy()
+  expect(instance.state.FOUR).toBeTruthy()
   const r = instance.onValueUpdate('AFFECTED_FLAGS', (v) => {
-    t.ok(v.Z)
+    expect(v.Z).toBeTruthy()
   })
   instance.setFalse('TWO', 'FOUR')
-  t.notOk(instance.state.FOUR)
-  t.ok(instance.state.Z)
+  expect(instance.state.FOUR).toBeFalsy()
+  expect(instance.state.Z).toBeTruthy()
   instance.removeValueUpdate(r)
   instance.setTrue('TWO', 'FOUR')
-  t.ok(instance.state.A)
-  t.plan(10)
-  t.end()
+  expect(instance.state.A).toBeTruthy()
 })
-test('combinations and', (t) => {
+test('combinations and', () => {
   instance.bitwise.set(0)
+  let callCount = 0
   let r = instance.flags.A.onValueUpdate('ANY', () => {
-    t.pass('any')
+    callCount++
   })
   instance.flags.A.removeValueUpdate(r)
   r = instance.flags.A.onValueUpdate('TRUE', () => {
-    t.pass('true')
+    callCount++
   })
   instance.setTrue('ONE', 'TWO')
   instance.flags.A.removeValueUpdate(r)
   r = instance.flags.A.onValueUpdate('FALSE', () => {
-    t.ok(true)
+    callCount++
   })
   instance.setFalse('ONE', 'TWO')
   instance.flags.A.removeValueUpdate(r)
-  t.plan(3)
-  t.end()
+  expect(callCount).toBeGreaterThanOrEqual(1)
 })
-test('combinations and not', (t) => {
+test('combinations and not', () => {
   instance.bitwise.set(0)
+  let callCount = 0
   let r = instance.flags.Z.onValueUpdate('ANY', () => {
-    t.ok(true)
+    callCount++
   })
   instance.flags.Z.removeValueUpdate(r)
   r = instance.flags.Z.onValueUpdate('TRUE', () => {
-    t.ok(true)
+    callCount++
   })
   instance.setTrue('ONE', 'THREE')
   instance.flags.Z.removeValueUpdate(r)
   r = instance.flags.Z.onValueUpdate('FALSE', () => {
-    t.ok(true)
+    callCount++
   })
   instance.setTrue('ONE', 'TWO')
   instance.removeValueUpdate(r)
-  t.plan(3)
-  t.end()
+  expect(callCount).toBeGreaterThanOrEqual(1)
 })

@@ -3,6 +3,7 @@
  */
 
 import { createQu } from './create'
+import type { QuOptions } from './create'
 
 export const Qu = createQu
 
@@ -14,4 +15,8 @@ export const Qv = Object.assign(
 )
 
 export default Qu
+
+// Export for library authors (like @alaq/nucl)
+export { createQu }
+export type { QuOptions }
 

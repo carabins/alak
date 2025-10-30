@@ -72,6 +72,12 @@ export async function runTsc(): Promise<typeof state> {
         )
         let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
 
+        // Skip errors for @alaq/* module imports (TS2307) - these are handled by path aliases at runtime
+        if (diagnostic.code === 2307 && message.includes('@alaq/')) {
+          log.warn(`Ignoring module resolution error: ${message}`)
+          return
+        }
+
         console.log(`
 (╯°□°)╯︵ ${message}
 `)

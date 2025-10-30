@@ -1,20 +1,12 @@
 {
     "name": "@alaq/bitmask",
-    "version": "0.1.4",
+    "version": "0.1.27",
     "description": "Alak bitmask",
-    "main": "index.js",
-    "types": "index.d.ts",
-
     "keywords": [
         "alak",
         "streams",
         "channels",
         "dataflow",
         "flow"
-    ],
-    "author": "Gleb Panteleev",
-    "license": "TVR",
-    "repository": "https://github.com/carabins/alak",
-    "typings": "index.d.ts",
-    "unpkg": "lib/es.js"
+    ]
 }

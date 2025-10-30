@@ -1,4 +1,4 @@
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { coreAtom } from '@alaq/atom/index'
 
 const model = {
@@ -17,30 +17,28 @@ class Model {
 
 type FilteredKeys<T> = FilterNotStartingWith<keyof T, '_'>
 type NewOrigin<T> = Pick<T, FilteredKeys<T>>
-function baseTest(t, m) {
-  t.plan(2)
+function baseTest(m) {
   m.state.up((v) => {
-    t.equal(v, 10)
+    expect(v).toBe(10)
   })
   m.state(10)
-  t.equal(m.other.value, 30)
+  expect(m.other.value).toBe(30)
 }
 
-test('pure one atom: object ', async (t) => {
+test('pure one atom: object ', async () => {
   const m = coreAtom(model)
-  baseTest(t, m)
+  baseTest(m)
 })
 
-test('pure atom one', async (t) => {
+test('pure atom one', async () => {
   const m = coreAtom(Model)
-  baseTest(t, m)
+  baseTest(m)
 })
 
-test('private model atom ', async (t) => {
+test('private model atom ', async () => {
   const m = coreAtom(Model)
   m.privateOther.up((v) => {
-    t.ok(v === 90 || v === 60)
+    expect(v === 90 || v === 60).toBeTruthy()
   })
   m.other(20)
-  t.end()
 })
