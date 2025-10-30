@@ -432,7 +432,7 @@ quark.id            // string | undefined - пользовательский id
 quark._flags        // number - bit flags состояния
 quark._realm        // string | undefined - realm name
 quark._realmPrefix  // string | undefined - realm + ':'
-quark.listeners     // Set<Function> | null - lazy init
+quark.listeners     // Array<Function> | null - lazy init
 quark._events       // Map<string, Set<Function>> | null - lazy init
 quark._eventCounts  // Record<string, number> | null - lazy init
 quark._pipeFn       // Function | null - pipe function
@@ -471,21 +471,35 @@ if (quark._flags === WAS_SET) {
 
 Текущая реализация использует:
 
-1. **Lazy Initialization** - структуры создаются только когда нужны
+1. **Hybrid Initialization** - минимальная инициализация полей для оптимальной производительности в разных JS движках
+   - Всегда: `uid`, `_flags`
+   - Условно: `value`, `id`, `realm`, `_realmPrefix`, `_pipeFn`
+   - Lazy: `listeners`, `_events`, `_eventCounts`, `_wildcardListeners`
+
 2. **Bit Flags** - O(1) проверки состояния вместо множественных if
+
 3. **Event Counts Cache** - O(1) проверка `hasListeners(event)`
-4. **Fast Paths** - оптимизированные ветки для частых случаев
-5. **Function + Prototype** - 7.6x быстрее чем Proxy
 
-Планируемые оптимизации (см. PERFORMANCE.md):
-- Monomorphic shapes
-- Inline listeners array (вместо Set)
-- Pre-allocated event data
-- Object pooling
-- Remove setPrototypeOf
+4. **Fast Paths** - оптимизированные ветки для частых случаев:
+   - Только `WAS_SET` (без listeners/events)
+   - Только `HAS_LISTENERS | WAS_SET`
 
-**Текущий baseline:** 3ms для 100k операций
-**Цель:** <2ms для 100k операций
+5. **Array Listeners** - вместо Set для <10 listeners (избегаем overhead)
+
+6. **Single Parameter Setter** - `quark(value)` вместо `quark(...args)` (избегаем rest params)
+
+7. **Direct Property Access** - `quark.value` для чтения (быстрее чем function call)
+
+8. **Function + Prototype** - быстрее чем Proxy
+
+**Результаты (Bun 1.3.0):**
+- 10,824 ops/ms среднее
+- 425,713 ops/ms для Get value
+- 268,031 ops/ms для Set value (no listeners)
+
+**Результаты (Browser Chrome):**
+- +8.1% улучшение vs baseline
+- Hybrid инициализация оптимальна для V8 в браузере
 
 ---
 
@@ -646,30 +660,40 @@ console.log(bus.value)  // undefined (значение не сохраняетс
 
 | Особенность | nucleus | quark |
 |-------------|---------|-------|
-| Размер | ~4KB | ~2KB (цель) |
-| API методов | 20+ | 12 core |
+| Размер бандла | ~4KB | ~10KB (IIFE) |
+| API методов | 20+ | 13 core |
 | Proxy | Да | Нет (Function+Prototype) |
 | Event bus | Нет | Да (встроен) |
-| Realms | Нет | Да |
-| Плагины | Нет | Да |
-| Производительность | Baseline | 7.6x быстрее |
-| Filters | Да (core) | Нет (plugin) |
+| Realms | Нет | Да (quantum bus) |
+| Плагины | Нет | Да (в разработке) |
+| Производительность | Baseline | Значительно быстрее |
+| Filters | Да (core) | Нет (через pipe) |
 | Computed | Да (core) | Нет (plugin) |
+| Wildcards | Нет | Да (`*`, `*:*`) |
+| Cross-realm | Нет | Да |
 
 ---
 
 ## Статус реализации
 
-- [ ] Core создание (createQu)
-- [ ] Прототип методы (up/down/silent)
-- [ ] События (on/off/once/emit)
-- [ ] Quantum bus
-- [ ] Realms
-- [ ] pipe функциональность
-- [ ] dedup функциональность
-- [ ] stateless функциональность
-- [ ] Bit flags оптимизация
-- [ ] Fast paths в setValue
-- [ ] TypeScript типы
-- [ ] Тесты
-- [ ] Система плагинов
+- [x] Core создание (createQu)
+- [x] Qv alias
+- [x] Прототип методы (up/down/silent)
+- [x] События (on/off/once/emit)
+- [x] Quantum bus
+- [x] Realms
+- [x] pipe функциональность
+- [x] dedup функциональность
+- [x] stateless функциональность
+- [x] Bit flags оптимизация
+- [x] Fast paths в setValue
+- [x] Hybrid initialization
+- [x] Array listeners вместо Set
+- [x] Single parameter setter
+- [x] Direct property access для .value
+- [x] TypeScript типы
+- [x] Тесты (100% coverage, 37 тестов)
+- [x] Node.js тесты
+- [x] Browser тесты
+- [x] Бенчмарки (Bun, Node.js, Browser)
+- [ ] Система плагинов (в разработке)
