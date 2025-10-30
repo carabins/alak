@@ -1,8 +1,25 @@
-# Quark Baseline Performance Results
+# Quark Performance Results
+
+**Last Updated:** 30.10.2025
+**Runtimes:** Bun 1.3.0, Node.js v24.10.0, Browser
+**Platform:** win32 (x64)
+
+## 🌐 Browser Benchmark
+
+For interactive browser performance comparison:
+```bash
+cd packages/quark
+bun run bench:browser
+```
+
+This opens a visual benchmark comparing the current optimized version against baseline (commit d1b27de).
+
+---
+
+## 🔥 Bun Runtime Benchmark
 
 **Date:** 30.10.2025, 05:06:28
 **Runtime:** Bun 1.3.0
-**Platform:** win32 (x64)
 
 ## Summary
 
