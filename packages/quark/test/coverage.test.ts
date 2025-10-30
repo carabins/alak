@@ -229,10 +229,8 @@ test('Coverage: silent', () => {
 
   // count = 0 (up не вызвал listener т.к. нет значения)
 
-  q.silent(() => {
-    q(10)
-    q(20)
-  })
+  q.silent(10)
+  q.silent(20)
 
   if (count !== 0) throw new Error('silent should prevent notifications')
   if (q.value !== 20) throw new Error('silent should still set value')

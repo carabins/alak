@@ -160,7 +160,7 @@ bun run bench:browser
 - `count.emit(event, data)` - отправить событие
 - `count.pipe(fn)` - валидация/трансформация
 - `count.dedup(true)` - включить дедупликацию
-- `count.silent(() => {})` - изменить без уведомлений
+- `count.silent(value)` - изменить без уведомлений
 
 Полный API: [API.md](./API.md)
 

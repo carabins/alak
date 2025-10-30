@@ -418,11 +418,9 @@
         q.up(() => count++);
         assert(count === 1, 'Immediate call');
 
-        q.silent(() => {
-          q(10);
-          q(20);
-          q(30);
-        });
+        q.silent(10);
+        q.silent(20);
+        q.silent(30);
 
         assert(count === 1, 'silent() should block notifications');
         assert(q.value === 30, 'Value should still be updated');
