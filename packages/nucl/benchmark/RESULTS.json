@@ -1,5 +1,5 @@
 {
-  "timestamp": 1761844098912,
+  "timestamp": 1761846060799,
   "runtime": "Bun 1.3.0",
   "platform": "win32",
   "arch": "x64",
@@ -8,289 +8,289 @@
       "quark": {
         "name": "Create empty (Quark)",
         "ops": 100000,
-        "time": 6.3,
-        "opsPerMs": 15861.18
+        "time": 7.01,
+        "opsPerMs": 14273.48
       },
       "nucl": {
         "name": "Create empty (Nucl)",
         "ops": 100000,
-        "time": 10.61,
-        "opsPerMs": 9426.4
+        "time": 8.66,
+        "opsPerMs": 11543.21
       },
       "nuclWithPlugins": {
         "name": "Create empty (Nucl+plugins)",
         "ops": 100000,
-        "time": 6.7,
-        "opsPerMs": 14923.37
+        "time": 6.46,
+        "opsPerMs": 15471.25
       },
       "heavyNucl": {
         "name": "Create empty (HeavyNucl)",
         "ops": 100000,
-        "time": 4.52,
-        "opsPerMs": 22104.33
+        "time": 3.17,
+        "opsPerMs": 31547.73
       },
       "overhead": {
-        "nucl": "40.57%",
-        "nuclWithPlugins": "5.91%",
-        "heavyNucl": "-39.36%"
+        "nucl": "19.13%",
+        "nuclWithPlugins": "-8.39%",
+        "heavyNucl": "-121.02%"
       }
     },
     {
       "quark": {
         "name": "Create with value (Quark)",
         "ops": 100000,
-        "time": 8.68,
-        "opsPerMs": 11517.42
+        "time": 8.85,
+        "opsPerMs": 11300.46
       },
       "nucl": {
         "name": "Create with value (Nucl)",
         "ops": 100000,
-        "time": 6.49,
-        "opsPerMs": 15401.68
+        "time": 3.98,
+        "opsPerMs": 25126.89
       },
       "nuclWithPlugins": {
         "name": "Create with value (Nucl+plugins)",
         "ops": 100000,
-        "time": 4.99,
-        "opsPerMs": 20034.46
+        "time": 2.78,
+        "opsPerMs": 36034.74
       },
       "heavyNucl": {
         "name": "Create with value (HeavyNucl)",
         "ops": 100000,
-        "time": 6.23,
-        "opsPerMs": 16061.68
+        "time": 3.89,
+        "opsPerMs": 25738.7
       },
       "overhead": {
-        "nucl": "-33.73%",
-        "nuclWithPlugins": "-73.95%",
-        "heavyNucl": "-39.46%"
+        "nucl": "-122.35%",
+        "nuclWithPlugins": "-218.88%",
+        "heavyNucl": "-127.77%"
       }
     },
     {
       "quark": {
         "name": "Create with object value (Quark)",
         "ops": 100000,
-        "time": 3.56,
-        "opsPerMs": 28079.63
+        "time": 3.55,
+        "opsPerMs": 28161.08
       },
       "nucl": {
         "name": "Create with object value (Nucl)",
         "ops": 100000,
-        "time": 6.23,
-        "opsPerMs": 16044.93
+        "time": 4.41,
+        "opsPerMs": 22678.82
       },
       "nuclWithPlugins": {
         "name": "Create with object value (Nucl+plugins)",
         "ops": 100000,
-        "time": 5.01,
-        "opsPerMs": 19942.57
+        "time": 3.11,
+        "opsPerMs": 32153.31
       },
       "heavyNucl": {
         "name": "Create with object value (HeavyNucl)",
         "ops": 100000,
-        "time": 5.75,
-        "opsPerMs": 17389.49
+        "time": 3.91,
+        "opsPerMs": 25585.26
       },
       "overhead": {
-        "nucl": "42.86%",
-        "nuclWithPlugins": "28.98%",
-        "heavyNucl": "38.07%"
+        "nucl": "19.47%",
+        "nuclWithPlugins": "-14.18%",
+        "heavyNucl": "9.15%"
       }
     },
     {
       "quark": {
         "name": "Get value (Quark)",
         "ops": 1000000,
-        "time": 74.41,
-        "opsPerMs": 13439.16
+        "time": 74.99,
+        "opsPerMs": 13334.99
       },
       "nucl": {
         "name": "Get value (Nucl)",
         "ops": 1000000,
-        "time": 46.11,
-        "opsPerMs": 21688.68
+        "time": 31.41,
+        "opsPerMs": 31833.75
       },
       "nuclWithPlugins": {
         "name": "Get value (Nucl+plugins)",
         "ops": 1000000,
-        "time": 47.37,
-        "opsPerMs": 21109.87
+        "time": 31.5,
+        "opsPerMs": 31742.2
       },
       "heavyNucl": {
         "name": "Get value (HeavyNucl)",
         "ops": 1000000,
-        "time": 46.64,
-        "opsPerMs": 21440.18
+        "time": 35.54,
+        "opsPerMs": 28139.92
       },
       "overhead": {
-        "nucl": "-61.38%",
-        "nuclWithPlugins": "-57.08%",
-        "heavyNucl": "-59.54%"
+        "nucl": "-138.72%",
+        "nuclWithPlugins": "-138.04%",
+        "heavyNucl": "-111.02%"
       }
     },
     {
       "quark": {
         "name": "Set value (Quark)",
         "ops": 500000,
-        "time": 37.9,
-        "opsPerMs": 13191.32
+        "time": 45.33,
+        "opsPerMs": 11029.27
       },
       "nucl": {
         "name": "Set value (Nucl)",
         "ops": 500000,
-        "time": 26.75,
-        "opsPerMs": 18691.17
+        "time": 17.82,
+        "opsPerMs": 28061.2
       },
       "nuclWithPlugins": {
         "name": "Set value (Nucl+plugins)",
         "ops": 500000,
-        "time": 26.12,
-        "opsPerMs": 19141.91
+        "time": 18.59,
+        "opsPerMs": 26895.17
       },
       "heavyNucl": {
         "name": "Set value (HeavyNucl)",
         "ops": 500000,
-        "time": 26.75,
-        "opsPerMs": 18690.19
+        "time": 17.9,
+        "opsPerMs": 27939.05
       },
       "overhead": {
-        "nucl": "-41.69%",
-        "nuclWithPlugins": "-45.11%",
-        "heavyNucl": "-41.69%"
+        "nucl": "-154.42%",
+        "nuclWithPlugins": "-143.85%",
+        "heavyNucl": "-153.32%"
       }
     },
     {
       "quark": {
         "name": "Set value repeatedly (Quark)",
         "ops": 100000,
-        "time": 10.42,
-        "opsPerMs": 9594.53
+        "time": 10.06,
+        "opsPerMs": 9943.22
       },
       "nucl": {
         "name": "Set value repeatedly (Nucl)",
         "ops": 100000,
-        "time": 8.31,
-        "opsPerMs": 12029.64
+        "time": 4.99,
+        "opsPerMs": 20027.24
       },
       "nuclWithPlugins": {
         "name": "Set value repeatedly (Nucl+plugins)",
         "ops": 100000,
-        "time": 6.7,
-        "opsPerMs": 14922.7
+        "time": 6.34,
+        "opsPerMs": 15763.42
       },
       "heavyNucl": {
         "name": "Set value repeatedly (HeavyNucl)",
         "ops": 100000,
-        "time": 7.58,
-        "opsPerMs": 13186.52
+        "time": 4.9,
+        "opsPerMs": 20426.92
       },
       "overhead": {
-        "nucl": "-25.38%",
-        "nuclWithPlugins": "-55.53%",
-        "heavyNucl": "-37.44%"
+        "nucl": "-101.42%",
+        "nuclWithPlugins": "-58.53%",
+        "heavyNucl": "-105.44%"
       }
     },
     {
       "quark": {
         "name": "Add listener (Quark)",
         "ops": 100000,
-        "time": 8.84,
-        "opsPerMs": 11312.22
+        "time": 10,
+        "opsPerMs": 9998.2
       },
       "nucl": {
         "name": "Add listener (Nucl)",
         "ops": 100000,
-        "time": 7.13,
-        "opsPerMs": 14024.07
+        "time": 5.17,
+        "opsPerMs": 19333.76
       },
       "nuclWithPlugins": {
         "name": "Add listener (Nucl+plugins)",
         "ops": 100000,
-        "time": 6.55,
-        "opsPerMs": 15270.67
+        "time": 3.82,
+        "opsPerMs": 26178.7
       },
       "heavyNucl": {
         "name": "Add listener (HeavyNucl)",
         "ops": 100000,
-        "time": 5.74,
-        "opsPerMs": 17432.84
+        "time": 5.22,
+        "opsPerMs": 19162.96
       },
       "overhead": {
-        "nucl": "-23.97%",
-        "nuclWithPlugins": "-34.99%",
-        "heavyNucl": "-54.11%"
+        "nucl": "-93.37%",
+        "nuclWithPlugins": "-161.83%",
+        "heavyNucl": "-91.66%"
       }
     },
     {
       "quark": {
         "name": "Notify 1 listener (Quark)",
         "ops": 100000,
-        "time": 10.82,
-        "opsPerMs": 9238.47
+        "time": 10.91,
+        "opsPerMs": 9162.21
       },
       "nucl": {
         "name": "Notify 1 listener (Nucl)",
         "ops": 100000,
-        "time": 8.59,
-        "opsPerMs": 11644.56
+        "time": 6.44,
+        "opsPerMs": 15524.58
       },
       "nuclWithPlugins": {
         "name": "Notify 1 listener (Nucl+plugins)",
         "ops": 100000,
-        "time": 7.59,
-        "opsPerMs": 13179.05
+        "time": 5.93,
+        "opsPerMs": 16867.67
       },
       "heavyNucl": {
         "name": "Notify 1 listener (HeavyNucl)",
         "ops": 100000,
-        "time": 7.38,
-        "opsPerMs": 13552.16
+        "time": 5.19,
+        "opsPerMs": 19265.22
       },
       "overhead": {
-        "nucl": "-26.04%",
-        "nuclWithPlugins": "-42.65%",
-        "heavyNucl": "-46.69%"
+        "nucl": "-69.44%",
+        "nuclWithPlugins": "-84.10%",
+        "heavyNucl": "-110.27%"
       }
     },
     {
       "quark": {
         "name": "Notify 5 listeners (Quark)",
         "ops": 50000,
-        "time": 8.21,
-        "opsPerMs": 6088.87
+        "time": 9.03,
+        "opsPerMs": 5537.22
       },
       "nucl": {
         "name": "Notify 5 listeners (Nucl)",
         "ops": 50000,
-        "time": 8.36,
-        "opsPerMs": 5979
+        "time": 9.04,
+        "opsPerMs": 5533.42
       },
       "nuclWithPlugins": {
         "name": "Notify 5 listeners (Nucl+plugins)",
         "ops": 50000,
-        "time": 6.95,
-        "opsPerMs": 7197.56
+        "time": 4.55,
+        "opsPerMs": 10996.26
       },
       "heavyNucl": {
         "name": "Notify 5 listeners (HeavyNucl)",
         "ops": 50000,
-        "time": 5.42,
-        "opsPerMs": 9223.22
+        "time": 5.11,
+        "opsPerMs": 9781.48
       },
       "overhead": {
-        "nucl": "1.80%",
-        "nuclWithPlugins": "-18.21%",
-        "heavyNucl": "-51.48%"
+        "nucl": "0.07%",
+        "nuclWithPlugins": "-98.59%",
+        "heavyNucl": "-76.65%"
       }
     }
   ],
   "summary": {
-    "avgQuark": 13146.977777777776,
-    "avgNucl": 13881.125555555556,
-    "avgPlugins": 16191.351111111111,
-    "avgHeavy": 16564.51222222222,
-    "avgNuclOverhead": "-5.58",
-    "avgPluginsOverhead": "-23.16",
-    "avgHeavyOverhead": "-25.99"
+    "avgQuark": 12526.681111111111,
+    "avgNucl": 19962.54111111111,
+    "avgPlugins": 23566.968888888892,
+    "avgHeavy": 23065.24888888889,
+    "avgNuclOverhead": "-59.36",
+    "avgPluginsOverhead": "-88.13",
+    "avgHeavyOverhead": "-84.13"
   }
 }

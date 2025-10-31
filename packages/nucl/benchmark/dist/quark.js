@@ -351,8 +351,17 @@ var Qv = Object.assign(function(value, options) {
 });
 var src_default = Qu;
 export {
+  setValue,
+  quarkProto,
   src_default as default,
   createQu,
+  WAS_SET,
+  STATELESS,
+  SILENT,
   Qv,
-  Qu
+  Qu,
+  HAS_REALM,
+  HAS_LISTENERS,
+  HAS_EVENTS,
+  DEDUP
 };

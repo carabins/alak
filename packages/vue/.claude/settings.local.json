@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//a/source/alak/packages/**)",
+      "Read(//a/source/alak/**)",
+      "Bash(npx tap:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix(vue): deep sync for objects and arrays\n\n- Added Vue watch with deep: true for nested object/array changes\n- Automatic watcher setup/cleanup for complex values\n- Fixed dedup with strict equality comparison\n- Added 15 comprehensive tests for sync scenarios\n- All tests passing (44/44)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr list:*)",
+      "Bash(winget install:*)",
+      "Bash(\"C:\\Program Files\\GitHub CLI\\gh.exe\" pr list --state open)",
+      "Bash(\"C:\\Program Files\\GitHub CLI\\gh.exe\" pr close 56 55 54 53 52 51 50 49 48 47 46 44 43 42 41)",
+      "Bash(for:*)",
+      "Bash(do \"C:\\Program Files\\GitHub CLI\\gh.exe\" pr close $pr --comment \"Closing outdated PR after major update to v5\")",
+      "Bash(done)",
+      "Bash(bun test:*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node node_modules/typescript/bin/tsc:*)",
+      "Bash(bun run:*)",
+      "Bash(timeout 30 bun run scripts/index.ts compile alak)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

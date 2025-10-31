@@ -1,0 +1,20 @@
+[install]
+# peer dependencies
+auto = true
+
+[run]
+# Use the project's node_modules
+prefer = "local"
+
+# Map TypeScript path aliases
+[run.paths]
+"alak/*" = ["./packages/alak/src/*"]
+"@alaq/atom/*" = ["./packages/atom/src/*"]
+"@alaq/nucleus/*" = ["./packages/nucleus/src/*"]
+"@alaq/quark" = ["./packages/quark/src/index.ts"]
+"@alaq/quark/*" = ["./packages/quark/src/*"]
+"@alaq/nucl" = ["./packages/nucl/src/index.ts"]
+"@alaq/nucl/*" = ["./packages/nucl/src/*"]
+"@alaq/rune/*" = ["./packages/rune/src/*"]
+"@alaq/bitmask/*" = ["./packages/bitmask/src/*"]
+"@alaq/datastruct/*" = ["./packages/datastruct/src/*"]

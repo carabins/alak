@@ -1,0 +1,28 @@
+{
+  "name": "@alaq/axial",
+  "version": "1.0.0",
+  "description": "UnoCSS plugin for axial semantics utility classes",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "bun run ../../scripts/index.ts build",
+    "dev": "bun run ../../scripts/index.ts build --watch"
+  },
+  "keywords": [
+    "unocss",
+    "plugin",
+    "layout",
+    "flexbox",
+    "utility",
+    "axial"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "unocss": "^0.50.0"
+  },
+  "devDependencies": {
+    "unocss": "^0.50.0"
+  }
+}

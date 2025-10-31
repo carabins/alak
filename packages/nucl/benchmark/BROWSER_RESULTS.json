@@ -1,120 +1,120 @@
 {
-  "timestamp": 1761843722159,
-  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+  "timestamp": 1761845932563,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
   "results": [
     {
       "name": "Create empty",
       "quark": {
-        "opsPerMs": 12658.23
+        "opsPerMs": 25000
       },
       "nucl": {
-        "opsPerMs": 6849.32
+        "opsPerMs": 20000
       },
       "plugins": {
-        "opsPerMs": 6802.72
+        "opsPerMs": 33333.33
       },
       "heavy": {
-        "opsPerMs": 7462.69
+        "opsPerMs": 25000
       }
     },
     {
       "name": "Create with value",
       "quark": {
-        "opsPerMs": 14492.75
+        "opsPerMs": 25000
       },
       "nucl": {
-        "opsPerMs": 6410.26
+        "opsPerMs": 20000
       },
       "plugins": {
-        "opsPerMs": 6535.95
+        "opsPerMs": 20000
       },
       "heavy": {
-        "opsPerMs": 6493.51
+        "opsPerMs": 20000
       }
     },
     {
       "name": "Get value",
       "quark": {
-        "opsPerMs": 14619.88
+        "opsPerMs": 25000
       },
       "nucl": {
-        "opsPerMs": 6561.68
+        "opsPerMs": 21739.13
       },
       "plugins": {
-        "opsPerMs": 6544.5
+        "opsPerMs": 22727.27
       },
       "heavy": {
-        "opsPerMs": 6468.31
+        "opsPerMs": 22727.27
       }
     },
     {
       "name": "Set value",
       "quark": {
-        "opsPerMs": 13215.86
+        "opsPerMs": 20000
       },
       "nucl": {
-        "opsPerMs": 6147.54
+        "opsPerMs": 18750
       },
       "plugins": {
-        "opsPerMs": 6329.11
+        "opsPerMs": 18750
       },
       "heavy": {
-        "opsPerMs": 5769.23
+        "opsPerMs": 20000
       }
     },
     {
       "name": "Add listener",
       "quark": {
-        "opsPerMs": 13157.89
+        "opsPerMs": 25000
       },
       "nucl": {
-        "opsPerMs": 6172.84
+        "opsPerMs": 25000
       },
       "plugins": {
-        "opsPerMs": 6097.56
+        "opsPerMs": 16666.67
       },
       "heavy": {
-        "opsPerMs": 6097.56
+        "opsPerMs": 25000
       }
     },
     {
       "name": "Notify 1 listener",
       "quark": {
-        "opsPerMs": 10638.3
+        "opsPerMs": 12500
       },
       "nucl": {
-        "opsPerMs": 5555.56
+        "opsPerMs": 12500
       },
       "plugins": {
-        "opsPerMs": 5747.13
+        "opsPerMs": 12500
       },
       "heavy": {
-        "opsPerMs": 5813.95
+        "opsPerMs": 12500
       }
     },
     {
       "name": "Notify 5 listeners",
       "quark": {
-        "opsPerMs": 7142.86
+        "opsPerMs": 10000
       },
       "nucl": {
-        "opsPerMs": 4411.76
+        "opsPerMs": 10000
       },
       "plugins": {
-        "opsPerMs": 4225.35
+        "opsPerMs": 10000
       },
       "heavy": {
-        "opsPerMs": 4109.59
+        "opsPerMs": 7500
       }
     }
   ],
   "summary": {
-    "avgQuark": 12275.11,
-    "avgNucl": 6015.565714285715,
-    "avgPlugins": 6040.331428571429,
-    "avgHeavy": 6030.691428571428,
-    "nuclDelta": "-50.99",
-    "pluginsDelta": "-50.79",
-    "heavyDelta": "-50.87"
+    "avgQuark": 20357.14285714286,
+    "avgNucl": 18284.161428571428,
+    "avgPlugins": 19139.610000000004,
+    "avgHeavy": 18961.038571428573,
+    "nuclDelta": "-10.18",
+    "pluginsDelta": "-5.98",
+    "heavyDelta": "-6.86"
   }
 }

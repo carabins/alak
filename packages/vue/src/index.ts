@@ -1,20 +1,48 @@
 /**
- * Расширение атома для vue
- * @remarks
+ * @alaq/vue - Vue 3 reactivity integration
+ *
+ * New Architecture (Atom v6):
+ * - VueQuarkRefPlugin - Quark as Vue Ref
+ * - StateReactivePlugin - atom.state as Vue reactive
+ * - ViewMarkerPlugin - Selective reactivity with view() marker
+ *
+ * Legacy Architecture (Atom v5):
+ * - vueAtom() - One-way atom -> Vue reactive
+ * - watchVueAtom() - Two-way atom <-> Vue reactive sync
+ *
  * @packageDocumentation
  */
 
+// ============================================================================
+// NEW ARCHITECTURE - Atom v6 Plugins
+// ============================================================================
+
+export { VueQuarkRefPlugin } from './plugins/quarkRefPlugin'
+export { StateReactivePlugin } from './plugins/stateReactivePlugin'
+export { ViewMarkerPlugin, view, isView } from './plugins/viewMarkerPlugin'
+
+export type {
+  VueQuarkRefAtom,
+  StateReactiveAtom,
+  ViewMarkerAtom,
+  ViewMarker
+} from './types'
+
+// ============================================================================
+// LEGACY ARCHITECTURE - Atom v5 Functions
+// ============================================================================
 
 import { ref, reactive, watch } from 'vue'
 import {UnwrapNestedRefs} from '@vue/reactivity'
 
-export {vueController} from "./vueController";
-export { VueNucleusPlugin } from './nucleusPlugin';
-export { VueRefPlugin } from './vueRefPlugin';
-
-const vueKey = 'vueKey'
-
+/**
+ * Convert nucleus to Vue ref (legacy, one-way sync)
+ *
+ * @deprecated For old nucleus architecture. Use new plugins for Atom v6.
+ */
 export function vueNucleon<T = any>(n: INucleus<T>): any {
+  const vueKey = 'vueKey'
+
   if (n.hasMeta(vueKey)) {
     return n.getMeta(vueKey)
   } else {
@@ -27,6 +55,11 @@ export function vueNucleon<T = any>(n: INucleus<T>): any {
   }
 }
 
+/**
+ * Convert nucleus to Vue ref with two-way sync (legacy)
+ *
+ * @deprecated For old nucleus architecture. Use new plugins for Atom v6.
+ */
 export function watchVueNucleon<T = any>(n: INucleus<T>) {
   const l = vueNucleon(n)
   watch(l, (v) => {
@@ -35,10 +68,21 @@ export function watchVueNucleon<T = any>(n: INucleus<T>) {
   return l
 }
 
-const vueAtomKey = '__vue_reactive'
+/**
+ * Create Vue reactive from atom (one-way: atom -> Vue)
+ *
+ * @deprecated For Atom v5. Use StateReactivePlugin for Atom v6.
+ * @example
+ * ```ts
+ * const atom = Atom({ model: Counter })
+ * const state = vueAtom(atom)
+ * // state updates when atom.core changes
+ * ```
+ */
 export default function vueAtom<M>(
   atom: IAtom<M> | IUnionAtom<M, any>,
 ): UnwrapNestedRefs<ClassToKV<M>> {
+  const vueAtomKey = '__vue_reactive'
   if (!atom.known.meta) {
     atom.known.meta = {}
   }

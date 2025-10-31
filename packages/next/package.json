@@ -1,0 +1,12 @@
+{
+    "name": "@alaq/next",
+    "version": "5.0.27",
+    "description": "Computed extensions for @alaq/nucleus",
+    "keywords": [
+        "alak",
+        "nucleus",
+        "computed",
+        "reactive",
+        "extensions"
+    ]
+}
