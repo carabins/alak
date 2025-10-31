@@ -3,31 +3,6 @@
   "version": "6.0.0-alpha.1",
   "description": "Enhanced reactive primitive with plugin system - built on Quark",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./types/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./nucleus": {
-      "types": "./types/nucleus/index.d.ts",
-      "import": "./dist/nucleus/index.js"
-    },
-    "./fusion": {
-      "types": "./types/fusion/index.d.ts",
-      "import": "./dist/fusion/index.js"
-    },
-    "./heavy": {
-      "types": "./types/heavy/index.d.ts",
-      "import": "./dist/heavy/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "types",
-    "src"
-  ],
   "scripts": {
     "build": "bun run ../../scripts/index.ts build",
     "test": "bun test",
@@ -36,7 +11,7 @@
     "bench:browser": "bun benchmark/build-browser.ts && bun benchmark/server.ts"
   },
   "keywords": [
-    "reactive",
+    "proactive",
     "state",
     "nucl",
     "quark",
@@ -52,9 +27,5 @@
   },
   "peerDependencies": {
     "@alaq/quark": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/alaq/nucl"
   }
 }

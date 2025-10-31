@@ -1,165 +1,304 @@
 # @alaq/atom
 
-> Проактивное управление состоянием через модели с автоматическим созданием nucleus для каждого свойства
+Minimal reactive state management built on [@alaq/quark](../quark) proactive containers.
 
-Atom — это слой управления состоянием, построенный поверх `@alaq/nucleus`. Автоматически превращает класс или объект в проактивную модель, где каждое свойство становится nucleus.
+## Features
 
-## Установка
+- 🎯 **Minimal Core** - Only what you need, nothing more
+- 🔌 **Plugin System** - Extend with custom property markers
+- 🧮 **Computed Properties** - Auto-tracking dependencies via getters
+- 🏗️ **Class & Object Support** - Works with ES6 classes or plain objects
+- 🌳 **Tree-Shakeable** - Pay only for what you use
+- 🚀 **High Performance** - Built on optimized Quark primitives
+- 📡 **Event Bus** - Realm-based event system via quantumBus
+
+## Installation
 
 ```bash
-npm install @alaq/atom
+bun add @alaq/atom @alaq/quark @alaq/nucl
 ```
 
-## Основные концепции
+## Quick Start
 
-- **Atom** — проактивная обертка над моделью/классом
-- **Core** — доступ к nucleus каждого свойства (`atom.core.propertyName`)
-- **State** — текущие значения всех свойств (`atom.state`)
-- **Actions** — методы модели (`atom.actions`)
-
-## Примеры использования
-
-### Пример 1: Простая модель счетчика
+### Plain Object
 
 ```typescript
 import { Atom } from '@alaq/atom'
 
-class CounterModel {
-  count = 0
-
+const counter = Atom({
+  count: 0,
+  step: 1,
   increment() {
-    this.count++
+    this.count += this.step
   }
-
-  decrement() {
-    this.count--
-  }
-}
-
-const counter = Atom({ model: CounterModel })
-
-// Подписаться на изменения count
-counter.core.count.up((value) => {
-  console.log('Count:', value) // Count: 0
 })
 
-// Изменить значение напрямую
-counter.core.count(5) // Count: 5
-
-// Или через action
-counter.actions.increment() // Count: 6
-
-// Получить текущее состояние
-console.log(counter.state.count) // 6
+counter.state.count = 10
+counter.actions.increment()
+console.log(counter.state.count) // 11
 ```
 
-### Пример 2: Модель с вычисляемыми свойствами
+### ES6 Class
 
 ```typescript
-import { Atom } from '@alaq/atom'
+class User {
+  name = ''
+  age = 0
 
-class CartModel {
-  items = []
-  tax = 0.1
-
-  get subtotal() {
-    return this.items.reduce((sum, item) => sum + item.price, 0)
+  greet() {
+    return `Hello, ${this.name}!`
   }
 
-  get total() {
-    return this.subtotal * (1 + this.tax)
-  }
-
-  addItem(item) {
-    this.items = [...this.items, item]
+  get isAdult() {
+    return this.age >= 18
   }
 }
 
-const cart = Atom({ model: CartModel })
-
-// Геттеры также становятся nucleus
-cart.core.total.up((value) => {
-  console.log('Total:', value)
+const user = Atom(User, {
+  name: 'user',
+  realm: 'app'
 })
 
-cart.actions.addItem({ name: 'Book', price: 100 })
-// Total: 110
-```
+user.state.name = 'John'
+user.state.age = 25
 
-### Пример 3: Сохранение состояния (LocalStorage)
-
-```typescript
-import { Atom, saved } from '@alaq/atom'
-
-class SettingsModel {
-  theme = saved('light') // Автоматически сохраняется в localStorage
-  fontSize = saved(14)
-  notifications = saved(true)
-}
-
-const settings = Atom({
-  model: SettingsModel,
-  name: 'app-settings', // Ключ для localStorage
-  saved: '*' // Сохранять все свойства
-})
-
-// При изменении автоматически сохраняется
-settings.core.theme('dark')
-
-// При следующей загрузке значения восстановятся из localStorage
-```
-
-## Продвинутые возможности
-
-### Теги и метаданные
-
-```typescript
-import { Atom, tag, saved, mixed } from '@alaq/atom'
-
-class UserModel {
-  id = tag.userId(null) // Добавить метаданные
-  name = mixed(saved, tag.sync, 'John') // Комбинировать свойства
-  email = saved('user@example.com')
-}
-
-const user = Atom({ model: UserModel })
-
-// Доступ к метаданным
-user.core.id.getMeta('tag') // 'userId'
-```
-
-### Создание упрощенного API
-
-```typescript
-import { coreAtom } from '@alaq/atom'
-
-class Model {
-  value = 0
-  increment() { this.value++ }
-}
-
-// Прямой доступ к ядру (без .core)
-const atom = coreAtom(Model)
-
-atom.value.up((v) => console.log(v))
-atom.increment()
+console.log(user.actions.greet())  // 'Hello, John!'
+console.log(user.state.isAdult)    // true
 ```
 
 ## API
 
-| Свойство | Описание |
-|----------|----------|
-| `atom.core` | Nucleus для каждого свойства |
-| `atom.state` | Текущие значения свойств |
-| `atom.actions` | Методы модели |
-| `atom.bus` | Шина событий |
-| `atom.known` | Метаинформация о свойствах |
-| `atom.decay()` | Очистить память |
+### Atom Constructor
 
-## Зависимости
+```typescript
+function Atom<T>(
+  model: T | (new (...args: any[]) => T),
+  options?: AtomOptions
+): AtomInstance<T>
+```
 
-Требует `@alaq/nucleus`
+**Options:**
 
-## Лицензия
+```typescript
+interface AtomOptions {
+  name?: string            // Atom name (appended to realm)
+  realm?: string           // Namespace (default: '+')
+  container?: Function     // Quark/Nucl constructor (default: Qu)
+  bus?: any                // External event bus
+  constructorArgs?: any[]  // Arguments for class constructor
+  emitChanges?: boolean    // Emit NUCLEUS_CHANGE events
+}
+```
 
-TVR
+### AtomInstance
+
+```typescript
+interface AtomInstance<T> {
+  core: Record<string, Quark>  // Direct quark access
+  state: T                     // Proxy for values (getter/setter)
+  actions: Record<string, Function>  // Methods bound to state
+  bus: RealmBus               // Event bus for this realm
+  decay(): void               // Cleanup method
+}
+```
+
+## Computed Properties (Getters)
+
+Getters automatically become computed properties with dependency tracking:
+
+```typescript
+class Calculator {
+  a = 0
+  b = 0
+
+  get sum() {
+    return this.a + this.b  // depends on a, b
+  }
+
+  get doubled() {
+    return this.sum * 2  // depends on sum
+  }
+}
+
+const calc = Atom(Calculator)
+
+calc.state.a = 10
+calc.state.b = 5
+
+console.log(calc.state.sum)      // 15 (computed)
+console.log(calc.state.doubled)  // 30 (computed from computed)
+```
+
+**How it works:**
+- Dependencies are tracked automatically via Proxy
+- Getters are sorted topologically by dependency levels
+- Uses `NeoFusion(...sources).any()` for reactive updates
+- Works with falsy values (0, '', false)
+
+## Constructor Support
+
+```typescript
+class Counter {
+  count: number
+
+  constructor(initial: number) {
+    this.count = initial
+    console.log('Initialized with:', initial)
+  }
+
+  increment() {
+    this.count++
+  }
+}
+
+const counter = Atom(Counter, {
+  constructorArgs: [100]
+})
+
+console.log(counter.state.count)  // 100
+```
+
+## Direct Quark Access
+
+```typescript
+const data = Atom({ value: 42 })
+
+// Via state
+data.state.value = 100
+
+// Via core (direct quark)
+data.core.value.value  // 100
+data.core.value(200)   // set
+data.core.value.up(v => console.log(v))  // subscribe
+```
+
+## Event Bus & Realms
+
+```typescript
+const user = Atom(User, {
+  realm: 'app.users',
+  name: 'profile'
+})
+
+// Full realm: 'app.users.profile'
+// Quark IDs: 'app.users.profile.name', 'app.users.profile.age'
+
+// Listen to atom initialization
+user.bus.on('ATOM_INIT', (data) => {
+  console.log('Atom initialized:', data)
+})
+
+// Listen to quark changes (if emitChanges: true)
+const user2 = Atom(User, {
+  realm: 'app',
+  emitChanges: true
+})
+
+user2.bus.on('NUCLEUS_CHANGE', ({ key, value }) => {
+  console.log(`${key} changed to:`, value)
+})
+```
+
+## Property Markers & Plugins
+
+Atom supports a plugin system for property markers:
+
+```typescript
+import { synthesis, use } from '@alaq/atom'
+import { persistPlugin, saved } from '@alaq/atom-persist'
+
+use(persistPlugin)
+
+class Settings {
+  // Single marker
+  theme = saved('dark')
+
+  // Multiple markers (composition)
+  email = synthesis(
+    saved(''),
+    tag('contact')
+  )
+}
+
+const settings = Atom(Settings)
+settings.state.theme = 'light'  // auto-saved to localStorage
+```
+
+### Creating Custom Plugins
+
+```typescript
+const MY_MARKER = Symbol.for('my-plugin')
+
+export const myMarker = (value, opts = {}) => ({
+  _marker: MY_MARKER,
+  value,
+  ...opts
+})
+
+export const myPlugin: AtomPlugin = {
+  symbol: MY_MARKER,
+
+  detectMarker(value) {
+    return value?._marker === MY_MARKER
+  },
+
+  onQuarkProperty({ atom, quark, key, markers }) {
+    // Called when quark with marker is created
+    console.log(`Setting up ${key}`)
+  },
+
+  onCreate(atom, markedProperties) {
+    // Called after all quarks are created
+  },
+
+  onDecay(atom) {
+    // Cleanup
+  }
+}
+```
+
+## Cleanup
+
+Always call `decay()` when done:
+
+```typescript
+const atom = Atom(MyModel)
+
+// Use atom...
+
+atom.decay()  // Cleanup all quarks, computed, and subscriptions
+```
+
+## TypeScript
+
+Full TypeScript support with type inference:
+
+```typescript
+class User {
+  name = ''
+  age = 0
+  greet() { return `Hi ${this.name}` }
+}
+
+const user = Atom(User)
+
+user.state.name = 'John'  // ✅ string
+user.state.name = 123     // ❌ Type error
+
+user.actions.greet()      // ✅ () => string
+user.actions.invalid()    // ❌ Property doesn't exist
+```
+
+## Examples
+
+See [test/basic.test.ts](./test/basic.test.ts) for more examples.
+
+## Related Packages
+
+- [@alaq/quark](../quark) - Base reactive container
+- [@alaq/nucl](../nucl) - Quark with plugin system
+- [@alaq/nucl/fusion](../nucl/src/fusion) - Computed values
+
+## License
+
+MIT

@@ -343,7 +343,6 @@ function createQu(options) {
   Object.setPrototypeOf(quark, quarkProto);
   return quark;
 }
-
 // ../quark/src/index.ts
 var Qv = Object.assign(function(value, options) {
   return createQu({ ...options, value });
@@ -376,17 +375,44 @@ function use(plugin) {
   }
   plugin.onInstall?.();
 }
-var NuclProto = Object.create(Object.getPrototypeOf(createQu()));
+var NuclProto = Object.create(quarkProto);
 var originalDecay = NuclProto.decay;
 NuclProto.decay = function() {
   registry.decayHooks.forEach((hook) => hook(this));
   return originalDecay.call(this);
 };
+var uidCounter2 = 0;
 function Nucl(options) {
   const opts = options !== null && typeof options === "object" && "value" in options ? options : { value: options };
-  const nucl = createQu(opts);
+  const nucl = function(value) {
+    return setValue(nucl, value);
+  };
+  nucl.uid = ++uidCounter2;
+  nucl._flags = 0;
+  if (opts.value !== undefined) {
+    nucl.value = opts.value;
+  }
+  if (opts.id) {
+    nucl.id = opts.id;
+  }
+  if (opts.realm) {
+    nucl._realm = opts.realm;
+    nucl._realmPrefix = opts.realm + ":";
+    nucl._flags |= HAS_REALM;
+  }
+  if (opts.pipe) {
+    nucl._pipeFn = opts.pipe;
+  }
+  if (opts.dedup) {
+    nucl._flags |= DEDUP;
+  }
+  if (opts.stateless) {
+    nucl._flags |= STATELESS;
+  }
   Object.setPrototypeOf(nucl, NuclProto);
-  registry.createHooks.forEach((hook) => hook(nucl));
+  for (let i = 0, len = registry.createHooks.length;i < len; i++) {
+    registry.createHooks[i](nucl);
+  }
   return nucl;
 }
 export {

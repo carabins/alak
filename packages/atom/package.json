@@ -1,4 +1,30 @@
 {
-    "name": "@alaq/atom",
-    "version": "5.0.61"
+  "name": "@alaq/atom",
+  "version": "6.0.0-alpha.1",
+  "description": "Minimal reactive state management built on Quark",
+  "type": "module",
+  "scripts": {
+    "build": "bun run ../../scripts/index.ts build",
+    "test": "bun test",
+    "dev": "bun test --watch"
+  },
+  "keywords": [
+    "reactive",
+    "state",
+    "atom",
+    "quark",
+    "alaq"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@alaq/quark": "workspace:*",
+    "@alaq/nucl": "workspace:*"
+  },
+  "peerDependencies": {
+    "@alaq/quark": "^1.0.0",
+    "@alaq/nucl": "^6.0.0"
+  }
 }

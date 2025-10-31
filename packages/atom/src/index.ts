@@ -1,23 +1,41 @@
-import cloudCreate from './cloud.create'
+/**
+ * @alaq/atom - Minimal reactive state management
+ *
+ * Built on @alaq/quark proactive containers with computed support via Fusion
+ *
+ * @example
+ * ```ts
+ * import { Atom } from '@alaq/atom'
+ *
+ * class Counter {
+ *   count = 0
+ *   step = 1
+ *
+ *   increment() {
+ *     this.count += this.step
+ *   }
+ *
+ *   get doubled() {
+ *     return this.count * 2
+ *   }
+ * }
+ *
+ * const counter = Atom(Counter, { name: 'counter' })
+ *
+ * counter.state.count = 10
+ * counter.actions.increment()
+ * console.log(counter.state.doubled) // 22
+ * ```
+ */
 
-export const savedAtom = <T>(name: string, model: T) =>
-  Atom({
-    model,
-    name,
-    saved: true,
-  })
+export { Atom } from './atom'
+export { synthesis } from './markers'
+export { use } from './plugin'
 
-export const coreAtom = <T>(model: T) =>
-  new Proxy(Atom({ model }), {
-    get(a, k) {
-      return a.core[k]
-    },
-  }) as any as IAtomCore<ClassToKV<T>>
-
-export const Atom = cloudCreate
-
-export const A = cloudCreate
-
-export class MultiAtomic {
-  id: string | any
-}
+// Types
+export type {
+  AtomPlugin,
+  AtomOptions,
+  AtomInstance,
+  ParsedModel
+} from './types'

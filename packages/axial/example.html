@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axial UnoCSS Plugin Example</title>
+  <!-- This would typically be processed by UnoCSS in a real project -->
+  <style>
+    /* Example of @apply usage */
+    .header {
+      @apply x-group x-center x-percent-90 y-fixed;
+    }
+    
+    .sidebar {
+      @apply x-percent-25 y-fixed;
+    }
+    
+    .main-content {
+      @apply x-flex-1 y-fixed;
+    }
+    
+    .container {
+      @apply y-group y-center x-center;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <!-- Example 1: Basic layout -->
+  <div class="x-group x-between y-center" style="height: 200px; background: #f0f0f0; padding: 20px;">
+    <div class="x-percent-25 y-fixed" style="background: #007acc; color: white; padding: 10px;">
+      Sidebar
+    </div>
+    <div class="x-flex-1 y-fixed" style="background: #2c3e50; color: white; padding: 10px;">
+      Main content
+    </div>
+    <div class="x-percent-25 y-fixed" style="background: #007acc; color: white; padding: 10px;">
+      Sidebar
+    </div>
+  </div>
+
+  <!-- Example 2: Nested layout -->
+  <div class="y-group" style="height: 300px; background: #e0e0e0; padding: 20px; margin-top: 20px;">
+    <div class="x-group x-center y-percent-50" style="background: #d0d0d0; margin-bottom: 10px;">
+      <div class="x-percent-50" style="background: #ff6b6b; padding: 10px;">Header Content</div>
+    </div>
+    <div class="x-group x-between y-flex-1" style="background: #c0c0c0;">
+      <div class="x-percent-30 y-percent-100" style="background: #4ecdc4; padding: 10px;">Navigation</div>
+      <div class="x-flex-1 y-percent-100" style="background: #1a936f; color: white; padding: 10px;">Main Content Area</div>
+    </div>
+  </div>
+</body>
+</html>

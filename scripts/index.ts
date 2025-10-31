@@ -33,6 +33,9 @@ async function main() {
 
   // Quick commands
   const quickCommand = process.argv[2]
+  if (quickCommand === 'build') {
+    return await buildPackages()
+  }
   if (quickCommand === 'gen-pkg') {
     return await generatePackageJson()
   }
@@ -41,6 +44,11 @@ async function main() {
   const task = await select({
     message: 'Select a task',
     choices: [
+      {
+        name: 'Build packages',
+        description: 'Build v6 packages (Rolldown + TypeScript)',
+        value: 'build'
+      },
       {
         name: 'Generate package.json',
         description: 'Auto-generate package.json for v6 packages',
@@ -55,6 +63,9 @@ async function main() {
   })
 
   switch (task) {
+    case 'build':
+      await buildPackages()
+      break
     case 'gen-pkg':
       await generatePackageJson()
       break
@@ -62,6 +73,107 @@ async function main() {
       await runOldTests()
       break
   }
+}
+
+/**
+ * Build v6 packages with Rolldown + TypeScript
+ */
+async function buildPackages() {
+  console.log('\n🔨 Building v6 packages...\n')
+
+  // Import builders
+  const { RolldownBuilder } = await import('./builders/RolldownBuilder')
+  const { TypeScriptBuilder } = await import('./builders/TypeScriptBuilder')
+  const { PackageJsonGenerator, detectEntryPoints, readRootPackageJson } = await import('./generators/PackageJsonGenerator')
+
+  for (const pkgName of V6_PACKAGES) {
+    const sourceDir = path.join(process.cwd(), 'packages', pkgName)
+    const artifactsDir = path.join(process.cwd(), 'artifacts', pkgName)
+
+    if (!fs.existsSync(sourceDir)) {
+      console.log(`[${pkgName}] ⚠️  Package not found, skipping`)
+      continue
+    }
+
+    const sourcePackageJsonPath = path.join(sourceDir, 'package.json')
+    if (!fs.existsSync(sourcePackageJsonPath)) {
+      console.log(`[${pkgName}] ⚠️  package.json not found, skipping`)
+      continue
+    }
+
+    // Read config
+    const sourcePackageJson = JSON.parse(fs.readFileSync(sourcePackageJsonPath, 'utf-8'))
+    const packageName = sourcePackageJson.name
+    const entryPoints = detectEntryPoints(sourceDir)
+
+    // Log detected structure
+    const hasPlatformSpecific = entryPoints.some(e => e.platformSpecific)
+    const hasMultipleEntries = entryPoints.length > 1
+
+    // Check for global types (non-empty types/ directory)
+    const typesDir = path.join(sourceDir, 'types')
+    let hasGlobalTypes = false
+    if (fs.existsSync(typesDir)) {
+      const typeFiles = fs.readdirSync(typesDir).filter(f => f.endsWith('.d.ts'))
+      hasGlobalTypes = typeFiles.length > 0
+    }
+
+    let info = []
+    if (hasPlatformSpecific) info.push('platform-specific')
+    if (hasMultipleEntries) info.push(`${entryPoints.length} entries`)
+    if (hasGlobalTypes) info.push('global types')
+
+    const infoStr = info.length > 0 ? ` (${info.join(', ')})` : ''
+    console.log(`[${pkgName}] 🔨 Building${infoStr}...`)
+
+    // 1. Build with Rolldown
+    const rolldownBuilder = new RolldownBuilder({
+      sourceDir,
+      artifactsDir,
+      entryPoints,
+      packageName,
+    })
+
+    const rolldownSuccess = await rolldownBuilder.build()
+    if (!rolldownSuccess) {
+      console.error(`[${pkgName}] ❌ Build failed`)
+      continue
+    }
+
+    // 2. Generate TypeScript declarations
+    const tsBuilder = new TypeScriptBuilder({
+      sourceDir,
+      artifactsDir,
+      entryPoints,
+      packageName,
+    })
+
+    const tsSuccess = await tsBuilder.build()
+    if (!tsSuccess) {
+      console.error(`[${pkgName}] ❌ Build failed`)
+      continue
+    }
+
+    // 3. Generate package.json
+    const rootPackageJson = readRootPackageJson()
+    const generator = new PackageJsonGenerator({
+      sourceDir,
+      artifactsDir,
+      sourcePackageJson,
+      rootPackageJson,
+      entryPoints,
+    })
+
+    const packageJson = generator.generate()
+    fs.writeFileSync(
+      path.join(artifactsDir, 'package.json'),
+      JSON.stringify(packageJson, null, 2)
+    )
+
+    console.log(`[${pkgName}] ✅ Complete\n`)
+  }
+
+  console.log('✅ All packages built successfully!')
 }
 
 /**

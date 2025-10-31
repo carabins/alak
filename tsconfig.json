@@ -66,7 +66,8 @@
   },
   "include": [
     "packages/atom/types/*.d.ts",
-    "packages/molecule/types/*.d.ts",
+    "packages/quark/types/*.d.ts",
+    "packages/nucl/types/*.d.ts",
     "packages/nucleus/types/*.d.ts",
     "packages/alak/types/*.d.ts",
     "packages/vue/types/*.d.ts",
