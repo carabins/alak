@@ -42,8 +42,17 @@ function createFusionWithStrategy<R>(
   // Create result Nucl
   const result = Nucl<R | undefined>(undefined)
 
+  // Track which sources have decayed
+  const decayedSources = new Set<AnyNucl>()
+
   // Compute function
   const compute = () => {
+    // If any source has decayed, don't compute and set result to undefined
+    if (decayedSources.size > 0) {
+      result(undefined)
+      return
+    }
+    
     if (strategy(sources)) {
       const values = sources.map(s => s.value)
       const newValue = fn(...values)
@@ -74,8 +83,12 @@ function createFusionWithStrategy<R>(
   sources.forEach(source => {
     const originalDecay = source.decay
     source.decay = function() {
-      cleanups.forEach(c => c())
-      result.decay()
+      if (!this._decayed) {  // Prevent multiple calls to decay
+        cleanups.forEach(c => c())
+        decayedSources.add(this)  // Mark this source as decayed
+        result(undefined)  // Set result to undefined when a source decays
+        this._decayed = true
+      }
       return originalDecay.call(this)
     }
   })

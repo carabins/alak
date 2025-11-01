@@ -18,14 +18,9 @@
     "computed",
     "fusion"
   ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "@types/bun": "latest",
     "@alaq/quark": "workspace:*"
-  },
-  "peerDependencies": {
-    "@alaq/quark": "^1.0.0"
   }
 }

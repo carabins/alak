@@ -2,12 +2,12 @@
  * Tests for StateReactivePlugin
  */
 
-import { test } from 'tap'
+import { test, expect } from 'bun:test'
 import { Atom } from '@alaq/atom'
-import { StateReactivePlugin } from '../src/plugins/stateReactivePlugin'
+import { StateReactivePlugin } from '../src/atomic-state'
 import { watch, isReactive, toRaw } from 'vue'
 
-test('StateReactivePlugin - makes state reactive', async (t) => {
+test('StateReactivePlugin - makes state reactive', async () => {
   Atom.use(StateReactivePlugin)
 
   class User {
@@ -18,13 +18,11 @@ test('StateReactivePlugin - makes state reactive', async (t) => {
   const user = Atom(User)
 
   // Check reactive markers
-  t.ok(user.state.__v_isReactive, 'state has __v_isReactive marker')
-  t.ok(isReactive(user.state), 'state is recognized as reactive by Vue')
-
-  t.end()
+  expect(user.state.__v_isReactive).toBe(true)
+  expect(isReactive(user.state)).toBe(true)
 })
 
-test('StateReactivePlugin - tracks deep object changes', async (t) => {
+test('StateReactivePlugin - tracks deep object changes', async () => {
   Atom.use(StateReactivePlugin)
 
   class User {
@@ -43,18 +41,17 @@ test('StateReactivePlugin - tracks deep object changes', async (t) => {
   user.state.profile.name = 'Alice'
   await new Promise(resolve => setTimeout(resolve, 10))
 
-  t.equal(changes.length, 1, 'watch triggered once')
-  t.equal(changes[0], 'Alice', 'watch received correct value')
-  t.equal(user.state.profile.name, 'Alice', 'state updated')
+  expect(changes.length).toBe(1)
+  expect(changes[0]).toBe('Alice')
+  expect(user.state.profile.name).toBe('Alice')
 
   // Check that quark was updated
-  t.equal(user.core.profile.value.name, 'Alice', 'quark value updated')
+  expect(user.core.profile.value.name).toBe('Alice')
 
   stop()
-  t.end()
 })
 
-test('StateReactivePlugin - tracks array mutations', async (t) => {
+test('StateReactivePlugin - tracks array mutations', async () => {
   Atom.use(StateReactivePlugin)
 
   class TodoList {
@@ -65,7 +62,7 @@ test('StateReactivePlugin - tracks array mutations', async (t) => {
   const changes: number[] = []
 
   // Watch array length
-  const stop = watch(() => user.state.items.length, (newLength) => {
+  const stop = watch(() => list.state.items.length, (newLength) => {
     changes.push(newLength)
   })
 
@@ -73,15 +70,14 @@ test('StateReactivePlugin - tracks array mutations', async (t) => {
   list.state.items.push('task2')
   await new Promise(resolve => setTimeout(resolve, 10))
 
-  t.equal(changes.length, 1, 'watch triggered')
-  t.equal(changes[0], 2, 'new length is 2')
-  t.same(list.state.items, ['task1', 'task2'], 'array updated')
+  expect(changes.length).toBe(1)
+  expect(changes[0]).toBe(2)
+  expect(list.state.items).toEqual(['task1', 'task2'])
 
   stop()
-  t.end()
 })
 
-test('StateReactivePlugin - rawState() returns clean data', (t) => {
+test('StateReactivePlugin - rawState() returns clean data', () => {
   Atom.use(StateReactivePlugin)
 
   class User {
@@ -98,19 +94,17 @@ test('StateReactivePlugin - rawState() returns clean data', (t) => {
   // Get raw state
   const raw = user.rawState()
 
-  t.same(raw, {
+  expect(raw).toEqual({
     profile: { name: 'Alice', age: 30 },
     tags: ['vue', 'typescript', 'atom']
-  }, 'rawState has correct values')
+  })
 
   // Check that raw is not reactive
-  t.notOk(isReactive(raw.profile), 'raw profile is not reactive')
-  t.notOk(isReactive(raw.tags), 'raw tags is not reactive')
-
-  t.end()
+  expect(isReactive(raw.profile)).toBe(false)
+  expect(isReactive(raw.tags)).toBe(false)
 })
 
-test('StateReactivePlugin - syncs quark changes to state', async (t) => {
+test('StateReactivePlugin - syncs quark changes to state', async () => {
   Atom.use(StateReactivePlugin)
 
   class Counter {
@@ -129,15 +123,14 @@ test('StateReactivePlugin - syncs quark changes to state', async (t) => {
   counter.core.count(10)
   await new Promise(resolve => setTimeout(resolve, 10))
 
-  t.equal(changes.length, 1, 'watch triggered')
-  t.equal(changes[0], 10, 'watch received correct value')
-  t.equal(counter.state.count, 10, 'state updated')
+  expect(changes.length).toBe(1)
+  expect(changes[0]).toBe(10)
+  expect(counter.state.count).toBe(10)
 
   stop()
-  t.end()
 })
 
-test('StateReactivePlugin - handles complex nested structures', async (t) => {
+test('StateReactivePlugin - handles complex nested structures', async () => {
   Atom.use(StateReactivePlugin)
 
   class App {
@@ -162,14 +155,13 @@ test('StateReactivePlugin - handles complex nested structures', async (t) => {
   app.state.config.ui.theme = 'light'
   await new Promise(resolve => setTimeout(resolve, 10))
 
-  t.equal(themeChanges[0], 'light', 'deep watch works')
-  t.equal(app.state.config.ui.theme, 'light', 'deep state updated')
+  expect(themeChanges[0]).toBe('light')
+  expect(app.state.config.ui.theme).toBe('light')
 
   // Check rawState
   const raw = app.rawState()
-  t.equal(raw.config.ui.theme, 'light', 'rawState reflects changes')
-  t.notOk(isReactive(raw.config), 'rawState is not reactive')
+  expect(raw.config.ui.theme).toBe('light')
+  expect(isReactive(raw.config)).toBe(false)
 
   stop()
-  t.end()
 })
