@@ -1,6 +1,6 @@
 # Nucl vs Quark Performance Comparison
 
-**Date:** 30.10.2025, 20:41:00
+**Date:** 01.11.2025, 09:44:17
 **Runtime:** Bun 1.3.0
 **Platform:** win32 (x64)
 
@@ -8,10 +8,10 @@
 
 | Implementation | Avg Ops/ms | Overhead |
 |----------------|----------:|----------:|
-| Quark (baseline) | 12 526,681 | 0% |
-| Nucl (bare) | 19 962,541 | -59.36% |
-| Nucl+plugins | 23 566,969 | -88.13% |
-| HeavyNucl | 23 065,249 | -84.13% |
+| Quark (baseline) | 3 394,586 | 0% |
+| Nucl (bare) | 3 154,306 | 7.08% |
+| Nucl+plugins | 3 340,883 | 1.58% |
+| HeavyNucl | 3 304,901 | 2.64% |
 
 ## Detailed Results
 
@@ -19,29 +19,29 @@
 
 | Test | Quark | Nucl | Nucl+plugins | HeavyNucl | Overhead (Nucl) | Overhead (Plugins) | Overhead (Heavy) |
 |------|------:|-----:|-------------:|----------:|----------------:|-------------------:|-----------------:|
-| Create empty | 14 273,48 | 11 543,21 | 15 471,25 | 31 547,73 | 19.13% | -8.39% | -121.02% |
-| Create with value | 11 300,46 | 25 126,89 | 36 034,74 | 25 738,7 | -122.35% | -218.88% | -127.77% |
-| Create with object value | 28 161,08 | 22 678,82 | 32 153,31 | 25 585,26 | 19.47% | -14.18% | 9.15% |
-| Get value | 13 334,99 | 31 833,75 | 31 742,2 | 28 139,92 | -138.72% | -138.04% | -111.02% |
-| Set value | 11 029,27 | 28 061,2 | 26 895,17 | 27 939,05 | -154.42% | -143.85% | -153.32% |
-| Set value repeatedly | 9 943,22 | 20 027,24 | 15 763,42 | 20 426,92 | -101.42% | -58.53% | -105.44% |
-| Add listener | 9 998,2 | 19 333,76 | 26 178,7 | 19 162,96 | -93.37% | -161.83% | -91.66% |
-| Notify 1 listener | 9 162,21 | 15 524,58 | 16 867,67 | 19 265,22 | -69.44% | -84.10% | -110.27% |
-| Notify 5 listeners | 5 537,22 | 5 533,42 | 10 996,26 | 9 781,48 | 0.07% | -98.59% | -76.65% |
+| Create empty | 3 773,04 | 3 099,45 | 3 571,4 | 3 765,63 | 17.85% | 5.34% | 0.20% |
+| Create with value | 3 509,72 | 3 619,25 | 3 744,17 | 3 624,27 | -3.12% | -6.68% | -3.26% |
+| Create with object value | 4 329,15 | 3 380,55 | 3 532,68 | 3 590,54 | 21.91% | 18.40% | 17.06% |
+| Get value | 3 631,67 | 3 706,69 | 3 768,05 | 3 589,58 | -2.07% | -3.76% | 1.16% |
+| Set value | 3 551,21 | 3 521,44 | 3 470,14 | 3 398,6 | 0.84% | 2.28% | 4.30% |
+| Set value repeatedly | 2 910,84 | 2 871,92 | 3 046,1 | 2 789,45 | 1.34% | -4.65% | 4.17% |
+| Add listener | 3 288,45 | 3 200,24 | 3 380,59 | 3 279,29 | 2.68% | -2.80% | 0.28% |
+| Notify 1 listener | 3 123,26 | 2 741,98 | 2 961,24 | 3 174,31 | 12.21% | 5.19% | -1.63% |
+| Notify 5 listeners | 2 433,93 | 2 247,23 | 2 593,58 | 2 532,44 | 7.67% | -6.56% | -4.05% |
 
 ## Analysis
 
 ### Overhead Breakdown
 
-1. **Nucl (bare)** - -59.36% overhead
+1. **Nucl (bare)** - 7.08% overhead
    - Cost of plugin system infrastructure (prototype chain, hooks)
    - Minimal impact on basic operations
 
-2. **Nucl+plugins** - -88.13% overhead
+2. **Nucl+plugins** - 1.58% overhead
    - Includes nucleus plugin (universal + array + object methods)
    - Additional prototype properties and methods
 
-3. **HeavyNucl** - -84.13% overhead
+3. **HeavyNucl** - 2.64% overhead
    - Same as Nucl+plugins (uses same implementation)
    - Convenience wrapper for full feature set
 
