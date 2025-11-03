@@ -1,0 +1,6 @@
+{
+  "name": "@alaq/deep-state",
+  "version": "6.0.0",
+  "description": "Lightweight deep state tracking with proxy reuse optimization",
+  "type": "module"
+}
