@@ -2,36 +2,28 @@
  * Functions for realm-wide plugins
  */
 
-import type {NuclPlugin} from './types'
+import type {NucleonPlugin, PluginsRegistry} from './types'
 import INucleusCore from "./types/core";
-import {NuclProto} from "./prototype";
+import {NuclearProto} from "./prototype";
+import defaultRealm from "./defaultRealm";
 
 // Global registry for realm-wide plugins
-type PluginHandler = (nuc: INucleusCore<any>) => void
-type PluginChangeHandler = (nuc: INucleusCore<any>, key: string, newValue: any, oldValue: any) => void
 
-interface PluginsRegistry {
-  createHooks: PluginHandler[]
-  decayHooks: PluginHandler[]
-  changeHooks: PluginChangeHandler[]
-  proto: any
-}
-
-const newRegistry = (plugins: NuclPlugin[]) => {
+const newRegistry = (plugins: NucleonPlugin[]) => {
   const r = {
     createHooks: [],
     decayHooks: [],
     beforeChangeHooks: [],
-    changeHooks: [],
     afterChangeHooks: [],
-    proto: Object.assign({}, NuclProto)
+    proto: Object.assign({}, NuclearProto)
   }
   return r
 }
 
-function updateRegistry(r: PluginsRegistry, plugins: NuclPlugin[]) {
+function updateRegistry(r: PluginsRegistry, plugins: NucleonPlugin[]) {
   plugins.forEach(plugin => {
-    plugin.onChange && r.changeHooks.push(plugin.onChange)
+    plugin.onBeforeChange && r.beforeChangeHooks.push(plugin.onBeforeChange)
+    plugin.onAfterChange && r.afterChangeHooks.push(plugin.onAfterChange)
     plugin.onCreate && r.createHooks.push(plugin.onCreate)
     plugin.onDecay && r.decayHooks.push(plugin.onDecay)
     plugin.onInstall && r.decayHooks.push(plugin.onInstall)
@@ -55,15 +47,15 @@ export const realmPluginRegistry = {} as Record<string, PluginsRegistry>
 /**
  * Install plugins globally for a specific realm
  */
-export function initiateRealmPlugins(realm: string, ...plugins: NuclPlugin[]): void {
+export function createNuRealm(realm: string, ...plugins: NucleonPlugin[]): void {
   let registry = realmPluginRegistry[realm]
-  if (!plugins) {
-    registry = newRegistry(plugins)
+  if (!registry) {
+    registry = newRegistry([])
   }
   realmPluginRegistry[realm] = updateRegistry(registry, plugins)
 }
 
-function getPluginsForRealm(realm:string) {
+export function getPluginsForRealm(realm:string) {
   let registry = realmPluginRegistry[realm]
   if (!registry) {
     registry = newRegistry([])

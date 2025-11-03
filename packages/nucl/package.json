@@ -17,12 +17,5 @@
     "quark",
     "computed",
     "fusion"
-  ],
-  "dependencies": {
-    "@alaq/deep-state": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@alaq/quark": "workspace:*"
-  }
+  ]
 }

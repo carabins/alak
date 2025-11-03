@@ -1,7 +1,8 @@
-import type {NuOptions} from "@alaq/nucl/types";
+import {InternalQuark} from "@alaq/quark/types/IQuarkSystem";
+import {PluginsRegistry} from "../types";
 
-export interface NuCore extends interna{
-  (this, ...args: any[]): NuCore
-  realm: string
-  plugins: []
+export default interface INucleusQuark<T> extends InternalQuark<T> {
+  _value: T
+  _proxy: T
+  _reg: PluginsRegistry
 }

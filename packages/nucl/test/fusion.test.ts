@@ -1,14 +1,14 @@
 import { test, expect } from 'bun:test'
-import { Nucl } from '../src/index'
-import { Fusion, NeoFusion, AliveFusion, AnyFusion } from '../src/fusion'
+import { Nv } from '../src/index'
+import { fusion, aliveFusion, anyFusion } from '../src/fusion'
 
 // ============ FUSION ============
 
-test('Fusion - basic computation', () => {
-  const a = Nucl(5)
-  const b = Nucl(10)
+test('fusion.alive - basic computation', () => {
+  const a = Nv(5)
+  const b = Nv(10)
 
-  const sum = Fusion(a, b, (av, bv) => av + bv)
+  const sum = fusion(a, b).alive((av, bv) => av + bv)
 
   expect(sum.value).toBe(15)
 
@@ -19,11 +19,11 @@ test('Fusion - basic computation', () => {
   expect(sum.value).toBe(25)
 })
 
-test('Fusion - alive strategy (default)', () => {
-  const enabled = Nucl(false)
-  const data = Nucl(100)
+test('fusion.alive - alive strategy (default)', () => {
+  const enabled = Nv(false)
+  const data = Nv(100)
 
-  const result = Fusion(enabled, data, (e, d) => e ? d : 0)
+  const result = fusion(enabled, data).alive((e, d) => e ? d : 0)
 
   // Initial: enabled is false (falsy) - should not compute
   expect(result.value).toBeUndefined()
@@ -41,12 +41,12 @@ test('Fusion - alive strategy (default)', () => {
   expect(result.value).toBe(300)
 })
 
-test('Fusion - multiple sources', () => {
-  const a = Nucl(1)
-  const b = Nucl(2)
-  const c = Nucl(3)
+test('fusion.alive - multiple sources', () => {
+  const a = Nv(1)
+  const b = Nv(2)
+  const c = Nv(3)
 
-  const sum = Fusion(a, b, c, (av, bv, cv) => av + bv + cv)
+  const sum = fusion(a, b, c).alive((av, bv, cv) => av + bv + cv)
 
   expect(sum.value).toBe(6)
 
@@ -54,12 +54,12 @@ test('Fusion - multiple sources', () => {
   expect(sum.value).toBe(15)
 })
 
-test('Fusion - chaining', () => {
-  const firstName = Nucl('John')
-  const lastName = Nucl('Doe')
+test('fusion.alive - chaining', () => {
+  const firstName = Nv('John')
+  const lastName = Nv('Doe')
 
-  const fullName = Fusion(firstName, lastName, (f, l) => `${f} ${l}`)
-  const greeting = Fusion(fullName, (name) => `Hello, ${name}!`)
+  const fullName = fusion(firstName, lastName).alive((f, l) => `${f} ${l}`)
+  const greeting = fusion(fullName).alive((name) => `Hello, ${name}!`)
 
   expect(greeting.value).toBe('Hello, John Doe!')
 
@@ -67,14 +67,14 @@ test('Fusion - chaining', () => {
   expect(greeting.value).toBe('Hello, Alice Doe!')
 })
 
-// ============ NEOFUSION ============
+// ============ FUSION.ANY ============
 
-test('NeoFusion.any - recomputes on all changes', () => {
-  const a = Nucl(0)
-  const b = Nucl(null)
+test('fusion.any - recomputes on all changes', () => {
+  const a = Nv(0)
+  const b = Nv(null)
 
   let computeCount = 0
-  const result = NeoFusion(a, b).any((av, bv) => {
+  const result = fusion(a, b).any((av, bv) => {
     computeCount++
     return (av || 0) + (bv || 0)
   })
@@ -88,11 +88,11 @@ test('NeoFusion.any - recomputes on all changes', () => {
   expect(computeCount).toBe(3)
 })
 
-test('NeoFusion.alive - same as Fusion', () => {
-  const a = Nucl(null)
-  const b = Nucl(5)
+test('fusion.alive - same behavior', () => {
+  const a = Nv(null)
+  const b = Nv(5)
 
-  const result = NeoFusion(a, b).alive((av, bv) => av + bv)
+  const result = fusion(a, b).alive((av, bv) => av + bv)
 
   expect(result.value).toBeUndefined() // a is null
 
@@ -102,12 +102,12 @@ test('NeoFusion.alive - same as Fusion', () => {
 
 // ============ ALIVEFUSION ============
 
-test('AliveFusion - side-effect only when truthy', () => {
-  const data = Nucl(null)
+test('aliveFusion - side-effect only when truthy', () => {
+  const data = Nv(null)
   let effectCount = 0
   let lastValue: any = null
 
-  const stop = AliveFusion([data], (d) => {
+  const decay = aliveFusion([data], (d) => {
     effectCount++
     lastValue = d
   })
@@ -125,18 +125,18 @@ test('AliveFusion - side-effect only when truthy', () => {
   expect(effectCount).toBe(2)
   expect(lastValue).toBe(200)
 
-  stop()
+  decay()
 
   data(300)
   expect(effectCount).toBe(2) // Stopped, no more effects
 })
 
-test('AliveFusion - multiple sources', () => {
-  const user = Nucl(null)
-  const settings = Nucl(null)
+test('aliveFusion - multiple sources', () => {
+  const user = Nv(null)
+  const settings = Nv(null)
   let effectCount = 0
 
-  const stop = AliveFusion([user, settings], (u, s) => {
+  const decay = aliveFusion([user, settings], (u, s) => {
     effectCount++
   })
 
@@ -151,17 +151,17 @@ test('AliveFusion - multiple sources', () => {
   user({ id: 2 })
   expect(effectCount).toBe(2)
 
-  stop()
+  decay()
 })
 
 // ============ ANYFUSION ============
 
-test('AnyFusion - triggers on all changes', () => {
-  const count = Nucl(0)
+test('anyFusion - triggers on all changes', () => {
+  const count = Nv(0)
   let effectCount = 0
   let lastValue: any
 
-  const stop = AnyFusion([count], (c) => {
+  const decay = anyFusion([count], (c) => {
     effectCount++
     lastValue = c
   })
@@ -178,18 +178,18 @@ test('AnyFusion - triggers on all changes', () => {
   count(null as any)
   expect(effectCount).toBe(4) // null triggers
 
-  stop()
+  decay()
 
   count(10)
   expect(effectCount).toBe(4) // Stopped
 })
 
-test('AnyFusion - form validation use case', () => {
-  const email = Nucl('')
-  const password = Nucl('')
+test('anyFusion - form validation use case', () => {
+  const email = Nv('')
+  const password = Nv('')
   let isValid = false
 
-  const stop = AnyFusion([email, password], (e, p) => {
+  const decay = anyFusion([email, password], (e, p) => {
     isValid = e.length > 0 && p.length >= 6
   })
 
@@ -204,16 +204,16 @@ test('AnyFusion - form validation use case', () => {
   password('')
   expect(isValid).toBe(false) // Empty password
 
-  stop()
+  decay()
 })
 
 // ============ AUTO-CLEANUP ============
 
-test('Fusion auto-cleanup on source decay', () => {
-  const a = Nucl(1)
-  const b = Nucl(2)
+test('fusion auto-cleanup on source decay', () => {
+  const a = Nv(1)
+  const b = Nv(2)
 
-  const sum = Fusion(a, b, (av, bv) => av + bv)
+  const sum = fusion(a, b).alive((av, bv) => av + bv)
   expect(sum.value).toBe(3)
 
   // Decay source

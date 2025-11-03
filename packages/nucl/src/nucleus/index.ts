@@ -8,8 +8,10 @@
  * @module @alaq/nucl/nucleus
  */
 
-import { Nucl, use } from '../index'
-import type { NuclPlugin } from '../index'
+import { createNuRealm } from '../plugins'
+import { createNu } from '../createNu'
+import type { NucleonPlugin, NuOptions } from "../types"
+import type { NucleusProto } from './types'
 
 /**
  * Check if value is empty
@@ -27,18 +29,19 @@ function isEmpty(value: any): boolean {
 /**
  * Nucleus plugin - combines universal, array, and object functionality
  */
-export const nucleusPlugin: NuclPlugin = {
+export const nucleusPlugin: NucleonPlugin = {
   name: 'nucleus',
+  symbol: Symbol('nucleus'),
 
   methods: {
     // ============ UNIVERSAL METHODS ============
 
     /**
-     * Subscribe to changes, only when value is truthy
+     * Subscribe to changes, only when value is not empty
      */
     upSome(this: any, fn: Function) {
       return this.up((value: any) => {
-        if (value) fn(value, this)
+        if (!isEmpty(value)) fn(value, this)
       })
     },
 
@@ -97,41 +100,6 @@ export const nucleusPlugin: NuclPlugin = {
       return last
     },
 
-    /**
-     * Transform array - returns new reactive Nucl
-     */
-    map(this: any, fn: Function) {
-      if (!Array.isArray(this.value)) {
-        throw new TypeError('map() requires array value')
-      }
-
-      const mapped = Nucl(this.value.map(fn))
-
-      // Subscribe to source changes
-      this.up((value: any[]) => {
-        mapped(value.map(fn))
-      })
-
-      return mapped
-    },
-
-    /**
-     * Filter array - returns new reactive Nucl
-     */
-    filter(this: any, fn: Function) {
-      if (!Array.isArray(this.value)) {
-        throw new TypeError('filter() requires array value')
-      }
-
-      const filtered = Nucl(this.value.filter(fn))
-
-      // Subscribe to source changes
-      this.up((value: any[]) => {
-        filtered(value.filter(fn))
-      })
-
-      return filtered
-    },
 
     /**
      * Find first matching item
@@ -185,47 +153,13 @@ export const nucleusPlugin: NuclPlugin = {
         throw new TypeError('pick() requires object value')
       }
 
-      const pickKeys = (obj: any) => {
-        const result: any = {}
-        keys.forEach(k => {
-          if (k in obj) result[k] = obj[k]
-        })
-        return result
-      }
-
-      const picked = Nucl(pickKeys(this.value))
-
-      // Subscribe to source changes
-      this.up((value: any) => {
-        picked(pickKeys(value))
+      const result: any = {}
+      keys.forEach(k => {
+        if (k in this.value) result[k] = this.value[k]
       })
-
-      return picked
+      return result
     },
 
-    /**
-     * Omit keys - returns new reactive Nucl
-     */
-    omit(this: any, ...keys: string[]) {
-      if (typeof this.value !== 'object' || this.value === null) {
-        throw new TypeError('omit() requires object value')
-      }
-
-      const omitKeys = (obj: any) => {
-        const result = { ...obj }
-        keys.forEach(k => delete result[k])
-        return result
-      }
-
-      const omitted = Nucl(omitKeys(this.value))
-
-      // Subscribe to source changes
-      this.up((value: any) => {
-        omitted(omitKeys(value))
-      })
-
-      return omitted
-    }
   },
 
   properties: {
@@ -276,7 +210,43 @@ export const nucleusPlugin: NuclPlugin = {
   }
 }
 
-// Auto-install nucleus plugin
-use(nucleusPlugin)
+// ============ AUTO-INIT REALM ============
+// Automatically install nucleus plugin when this module is imported
 
-export { Nucl, use }
+export const NUCLEUS_REALM = "__nucleus_realm__"
+createNuRealm(NUCLEUS_REALM, nucleusPlugin)
+
+// ============ MODULE AUGMENTATION ============
+// Extend global NuRealms interface to add typing for nucleus realm
+
+declare module '@alaq/nucl' {
+  interface NuRealms {
+    "__nucleus_realm__": NucleusProto
+  }
+}
+
+// ============ CONSTRUCTOR ============
+// Convenience constructor for Nucl with nucleus plugin
+
+/**
+ * Create Nucl with Nucleus plugin pre-installed
+ *
+ * Provides array, object, and universal reactive methods.
+ *
+ * @example
+ * ```typescript
+ * const arr = Nucleus([1, 2, 3])
+ * arr.push(4) // ✅ array methods
+ * arr.size // ✅ 4
+ *
+ * const obj = Nucleus({ name: 'John' })
+ * obj.set('age', 25) // ✅ object methods
+ * obj.keys // ✅ ['name', 'age']
+ * ```
+ */
+export function Nucleus<T>(value?: T, options?: Omit<NuOptions<T>, 'realm'>): any {
+  return createNu({ ...options, value, realm: NUCLEUS_REALM })
+}
+
+// Export types
+export type { NucleusProto } from './types'

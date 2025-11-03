@@ -1,10 +1,10 @@
 import { test, expect } from 'bun:test'
-import { Nucl } from '../src/nucleus'
+import { Nucleus } from '../src/nucleus'
 
 // ============ UNIVERSAL ============
 
 test('isEmpty - string', () => {
-  const n = Nucl('') as any
+  const n = Nucleus('') as any
   expect(n.isEmpty).toBe(true)
 
   n('hello')
@@ -12,7 +12,7 @@ test('isEmpty - string', () => {
 })
 
 test('isEmpty - array', () => {
-  const n = Nucl([]) as any
+  const n = Nucleus([]) as any
   expect(n.isEmpty).toBe(true)
 
   n([1, 2])
@@ -20,7 +20,7 @@ test('isEmpty - array', () => {
 })
 
 test('isEmpty - object', () => {
-  const n = Nucl({}) as any
+  const n = Nucleus({}) as any
   expect(n.isEmpty).toBe(true)
 
   n({ x: 1 })
@@ -28,7 +28,7 @@ test('isEmpty - object', () => {
 })
 
 test('upSome - only triggers on truthy', () => {
-  const n = Nucl(0) as any
+  const n = Nucleus(0) as any
   let count = 0
 
   n.upSome(() => count++)
@@ -42,7 +42,8 @@ test('upSome - only triggers on truthy', () => {
 })
 
 test('injectTo', () => {
-  const n = Nucl({ value: 42, id: 'count' }) as any
+  const n = Nucleus(42) as any
+  n.id = 'count' // Set id property
   const obj: any = {}
 
   n.injectTo(obj)
@@ -54,7 +55,7 @@ test('injectTo', () => {
 })
 
 test('injectAs', () => {
-  const n = Nucl('hello') as any
+  const n = Nucleus('hello') as any
   const obj: any = {}
 
   n.injectAs('greeting', obj)
@@ -68,7 +69,7 @@ test('injectAs', () => {
 // ============ ARRAY ============
 
 test('push', () => {
-  const n = Nucl([1, 2, 3]) as any
+  const n = Nucleus([1, 2, 3]) as any
 
   n.push(4)
   expect(n.value).toEqual([1, 2, 3, 4])
@@ -78,42 +79,22 @@ test('push', () => {
 })
 
 test('pop', () => {
-  const n = Nucl([1, 2, 3]) as any
+  const n = Nucleus([1, 2, 3]) as any
 
   const last = n.pop()
   expect(last).toBe(3)
   expect(n.value).toEqual([1, 2])
 })
 
-test('map - reactive', () => {
-  const n = Nucl([1, 2, 3]) as any
-  const doubled = n.map((x: number) => x * 2)
-
-  expect(doubled.value).toEqual([2, 4, 6])
-
-  n([5, 10])
-  expect(doubled.value).toEqual([10, 20])
-})
-
-test('filter - reactive', () => {
-  const n = Nucl([1, 2, 3, 4, 5]) as any
-  const evens = n.filter((x: number) => x % 2 === 0)
-
-  expect(evens.value).toEqual([2, 4])
-
-  n([1, 2, 3, 4, 5, 6])
-  expect(evens.value).toEqual([2, 4, 6])
-})
-
 test('find', () => {
-  const n = Nucl([1, 2, 3, 4]) as any
+  const n = Nucleus([1, 2, 3, 4]) as any
 
   const found = n.find((x: number) => x > 2)
   expect(found).toBe(3)
 })
 
 test('at', () => {
-  const n = Nucl(['a', 'b', 'c']) as any
+  const n = Nucleus(['a', 'b', 'c']) as any
 
   expect(n.at(0)).toBe('a')
   expect(n.at(-1)).toBe('c')
@@ -121,7 +102,7 @@ test('at', () => {
 })
 
 test('size getter', () => {
-  const n = Nucl([1, 2, 3]) as any
+  const n = Nucleus([1, 2, 3]) as any
 
   expect(n.size).toBe(3)
 
@@ -132,7 +113,7 @@ test('size getter', () => {
 // ============ OBJECT ============
 
 test('set', () => {
-  const n = Nucl({ x: 1, y: 2 }) as any
+  const n = Nucleus({ x: 1, y: 2 }) as any
 
   n.set('x', 10)
   expect(n.value).toEqual({ x: 10, y: 2 })
@@ -142,40 +123,27 @@ test('set', () => {
 })
 
 test('get', () => {
-  const n = Nucl({ name: 'John', age: 30 }) as any
+  const n = Nucleus({ name: 'John', age: 30 }) as any
 
   expect(n.get('name')).toBe('John')
   expect(n.get('age')).toBe(30)
 })
 
-test('pick - reactive', () => {
-  const n = Nucl({ a: 1, b: 2, c: 3 }) as any
+test('pick - returns plain object', () => {
+  const n = Nucleus({ a: 1, b: 2, c: 3 }) as any
   const picked = n.pick('a', 'c')
 
-  expect(picked.value).toEqual({ a: 1, c: 3 })
-
-  n({ a: 10, b: 20, c: 30 })
-  expect(picked.value).toEqual({ a: 10, c: 30 })
-})
-
-test('omit - reactive', () => {
-  const n = Nucl({ a: 1, b: 2, c: 3 }) as any
-  const omitted = n.omit('b')
-
-  expect(omitted.value).toEqual({ a: 1, c: 3 })
-
-  n({ a: 10, b: 20, c: 30 })
-  expect(omitted.value).toEqual({ a: 10, c: 30 })
+  expect(picked).toEqual({ a: 1, c: 3 })
 })
 
 test('keys getter', () => {
-  const n = Nucl({ x: 1, y: 2 }) as any
+  const n = Nucleus({ x: 1, y: 2 }) as any
 
   expect(n.keys).toEqual(['x', 'y'])
 })
 
 test('values getter', () => {
-  const n = Nucl({ x: 1, y: 2 }) as any
+  const n = Nucleus({ x: 1, y: 2 }) as any
 
   expect(n.values).toEqual([1, 2])
 })
