@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import { existsSync } from 'fs'
+import {Project} from "~/scripts/Project";
 
 const scan = (dir) => {
   const fromDir = path.resolve(dir)
@@ -28,12 +29,19 @@ export function startScan(target) {
   return scan(target)
 }
 
-export const scanAllSrc = () => {
+export const scanAllSrc = (targetProjects: Project[]) => {
   const packagesDir = path.resolve('packages')
   const projects = {}
   const all = []
+  const targets = {}
+  for (const p of targetProjects) {
+    targets[p.id] = p
+  }
   fs.readdirSync(packagesDir).forEach((projectDir) => {
     const fromFile = path.join(packagesDir, projectDir)
+    if (!targets[projectDir]) {
+      return
+    }
     const fromFileStats = fs.statSync(fromFile)
     const project = {}
 
@@ -41,13 +49,15 @@ export const scanAllSrc = () => {
       if (existsSync(nextDir)) {
         fs.readdirSync(nextDir).forEach((f) => {
           const srcPath = path.resolve(nextDir, f)
-          const isDeclaration = f.endsWith('.d.ts')
-          const name = isDeclaration ? f.replace('.d.ts', '') : f.replace('.ts', '')
-          project[srcPath] = {
-            name,
-            isDeclaration,
+          const stats = fs.statSync(srcPath)
+          if (stats.isDirectory()) {
+            scanNext(srcPath)
+          } else if (f.endsWith('.ts') || f.endsWith('.d.ts')) {
+            const isDeclaration = f.endsWith('.d.ts')
+            const name = isDeclaration ? f.replace('.d.ts', '') : f.replace('.ts', '')
+            project[srcPath] = { name, isDeclaration }
+            all.push(srcPath)
           }
-          all.push(srcPath)
         })
       }
     }

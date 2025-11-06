@@ -28,10 +28,16 @@ export interface NucleonPlugin {
   /** Called when Nucl instance is disposed */
   onDecay?: PluginHandler
 
+  deepWatch?: (e:{
+    n:INucleusCore<any>,
+    path: string,
+    type: string,
+    target: any,
+    oldValue?: any
+  })=>void
 
-
-  methods:any
-  properties:any
+  methods?:any
+  properties?:any
 
   // /** Called when property is accessed */
   // onGet?: (nucl: any, key: string, value: any) => void
@@ -61,7 +67,9 @@ export interface NuOptions<T = any> extends QuOptions<T> {
   /** Enable immutability - creates new copies on each update */
   immutable?: boolean
   /** Enable deep tracking - tracks changes in nested objects/arrays */
-  deepTracking?: boolean
+  deepWatch?: boolean
+
+  plugins?: NucleonPlugin[]
 }
 
 // Re-export realm types
