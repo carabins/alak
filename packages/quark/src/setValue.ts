@@ -2,7 +2,7 @@ import IQuarkCore from "./IQuarkCore";
 import {DEDUP, HAS_GROW_UP, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS} from "./flags";
 import {quantumBus} from "./quantum-bus";
 
-export function setValue<T>(quark: IQuarkCore, value: T): void {
+export default function setValue<T>(quark: IQuarkCore, value: T): void {
   const flags = quark._flags
 
   if (quark._pipeFn) {
@@ -37,7 +37,7 @@ export function setValue<T>(quark: IQuarkCore, value: T): void {
   }
 
   if (flags & HAS_GROW_UP) {
-    const listeners = quark._listeners
+    const listeners = quark._edges
     for (let i = 0, len = listeners.length; i < len; i++) {
       listeners[i](value, quark)
     }

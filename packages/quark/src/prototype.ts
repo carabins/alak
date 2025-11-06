@@ -92,3 +92,5 @@ export const quarkProto = {
 //     enumerable: true,
 //   },
 // })
+
+export default quarkProto

@@ -18,7 +18,6 @@ export class RealmBus {
   }
 
   on(event: string, listener: AnyFunction) {
-    console.log('RealmBus.on:', {event, realmName: this._realmName});
     if (event === '*:*') {
       quantumBus.onWildcard(listener)
       return this
@@ -32,11 +31,9 @@ export class RealmBus {
 
     // Handle cross-realm event
     const colonIdx = event.indexOf(':')
-    console.log('  colonIdx:', colonIdx);
     if (colonIdx > 0) {
       const realm = event.slice(0, colonIdx)
       const evt = event.slice(colonIdx + 1)
-      console.log('  cross-realm detected:', {realm, evt, subscriberRealm: this._realmName});
       quantumBus.subscribeToRealm(this._realmName, realm, evt, listener)
       return this
     }
@@ -159,9 +156,7 @@ class QuantumBusManager {
   // Subscribe to events from another realm
   subscribeToRealm(subscriberRealm: string, targetRealm: string, event: string, listener: AnyFunction) {
     const key = `${subscriberRealm}:${targetRealm}:${event}`;
-    console.log('subscribeToRealm:', {key, subscriberRealm, targetRealm, event});
     this.crossRealmSubscriptions.set(key, listener);
-    console.log('crossRealmSubscriptions size:', this.crossRealmSubscriptions.size);
   }
 
   // Unsubscribe from events from another realm
@@ -172,14 +167,11 @@ class QuantumBusManager {
 
   // Notify cross-realm subscribers when target realm emits an event
   notifyCrossRealmSubscribers(targetRealm: string, event: string, data: any) {
-    console.log('notifyCrossRealmSubscribers:', {targetRealm, event, subsCount: this.crossRealmSubscriptions.size, keys: Array.from(this.crossRealmSubscriptions.keys())});
     // Find all subscribers to this (targetRealm:event) combination
     for (const [key, listener] of this.crossRealmSubscriptions) {
       const [subscriberRealm, target, evt] = key.split(':');
-      console.log('  checking:', {key, subscriberRealm, target, evt, match: target === targetRealm && evt === event});
       if (target === targetRealm && evt === event) {
         // Call the listener with wrapped data for consistency with regular events
-        console.log('  CALLING LISTENER!');
         listener({ event, data });
       }
     }

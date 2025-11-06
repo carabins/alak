@@ -1,17 +1,10 @@
-import { describe, expect, test, beforeEach } from "bun:test";
-import { setValue } from "../src/setValue";
+//@ts-nocheck
+
+
+import {beforeEach, describe, expect, test} from "bun:test";
+import {setValue} from "../src/setValue";
 import setupQuarkAndOptions from "../src/setupQuarkAndOptions";
-import { Qu } from "../src/index";
-import {
-  DEDUP,
-  HAS_GROW_UP,
-  HAS_REALM,
-  HAS_REALM_AND_EMIT,
-  IS_EMPTY,
-  SILENT,
-  STATELESS,
-  EMIT_CHANGES
-} from "@alaq/quark/flags";
+import {DEDUP, EMIT_CHANGES, HAS_GROW_UP, HAS_REALM, IS_EMPTY, SILENT, STATELESS} from "@alaq/quark/flags";
 
 describe("setValue", () => {
   let quark: any;

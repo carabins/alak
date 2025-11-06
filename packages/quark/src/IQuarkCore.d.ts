@@ -20,15 +20,15 @@ export default interface IQuarkCore<T = any> extends IQuark<T> {
   /** Realm identifier if realm is set */
 
 
-  _hasListeners: boolean
+  _isAwake: boolean
   // dedup: boolean
   // keepState: boolean
   // isSilent: boolean
   // emitChanges: boolean
-  _emitChangeName: string
-  _changeEventName: string
+  // _emitChangeName: string
+  _evName : string
   _pipeFn: (value: T) => T
-  _listeners: Array<(value: T, quark: IQuark<T>) => void>
+  _edges: Array<(value: T, quark: IQuark<T>) => void>
 
 }
 

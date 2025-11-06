@@ -36,7 +36,7 @@ describe("quarkProto", () => {
     });
 
     test("should lazy init listeners if not present", () => {
-      const tempQuark = Qu<number>();
+      const tempQuark = Qu<number>() as any
       const listener = jest.fn();
       tempQuark.up(listener);
 
