@@ -1,10 +1,10 @@
 import fs from 'fs'
-import {Const} from './common/constants.js'
-import {initProjectsInPackagesDir, Project} from './Project'
+import {Const} from './constants'
+import {initProjectsInPackagesDir, BuildPackage} from '../BuildPackage'
 
 
-export const projects = {
-  all: {} as Record<string, Project>,
+export const packageRegistry = {
+  all: {} as Record<string, BuildPackage>,
   versions: {} as Record<string, string>
 }
 
@@ -12,7 +12,7 @@ fs.readdirSync(Const.PACKAGES).forEach((f) => {
   const p = initProjectsInPackagesDir(f)
   if (p) {
     p.id = f
-    projects.all[f] = p
-    projects.versions[p.packageJson.name] = p.packageJson.version
+    packageRegistry.all[f] = p
+    packageRegistry.versions[p.packageJson.name] = p.packageJson.version
   }
 })

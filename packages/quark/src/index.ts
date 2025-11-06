@@ -1,24 +1,36 @@
 /**
  * @alaq/quark - High-Performance Reactive Container
  */
+import IQuark from "./IQuark";
+import {setValue} from "./setValue";
+import {quarkProto} from "./prototype";
+import setupQuarkAndOptions from "./setupQuarkAndOptions";
 
-import { createQu } from './create'
-import type { QuOptions } from './create'
 
-export const Qu = createQu
+export interface QuOptions<T = any> {
+  value?: T
+  realm?: string
+  id?: string
+  pipe?: (value: T) => T | undefined
+  dedup?: boolean
+  stateless?: boolean
+  emitChanges?: boolean
+  emitChangeName?: string
+}
 
 
-export const Qv = Object.assign(
-  function<T>(value?: T, options?: any) {
-    return createQu({ ...options, value })
+export function Qu<T>(options?: QuOptions<T>) {
+  function quark(this: any, value: any) {
+    return setValue(quark as any, value)
   }
-)
 
-export default Qu
+  setupQuarkAndOptions(quark, options)
+  Object.setPrototypeOf(quark, quarkProto)
+  return quark as IQuark<T>;
+}
 
-// Export for library authors (like @alaq/nucl)
-export { createQu, setValue } from './create'
-export { quarkProto } from './prototype'
-export { HAS_LISTENERS, HAS_EVENTS, HAS_REALM, WAS_SET, DEDUP, STATELESS, SILENT } from './flags'
-export type { QuOptions }
-
+export function Qv<T>(value?: T, options?: QuOptions) {
+  const q = Qu<T>(options)
+  q(value)
+  return q
+}

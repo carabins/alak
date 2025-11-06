@@ -1,9 +1,9 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import { existsSync } from 'fs'
-import {Project} from "~/scripts/Project";
+import {BuildPackage} from "~/scripts/BuildPackage";
 
-const scan = (dir) => {
+const scanFiles = (dir) => {
   const fromDir = path.resolve(dir)
   const sources = {}
   fs.readdirSync(fromDir).forEach((f) => {
@@ -17,7 +17,7 @@ const scan = (dir) => {
         isDeclaration,
       }
     } else {
-      const inSources = scan(path.join(dir, f))
+      const inSources = scanFiles(path.join(dir, f))
       Object.assign(sources, inSources)
     }
   })
@@ -26,14 +26,15 @@ const scan = (dir) => {
 
 export function startScan(target) {
   // Log("scan sources...")
-  return scan(target)
+  return scanFiles(target)
 }
 
-export const scanAllSrc = (targetProjects: Project[]) => {
+export const scanAllSrc = (targetProjects: BuildPackage[]) => {
   const packagesDir = path.resolve('packages')
   const projects = {}
   const all = []
   const targets = {}
+
   for (const p of targetProjects) {
     targets[p.id] = p
   }

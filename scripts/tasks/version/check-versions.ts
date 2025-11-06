@@ -2,9 +2,9 @@
  * Check published versions of packages in npm
  */
 import select from '@inquirer/select'
-import { getPackageVersions, NpmPackageInfo } from '../common/utils/publish'
-import { projects } from '../common/scan.projects'
-import { Project } from '../Project'
+import { getPackageVersions, NpmPackageInfo } from '../../common/utils/publish'
+import { packageRegistry } from '../../common/scan.projects'
+import { BuildPackage } from '../../BuildPackage'
 
 interface PackageChoice {
   name: string
@@ -17,7 +17,7 @@ interface PackageChoice {
  * Get available packages for version check
  */
 function getAvailablePackages(): PackageChoice[] {
-  return Object.values(projects.all).map((project: Project) => {
+  return Object.values(packageRegistry.all).map((project: BuildPackage) => {
     const localVersion = project.packageJson.version || '0.0.0'
     const packageName = project.packageJson.name
 
@@ -181,7 +181,7 @@ export async function checkVersionsWorkflow() {
     console.log(`\n💻 Local version: ${selected.localVersion}`)
 
     // Still update the project's npmVersion even if package not found on npm
-    const project = projects.all[selected.value];
+    const project = packageRegistry.all[selected.value];
     if (project) {
       project.npmVersion = selected.localVersion; // Use local version if not published
     }
@@ -190,7 +190,7 @@ export async function checkVersionsWorkflow() {
   }
 
   // Update Project's npm version
-  const project = projects.all[selected.value];
+  const project = packageRegistry.all[selected.value];
   if (project) {
     project.npmVersion = npmInfo['dist-tags'].latest || selected.localVersion;
   }

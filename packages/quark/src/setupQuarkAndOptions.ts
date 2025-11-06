@@ -1,0 +1,51 @@
+import {DEDUP, EMIT_CHANGES, HAS_PIPE, HAS_REALM, IS_EMPTY, STATELESS} from './flags'
+import {quantumBus} from './quantum-bus'
+import IQuark from "./IQuark";
+import {QuOptions} from "./index";
+
+
+let uidCounter = 0
+
+export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: QuOptions): IQuark<T> {
+
+  quark.uid = ++uidCounter
+  quark._flags = IS_EMPTY
+
+  if (options) {
+    if (options.value !== undefined) {
+      quark.value = options.value
+    }
+
+    if (options.id) {
+      quark.id = options.id
+    }
+
+    if (options.realm) {
+      const realm = options.realm
+      quark.realm = realm
+      quark._flags |= HAS_REALM
+      if (!quark._bus) {
+        quark._bus = quantumBus.getRealm(quark.realm || '+')
+      }
+    }
+
+    if (options.pipe) {
+      quark._flags |= HAS_PIPE
+      quark._pipeFn = options.pipe
+    }
+
+    if (options.emitChanges) {
+      quark._flags |= EMIT_CHANGES
+      quark._changeEventName = options?.emitChangeName || 'change'
+    }
+    if (options.dedup) {
+      quark._flags |= DEDUP
+    }
+    if (options.stateless) {
+      quark._flags |= STATELESS
+    }
+  }
+
+  if (quark.value !== undefined) quark(quark.value)
+  return quark as IQuark<T>
+}

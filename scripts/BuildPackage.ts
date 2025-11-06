@@ -6,7 +6,7 @@ import {FileStatusResult} from 'simple-git/dist/typings/response'
 import {pick} from './common/utils'
 import {createModuleLogger, Log} from "~/scripts/log";
 
-export class Project {
+export class BuildPackage {
   id: string
   dir: string
   npmVersion: string
@@ -68,10 +68,10 @@ export class Project {
   }
 }
 
-export function initProjectsInPackagesDir(dir: string): Project | null {
+export function initProjectsInPackagesDir(dir: string): BuildPackage | null {
   const pkgPath = path.join(Const.PACKAGES, dir, Const.PK_JSON)
   if (!fs.existsSync(pkgPath)) {
     return null
   }
-  return new Project(dir)
+  return new BuildPackage(dir)
 }

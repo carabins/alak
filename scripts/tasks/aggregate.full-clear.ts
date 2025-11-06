@@ -1,10 +1,9 @@
 import {BuildPackage} from "~/scripts/BuildPackage";
-import fs from "fs";
+import fs from "fs-extra";
 
 export default (p: BuildPackage[]) => {
   p.forEach(l=>{
-    console.log(l);
-    // fs.unlinkSync(l.artPatch)
+    fs.removeSync(l.artPatch)
   })
 }
- 
+
