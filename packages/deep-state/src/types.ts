@@ -53,7 +53,6 @@ export interface IDeepState {
   root: {
     notify: RootNotify
   } & DeepOptions
-  parentPath?: string
   type?: string
 }
 

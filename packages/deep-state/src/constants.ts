@@ -2,6 +2,7 @@
 
 // Внутренние свойства прокси
 import {IDeepState} from "./types";
+import {getPath} from "./utils";
 
 export const INTERNAL_PROPERTIES = {
   PARENT: '__parent__',
@@ -31,7 +32,7 @@ MUTATING_ARRAY_METHODS.forEach(method => {
     // Очищаем кэш прокси, так как индексы могли сдвинуться
     parent.subProxies = {}
     
-    parent.root.notify(parent.parentPath, method, target)
+    parent.root.notify(getPath(parent), method, target)
     return result
   }
 })
@@ -42,7 +43,7 @@ ITERATION_ARRAY_METHODS.forEach(method => {
   arrayMethods[method] = function (this: any, ...args: any[]) {
     const parent = this.__parent__ as IDeepState
     const result = original.apply(parent.value, args)
-    parent.root.notify(parent.parentPath, method, parent.value)
+    parent.root.notify(getPath(parent), method, parent.value)
     return result
   }
 })

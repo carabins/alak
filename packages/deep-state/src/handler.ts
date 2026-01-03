@@ -1,5 +1,6 @@
 import {IDeepState} from './types'
 import {arrayMethods, RETURN_FALSE_MAP, RETURN_RAW_MAP, RETURN_TRUE_MAP} from './constants'
+import {getPath} from "./utils";
 
 
 export const baseHandler = {
@@ -31,7 +32,8 @@ export const baseHandler = {
       }
     }
 
-    const path = parent.parentPath ? parent.parentPath + "." + String(key) : String(key)
+    const parentPath = getPath(parent)
+    const path = parentPath ? parentPath + "." + String(key) : String(key)
     parent.root.notify(path, "set", target, oldValue)
     return true
   },
@@ -80,8 +82,7 @@ export const baseHandler = {
         parent,
         root,
         value,
-        key,
-        parentPath: parent.parentPath ? parent.parentPath + "." + key : key
+        key
       }
 
       proxy = new Proxy(childParent, this)
@@ -106,7 +107,8 @@ export const baseHandler = {
     if (parent.subProxies && parent.subProxies[key])
       delete parent.subProxies[key]
 
-    const path = parent.parentPath ? parent.parentPath + "." + key : key
+    const parentPath = getPath(parent)
+    const path = parentPath ? parentPath + "." + key : key
     parent.root.notify(path, "delete", target)
 
     return result
@@ -116,7 +118,8 @@ export const baseHandler = {
     const target = parent.value
     const result = Reflect.has(target, key)
 
-    const path = parent.parentPath ? parent.parentPath + "." + key : key
+    const parentPath = getPath(parent)
+    const path = parentPath ? parentPath + "." + key : key
     parent.root.notify(path, "has", target)
     return result
   },

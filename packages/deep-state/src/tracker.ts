@@ -20,7 +20,6 @@ export function createState(notify: NotifyFn, options: DeepOptions = {}) {
         notify(root.value, {path, type, target, oldValue})
       }
     },
-    parentPath: ""
   }
 
   return {
