@@ -12,6 +12,7 @@ import { createNuRealm } from '../plugins'
 import { createNu } from '../createNu'
 import type { NucleonPlugin, NuOptions } from "../types"
 import type { NucleusProto } from './types'
+import { deepStatePlugin } from '../deep-state/plugin'
 
 /**
  * Check if value is empty
@@ -214,7 +215,7 @@ export const nucleusPlugin: NucleonPlugin = {
 // Automatically install nucleus plugin when this module is imported
 
 export const NUCLEUS_REALM = "__nucleus_realm__"
-createNuRealm(NUCLEUS_REALM, nucleusPlugin)
+createNuRealm(NUCLEUS_REALM, nucleusPlugin, deepStatePlugin)
 
 // ============ MODULE AUGMENTATION ============
 // Extend global NuRealms interface to add typing for nucleus realm

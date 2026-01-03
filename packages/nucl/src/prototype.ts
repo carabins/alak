@@ -17,35 +17,10 @@ export const NuclearProto = Object.assign({
 // Define value getter for Nucl
 Object.defineProperty(NuclearProto, 'value', {
   get() {
-    if (this._isDeep) {
-      this._reg.handleWatch(this, {
-        value: this._value,
-        type: TrackTypes.GET,
-        target: this._state
-      })
-      return this._state
-    }
     return this._value
   },
   set(value) {
-    if (this._value != value) {
-      if (this._isDeep) {
-        const isObject = typeof value === 'object'
-        this._isObject = isObject
-        if (isObject) {
-          this._state = this._watcher.deepWatch(value)
-        } else {
-          this._state = value
-        }
-        this._reg.handleWatch(this,
-          {
-            value,
-            oldValue: this._value,
-            type: TriggerOpTypes.SET,
-            target: this._state
-          }
-        )
-      }
+    if (this._value !== value) {
       this._value = value
       this(value)
     }

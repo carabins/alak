@@ -37,3 +37,4 @@ export const Nv = function <T>(value?: T, options?: INuOptions) {
 // Export types
 
 export {createNuRealm} from './plugins'
+export {deepStatePlugin} from './deep-state/plugin'

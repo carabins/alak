@@ -3,7 +3,6 @@ import defaultRealm from "./defaultRealm";
 import {INuOptions} from "./index";
 import setValue from "@alaq/quark/setValue";
 import setupQuarkAndOptions from "@alaq/quark/setupQuarkAndOptions";
-import {setupDeepState} from "@alaq/nucl/deep-state";
 import IQuark from "@alaq/quark/IQuark";
 
 
@@ -27,9 +26,6 @@ export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
   nuq._reg = reg
 
   if (options) {
-    if (options.deepWatch) {
-      setupDeepState(nuq as any, options, reg)
-    }
     if (options.immutable) {
       nuq.isIm = true
     }
@@ -39,7 +35,7 @@ export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
 
   for (const h of reg.createHooks) {
     //@ts-ignore
-    h(nuq)
+    h(nuq, options)
   }
 
   if (options && options.value !== undefined) {
