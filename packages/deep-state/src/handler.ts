@@ -12,8 +12,6 @@ export const baseHandler = {
       return Reflect.set(target, key, newValue, receiver)
     }
 
-    console.log({target})
-
     const oldValue = target[key]
     target[key] = newValue
 
@@ -33,7 +31,8 @@ export const baseHandler = {
       }
     }
 
-    parent.root.notify(parent.parentPath + "." + key, "set", target, oldValue)
+    const path = parent.parentPath ? parent.parentPath + "." + String(key) : String(key)
+    parent.root.notify(path, "set", target, oldValue)
     return true
   },
   get(parent: IDeepState, key: string, receiver: any) {
@@ -82,7 +81,7 @@ export const baseHandler = {
         root,
         value,
         key,
-        parentPath: parent.parentPath + key
+        parentPath: parent.parentPath ? parent.parentPath + "." + key : key
       }
 
       proxy = new Proxy(childParent, this)
@@ -107,7 +106,8 @@ export const baseHandler = {
     if (parent.subProxies && parent.subProxies[key])
       delete parent.subProxies[key]
 
-    parent.root.notify(parent.parentPath + key, "delete", target)
+    const path = parent.parentPath ? parent.parentPath + "." + key : key
+    parent.root.notify(path, "delete", target)
 
     return result
   },
@@ -116,7 +116,8 @@ export const baseHandler = {
     const target = parent.value
     const result = Reflect.has(target, key)
 
-    parent.root.notify(parent.parentPath + key, "has", target)
+    const path = parent.parentPath ? parent.parentPath + "." + key : key
+    parent.root.notify(path, "has", target)
     return result
   },
 

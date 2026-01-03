@@ -27,6 +27,10 @@ MUTATING_ARRAY_METHODS.forEach(method => {
     const parent = this.__parent__ as IDeepState
     const target = parent.value
     const result = original.apply(target, args)
+    
+    // Очищаем кэш прокси, так как индексы могли сдвинуться
+    parent.subProxies = {}
+    
     parent.root.notify(parent.parentPath, method, target)
     return result
   }
