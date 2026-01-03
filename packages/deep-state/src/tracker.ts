@@ -1,9 +1,5 @@
-import {IParent, NotifyFn, RootNotify, DeepOptions} from './types'
+import {IDeepState, NotifyFn, RootNotify, DeepOptions} from './types'
 import {baseHandler} from "./handler";
-
-
-// Для отслеживания уже обернутых объектов (как во Vue)
-//const reactiveMap = new WeakMap<object, any>()
 
 
 /**
@@ -16,7 +12,7 @@ export function createState(notify: NotifyFn, options: DeepOptions = {}) {
   }
 
 
-  const root: IParent = {
+  const root: IDeepState = {
     isRoot: true,
     root: {
       ...finalOptions,
@@ -29,12 +25,11 @@ export function createState(notify: NotifyFn, options: DeepOptions = {}) {
 
   return {
     root,
-    deepWatch(value) {
+    deepWatch(value?) {
       root.value = value
       return new Proxy(root, baseHandler)
     },
   }
 }
 
-
-export default createState
+export type IDeepWatcher = ReturnType<typeof createState>

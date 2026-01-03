@@ -3,7 +3,7 @@
  * Prefixed with _ to denote internal properties
  */
 import IQuark from "./IQuark";
-import {QuOptions} from "./index";
+import {IQuOptions} from "./index";
 import {RealmBus} from './quantum-bus';
 
 // System internal properties and methods

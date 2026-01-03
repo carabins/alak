@@ -1,9 +1,9 @@
-import {IParent} from './types'
+import {IDeepState} from './types'
 import {arrayMethods, RETURN_FALSE_MAP, RETURN_RAW_MAP, RETURN_TRUE_MAP} from './constants'
 
 
 export const baseHandler = {
-  set(parent: IParent, key: string | symbol, newValue: any, receiver: any) {
+  set(parent: IDeepState, key: string | symbol, newValue: any, receiver: any) {
     const target = parent.value
     // target[key] = newValue
 
@@ -12,6 +12,7 @@ export const baseHandler = {
       return Reflect.set(target, key, newValue, receiver)
     }
 
+    console.log({target})
 
     const oldValue = target[key]
     target[key] = newValue
@@ -19,7 +20,7 @@ export const baseHandler = {
     // Переиспользуем существующий прокси если он есть
     if (parent.subProxies && parent.subProxies[key]) {
       const existingProxy = parent.subProxies[key]
-      const childParent = existingProxy.__parent__ as IParent
+      const childParent = existingProxy.__parent__ as IDeepState
 
       // Если новое значение - объект, обновляем прокси
       if (typeof newValue === 'object' && newValue !== null) {
@@ -35,7 +36,7 @@ export const baseHandler = {
     parent.root.notify(parent.parentPath + "." + key, "set", target, oldValue)
     return true
   },
-  get(parent: IParent, key: string, receiver: any) {
+  get(parent: IDeepState, key: string, receiver: any) {
 
     if (key === '__parent__') return parent
     if (RETURN_TRUE_MAP[key]) return true
@@ -76,7 +77,7 @@ export const baseHandler = {
 
     let proxy = parent.subProxies[key]
     if (!proxy) {
-      const childParent: IParent = {
+      const childParent: IDeepState = {
         parent,
         root,
         value,
@@ -91,7 +92,7 @@ export const baseHandler = {
   },
 
 
-  deleteProperty(parent: IParent, key: string | symbol) {
+  deleteProperty(parent: IDeepState, key: string | symbol) {
     const target = parent.value
 
     if (typeof key === 'symbol') {
@@ -111,7 +112,7 @@ export const baseHandler = {
     return result
   },
 
-  has(parent: IParent, key: string) {
+  has(parent: IDeepState, key: string) {
     const target = parent.value
     const result = Reflect.has(target, key)
 
@@ -119,7 +120,7 @@ export const baseHandler = {
     return result
   },
 
-  ownKeys(parent: IParent) {
+  ownKeys(parent: IDeepState) {
     const target = parent.value
     // track(target, TrackOpTypes.ITERATE, Array.isArray(target) ? 'length' : Symbol.iterator)
     parent.root.notify(parent.parentPath, "ownKeys", target)

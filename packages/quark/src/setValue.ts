@@ -1,6 +1,7 @@
 import IQuarkCore from "./IQuarkCore";
-import {DEDUP, HAS_GROW_UP, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS} from "./flags";
+import {DEDUP, IS_AWAKE, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS} from "./flags";
 import {quantumBus} from "./quantum-bus";
+
 
 export default function setValue<T>(quark: IQuarkCore, value: T): void {
   const flags = quark._flags
@@ -11,7 +12,7 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
     value = transformed
   }
 
-  // Сбрасываем IS_EMPTY при первой установке значения (до dedup проверки)
+
   if (flags & IS_EMPTY) {
     quark._flags &= ~IS_EMPTY
   }
@@ -36,14 +37,14 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
     })
   }
 
-  if (flags & HAS_GROW_UP) {
-    const listeners = quark._edges
-    for (let i = 0, len = listeners.length; i < len; i++) {
-      listeners[i](value, quark)
+  if (flags & IS_AWAKE) {
+    const edges = quark._edges
+    for (let i = 0, len = edges.length; i < len; i++) {
+      edges[i](value, quark)
     }
   }
 
-  if ((flags & HAS_REALM_AND_EMIT) === HAS_REALM_AND_EMIT ) {
+  if ((flags & HAS_REALM_AND_EMIT) === HAS_REALM_AND_EMIT) {
     quark._bus.emit('QUARK_CHANGE', {
       id: quark.id,
       value,

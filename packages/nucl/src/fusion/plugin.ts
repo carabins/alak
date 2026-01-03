@@ -3,7 +3,7 @@
  * @module @alaq/nucl/fusion/plugin
  */
 
-import type { NucleonPlugin } from '../types'
+import type { INucleonPlugin } from '../INucleonPlugin'
 import { strategies, type StrategyName } from './strategies'
 
 type AnyNucl = any
@@ -24,7 +24,7 @@ type AnyNucl = any
  * // Or with explicit strategy
  * result.fusion(a, b, 'any', (a, b) => a + b)
  */
-export const fusionPlugin: NucleonPlugin = {
+export const fusionPlugin: INucleonPlugin = {
   name: 'fusion',
   symbol: Symbol('fusion'),
 

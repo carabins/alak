@@ -19,9 +19,6 @@
       "alak/*": [
         "packages/alak/src/*"
       ],
-      "@alaq/molecule/*": [
-        "packages/molecule/src/*"
-      ],
       "@alaq/atom/*": [
         "packages/atom/src/*"
       ],
@@ -33,6 +30,12 @@
       ],
       "@alaq/quark/*": [
         "packages/quark/src/*"
+      ],
+      "@alaq/deep-state": [
+        "packages/deep-state/src/index.ts"
+      ],
+      "@alaq/deep-state/*": [
+        "packages/deep-state/src/*"
       ],
       "@alaq/nucl": [
         "packages/nucl/src/index.ts"
@@ -61,18 +64,11 @@
     ],
     "types": [
       "@types/node",
+      "@types/bun",
       "typescript"
     ]
   },
   "include": [
-    "packages/atom/types/*.d.ts",
-    "packages/quark/types/*.d.ts",
-    "packages/nucl/types/*.d.ts",
-    "packages/nucleus/types/*.d.ts",
-    "packages/alak/types/*.d.ts",
-    "packages/vue/types/*.d.ts",
-    "packages/svg/types/*.d.ts",
-
     "packages/**/*.ts",
     "scripts/**/*.d.ts",
     "scripts/**/*.ts"

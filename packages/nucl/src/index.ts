@@ -1,8 +1,25 @@
 import {createNu} from "./createNu";
-import {NuOptions} from "./types";
+
+import {INucleonPlugin} from "./INucleonPlugin";
+import {IQuOptions} from "@alaq/quark";
 
 /**
- * Create Nucl instance (OPTIMIZED)
+ * Extended options for Nucl
+ */
+export interface INuOptions<T = any> extends IQuOptions<T> {
+  /** Realm to use for this instance - determines which plugins are active */
+  realm?: string
+  /** Enable immutability - creates new copies on each update */
+  immutable?: boolean
+  /** Enable deep tracking - tracks changes in nested objects/arrays */
+  deepWatch?: boolean
+
+  plugins?: INucleonPlugin[]
+}
+
+
+/**
+ * Create Nucl instance
  *
  * This function is a COMPLETE INLINE of createQu() logic,
  * with the critical difference that we setPrototypeOf to NuclProto instead of quarkProto.
@@ -13,11 +30,10 @@ import {NuOptions} from "./types";
 export const Nu = createNu
 
 // Export Nv as alias to Nucl
-export const Nv = function <T>(value?: T, options?: NuOptions) {
+export const Nv = function <T>(value?: T, options?: INuOptions) {
   return createNu({...options, value})
 }
 
 // Export types
-export type { Nu as NuType, NuRealms } from './types'
-export type { NuOptions, NucleonPlugin } from './types'
-export { createNuRealm } from './plugins'
+
+export {createNuRealm} from './plugins'

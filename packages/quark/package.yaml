@@ -1,0 +1,12 @@
+{
+  "name": "@alaq/quark",
+  "version": "1.0.0",
+  "description": "High-performance proactive container with powerful plugin system",
+  "keywords": [
+    "proactive",
+    "state",
+    "observable",
+    "quark",
+    "plugins"
+  ]
+}

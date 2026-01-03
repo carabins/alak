@@ -1,7 +1,7 @@
 // Константы, используемые в системе глубокого отслеживания
 
 // Внутренние свойства прокси
-import {IParent} from "./types";
+import {IDeepState} from "./types";
 
 export const INTERNAL_PROPERTIES = {
   PARENT: '__parent__',
@@ -24,7 +24,7 @@ MUTATING_ARRAY_METHODS.forEach(method => {
   const original = Array.prototype[method as keyof Array<any>]
   arrayMethods[method] = function (this: any, ...args: any[]) {
     // isArrayMethod[method] = true
-    const parent = this.__parent__ as IParent
+    const parent = this.__parent__ as IDeepState
     const target = parent.value
     const result = original.apply(target, args)
     parent.root.notify(parent.parentPath, method, target)
@@ -36,7 +36,7 @@ MUTATING_ARRAY_METHODS.forEach(method => {
 ITERATION_ARRAY_METHODS.forEach(method => {
   const original = Array.prototype[method as keyof Array<any>]
   arrayMethods[method] = function (this: any, ...args: any[]) {
-    const parent = this.__parent__ as IParent
+    const parent = this.__parent__ as IDeepState
     const result = original.apply(parent.value, args)
     parent.root.notify(parent.parentPath, method, parent.value)
     return result

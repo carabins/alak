@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeEach, jest } from "bun:test";
 import { Qu } from "../src/index"
 import { quarkProto } from "../src/prototype";
-import { HAS_GROW_UP, DEDUP, STATELESS, IS_EMPTY, SILENT } from "../src/flags";
+import { IS_AWAKE, DEDUP, STATELESS, IS_EMPTY, SILENT } from "../src/flags";
 
 describe("quarkProto", () => {
   let quark: any;
@@ -15,10 +15,10 @@ describe("quarkProto", () => {
       const listener = jest.fn();
       quark.up(listener);
 
-      expect(quark._listeners).toBeDefined();
-      expect(Array.isArray(quark._listeners)).toBe(true);
-      expect(quark._listeners.includes(listener)).toBe(true);
-      expect(quark._flags & HAS_GROW_UP).toBe(HAS_GROW_UP);
+      expect(quark._edges).toBeDefined();
+      expect(Array.isArray(quark._edges)).toBe(true);
+      expect(quark._edges.includes(listener)).toBe(true);
+      expect(quark._flags & IS_AWAKE).toBe(IS_AWAKE);
     });
 
     test("should call listener immediately if value is already set", () => {
@@ -40,9 +40,9 @@ describe("quarkProto", () => {
       const listener = jest.fn();
       tempQuark.up(listener);
 
-      expect(tempQuark._listeners).toBeDefined();
-      expect(Array.isArray(tempQuark._listeners)).toBe(true);
-      expect(tempQuark._listeners.includes(listener)).toBe(true);
+      expect(tempQuark._edges).toBeDefined();
+      expect(Array.isArray(tempQuark._edges)).toBe(true);
+      expect(tempQuark._edges.includes(listener)).toBe(true);
     });
   });
 
@@ -51,12 +51,12 @@ describe("quarkProto", () => {
       const listener = jest.fn();
       quark.up(listener);
 
-      expect(quark._listeners.length).toBe(1);
+      expect(quark._edges.length).toBe(1);
 
       quark.down(listener);
 
-      expect(quark._listeners.length).toBe(0);
-      expect(quark._flags & HAS_GROW_UP).toBe(0); // Flag should be cleared when no listeners
+      expect(quark._edges.length).toBe(0);
+      expect(quark._flags & IS_AWAKE).toBe(0); // Flag should be cleared when no listeners
     });
 
     test("should return quark for chaining", () => {
@@ -71,12 +71,12 @@ describe("quarkProto", () => {
       const listener2 = jest.fn();
       quark.up(listener1);
 
-      expect(quark._listeners.length).toBe(1);
+      expect(quark._edges.length).toBe(1);
 
       quark.down(listener2); // Try to remove non-existent listener
 
-      expect(quark._listeners.length).toBe(1);
-      expect(quark._listeners[0]).toBe(listener1);
+      expect(quark._edges.length).toBe(1);
+      expect(quark._edges[0]).toBe(listener1);
     });
 
     test("should not clear HAS_GROW_UP flag if other listeners remain", () => {
@@ -85,11 +85,11 @@ describe("quarkProto", () => {
       quark.up(listener1);
       quark.up(listener2);
 
-      expect(quark._flags & HAS_GROW_UP).toBe(HAS_GROW_UP);
+      expect(quark._flags & IS_AWAKE).toBe(IS_AWAKE);
 
       quark.down(listener1);
 
-      expect(quark._flags & HAS_GROW_UP).toBe(HAS_GROW_UP);
+      expect(quark._flags & IS_AWAKE).toBe(IS_AWAKE);
     });
   });
 
@@ -194,11 +194,11 @@ describe("quarkProto", () => {
       const listener = jest.fn();
       quark.up(listener);
 
-      expect(quark._listeners.length).toBe(1);
+      expect(quark._edges.length).toBe(1);
 
       quark.decay();
 
-      expect(quark._listeners).toBeNull();
+      expect(quark._edges).toBeNull();
     });
 
 

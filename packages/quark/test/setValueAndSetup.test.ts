@@ -2,9 +2,18 @@
 
 
 import {beforeEach, describe, expect, test} from "bun:test";
-import {setValue} from "../src/setValue";
+import setValue from "../src/setValue";
 import setupQuarkAndOptions from "../src/setupQuarkAndOptions";
-import {DEDUP, EMIT_CHANGES, HAS_GROW_UP, HAS_REALM, IS_EMPTY, SILENT, STATELESS} from "@alaq/quark/flags";
+import {
+  DEDUP,
+  EMIT_CHANGES,
+  IS_AWAKE,
+  HAS_REALM,
+  HAS_REALM_AND_EMIT,
+  IS_EMPTY,
+  SILENT,
+  STATELESS
+} from "@alaq/quark/flags";
 
 describe("setValue", () => {
   let quark: any;
@@ -104,8 +113,8 @@ describe("setValue", () => {
     const listener2 = (value: any, q: any) => {
       calls.push([value, q]);
     };
-    quark._listeners = [listener1, listener2];
-    quark._flags |= HAS_GROW_UP;
+    quark._edges = [listener1, listener2];
+    quark._flags |= IS_AWAKE;
     quark._flags &= ~IS_EMPTY; // Remove IS_EMPTY flag
 
     setValue(quark, "test");
@@ -120,7 +129,7 @@ describe("setValue", () => {
     quark.realm = "testRealm";
     quark.id = "testId";
     // HAS_REALM_AND_EMIT = HAS_REALM | EMIT_CHANGES = 4 | 2 = 6
-    quark._flags = 6; // Set both HAS_REALM (4) and EMIT_CHANGES (2)
+    quark._flags = HAS_REALM_AND_EMIT; // Set both HAS_REALM (4) and EMIT_CHANGES (2)
 
     // Create a mock bus
     const emitCalls: any[] = [];

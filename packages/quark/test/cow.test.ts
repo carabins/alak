@@ -1,5 +1,6 @@
 import {test} from 'bun:test'
 import {Qu, Qv} from '../src/index'
+import {DEDUP, STATELESS} from "@alaq/quark/flags";
 
 test('Coverage: createQu - все опции', () => {
   const empty = Qu()
@@ -15,10 +16,10 @@ test('Coverage: createQu - все опции', () => {
   if (withId.id !== 'my-id') throw new Error('Should have id')
 
   const withDedup = Qu({dedup: true})
-  if (!((withDedup as any)._flags & 16)) throw new Error('Should have DEDUP flag')
+  if (!((withDedup as any)._flags & DEDUP)) throw new Error('Should have DEDUP flag')
 
   const withStateless = Qu({stateless: true})
-  if (!((withStateless as any)._flags & 32)) throw new Error('Should have STATELESS flag')
+  if (!((withStateless as any)._flags & STATELESS)) throw new Error('Should have STATELESS flag')
 
   const withPipe = Qu<number>({pipe: (v) => v * 2})
   if (!(withPipe as any)._pipeFn) throw new Error('Should have pipe function')

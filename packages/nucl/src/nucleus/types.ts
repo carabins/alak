@@ -5,7 +5,7 @@
  * Separated into Array, Object, and Universal categories.
  */
 
-import type INucleusQuark from '../types/core'
+import type INucleusQuark from '../core'
 
 // ============ ARRAY METHODS ============
 // Only available when T is an array type

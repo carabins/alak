@@ -1,15 +1,16 @@
 import {DEDUP, EMIT_CHANGES, HAS_PIPE, HAS_REALM, IS_EMPTY, STATELESS} from './flags'
 import {quantumBus} from './quantum-bus'
 import IQuark from "./IQuark";
-import {QuOptions} from "./index";
+import {IQuOptions} from "./index";
 
 
 let uidCounter = 0
 
-export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: QuOptions): IQuark<T> {
+export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: IQuOptions): IQuark<T> {
 
   quark.uid = ++uidCounter
   quark._flags = IS_EMPTY
+
 
   if (options) {
     if (options.value !== undefined) {

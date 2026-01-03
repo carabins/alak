@@ -3,13 +3,6 @@
   "version": "6.0.0-alpha.1",
   "description": "Enhanced reactive primitive with plugin system - built on Quark",
   "type": "module",
-  "scripts": {
-    "build": "bun run ../../scripts/index.ts build",
-    "test": "bun test",
-    "dev": "bun test --watch",
-    "bench": "bun benchmark/run.ts",
-    "bench:browser": "bun benchmark/build-browser.ts && bun benchmark/server.ts"
-  },
   "keywords": [
     "proactive",
     "state",

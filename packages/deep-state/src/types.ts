@@ -1,9 +1,34 @@
-export type NotifyFn = (value, from: {
+export const TrackTypes = {
+  GET: "get",
+  HAS: "has",
+  ITERATE: "iterate"
+}
+export const TriggerOpTypes = {
+  SET: "set",
+  ADD: "add",
+  DELETE: "delete",
+  CLEAR: "clear"
+}
+
+export declare enum ReactiveFlags {
+  SKIP = "__v_skip",
+  IS_REACTIVE = "__v_isReactive",
+  IS_READONLY = "__v_isReadonly",
+  IS_SHALLOW = "__v_isShallow",
+  RAW = "__v_raw",
+  IS_REF = "__v_isRef"
+}
+
+
+export interface IDeepStateChange  {
   path: string,
   type: string,
   target: any,
   oldValue?: any
-}) => any
+  value?: any
+}
+
+export type NotifyFn = (value, from: IDeepStateChange) => any
 
 export type RootNotify = (
   path: string,
@@ -17,12 +42,12 @@ export interface DeepOptions {
   deepObjects?: boolean     // Глубокая реактивность для объектов (по умолчанию true)
 }
 
-export interface IParent {
+export interface IDeepState {
   isRoot?: boolean
   key?: string | symbol
   // subProxies?: WeakMap<object, any>
   subProxies?: Record<string | symbol, any>
-  parent?: IParent
+  parent?: IDeepState
   isShallow?: boolean
   value?: any
   root: {
@@ -34,7 +59,7 @@ export interface IParent {
 
 // Тип для реактивных оберток (прокси)
 export type ReactiveProxy<T> = T & {
-  __parent__: IParent
+  __parent__: IDeepState
   __isProxy__: boolean
   __raw__: T
 }

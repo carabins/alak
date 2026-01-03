@@ -2,28 +2,40 @@
  * Functions for realm-wide plugins
  */
 
-import type {NucleonPlugin, PluginsRegistry} from './types'
-import INucleusCore from "./types/core";
+import type {INucleonPlugin, IPluginsRegistry, PluginDeepChangeHandler} from './INucleonPlugin'
 import {NuclearProto} from "./prototype";
-import defaultRealm from "./defaultRealm";
+import {INucleonCore} from "@alaq/nucl/INucleon";
+import {IDeepStateChange} from "@alaq/deep-state/types";
 
 // Global registry for realm-wide plugins
 
-const newRegistry = (plugins: NucleonPlugin[]) => {
+const newRegistry = (plugins: INucleonPlugin[]) => {
   const r = {
     createHooks: [],
     decayHooks: [],
     beforeChangeHooks: [],
-    afterChangeHooks: [],
-    proto: Object.assign({}, NuclearProto)
+    deepChangeHooks: [],
+    proto: Object.create(NuclearProto),
+    haveDeepWatch: false,
+    handleWatch(n: INucleonCore, f: IDeepStateChange) {
+      if (r.handleWatch) {
+        const hooks = r.deepChangeHooks
+        for (let i = 0; i < hooks.length; i++) {
+          hooks[i](n, f)
+        }
+      }
+    }
   }
   return r
 }
 
-function updateRegistry(r: PluginsRegistry, plugins: NucleonPlugin[]) {
+function updateRegistry(r: IPluginsRegistry, plugins: INucleonPlugin[]) {
   plugins.forEach(plugin => {
     plugin.onBeforeChange && r.beforeChangeHooks.push(plugin.onBeforeChange)
-    plugin.onAfterChange && r.afterChangeHooks.push(plugin.onAfterChange)
+    if (plugin.onDeepChange) {
+      r.deepChangeHooks.push(plugin.onDeepChange)
+      r.haveDeepWatch = true
+    }
     plugin.onCreate && r.createHooks.push(plugin.onCreate)
     plugin.onDecay && r.decayHooks.push(plugin.onDecay)
     plugin.onInstall && r.decayHooks.push(plugin.onInstall)
@@ -41,13 +53,13 @@ function updateRegistry(r: PluginsRegistry, plugins: NucleonPlugin[]) {
 }
 
 
-export const realmPluginRegistry = {} as Record<string, PluginsRegistry>
+export const realmPluginRegistry = {} as Record<string, IPluginsRegistry>
 
 
 /**
  * Install plugins globally for a specific realm
  */
-export function createNuRealm(realm: string, ...plugins: NucleonPlugin[]): void {
+export function createNuRealm(realm: string, ...plugins: INucleonPlugin[]): void {
   let registry = realmPluginRegistry[realm]
   if (!registry) {
     registry = newRegistry([])
@@ -55,7 +67,7 @@ export function createNuRealm(realm: string, ...plugins: NucleonPlugin[]): void 
   realmPluginRegistry[realm] = updateRegistry(registry, plugins)
 }
 
-export function getPluginsForRealm(realm:string) {
+export function getPluginsForRealm(realm: string) {
   let registry = realmPluginRegistry[realm]
   if (!registry) {
     registry = newRegistry([])

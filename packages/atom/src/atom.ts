@@ -2,12 +2,12 @@
  * @alaq/atom - Core Atom constructor
  */
 
-import { Qu } from '@alaq/quark'
-import { quantumBus } from '@alaq/quark/quantum-bus'
-import { NeoFusion } from '@alaq/nucl/fusion'
-import type { AtomOptions, AtomInstance } from './types'
-import { parseModel, sortGettersByLevel } from './parse'
-import { getPlugins } from './plugin'
+import {Qu} from '@alaq/quark'
+import {quantumBus} from '@alaq/quark/quantum-bus'
+import {NeoFusion} from '@alaq/nucl/fusion'
+import type {AtomInstance, AtomOptions} from './types'
+import {parseModel, sortGettersByLevel} from './parse'
+import {getPlugins} from './plugin'
 
 /**
  * Create reactive atom from model
@@ -35,6 +35,7 @@ import { getPlugins } from './plugin'
  * user.state.isAdult // true
  * ```
  */
+
 export function Atom<T = any>(
   model: T | (new (...args: any[]) => T),
   options: AtomOptions = {}

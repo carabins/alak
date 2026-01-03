@@ -1,6 +1,10 @@
 import { test } from 'bun:test'
 import { Atom } from '../src'
 
+
+function 
+
+
 test('plain object atom', () => {
   const counter = Atom({
     count: 0,
@@ -17,7 +21,7 @@ test('plain object atom', () => {
 
   counter.actions.increment()
   console.log('After increment:', counter.state.count) // 11
-
+а
   counter.decay()
 })
 
@@ -25,7 +29,6 @@ test('class-based atom', () => {
   class User {
     name = ''
     age = 0
-
     greet() {
       return `Hello, ${this.name}!`
     }

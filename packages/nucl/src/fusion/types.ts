@@ -4,7 +4,7 @@
  * Type definitions for fusion plugin methods and NuFusion builder.
  */
 
-import type INucleusQuark from '../types/core'
+import type INucleusQuark from '../core'
 import type { StrategyName } from './strategies'
 
 // ============ FUSION METHODS ============

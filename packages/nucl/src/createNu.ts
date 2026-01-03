@@ -1,43 +1,49 @@
-import type {NuOptions} from './types'
-
-import {createQu, DEEP_TRACKING, IMMUTABLE, setValue} from '@alaq/quark'
-import INucleusQuark from "./types/core";
 import {getPluginsForRealm} from "./plugins";
 import defaultRealm from "./defaultRealm";
+import {INuOptions} from "./index";
+import setValue from "@alaq/quark/setValue";
+import setupQuarkAndOptions from "@alaq/quark/setupQuarkAndOptions";
+import {setupDeepState} from "@alaq/nucl/deep-state";
+import IQuark from "@alaq/quark/IQuark";
 
 
-
-
-
-export function createNu<T = any>(options?: NuOptions<T>): any {
+export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
 
   const reg = getPluginsForRealm(options?.realm || defaultRealm)
+  let isSetting = false
 
-  const nuq = function (this: any, value: any) {
+
+  function nuq(value: any) {
+    if (isSetting) return
+    isSetting = true
     for (const h of reg.beforeChangeHooks) {
-      h(nuq, value, nuq._value)
+      //@ts-ignore
+      h(nuq, value)
     }
-    return setValue(nuq, value)
-  } as INucleusQuark<any>
+    setValue(nuq as any, value)
+    isSetting = false
+  }
+
+  nuq._reg = reg
 
   if (options) {
-    if (options.deepTracking) {
-      nuq._flags |= DEEP_TRACKING
+    if (options.deepWatch) {
+      setupDeepState(nuq as any, options, reg)
     }
     if (options.immutable) {
-      nuq._flags |= IMMUTABLE
+      nuq.isIm = true
     }
   }
-  nuq._reg = reg
-  createQu({_extend: nuq})
   Object.setPrototypeOf(nuq, reg.proto)
+  setupQuarkAndOptions(nuq)
 
-  if (options?.value !== undefined) {
-    nuq(options.value)
-  }
   for (const h of reg.createHooks) {
+    //@ts-ignore
     h(nuq)
   }
 
-  return nuq
+  if (options && options.value !== undefined) {
+    nuq(options.value)
+  }
+  return nuq as unknown as IQuark<T>
 }
