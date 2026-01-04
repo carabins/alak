@@ -21,7 +21,7 @@ export declare enum ReactiveFlags {
 
 
 export interface IDeepStateChange  {
-  path: string,
+  path?: string,
   type: string,
   target: any,
   oldValue?: any

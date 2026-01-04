@@ -3,7 +3,7 @@
  * @module @alaq/nucl/fusion
  */
 
-import { createNuRealm } from '../plugins'
+import { defineKind } from '../plugins'
 import { fusionPlugin } from './plugin'
 import type { FusionProto } from './types'
 
@@ -11,7 +11,7 @@ import type { FusionProto } from './types'
 // Automatically install fusion plugin when this module is imported
 
 export const FUSION_REALM = "__fusion_realm__"
-createNuRealm(FUSION_REALM, fusionPlugin)
+defineKind(FUSION_REALM, fusionPlugin)
 
 // ============ MODULE AUGMENTATION ============
 // Extend global NuRealms interface to add typing for fusion realm

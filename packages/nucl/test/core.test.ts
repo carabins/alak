@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
 import { Nv,  } from '../src/index'
-import {createNuRealm} from "../src/plugins";
+import {defineKind} from "../src/plugins";
 
 test('Nv creates instance with value', () => {
   const n = Nv(42)
@@ -39,7 +39,7 @@ test('Plugin system - createNuRealm installs plugin', () => {
     }
   }
 
-  createNuRealm("+", testPlugin)
+  defineKind("+", testPlugin)
 
   const n = Nv(1) as any
   expect(n.testMethod()).toBe('test')

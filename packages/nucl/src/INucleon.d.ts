@@ -9,5 +9,6 @@ export interface INucleonCore extends IQuarkCore {
   _isDeepAwake?: boolean
   _watcher?: IDeepWatcher
   _state?: IDeepState
-  _req: IPluginsRegistry
+  _reg: IPluginsRegistry
+  _value: any
 }

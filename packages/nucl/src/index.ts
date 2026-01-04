@@ -1,22 +1,7 @@
 import {createNu} from "./createNu";
 
 import {INucleonPlugin} from "./INucleonPlugin";
-import {IQuOptions} from "@alaq/quark";
-
-/**
- * Extended options for Nucl
- */
-export interface INuOptions<T = any> extends IQuOptions<T> {
-  /** Realm to use for this instance - determines which plugins are active */
-  realm?: string
-  /** Enable immutability - creates new copies on each update */
-  immutable?: boolean
-  /** Enable deep tracking - tracks changes in nested objects/arrays */
-  deepWatch?: boolean
-
-  plugins?: INucleonPlugin[]
-}
-
+import {INuOptions} from "./options";
 
 /**
  * Create Nucl instance
@@ -35,6 +20,6 @@ export const Nv = function <T>(value?: T, options?: INuOptions) {
 }
 
 // Export types
-
-export {createNuRealm} from './plugins'
+export type { INuOptions } from './options'
+export {defineKind, combineKinds} from './plugins'
 export {deepStatePlugin} from './deep-state/plugin'

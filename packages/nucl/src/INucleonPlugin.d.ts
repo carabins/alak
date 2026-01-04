@@ -1,6 +1,14 @@
-import INucleusCore from "./core";
 import {IDeepStateChange} from "@alaq/deep-state/types";
 import {INucleonCore} from "@alaq/nucl/INucleon";
+import {INuOptions} from "./options";
+
+/**
+ * Hook types
+ */
+export type PluginCreateHook = (nuc: INucleonCore, options?: INuOptions) => void
+export type PluginChangeHook = (n: INucleonCore, newValue: any) => void
+export type PluginDeepChangeHandler = (n: INucleonCore, dsc: IDeepStateChange) => void
+export type PluginDecayHook = (n: INucleonCore) => void
 
 /**
  * Nucl plugin definition
@@ -16,38 +24,35 @@ export interface INucleonPlugin {
   onInstall?: () => void
 
   /** Called when Nucl instance is created */
-  onCreate?: PluginHandler
+  onCreate?: PluginCreateHook
 
   /** Called when Nucl instance changes */
-  onBeforeChange?: PluginChangeHandler
+  onBeforeChange?: PluginChangeHook
   onDeepChange?: PluginDeepChangeHandler
 
   /** Called when Nucl instance is disposed */
-  onDecay?: PluginHandler
+  onDecay?: PluginDecayHook
 
-  deepWatch?: (n: INucleusCore<any>, dsc:IDeepStateChange) => void
-
-  methods?: any
-  properties?: any
-
-  // /** Called when property is accessed */
-  // onGet?: (nucl: any, key: string, value: any) => void
-  //
-  // /** Called when property is set */
-  // onSet?: (nucl: any, key: string, value: any) => void
+  methods?: Record<string | symbol, Function>
+  properties?: PropertyDescriptorMap
 }
 
-type PluginHandler = (nuc: INucleusCore<any>, ...options: any[]) => void
-type PluginChangeHandler = (n: INucleusCore<any>, newValue: any) => void
-type PluginDeepChangeHandler = (n: INucleusCore<any>, dsc:IDeepStateChange) => void
-
+/**
+ * Optimized Registry stored for each Kind
+ * Contains compiled (flattened) hooks for maximum performance
+ */
 export interface IPluginsRegistry {
-  createHooks: PluginHandler[]
-  decayHooks: PluginHandler[]
-  beforeChangeHooks: PluginChangeHandler[]
-  deepChangeHooks: PluginDeepChangeHandler[]
-  // afterChangeHooks: PluginChangeHandler[]
+  /** Compiled create hook (calls all plugin hooks) */
+  onCreate: PluginCreateHook
+  /** Compiled decay hook */
+  onDecay: PluginDecayHook
+  /** Compiled before change hook */
+  onBeforeChange: PluginChangeHook
+  
+  // Deep hooks might still be an array if handled dynamically, 
+  // but better to compile handleWatch directly.
+  handleWatch: (n: INucleonCore, f: IDeepStateChange) => void
+  
   proto: any
   haveDeepWatch: boolean
-  handleWatch(n: INucleonCore, f: IDeepStateChange):void
 }

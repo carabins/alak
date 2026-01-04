@@ -8,11 +8,12 @@
  * @module @alaq/nucl/nucleus
  */
 
-import { createNuRealm } from '../plugins'
+import { defineKind } from '../plugins'
 import { createNu } from '../createNu'
-import type { NucleonPlugin, NuOptions } from "../types"
 import type { NucleusProto } from './types'
 import { deepStatePlugin } from '../deep-state/plugin'
+import {INucleonPlugin} from "@alaq/nucl/INucleonPlugin";
+import {INuOptions} from "@alaq/nucl";
 
 /**
  * Check if value is empty
@@ -30,7 +31,7 @@ function isEmpty(value: any): boolean {
 /**
  * Nucleus plugin - combines universal, array, and object functionality
  */
-export const nucleusPlugin: NucleonPlugin = {
+export const nucleusPlugin: INucleonPlugin = {
   name: 'nucleus',
   symbol: Symbol('nucleus'),
 
@@ -215,7 +216,7 @@ export const nucleusPlugin: NucleonPlugin = {
 // Automatically install nucleus plugin when this module is imported
 
 export const NUCLEUS_REALM = "__nucleus_realm__"
-createNuRealm(NUCLEUS_REALM, nucleusPlugin, deepStatePlugin)
+defineKind(NUCLEUS_REALM, nucleusPlugin, deepStatePlugin)
 
 // ============ MODULE AUGMENTATION ============
 // Extend global NuRealms interface to add typing for nucleus realm
@@ -245,8 +246,8 @@ declare module '@alaq/nucl' {
  * obj.keys // ✅ ['name', 'age']
  * ```
  */
-export function Nucleus<T>(value?: T, options?: Omit<NuOptions<T>, 'realm'>): any {
-  return createNu({ ...options, value, realm: NUCLEUS_REALM })
+export function Nucleus<T>(value?: T, options?: Omit<INuOptions<T>, 'kind'>): any {
+  return createNu({ ...options, value, kind: NUCLEUS_REALM })
 }
 
 // Export types

@@ -116,7 +116,7 @@ class NuFusionBuilderImpl<Sources extends any[]> implements NuFusionBuilder<Sour
  * ```
  */
 export function NuFusion<T = any>(): any {
-  const nucl = createNu<T>({ realm: FUSION_REALM })
+  const nucl = createNu<T>({ kind: FUSION_REALM })
 
   // Add .from() method that returns builder
   nucl.from = function(...sources: AnyNucl[]) {

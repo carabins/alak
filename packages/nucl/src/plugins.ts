@@ -1,76 +1,150 @@
-/**
- * Functions for realm-wide plugins
- */
-
-import type {INucleonPlugin, IPluginsRegistry, PluginDeepChangeHandler} from './INucleonPlugin'
+import type {INucleonPlugin, IPluginsRegistry, PluginCreateHook, PluginDecayHook, PluginChangeHook, PluginDeepChangeHandler} from './INucleonPlugin'
 import {NuclearProto} from "./prototype";
 import {INucleonCore} from "@alaq/nucl/INucleon";
 import {IDeepStateChange} from "@alaq/deep-state/types";
 
-// Global registry for realm-wide plugins
+// Empty hooks for optimization
+const noop = () => {}
 
-const newRegistry = (plugins: INucleonPlugin[]) => {
-  const r = {
-    createHooks: [],
-    decayHooks: [],
-    beforeChangeHooks: [],
-    deepChangeHooks: [],
-    proto: Object.create(NuclearProto),
-    haveDeepWatch: false,
-    handleWatch(n: INucleonCore, f: IDeepStateChange) {
-      if (r.handleWatch) {
-        const hooks = r.deepChangeHooks
-        for (let i = 0; i < hooks.length; i++) {
-          hooks[i](n, f)
-        }
-      }
+// Helper to compile an array of functions into one
+function compileHooks<T extends Function>(hooks: T[]): T {
+  if (hooks.length === 0) return noop as unknown as T
+  if (hooks.length === 1) return hooks[0]
+  
+  return function(this: any, ...args: any[]) {
+    for (let i = 0; i < hooks.length; i++) {
+      hooks[i].apply(this, args)
     }
-  }
-  return r
+  } as unknown as T
 }
 
-function updateRegistry(r: IPluginsRegistry, plugins: INucleonPlugin[]) {
-  plugins.forEach(plugin => {
-    plugin.onBeforeChange && r.beforeChangeHooks.push(plugin.onBeforeChange)
-    if (plugin.onDeepChange) {
-      r.deepChangeHooks.push(plugin.onDeepChange)
-      r.haveDeepWatch = true
-    }
-    plugin.onCreate && r.createHooks.push(plugin.onCreate)
-    plugin.onDecay && r.decayHooks.push(plugin.onDecay)
-    plugin.onInstall && r.decayHooks.push(plugin.onInstall)
-    if (plugin.methods) {
-      Object.assign(r.proto, plugin.methods)
-    }
-
-    if (plugin.properties) {
-      Object.keys(plugin.properties).forEach(key => {
-        Object.defineProperty(r.proto, key, plugin.properties![key])
-      })
-    }
-  })
-  return r
+interface RegistryWithSource extends IPluginsRegistry {
+  _plugins: INucleonPlugin[]
 }
 
-
-export const realmPluginRegistry = {} as Record<string, IPluginsRegistry>
-
+export const kindRegistry = {} as Record<string, RegistryWithSource>
 
 /**
- * Install plugins globally for a specific realm
+ * Creates an optimized registry from a list of plugins
  */
-export function createNuRealm(realm: string, ...plugins: INucleonPlugin[]): void {
-  let registry = realmPluginRegistry[realm]
-  if (!registry) {
-    registry = newRegistry([])
+function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
+  const createHooks: PluginCreateHook[] = []
+  const decayHooks: PluginDecayHook[] = []
+  const beforeChangeHooks: PluginChangeHook[] = []
+  const deepChangeHooks: PluginDeepChangeHandler[] = []
+  
+  // Base prototype
+  const proto = Object.create(NuclearProto)
+  let haveDeepWatch = false
+
+  plugins.forEach(plugin => {
+    if (plugin.onCreate) createHooks.push(plugin.onCreate)
+    if (plugin.onDecay) decayHooks.push(plugin.onDecay)
+    if (plugin.onBeforeChange) beforeChangeHooks.push(plugin.onBeforeChange)
+    if (plugin.onDeepChange) {
+      deepChangeHooks.push(plugin.onDeepChange)
+      haveDeepWatch = true
+    }
+    
+    // Install hook runs immediately during definition
+    if (plugin.onInstall) plugin.onInstall()
+
+    if (plugin.methods) {
+      Object.assign(proto, plugin.methods)
+    }
+    if (plugin.properties) {
+      Object.defineProperties(proto, plugin.properties)
+    }
+  })
+
+  // Compile hooks
+  const compiledCreate = compileHooks(createHooks)
+  const compiledDecay = compileHooks(decayHooks)
+  const compiledBeforeChange = compileHooks(beforeChangeHooks)
+  
+  // Compile handleWatch
+  const compiledDeepHooks = compileHooks(deepChangeHooks)
+  const handleWatch = (n: INucleonCore, f: IDeepStateChange) => {
+    if (haveDeepWatch) {
+      compiledDeepHooks(n, f)
+    }
   }
-  realmPluginRegistry[realm] = updateRegistry(registry, plugins)
+
+  return {
+    onCreate: compiledCreate,
+    onDecay: compiledDecay,
+    onBeforeChange: compiledBeforeChange,
+    handleWatch,
+    proto,
+    haveDeepWatch,
+    _plugins: plugins
+  }
 }
 
-export function getPluginsForRealm(realm: string) {
-  let registry = realmPluginRegistry[realm]
-  if (!registry) {
-    registry = newRegistry([])
-  }
-  return registry
+/**
+ * Define a named kind of Nucl with a set of plugins
+ */
+export function defineKind(kind: string, ...plugins: INucleonPlugin[]): void {
+  kindRegistry[kind] = createRegistry(plugins)
 }
+
+/**
+ * Get registry for a kind name.
+ * If not found, returns (and caches) an empty default registry.
+ */
+export function getRegistryForKind(kind: string): IPluginsRegistry {
+  let reg = kindRegistry[kind]
+  if (!reg) {
+    reg = createRegistry([])
+    kindRegistry[kind] = reg
+  }
+  return reg
+}
+
+/**
+ * Combine multiple kinds into a new one.
+ * Returns the name of the new combined kind.
+ * 
+ * @example
+ * const deepNucleus = combineKinds("nucleus", "deep-state")
+ * const n = Nu({ kind: deepNucleus })
+ */
+export function combineKinds(...kinds: string[]): string {
+  const sorted = kinds.sort().join('|')
+  if (kindRegistry[sorted]) return sorted
+  
+  const allPlugins: INucleonPlugin[] = []
+  
+  kinds.forEach(k => {
+    // Ensure kind exists (or create default)
+    if (!kindRegistry[k]) {
+      kindRegistry[k] = createRegistry([])
+    }
+    const reg = kindRegistry[k]
+    if (reg._plugins) {
+      allPlugins.push(...reg._plugins)
+    }
+  })
+  
+  kindRegistry[sorted] = createRegistry(allPlugins)
+  return sorted
+}
+
+/**
+ * Extend an existing registry (or kind) with extra plugins on the fly.
+ * Used for `options.plugins`.
+ * Returns a new registry (not registered in kindRegistry to avoid pollution with unique combos).
+ */
+export function extendRegistry(baseKind: string, extraPlugins: INucleonPlugin[]): IPluginsRegistry {
+  // We can re-use combine logic but here we return registry object, not name.
+  // Actually, we can just create a registry from (base plugins + extra).
+  
+  const baseReg = getRegistryForKind(baseKind) as RegistryWithSource
+  const allPlugins = [...(baseReg._plugins || []), ...extraPlugins]
+  
+  return createRegistry(allPlugins)
+}
+
+// Deprecated alias removal
+// export const createNuRealm = defineKind 
+// export const getPluginsForRealm = getRegistryForKind

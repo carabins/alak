@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
 import { Nucleus } from '../src/nucleus'
-import { Nu, createNuRealm } from '../src/index'
+import {defineKind, Nu} from '../src/index'
 import { deepStatePlugin } from '../src/deep-state/plugin'
 
 test('Deep State Plugin via Nucleus', () => {
@@ -17,12 +17,12 @@ test('Deep State Plugin via Nucleus', () => {
 })
 
 test('Deep State Plugin manually installed', () => {
-  createNuRealm("custom-deep", deepStatePlugin)
-  
-  const n = Nu({ 
+  defineKind("custom-deep", deepStatePlugin)
+
+  const n = Nu({
     value: { x: 10 },
     deepWatch: true,
-    realm: "custom-deep"
+    kind: "custom-deep"
   })
 
   let updateCount = 0
@@ -33,22 +33,22 @@ test('Deep State Plugin manually installed', () => {
 })
 
 test('Deep State Plugin ignores non-deep instances', () => {
-  createNuRealm("custom-mixed", deepStatePlugin)
-  
+  defineKind("custom-mixed", deepStatePlugin)
+
   // deepWatch: false (default)
-  const n = Nu({ 
+  const n = Nu({
     value: { x: 10 },
-    realm: "custom-mixed"
+    kind: "custom-mixed"
   })
 
   let updateCount = 0
   n.up(() => updateCount++)
-  
+
   // Initial call happens immediately
   expect(updateCount).toBe(1)
 
   n.value.x = 20
-  
+
   // Should NOT trigger because deepWatch wasn't enabled for this instance
   expect(updateCount).toBe(1)
 })

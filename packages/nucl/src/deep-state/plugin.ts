@@ -36,7 +36,7 @@ export const deepStatePlugin: INucleonPlugin = {
        } else {
          n._state = newValue
        }
-       
+
        // Notify that the root value is being replaced (SET operation)
        if (n._reg && n._reg.handleWatch) {
           n._reg.handleWatch(n, {
@@ -61,8 +61,6 @@ export const deepStatePlugin: INucleonPlugin = {
                target: this._state
              })
           }
-          // Fallback if _state isn't set yet (rare, but possible if accessed before first set?)
-          // Usually createNu calls nuq(value) which triggers onBeforeChange, setting _state.
           return this._state !== undefined ? this._state : this._value
         }
         return this._value
