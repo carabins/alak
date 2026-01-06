@@ -4,6 +4,15 @@
 
 type AnyFunction = (...args: any[]) => any
 
+// Helper for safe execution
+function safeEmit(fn: AnyFunction, arg: any) {
+  try {
+    fn(arg)
+  } catch (e) {
+    console.error('[QuantumBus] Error in listener:', e)
+  }
+}
+
 /** Шина для конкретного realm */
 let indexes = 0
 export class RealmBus {
@@ -109,13 +118,14 @@ export class RealmBus {
     const listeners = this._events.get(event)
     if (listeners && listeners.size > 0) {
       const eventObj = { event, data }
-      listeners.forEach(fn => fn(eventObj))
+      // Use safeEmit to ensure one error doesn't stop others
+      listeners.forEach(fn => safeEmit(fn, eventObj))
     }
 
     // Emit to wildcard listeners (for this realm)
     if (this._wildcardListeners.size > 0) {
       const eventObj = { event, data, realm: this._realmName }  // Note: This might need to be an actual realm name
-      this._wildcardListeners.forEach(fn => fn(eventObj))
+      this._wildcardListeners.forEach(fn => safeEmit(fn, eventObj))
     }
 
     // Notify cross-realm subscribers - notify those who are listening to THIS realm's events
@@ -172,7 +182,7 @@ class QuantumBusManager {
       const [subscriberRealm, target, evt] = key.split(':');
       if (target === targetRealm && evt === event) {
         // Call the listener with wrapped data for consistency with regular events
-        listener({ event, data });
+        safeEmit(listener, { event, data });
       }
     }
   }
@@ -200,13 +210,13 @@ class QuantumBusManager {
     // Emit wildcard listeners (only for quantumBus-level wildcards)
     if (this.wildcardListeners.size > 0) {
       const wildcardData = { realm, event, data }
-      this.wildcardListeners.forEach(fn => fn(wildcardData))
+      this.wildcardListeners.forEach(fn => safeEmit(fn, wildcardData))
     }
   }
   broadcast (event: string, data: any, realmName?: any) {
     if (this.wildcardListeners.size > 0) {
       const wildcardData = { event, data, realm: realmName }
-      this.wildcardListeners.forEach(fn => fn(wildcardData))
+      this.wildcardListeners.forEach(fn => safeEmit(fn, wildcardData))
     }
   }
 
