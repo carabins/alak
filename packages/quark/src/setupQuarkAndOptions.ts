@@ -9,7 +9,8 @@ let uidCounter = 0
 export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: IQuOptions): IQuark<T> {
 
   quark.uid = ++uidCounter
-  quark._flags = IS_EMPTY
+  // Enable DEDUP by default
+  quark._flags = IS_EMPTY | DEDUP
 
 
   if (options) {
@@ -39,9 +40,12 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
       quark._flags |= EMIT_CHANGES
       quark._changeEventName = options?.emitChangeName || 'change'
     }
-    if (options.dedup) {
-      quark._flags |= DEDUP
+    
+    // Disable DEDUP if explicitly requested
+    if (options.dedup === false) {
+      quark._flags &= ~DEDUP
     }
+    
     if (options.stateless) {
       quark._flags |= STATELESS
     }

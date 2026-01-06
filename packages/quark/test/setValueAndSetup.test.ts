@@ -14,13 +14,14 @@ import {
   SILENT,
   STATELESS
 } from "@alaq/quark/flags";
+import { CHANGE } from "@alaq/quark/events"; // Import CHANGE constant
 
 describe("setValue", () => {
   let quark: any;
 
   beforeEach(() => {
     quark = {
-      _flags: IS_EMPTY,
+      _flags: IS_EMPTY, // Note: DEDUP is not set here manually for basic setValue tests unless specified
       value: undefined,
       _pipeFn: undefined,
       _listeners: [],
@@ -105,7 +106,7 @@ describe("setValue", () => {
     expect(quark.value).toBe("test");
   });
 
-  test("should call listeners if HAS_GROW_UP flag is set", () => {
+  test("should call listeners if IS_AWAKE flag is set", () => {
     const calls: [any, any][] = [];
     const listener1 = (value: any, q: any) => {
       calls.push([value, q]);
@@ -142,10 +143,11 @@ describe("setValue", () => {
     setValue(quark, "test");
 
     expect(emitCalls.length).toBe(1);
-    expect(emitCalls[0].event).toBe("QUARK_CHANGE");
+    expect(emitCalls[0].event).toBe(CHANGE); // Expect CHANGE, not QUARK_CHANGE
     expect(emitCalls[0].data.id).toBe("testId");
     expect(emitCalls[0].data.value).toBe("test");
-    expect(emitCalls[0].data.quark).toBe(quark);
+    // Standard payload is just { id, value }, quark reference removed
+    expect(emitCalls[0].data.quark).toBeUndefined(); 
   });
 });
 
@@ -156,11 +158,12 @@ describe("setupQuarkAndOptions", () => {
     quark = function() {};
   });
 
-  test("should initialize quark with default values", () => {
+  test("should initialize quark with default values (IS_EMPTY | DEDUP)", () => {
     const result = setupQuarkAndOptions(quark);
 
     expect(result.uid).toBeGreaterThan(0);
-    expect(result._flags).toBe(IS_EMPTY);
+    // Default now includes DEDUP
+    expect(result._flags).toBe(IS_EMPTY | DEDUP);
   });
 
   test("should set value from options", () => {
@@ -182,7 +185,7 @@ describe("setupQuarkAndOptions", () => {
     const result = setupQuarkAndOptions(quark, options);
 
     expect(result.realm).toBe("testRealm");
-    expect(result._flags & HAS_REALM).toBe(HAS_REALM);
+    expect((result._flags & HAS_REALM)).toBe(HAS_REALM);
   });
 
   test("should set pipe function and flag when pipe is provided", () => {
@@ -210,11 +213,18 @@ describe("setupQuarkAndOptions", () => {
     expect(result._changeEventName).toBe("change");
   });
 
-  test("should set DEDUP flag when dedup option is true", () => {
-    const options = { dedup: true };
+  test("should KEEP DEDUP flag when dedup option is omitted (default)", () => {
+    const options = { };
     const result = setupQuarkAndOptions(quark, options);
 
     expect(result._flags & DEDUP).toBe(DEDUP);
+  });
+
+  test("should UNSET DEDUP flag when dedup option is false", () => {
+    const options = { dedup: false };
+    const result = setupQuarkAndOptions(quark, options);
+
+    expect(result._flags & DEDUP).toBe(0);
   });
 
   test("should set STATELESS flag when stateless option is true", () => {
