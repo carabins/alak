@@ -123,4 +123,16 @@ export interface AtomContext {
   
   /** Direct access to internal Nucl map (debug only) */
   _nucl: Map<string, any>
+
+  /** 
+   * Add a disposer function to be called on decay.
+   * Use this to clean up side effects created by plugins or manual subscriptions.
+   */
+  addDisposer(fn: () => void): void
+
+  /**
+   * Subscribe to a bus event with automatic cleanup on decay.
+   * Returns an unsubscribe function.
+   */
+  on(event: string, listener: (data: any) => void): () => void
 }

@@ -48,16 +48,42 @@ export function Atom<T extends new (...args: any[]) => any>(
   
   const nuclMap = new Map<string, any>()
   const methodCache = new Map<string, Function>()
+  const disposers = new Set<() => void>()
   
   const context: AtomContext & { _tracking: (deps: Set<string> | null) => void } = {
     bus,
     options,
     _nucl: nuclMap,
     _tracking: (deps) => { activeTrackingSet = deps },
+    
+    addDisposer(fn: () => void) {
+      disposers.add(fn)
+    },
+
+    on(event: string, listener: (data: any) => void) {
+      bus.on(event, listener)
+      const off = () => {
+        bus.off(event, listener)
+        disposers.delete(off)
+      }
+      disposers.add(off)
+      return off
+    },
+
     decay() {
+      // 1. Run explicit disposers (including bus listeners)
+      disposers.forEach(d => d())
+      disposers.clear()
+
+      // 2. Decay all properties
       nuclMap.forEach(n => n.decay?.())
       nuclMap.clear()
       methodCache.clear()
+
+      // 3. Notify plugins (optional cleanup)
+      if (options.plugins) {
+        options.plugins.forEach(p => p.onDecay?.(proxy as any))
+      }
     }
   }
 

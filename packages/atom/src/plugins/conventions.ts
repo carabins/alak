@@ -22,7 +22,12 @@ export const ConventionsPlugin: AtomPlugin = {
         const nucl = atom[`$${propName}`]
         
         if (nucl && typeof method === 'function') {
-           nucl.up((val: any) => method.call(atom, val))
+           // Subscribing to Nucl updates is handled by Nucl internal mechanism,
+           // but technically Nucl listeners are usually cleaned up on Nucl decay automatically.
+           // However, let's verify if we need to track this.
+           // Nucl.up returns unsubscribe function.
+           const unsub = nucl.up((val: any) => method.call(atom, val))
+           atom.$.addDisposer(unsub)
         }
         return
       }
@@ -35,10 +40,8 @@ export const ConventionsPlugin: AtomPlugin = {
         const method = atom[key]
         
         if (typeof method === 'function') {
-          // Direct subscription without any magic unwrapping.
-          // The method receives exactly what bus.on() listeners receive.
-          const listener = (payload: any) => method.call(atom, payload)
-          atom.$.bus.on(eventName, listener)
+          // Use the safe subscription method from context that auto-cleans on decay
+          atom.$.on(eventName, (payload: any) => method.call(atom, payload))
         }
       }
     })
