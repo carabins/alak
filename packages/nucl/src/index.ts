@@ -19,6 +19,9 @@ export const Nv = function <T>(value?: T, options?: INuOptions) {
   return createNu({...options, value})
 }
 
+// Export fusion
+export { fusion } from './fusion/fusion'
+
 // Export types
 export type { INuOptions } from './options'
 export {defineKind, combineKinds} from './plugins'

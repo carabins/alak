@@ -45,10 +45,16 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
   }
 
   if ((flags & HAS_REALM_AND_EMIT) === HAS_REALM_AND_EMIT) {
-    quark._bus.emit('QUARK_CHANGE', {
-      id: quark.id,
-      value,
-      quark,
-    })
+    // Optimization: Use custom event name if provided (Atom v6 style)
+    if (quark._changeEventName) {
+       quark._bus.emit(quark._changeEventName, value)
+    } else {
+       // Legacy/Standard Quark behavior
+       quark._bus.emit('QUARK_CHANGE', {
+         id: quark.id,
+         value,
+         quark,
+       })
+    }
   }
 }

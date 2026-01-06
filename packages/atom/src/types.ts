@@ -2,102 +2,125 @@
  * @alaq/atom - Type definitions
  */
 
-/**
- * Atom Plugin interface
- */
-export interface AtomPlugin {
-  /** Unique plugin identifier */
-  symbol: Symbol
-
-  /** Detect if value is a marker for this plugin */
-  detectMarker?(value: any): boolean
-
-  /** Called when quark with markers is created */
-  onQuarkProperty?(context: {
-    atom: any
-    quark: any
-    key: string
-    markers: any[]
-  }): void
-
-  /** Called after all quarks are created */
-  onCreate?(atom: any, markedProperties: Record<string, any[]>): void
-
-  /** Called when atom is destroyed */
-  onDecay?(atom: any): void
-}
+import { Orbit } from './orbit'
 
 /**
  * Atom creation options
  */
-export interface AtomOptions {
-  /** Atom name (appended to realm) */
-  name?: string
-
-  /** Realm namespace (default: '+') */
+export interface AtomOptions<Model = any> {
+  /** 
+   * Realm namespace for events (default: 'root' or isolated) 
+   * Events will be emitted to this bus realm.
+   */
   realm?: string
 
-  /** Container constructor (default: Qu from @alaq/quark) */
-  container?: Function
+  /** 
+   * Atom name for debugging and event prefixing 
+   * Events will be named `{name}.{prop}`
+   * Default: Model class name
+   */
+  name?: string
 
-  /** External event bus */
-  bus?: any
+  /**
+   * Plugins to extend atom behavior.
+   * Passing an empty array [] creates a bare atom without default behaviors.
+   * Default: [ConventionsPlugin, ComputedPlugin]
+   */
+  plugins?: AtomPlugin[]
 
-  /** Arguments for class constructor */
+  /**
+   * Arguments to pass to the Model constructor
+   */
   constructorArgs?: any[]
 
-  /** Emit NUCLEUS_CHANGE events */
+  /** 
+   * Automatically emit change events to the bus.
+   * By default, events are named 'change' (unless emitChangeName is set).
+   * If Quark has an ID, it will be used as part of the event payload or prefix.
+   */
   emitChanges?: boolean
+
+  /**
+   * Custom event name for changes. Default: 'change'
+   */
+  emitChangeName?: string
+
+  /**
+   * Global strategy kind for all properties.
+   * Merged with local property kinds.
+   * @example 'deep stored'
+   */
+  nuclearKind?: string
 }
 
 /**
- * Extract property keys (non-functions, non-getters)
+ * Atom Plugin interface
  */
-export type PropertiesOf<T> = {
-  [K in keyof T]: T[K] extends Function ? never : K
-}[keyof T]
+export interface AtomPlugin {
+  name: string
+  
+  /** Called before model analysis starts */
+  onSetup?(model: any, options: AtomOptions): void
 
-/**
- * Extract method keys (functions, non-getters)
- */
-export type MethodsOf<T> = {
-  [K in keyof T]: T[K] extends Function ? K : never
-}[keyof T]
-
-/**
- * Atom instance type
- */
-export interface AtomInstance<T = any> {
-  /** Direct access to quarks */
-  core: Record<string, any>
-
-  /** Proxy for state values (getter/setter) */
-  state: T
-
-  /** Methods bound to state */
-  actions: Record<string, Function>
-
-  /** Event bus */
-  bus: any
-
-  /** Cleanup method */
-  decay(): void
-
-  /** Internal metadata */
-  _internal: {
-    realm: string
-    containers: Record<string, any>
-    computed: Record<string, any>
+  /** Called for each property candidate found in model */
+  onProp?(context: {
+    key: string
+    orbit: Orbit
+    atom: AtomInstance
     model: any
-    initialized: boolean
-  }
+  }): void // Can modify orbit in place
+
+  /** Called for each method candidate found in model */
+  onMethod?(context: {
+    key: string
+    fn: Function
+    atom: AtomInstance
+    model: any
+  }): Function | void // Can return wrapped function
+
+  /** Called after atom is fully initialized */
+  onInit?(atom: AtomInstance): void
+
+  /** Called when atom is decayed */
+  onDecay?(atom: AtomInstance): void
 }
 
 /**
- * Parsed model structure
+ * Filter out keys starting with underscore
  */
-export interface ParsedModel {
-  properties: Record<string, any>
-  methods: Record<string, Function>
-  getters: Record<string, Function>
+export type PublicKeys<T> = {
+  [K in keyof T]: K extends string 
+    ? (K extends `_${string}` ? never : K) 
+    : K
+}[keyof T]
+
+export type PublicInterface<T> = Pick<T, PublicKeys<T>>
+
+/**
+ * The Atom Instance (Proxy)
+ * Combines user model members with Atom API
+ */
+export type AtomInstance<T = any> = PublicInterface<T> & {
+  /** 
+   * Access to Nucleus/Fusion instances 
+   * @example atom.$count.up(...)
+   */
+  [K in keyof T as `$${string & K}`]: any // Typed as any for flexibility, ideally Nucleus<T[K]>
+} & {
+  /** Atom Context */
+  $: AtomContext
+}
+
+export interface AtomContext {
+  /** Reference to the event bus realm */
+  bus: any
+  
+  /** Destroy the atom and all subscriptions */
+  decay(): void
+  
+  /** Access to internal options */
+  options: AtomOptions
+  
+  /** Direct access to internal Nucl map (debug only) */
+  _nucl: Map<string, any>
 }

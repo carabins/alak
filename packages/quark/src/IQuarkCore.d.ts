@@ -24,8 +24,8 @@ export default interface IQuarkCore<T = any> extends IQuark<T> {
   // dedup: boolean
   // keepState: boolean
   // isSilent: boolean
-  // emitChanges: boolean
-  // _emitChangeName: string
+  //  emitChanges: boolean
+  _emitChangeName: string
   _evName : string
   _pipeFn: (value: T) => T
   _edges: Array<(value: T, quark: IQuark<T>) => void>

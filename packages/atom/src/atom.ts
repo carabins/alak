@@ -1,250 +1,166 @@
 /**
- * @alaq/atom - Core Atom constructor
+ * @alaq/atom - Core Orchestrator
  */
 
-import {Qu} from '@alaq/quark'
-import {quantumBus} from '@alaq/quark/quantum-bus'
-import {NeoFusion} from '@alaq/nucl/fusion'
-import type {AtomInstance, AtomOptions} from './types'
-import {parseModel, sortGettersByLevel} from './parse'
-import {getPlugins} from './plugin'
+import { quantumBus } from '@alaq/quark/quantum-bus'
+import { Nu, combineKinds } from '@alaq/nucl'
+import { kind, isOrbit, Orbit } from './orbit'
+import { AtomInstance, AtomOptions, AtomPlugin, AtomContext } from './types'
 
-/**
- * Create reactive atom from model
- *
- * @example
- * ```ts
- * class User {
- *   name = ''
- *   age = 0
- *
- *   greet() {
- *     return `Hello, ${this.name}!`
- *   }
- *
- *   get isAdult() {
- *     return this.age >= 18
- *   }
- * }
- *
- * const user = Atom(User, { name: 'user', realm: 'app' })
- *
- * user.state.name = 'John'
- * user.state.age = 25
- * user.actions.greet() // 'Hello, John!'
- * user.state.isAdult // true
- * ```
- */
+// Global shared tracking context
+let activeTrackingSet: Set<string> | null = null
 
-export function Atom<T = any>(
-  model: T | (new (...args: any[]) => T),
-  options: AtomOptions = {}
-): AtomInstance<T> {
-  const container = options.container || Qu
-  const baseRealm = options.realm ?? '+'
-  const atomName = options.name ?? ''
-  const fullRealm = atomName ? `${baseRealm}.${atomName}` : baseRealm
+// Unique ID counter for anonymous/clashing models
+let atomUid = 0
+
+// Helper to merge and resolve kind strings using Nucl's combineKinds
+function getFinalKind(global: string | undefined, local: string): string {
+  if (!global) return local
+  
+  const gParts = global.split(' ').filter(Boolean)
+  const lParts = local.split(' ').filter(Boolean)
+  
+  // Check duplicates
+  const duplicates = lParts.filter(p => gParts.includes(p))
+  if (duplicates.length > 0) {
+    console.warn(`[Atom] Warning: Duplicate kinds detected: "${duplicates.join(', ')}". Global: "${global}", Local: "${local}"`)
+  }
+  
+  const allParts = Array.from(new Set([...gParts, ...lParts]))
+  
+  // combineKinds ensures all plugins are merged into a single registry
+  // and returns a stable composite key (e.g. "a|b")
+  return combineKinds(...allParts)
+}
+
+export function Atom<T extends new (...args: any[]) => any>(
+  model: T,
+  options: AtomOptions<InstanceType<T>> = {}
+): AtomInstance<InstanceType<T>> {
+  const baseName = options.name || model.name || 'Atom'
+  const modelName = options.name ? baseName : `${baseName}#${++atomUid}`
+
+  const realm = options.realm || 'root'
+  const bus = quantumBus.getRealm(realm)
+  
   const constructorArgs = options.constructorArgs || []
-
-  // Get registered plugins
-  const plugins = getPlugins()
-
-  // Parse model (this will call constructor with args to get field defaults)
-  const parsed = parseModel(model, plugins, constructorArgs)
-
-  // Create event bus
-  const bus = options.bus ?? quantumBus.getRealm(fullRealm)
-
-  // Internal state
-  const internal = {
-    realm: fullRealm,
-    containers: {} as Record<string, any>,
-    computed: {} as Record<string, any>,
-    model,
-    initialized: false
-  }
-
-  // Lazy container creator
-  function getContainer(key: string) {
-    // Emit ATOM_INIT on first access
-    if (!internal.initialized) {
-      internal.initialized = true
-      bus.emit('ATOM_INIT', { realm: fullRealm })
-    }
-
-    if (internal.containers[key]) {
-      return internal.containers[key]
-    }
-
-    // Create container
-    const value = parsed.properties[key]
-    const quarkId = `${fullRealm}.${key}`
-
-    const quark = container({
-      value,
-      id: quarkId,
-      realm: fullRealm
-    })
-
-    // Call plugin hooks for marked properties
-    const markers = parsed.markedProperties[key]
-    if (markers && markers.length > 0) {
-      plugins.forEach(plugin => {
-        if (plugin.onQuarkProperty) {
-          plugin.onQuarkProperty({
-            atom: atomInstance,
-            quark,
-            key,
-            markers
-          })
-        }
-      })
-    }
-
-    // Optional NUCLEUS_CHANGE events
-    if (options.emitChanges) {
-      quark.up((val: any) => {
-        bus.emit('NUCLEUS_CHANGE', { key, value: val, realm: fullRealm })
-      })
-    }
-
-    internal.containers[key] = quark
-    return quark
-  }
-
-  // Core proxy - direct quark access
-  const core = new Proxy({}, {
-    get(_, key: string) {
-      // Check computed first
-      if (internal.computed[key]) {
-        return internal.computed[key]
-      }
-      return getContainer(key)
-    }
-  })
-
-  // State proxy - getter/setter for values
-  const state = new Proxy({} as T, {
-    get(_, key: string) {
-      // Check computed
-      if (internal.computed[key]) {
-        return internal.computed[key].value
-      }
-
-      // Check regular properties
-      if (key in parsed.properties) {
-        return getContainer(key).value
-      }
-
-      // Check getters (shouldn't happen if computed setup correctly)
-      return undefined
-    },
-
-    set(_, key: string, value) {
-      getContainer(key)(value)
-      return true
-    }
-  })
-
-  // Setup computed (getters) by levels
-  const propertyKeys = Object.keys(parsed.properties)
-  const getterLevels = sortGettersByLevel(parsed.getters, propertyKeys)
-
-  getterLevels.forEach(level => {
-    level.forEach(({ key, getter, deps }) => {
-      // Get source quarks/fusions
-      const sources = deps.map(dep => {
-        // Check if dependency is computed
-        if (internal.computed[dep]) {
-          return internal.computed[dep]
-        }
-        // Otherwise it's a property
-        return getContainer(dep)
-      })
-
-      // Create Fusion with any strategy (always recompute on changes)
-      // Using 'any' instead of 'alive' because getters should work with falsy values (0, '', false)
-      if (sources.length > 0) {
-        internal.computed[key] = NeoFusion(...sources).any(() => {
-          return getter.call(state)
-        })
-      } else {
-        // No dependencies - create wrapper object with value getter
-        // This maintains consistent API without reactive updates
-        internal.computed[key] = {
-          get value() {
-            return getter.call(state)
-          },
-          up() {}, // stub
-          down() {}, // stub
-          decay() {} // stub
-        }
-      }
-    })
-  })
-
-  // Actions - methods bound to state
-  const actions: Record<string, Function> = {}
-  Object.entries(parsed.methods).forEach(([key, method]) => {
-    actions[key] = function(...args: any[]) {
-      return method.apply(state, args)
-    }
-  })
-
-  // Create atom instance
-  const atomInstance: AtomInstance<T> = {
-    core,
-    state,
-    actions,
+  const instance = new model(...constructorArgs)
+  
+  const nuclMap = new Map<string, any>()
+  const methodCache = new Map<string, Function>()
+  
+  const context: AtomContext & { _tracking: (deps: Set<string> | null) => void } = {
     bus,
-    decay,
-    _internal: internal
+    options,
+    _nucl: nuclMap,
+    _tracking: (deps) => { activeTrackingSet = deps },
+    decay() {
+      nuclMap.forEach(n => n.decay?.())
+      nuclMap.clear()
+      methodCache.clear()
+    }
   }
 
-  // Call plugin onCreate hooks
-  plugins.forEach(plugin => {
-    if (plugin.onCreate) {
-      plugin.onCreate(atomInstance, parsed.markedProperties)
+  // 2. Initialize properties
+  const allKeys = new Set<string>(Object.getOwnPropertyNames(instance))
+  
+  let proto = model.prototype
+  while (proto && proto !== Object.prototype) {
+    Object.getOwnPropertyNames(proto).forEach(k => allKeys.add(k))
+    proto = Object.getPrototypeOf(proto)
+  }
+
+  allKeys.forEach(key => {
+    if (key === 'constructor' || (typeof key === 'string' && key[0] === '$')) return
+
+    let descriptor = Object.getOwnPropertyDescriptor(instance, key)
+    let currentProto = model.prototype
+    while (!descriptor && currentProto && currentProto !== Object.prototype) {
+      descriptor = Object.getOwnPropertyDescriptor(currentProto, key)
+      currentProto = Object.getPrototypeOf(currentProto)
+    }
+
+    if (descriptor?.get) return
+    if (typeof instance[key] === 'function') return
+
+    const initialValue = instance[key]
+    
+    // Determine Kind and Value
+    let finalKind: string
+    let finalValue: any
+    let finalOptions: any = {}
+
+    if (isOrbit(initialValue)) {
+      finalValue = initialValue.value
+      finalOptions = initialValue.options
+      finalKind = getFinalKind(options.nuclearKind, initialValue.kind)
+    } else {
+      finalValue = initialValue
+      finalKind = getFinalKind(options.nuclearKind, 'nucleus')
+    }
+
+    const eventName = options.emitChanges
+      ? (options.emitChangeName || `${modelName}.${key}`)
+      : undefined
+
+    const nucl = Nu({
+      kind: finalKind,
+      value: finalValue,
+      realm: realm,
+      id: `${modelName}.${key}`,
+      emitChanges: options.emitChanges,
+      emitChangeName: eventName,
+      ...finalOptions
+    })
+
+    nuclMap.set(key, nucl)
+
+    Object.defineProperty(instance, key, {
+      enumerable: !key.startsWith('_'),
+      configurable: true,
+      get() {
+        if (activeTrackingSet) activeTrackingSet.add(key)
+        return nucl.value
+      },
+      set(val) {
+        nucl(val)
+      }
+    })
+  })
+
+  // 3. Create the Proxy
+  const proxy = new Proxy(instance, {
+    get(target, key: string) {
+      if (typeof key !== 'string') return Reflect.get(target, key)
+      if (key === '$') return context
+      if (key[0] === '$') return nuclMap.get(key.slice(1))
+
+      if (key in target) {
+        const val = Reflect.get(target, key)
+        if (typeof val === 'function') {
+          if (methodCache.has(key)) return methodCache.get(key)
+          const bound = val.bind(proxy)
+          methodCache.set(key, bound)
+          return bound
+        }
+        return val
+      }
+      return Reflect.get(target, key)
+    },
+    set(target, key, value) {
+      return Reflect.set(target, key, value)
     }
   })
 
-  // Call constructor if model is a class
-  // NOTE: Constructor already called in parseModel() to get field defaults
-  // Here we call it again with state proxy to allow initialization logic
-  if (typeof model === 'function') {
-    const constructor = model.prototype.constructor
+  // 4. Run Plugins
+  const plugins = options.plugins !== undefined ? options.plugins : getDefaultPlugins()
+  plugins.forEach(p => p.onInit?.(proxy as any))
 
-    if (constructor && constructor !== Object) {
-      try {
-        // Call constructor with state as this context
-        constructor.call(state, ...constructorArgs)
-      } catch (e) {
-        // Skip if constructor requires 'new' keyword
-        // Properties already initialized from parseModel
-      }
-    }
-  }
+  return proxy as any
+}
 
-  // Decay method
-  function decay() {
-    // Plugin decay hooks
-    plugins.forEach(plugin => {
-      if (plugin.onDecay) {
-        plugin.onDecay(atomInstance)
-      }
-    })
-
-    // Decay all containers
-    Object.values(internal.containers).forEach(c => c.decay?.())
-
-    // Decay all computed
-    Object.values(internal.computed).forEach(c => c.decay?.())
-
-    // Clear bus if it's ours (not external)
-    if (!options.bus) {
-      // quantumBus manages realm lifecycle
-    }
-  }
-
-  return atomInstance
+function getDefaultPlugins(): AtomPlugin[] {
+  const { ConventionsPlugin } = require('./plugins/conventions')
+  const { ComputedPlugin } = require('./plugins/computed')
+  return [ComputedPlugin, ConventionsPlugin]
 }
