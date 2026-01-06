@@ -4,7 +4,6 @@ export const ConventionsPlugin: AtomPlugin = {
   name: 'conventions',
 
   onInit(atom) {
-    // Collect all keys from instance and prototype chain
     const keys = new Set<string>()
     let obj = atom
     while (obj && obj !== Object.prototype) {
@@ -19,7 +18,6 @@ export const ConventionsPlugin: AtomPlugin = {
         const propName = upMatch[1]
         // @ts-ignore
         const method = atom[key]
-        
         // @ts-ignore
         const nucl = atom[`$${propName}`]
         
@@ -29,7 +27,7 @@ export const ConventionsPlugin: AtomPlugin = {
         return
       }
 
-      // 2. Bus: _on_EVENT(data)
+      // 2. Bus: _on_EVENT(payload)
       const onMatch = key.match(/^_on_(.+)$/)
       if (onMatch) {
         const eventName = onMatch[1]
@@ -37,13 +35,9 @@ export const ConventionsPlugin: AtomPlugin = {
         const method = atom[key]
         
         if (typeof method === 'function') {
-          // Optimization: Strict unwrapping. 
-          // QuantumBus guarantees { event, data } structure.
-          const listener = (payload: any) => {
-             // Direct access is faster and safer (no magic)
-             const data = payload?.data
-             method.call(atom, data)
-          }
+          // Direct subscription without any magic unwrapping.
+          // The method receives exactly what bus.on() listeners receive.
+          const listener = (payload: any) => method.call(atom, payload)
           atom.$.bus.on(eventName, listener)
         }
       }

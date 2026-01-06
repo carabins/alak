@@ -13,8 +13,10 @@ class ReactiveModel {
   }
 
   // 2. Bus Convention
-  _on_TEST_EVENT(data: any) {
-    this.eventData = data
+  _on_TEST_EVENT(payload: any) {
+    // Since we removed magic unwrapping, we get the full bus event object
+    // { event: 'TEST_EVENT', data: ... }
+    this.eventData = payload.data
   }
 }
 
@@ -61,8 +63,8 @@ describe('Atom v6 - Conventions', () => {
 
     atom.count = 99
     
-    // Quark emit logic: bus.emit(id, value)
-    // Bus logic: listeners receive { event, data }
-    expect(caughtEvent.data).toBe(99) 
+    // Quark emit logic: bus.emit(id, { id, value })
+    // Bus logic: listeners receive { event, data: { id, value } }
+    expect(caughtEvent.data.value).toBe(99) 
   })
 })

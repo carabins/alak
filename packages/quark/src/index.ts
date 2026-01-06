@@ -18,6 +18,7 @@ export interface IQuOptions<T = any> {
   emitChangeName?: string
 }
 
+export { CHANGE, AWAKE } from './events'
 
 export function Qu<T>(options?: IQuOptions<T>) {
   function quark(this: any, value: any) {

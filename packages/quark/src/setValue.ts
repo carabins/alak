@@ -1,7 +1,7 @@
 import IQuarkCore from "./IQuarkCore";
 import {DEDUP, IS_AWAKE, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS} from "./flags";
 import {quantumBus} from "./quantum-bus";
-
+import {CHANGE, AWAKE} from "./events";
 
 export default function setValue<T>(quark: IQuarkCore, value: T): void {
   const flags = quark._flags
@@ -30,7 +30,7 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
   }
 
   if ((flags & HAS_REALM_AWAKE) === HAS_REALM_AWAKE) {
-    quantumBus.emit(quark.realm, 'QUARK_AWAKE', {
+    quantumBus.emit(quark.realm, AWAKE, {
       id: quark.id,
       value,
       quark,
@@ -45,16 +45,15 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
   }
 
   if ((flags & HAS_REALM_AND_EMIT) === HAS_REALM_AND_EMIT) {
-    // Optimization: Use custom event name if provided (Atom v6 style)
-    if (quark._changeEventName) {
-       quark._bus.emit(quark._changeEventName, value)
-    } else {
-       // Legacy/Standard Quark behavior
-       quark._bus.emit('QUARK_CHANGE', {
-         id: quark.id,
-         value,
-         quark,
-       })
-    }
+    // Standardized Event Emission
+    // Use custom event name if provided, otherwise default to CHANGE
+    const eventName = quark._changeEventName || CHANGE
+    
+    // Always emit a structured payload
+    // This allows listeners to know WHAT changed (id) and TO WHAT (value)
+    quark._bus.emit(eventName, {
+      id: quark.id,
+      value
+    })
   }
 }
