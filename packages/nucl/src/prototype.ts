@@ -15,8 +15,8 @@ Object.defineProperty(BaseProto, 'value', {
     return this._state !== undefined ? this._state : this._value
   },
   set(this: INucleonCore, newValue: any) {
-    if (this._value === newValue) return
-    this._value = newValue
+    // We delegate update logic to the Nucl function call (which calls setValue)
+    // setValue handles dedup, IS_EMPTY clearing, and notification.
     this(newValue) 
   },
   enumerable: true,
@@ -46,6 +46,11 @@ Object.defineProperty(BaseProto, 'notify', {
       }
     }
     // Notify bus if enabled (checking EMIT_CHANGES flag 0b1000 - bit 3)
+    if (q._flags & 8) { // 8 is EMIT_CHANGES
+       if (q._bus) {
+         q._bus.safeEmit(q._changeEventName || 'change', { id: q.id, value: q._value })
+       }
+    }
   },
   writable: true,
   configurable: true

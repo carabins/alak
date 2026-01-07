@@ -3,24 +3,25 @@
  */
 
 import { test, expect } from 'bun:test'
-import { Nu } from '../src/index'
-import { stdPlugin } from '../src/std/plugin'
-import { createDeepPlugin } from '../src/deep-state/plugin'
-import { fusionPlugin } from '../src/fusion/plugin'
+import { Nu } from '@alaq/nucl'
+import { stdPlugin } from '@alaq/nucl/std/plugin'
+import { createDeepPlugin } from '@alaq/nucl/deep-state/plugin'
+import { fusionPlugin } from '@alaq/nucl/fusion/plugin'
 
 // Import fusion functions
-import { fusion, NuFusion, aliveFusion, anyFusion } from '../src/fusion'
+import { fusion, NuFusion, aliveFusion, anyFusion } from '@alaq/nucl/fusion'
 
-test('Nu - minimal default kind', () => { 
-  const n = Nu({ value: 42 })
-  expect(n.value).toBe(42)
+const stdDeepPlugins = [stdPlugin, createDeepPlugin()]
+
+test('Nu - minimal default kind', () => {
+  const n = Nu({ value: 42 }); expect(n.value).toBe(42)
 
   n(100)
   expect(n.value).toBe(100)
 })
 
 test('Std Kind - array methods', () => {
-  const arr = Nu({ value: [1, 2, 3], plugins: [stdPlugin] })
+  const arr = Nu({ value: [1, 2, 3], plugins: stdDeepPlugins })
 
   expect(arr.value).toEqual([1, 2, 3])
   expect(arr.size).toBe(3)
@@ -35,7 +36,7 @@ test('Std Kind - array methods', () => {
 })
 
 test('Std Kind - object methods', () => {
-  const obj = Nu({ value: { name: 'John' }, plugins: [stdPlugin] })
+  const obj = Nu({ value: { name: 'John' }, plugins: stdDeepPlugins })
 
   expect(obj.value).toEqual({ name: 'John' })
   expect(obj.keys).toEqual(['name'])
@@ -48,7 +49,7 @@ test('Std Kind - object methods', () => {
 })
 
 test('Std Kind - universal methods', () => {
-  const n = Nu({ value: 0, plugins: [stdPlugin] })
+  const n = Nu({ value: 0, plugins: stdDeepPlugins })
 
   expect(n.isEmpty).toBe(true)
 
@@ -82,7 +83,7 @@ test('NuFusion - Nucl-based builder with alive', () => {
   const a = Nu({ value: 2 })
   const b = Nu({ value: 3 })
 
-  const product = NuFusion<number>({ plugins: [fusionPlugin] }) 
+  const product = NuFusion<number>({ plugins: [fusionPlugin] })
   product.from(a, b).alive((a, b) => a * b)
 
   expect(product.value).toBe(6)

@@ -19,12 +19,9 @@ export interface NuclearKindRegistry {
 
 /**
  * Valid selector for a kind:
- * 1. String combination ("list log")
- * 2. Direct Registry object (Anonymous Kind)
+ * String combination ("list log") with autocomplete support.
  */
-export type NuclearKindSelector = 
-  | SpaceSeparatedKeys<NuclearKindRegistry>
-  | IPluginsRegistry
+export type NuclearKindSelector = SpaceSeparatedKeys<NuclearKindRegistry>
 
 /**
  * Extended options for Nucl

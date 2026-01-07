@@ -2,6 +2,7 @@ import type {INucleonPlugin, IPluginsRegistry, PluginCreateHook, PluginDecayHook
 import {NuclearProto} from "./prototype";
 import {INucleonCore} from "@alaq/nucl/INucleon";
 import {IDeepStateChange} from "@alaq/deep-state/types";
+import quarkProto from '@alaq/quark/prototype'
 
 // --- Types ---
 
@@ -12,7 +13,6 @@ export type INucleonKind = IPluginsRegistry
 const noop = () => {}
 
 // Internal storage for raw plugins per kind name (Base definitions)
-// Using globalThis to survive across test file boundaries in 'bun test'
 const rawKindDefinitions: Record<string, INucleonPlugin[]> = {}
 
 // Cache for compiled registries
@@ -52,8 +52,10 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
   const beforeChangeHooks: PluginChangeHook[] = []
   const deepChangeHooks: PluginDeepChangeHandler[] = []
   
-  // Base prototype inherits from NuclearProto (which inherits from Function.prototype)
-  const proto = Object.create(NuclearProto)
+  // Base prototype: Start with a flat object that includes NuclearProto methods directly
+  // We use flattening here so that the final proto object has all methods as own properties.
+  // This ensures Object.setPrototypeOf works reliably on the function instance.
+  const proto = { ...NuclearProto }
   let haveDeepWatch = false
 
   sortedPlugins.forEach(plugin => {
@@ -65,6 +67,7 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
       haveDeepWatch = true
     }
     
+    // Install hook runs immediately during definition
     if (plugin.onInstall) plugin.onInstall()
 
     if (plugin.methods) {
@@ -83,7 +86,7 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
   // Compile handleWatch
   const compiledDeepHooks = compileHooks(deepChangeHooks)
   const handleWatch = (n: INucleonCore, f: IDeepStateChange) => {
-    if (haveDeepWatch) {
+    if (haveDeepWatch) { 
       compiledDeepHooks(n, f)
     }
   }
@@ -95,7 +98,8 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
     handleWatch,
     proto,
     haveDeepWatch,
-    _plugins: sortedPlugins
+    _plugins: sortedPlugins,
+    // _descriptors removed as we use setPrototypeOf
   }
 }
 

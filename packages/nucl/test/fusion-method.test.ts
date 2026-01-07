@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
-import { Nu } from '../src/index'
-import { NuFusion } from '../src/fusion'
+import { Nu } from '@alaq/nucl'
+import { NuFusion } from '@alaq/nucl/fusion'
 
 // NuFusion provides .from() API instead of .fusion()
 test('NuFusion - basic computation with alive strategy', () => {

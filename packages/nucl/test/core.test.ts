@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
-import { Nv,  } from '../src/index'
-import {defineKind} from "../src/plugins";
+import { Nv,  } from '@alaq/nucl'
+import {defineKind} from "@alaq/nucl/plugins";
 
 test('Nv creates instance with value', () => {
   const n = Nv(42)

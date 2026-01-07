@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
-import { Nv } from '../src/index'
-import { fusion, aliveFusion, anyFusion } from '../src/fusion'
+import { Nv } from '@alaq/nucl'
+import { fusion, aliveFusion, anyFusion } from '@alaq/nucl/fusion'
 
 // ============ FUSION ============
 

@@ -4,7 +4,7 @@
 //  */
 //
 // import { test } from 'bun:test'
-// import { Nv, NvProto } from '../src/index'
+// import { Nv, NvProto } from '@alaq/nucl'
 // import { quarkProto } from '@alaq/quark'
 //
 // test('Nv prototype chain is correct', () => {

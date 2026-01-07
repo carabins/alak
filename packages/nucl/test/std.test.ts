@@ -3,11 +3,11 @@
  */
 
 import { test, expect } from 'bun:test'
-import { Nu } from '../src/index'
-import { stdPlugin } from '../src/std/plugin'
-import { createDeepPlugin } from '../src/deep-state/plugin'
+import { Nu } from '@alaq/nucl'
+import { stdPlugin } from '@alaq/nucl/std/plugin'
+import { createDeepPlugin } from '@alaq/nucl/deep-state/plugin'
 
-// Use plugins option directly to avoid registry confusion in tests
+// Use plugins option directly for tests to be strictly compliant with string-only kind
 
 // ============ UNIVERSAL ============
 
@@ -163,7 +163,7 @@ test('std deep: array with deep state', () => {
   n.up(() => updateCount++)
 
   expect(updateCount).toBe(1) // initial
-  
+
   n.value[0].id = 2
   expect(updateCount).toBe(2)
   expect(n.value[0].id).toBe(2)
@@ -175,7 +175,7 @@ test('std deep: object with deep state', () => {
   n.up(() => updateCount++)
 
   expect(updateCount).toBe(1) // initial
-  
+
   n.value.a.b = 2
   expect(updateCount).toBe(2)
   expect(n.value.a.b).toBe(2)
