@@ -10,5 +10,8 @@
     "quark",
     "computed",
     "fusion"
-  ]
+  ],
+  "dependencies": {
+    "es-toolkit": "^1.43.0"
+  }
 }

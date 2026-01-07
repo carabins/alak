@@ -9,7 +9,7 @@ import type { NuFusionBuilder } from './types'
 
 type AnyNucl = any
 
-const FUSION_REALM = "__fusion_realm__"
+const FUSION_KIND_NAME = "fusion"
 
 /**
  * NuFusion builder implementation
@@ -116,7 +116,7 @@ class NuFusionBuilderImpl<Sources extends any[]> implements NuFusionBuilder<Sour
  * ```
  */
 export function NuFusion<T = any>(): any {
-  const nucl = createNu<T>({ kind: FUSION_REALM })
+  const nucl = createNu<T>({ kind: FUSION_KIND_NAME })
 
   // Add .from() method that returns builder
   nucl.from = function(...sources: AnyNucl[]) {

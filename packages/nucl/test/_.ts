@@ -5,19 +5,29 @@ import {createNuRealm, Nu} from "@alaq/nucl";
 import {expect, it, test} from 'bun:test'
 import {fusion} from "@alaq/nucl/fusion";
 
+it('only one', () => {
+  expect.assertions(1)
+  const n = Nu()
+  n.up(v => {
+    expect(v.ok).toEqual(1)
+  })
 
-test('fusion - standalone builder with any strategy', () => {
-  const a = Nu({ value: null })
-  const b = Nu({ value: 2 })
-
-  const result = fusion(a, b).any((a, b) => (a || 0) + b)
-  expect(result.value).toBe(2) // null becomes 0
-
-  a(5)
-  // console.log(a.value)
-  // console.log(b.value)
-  // console.log(result.value)
-  expect(result.value).toBe(7)
+  n({ok: 1})
 })
 
 
+// it('next', () => {
+//
+//   const n = Nu({
+//     value: {ok: {
+//       ok: 1
+//       }},
+//     deepWatch: true
+//   })
+//   n.up(v => {
+//     // expect(v.ok).toEqual(1)
+//     console.log(":::::", v)
+//   })
+//   // n.value.ok = 3
+//
+// })

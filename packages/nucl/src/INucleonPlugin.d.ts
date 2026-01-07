@@ -17,6 +17,13 @@ export interface INucleonPlugin {
   /** Unique plugin name */
   name: string
 
+  /** 
+   * Execution priority. 
+   * Higher numbers run earlier. Default is 0. 
+   * Negative numbers run later.
+   */
+  order?: number
+
   /** Unique plugin symbol (optional) */
   symbol?: Symbol
 
@@ -55,4 +62,5 @@ export interface IPluginsRegistry {
   
   proto: any
   haveDeepWatch: boolean
+  _plugins: INucleonPlugin[]
 }

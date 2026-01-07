@@ -11,4 +11,6 @@ export interface INucleonCore extends IQuarkCore {
   _state?: IDeepState
   _reg: IPluginsRegistry
   _value: any
+  
+  notify(): void
 }

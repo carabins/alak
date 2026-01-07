@@ -4,10 +4,14 @@
 
 import { test, expect } from 'bun:test'
 import { Nu } from '../src/index'
-import { Nucleus } from '../src/nucleus'
+import { stdPlugin } from '../src/std/plugin'
+import { createDeepPlugin } from '../src/deep-state/plugin'
+import { fusionPlugin } from '../src/fusion/plugin'
+
+// Import fusion functions
 import { fusion, NuFusion, aliveFusion, anyFusion } from '../src/fusion'
 
-test('Nu - minimal default realm', () => {
+test('Nu - minimal default kind', () => { 
   const n = Nu({ value: 42 })
   expect(n.value).toBe(42)
 
@@ -15,8 +19,8 @@ test('Nu - minimal default realm', () => {
   expect(n.value).toBe(100)
 })
 
-test('Nucleus - array methods', () => {
-  const arr = Nucleus([1, 2, 3])
+test('Std Kind - array methods', () => {
+  const arr = Nu({ value: [1, 2, 3], plugins: [stdPlugin] })
 
   expect(arr.value).toEqual([1, 2, 3])
   expect(arr.size).toBe(3)
@@ -30,8 +34,8 @@ test('Nucleus - array methods', () => {
   expect(arr.size).toBe(3)
 })
 
-test('Nucleus - object methods', () => {
-  const obj = Nucleus({ name: 'John' })
+test('Std Kind - object methods', () => {
+  const obj = Nu({ value: { name: 'John' }, plugins: [stdPlugin] })
 
   expect(obj.value).toEqual({ name: 'John' })
   expect(obj.keys).toEqual(['name'])
@@ -43,8 +47,8 @@ test('Nucleus - object methods', () => {
   expect(obj.get('name')).toBe('John')
 })
 
-test('Nucleus - universal methods', () => {
-  const n = Nucleus(0)
+test('Std Kind - universal methods', () => {
+  const n = Nu({ value: 0, plugins: [stdPlugin] })
 
   expect(n.isEmpty).toBe(true)
 
@@ -78,7 +82,7 @@ test('NuFusion - Nucl-based builder with alive', () => {
   const a = Nu({ value: 2 })
   const b = Nu({ value: 3 })
 
-  const product = NuFusion<number>()
+  const product = NuFusion<number>({ plugins: [fusionPlugin] }) 
   product.from(a, b).alive((a, b) => a * b)
 
   expect(product.value).toBe(6)
@@ -91,7 +95,7 @@ test('NuFusion - Nucl-based builder with some (alias for alive)', () => {
   const a = Nu({ value: 2 })
   const b = Nu({ value: 3 })
 
-  const product = NuFusion<number>()
+  const product = NuFusion<number>({ plugins: [fusionPlugin] })
   product.from(a, b).some((a, b) => a * b)
 
   expect(product.value).toBe(6)
@@ -101,7 +105,7 @@ test('NuFusion - Nucl-based builder with any', () => {
   const a = Nu({ value: null })
   const b = Nu({ value: 5 })
 
-  const safe = NuFusion<number>()
+  const safe = NuFusion<number>({ plugins: [fusionPlugin] })
   safe.from(a, b).any((a, b) => (a || 0) + b)
 
   expect(safe.value).toBe(5)

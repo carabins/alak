@@ -3,10 +3,27 @@ import {NuclearProto} from "./prototype";
 import {INucleonCore} from "@alaq/nucl/INucleon";
 import {IDeepStateChange} from "@alaq/deep-state/types";
 
+// --- Types ---
+
+// Alias for the compiled registry, representing a "Kind" definition
+export type INucleonKind = IPluginsRegistry
+
 // Empty hooks for optimization
 const noop = () => {}
 
-// Helper to compile an array of functions into one
+// Internal storage for raw plugins per kind name (Base definitions)
+// Using globalThis to survive across test file boundaries in 'bun test'
+const rawKindDefinitions: Record<string, INucleonPlugin[]> = {}
+
+// Cache for compiled registries
+export const kindRegistry = {} as Record<string, RegistryWithSource>
+
+interface RegistryWithSource extends IPluginsRegistry {
+  _plugins: INucleonPlugin[]
+}
+
+// --- Helper Functions ---
+
 function compileHooks<T extends Function>(hooks: T[]): T {
   if (hooks.length === 0) return noop as unknown as T
   if (hooks.length === 1) return hooks[0]
@@ -18,26 +35,28 @@ function compileHooks<T extends Function>(hooks: T[]): T {
   } as unknown as T
 }
 
-interface RegistryWithSource extends IPluginsRegistry {
-  _plugins: INucleonPlugin[]
-}
-
-export const kindRegistry = {} as Record<string, RegistryWithSource>
-
 /**
- * Creates an optimized registry from a list of plugins
+ * Creates an optimized registry from a list of plugins.
+ * Sorts plugins by 'order' (descending) before compilation.
  */
 function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
+  // 1. Sort plugins by priority (Higher order executes first)
+  const sortedPlugins = [...plugins].sort((a, b) => {
+    const orderA = a.order ?? 0
+    const orderB = b.order ?? 0
+    return orderB - orderA 
+  })
+
   const createHooks: PluginCreateHook[] = []
   const decayHooks: PluginDecayHook[] = []
   const beforeChangeHooks: PluginChangeHook[] = []
   const deepChangeHooks: PluginDeepChangeHandler[] = []
   
-  // Base prototype
+  // Base prototype inherits from NuclearProto (which inherits from Function.prototype)
   const proto = Object.create(NuclearProto)
   let haveDeepWatch = false
 
-  plugins.forEach(plugin => {
+  sortedPlugins.forEach(plugin => {
     if (plugin.onCreate) createHooks.push(plugin.onCreate)
     if (plugin.onDecay) decayHooks.push(plugin.onDecay)
     if (plugin.onBeforeChange) beforeChangeHooks.push(plugin.onBeforeChange)
@@ -46,7 +65,6 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
       haveDeepWatch = true
     }
     
-    // Install hook runs immediately during definition
     if (plugin.onInstall) plugin.onInstall()
 
     if (plugin.methods) {
@@ -77,74 +95,75 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
     handleWatch,
     proto,
     haveDeepWatch,
-    _plugins: plugins
+    _plugins: sortedPlugins
   }
 }
 
-/**
- * Define a named kind of Nucl with a set of plugins
- */
+// --- Public API ---
+
+export function createKind(plugins: INucleonPlugin[]): INucleonKind {
+  return createRegistry(plugins)
+}
+
+export function setupNuclearKinds(kinds: Record<string, INucleonPlugin[]>) {
+  for (const [name, plugins] of Object.entries(kinds)) {
+    if (!rawKindDefinitions[name]) {
+      rawKindDefinitions[name] = []
+    }
+    rawKindDefinitions[name].push(...plugins)
+  }
+  
+  for (const key in kindRegistry) {
+    delete kindRegistry[key]
+  }
+}
+
 export function defineKind(kind: string, ...plugins: INucleonPlugin[]): void {
-  kindRegistry[kind] = createRegistry(plugins)
+  setupNuclearKinds({ [kind]: plugins })
 }
 
-/**
- * Get registry for a kind name.
- * If not found, returns (and caches) an empty default registry.
- */
-export function getRegistryForKind(kind: string): IPluginsRegistry {
-  let reg = kindRegistry[kind]
-  if (!reg) {
-    reg = createRegistry([])
-    kindRegistry[kind] = reg
+export function getRegistryForKind(kindSelector: string): IPluginsRegistry {
+  if (kindRegistry[kindSelector]) {
+    return kindRegistry[kindSelector]
   }
+
+  const keys = kindSelector.split(/\s+/).filter(k => k.length > 0)
+  
+  if (keys.length === 0) {
+    const reg = createRegistry([])
+    kindRegistry[kindSelector] = reg
+    return reg
+  }
+
+  const allPlugins: INucleonPlugin[] = []
+  
+  for (const key of keys) {
+    const plugins = rawKindDefinitions[key]
+    if (plugins) {
+      allPlugins.push(...plugins)
+    }
+  }
+
+  const reg = createRegistry(allPlugins)
+  kindRegistry[kindSelector] = reg
   return reg
 }
 
-/**
- * Combine multiple kinds into a new one.
- * Returns the name of the new combined kind.
- * 
- * @example
- * const deepNucleus = combineKinds("nucleus", "deep-state")
- * const n = Nu({ kind: deepNucleus })
- */
 export function combineKinds(...kinds: string[]): string {
-  const sorted = kinds.sort().join('|')
-  if (kindRegistry[sorted]) return sorted
-  
-  const allPlugins: INucleonPlugin[] = []
-  
-  kinds.forEach(k => {
-    // Ensure kind exists (or create default)
-    if (!kindRegistry[k]) {
-      kindRegistry[k] = createRegistry([])
-    }
-    const reg = kindRegistry[k]
-    if (reg._plugins) {
-      allPlugins.push(...reg._plugins)
-    }
-  })
-  
-  kindRegistry[sorted] = createRegistry(allPlugins)
-  return sorted
+  const selector = kinds.join(' ')
+  getRegistryForKind(selector)
+  return selector
 }
 
-/**
- * Extend an existing registry (or kind) with extra plugins on the fly.
- * Used for `options.plugins`.
- * Returns a new registry (not registered in kindRegistry to avoid pollution with unique combos).
- */
-export function extendRegistry(baseKind: string, extraPlugins: INucleonPlugin[]): IPluginsRegistry {
-  // We can re-use combine logic but here we return registry object, not name.
-  // Actually, we can just create a registry from (base plugins + extra).
-  
-  const baseReg = getRegistryForKind(baseKind) as RegistryWithSource
-  const allPlugins = [...(baseReg._plugins || []), ...extraPlugins]
-  
-  return createRegistry(allPlugins)
-}
+export function extendRegistry(baseKind: string | INucleonKind, extraPlugins: INucleonPlugin[]): IPluginsRegistry {
+  let basePlugins: INucleonPlugin[] = []
 
-// Deprecated alias removal
-// export const createNuRealm = defineKind 
-// export const getPluginsForRealm = getRegistryForKind
+  if (typeof baseKind === 'string') {
+    const reg = getRegistryForKind(baseKind) as RegistryWithSource
+    basePlugins = reg._plugins || []
+  } else {
+    basePlugins = (baseKind as RegistryWithSource)._plugins || []
+  }
+
+  return createRegistry([...basePlugins, ...extraPlugins])
+}

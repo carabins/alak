@@ -9,11 +9,15 @@ const defaultKind = "+"
 
 export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
 
-  const kind = options?.kind || defaultKind
-  let reg = getRegistryForKind(options?.kind)
+  const kindInput = options?.kind || defaultKind
+  
+  // Resolve registry: string (lookup) or object (direct)
+  let reg = (typeof kindInput === 'string') 
+    ? getRegistryForKind(kindInput)
+    : kindInput as any // Cast to registry
 
   if (options?.plugins && options.plugins.length > 0) {
-    reg = extendRegistry(kind, options.plugins)
+    reg = extendRegistry(kindInput as any, options.plugins)
   }
 
   let isSetting = false
@@ -45,14 +49,39 @@ export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
     }
   }
 
-  Object.setPrototypeOf(nuq, reg.proto)
-  setupQuarkAndOptions(nuq, options)
+  // Flatten prototype chain onto the instance because changing function prototype is flaky
+  // 1. Copy base methods (NuclearProto: value, up, down, etc.)
+  const baseProto = Object.getPrototypeOf(reg.proto)
+  if (baseProto && baseProto !== Function.prototype) {
+    Object.defineProperties(nuq, Object.getOwnPropertyDescriptors(baseProto))
+  }
+
+  // 2. Copy plugin methods (reg.proto own properties)
+  Object.defineProperties(nuq, Object.getOwnPropertyDescriptors(reg.proto))
+  
+  // Object.setPrototypeOf(nuq, reg.proto) // Removed setPrototypeOf
+  
+  // Directly set _value, so we don't need to pass 'value' to setupQuarkAndOptions
+  // This prevents Quark from creating an instance property that shadows the prototype getter.
+  if (options && options.value !== undefined) {
+    nuq._value = options.value
+  }
+
+  // Pass options without value
+  const quarkOptions = { ...options }
+  delete quarkOptions.value
+  setupQuarkAndOptions(nuq, quarkOptions)
 
   // Optimized single call
   reg.onCreate(core, options)
 
+  // Trigger onBeforeChange to allow plugins to initialize state (e.g. deep-state setting _state)
+  // We do this manually instead of calling nuq(value) to avoid dedup checks and overhead.
   if (options && options.value !== undefined) {
-    nuq(options.value)
+    reg.onBeforeChange(core, options.value)
   }
+
+  // No need to call nuq(value) because setter handles reactivity if set later,
+  // and _value is already set for initial state.
   return nuq as unknown as IQuark<T>
 }

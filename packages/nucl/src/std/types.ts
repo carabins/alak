@@ -1,16 +1,16 @@
 /**
- * Nucleus Plugin Types
+ * Standard Plugin Types
  *
- * Type definitions for nucleus plugin methods and properties.
+ * Type definitions for standard plugin methods and properties.
  * Separated into Array, Object, and Universal categories.
  */
 
-import type INucleusQuark from '../core'
+import type {INucleonCore} from '../INucleon' // TODO: Update to INuclCore or similar
 
 // ============ ARRAY METHODS ============
 // Only available when T is an array type
 
-export interface NucleusArrayMethods<T> {
+export interface StdArrayMethods<T> {
   /**
    * Add items to array
    * @returns this for chaining
@@ -36,7 +36,7 @@ export interface NucleusArrayMethods<T> {
 // ============ OBJECT METHODS ============
 // Only available when T is an object type
 
-export interface NucleusObjectMethods<T extends object> {
+export interface StdObjectMethods<T extends object> {
   /**
    * Set property value
    * @returns this for chaining
@@ -57,7 +57,7 @@ export interface NucleusObjectMethods<T extends object> {
 // ============ UNIVERSAL METHODS ============
 // Available for all types
 
-export interface NucleusUniversalMethods {
+export interface StdUniversalMethods {
   /**
    * Subscribe to changes, only when value is not empty
    * @returns cleanup function
@@ -81,7 +81,7 @@ export interface NucleusUniversalMethods {
 // ============ UNIVERSAL PROPERTIES ============
 // Available for all types
 
-export interface NucleusUniversalProperties {
+export interface StdUniversalProperties {
   /**
    * Check if value is empty
    * - null/undefined → true
@@ -97,7 +97,7 @@ export interface NucleusUniversalProperties {
 // ============ ARRAY PROPERTIES ============
 // Only meaningful when T is an array
 
-export interface NucleusArrayProperties {
+export interface StdArrayProperties {
   /**
    * Array length
    * Returns undefined for non-arrays
@@ -109,7 +109,7 @@ export interface NucleusArrayProperties {
 // ============ OBJECT PROPERTIES ============
 // Only meaningful when T is an object
 
-export interface NucleusObjectProperties {
+export interface StdObjectProperties {
   /**
    * Object keys
    * Returns [] for non-objects
@@ -126,13 +126,13 @@ export interface NucleusObjectProperties {
 // ============ COMBINED PROTO TYPE ============
 
 /**
- * Complete Nucleus Proto
+ * Complete Std Proto
  * Combines all methods and properties
  */
-export type NucleusProto =
-  & NucleusArrayMethods<any>
-  & NucleusObjectMethods<any>
-  & NucleusUniversalMethods
-  & NucleusUniversalProperties
-  & NucleusArrayProperties
-  & NucleusObjectProperties
+export type StdProto =
+  & StdArrayMethods<any>
+  & StdObjectMethods<any>
+  & StdUniversalMethods
+  & StdUniversalProperties
+  & StdArrayProperties
+  & StdObjectProperties
