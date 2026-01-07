@@ -13,6 +13,8 @@
     "@babel/types": "^7.28.4",
     "@inquirer/checkbox": "^4.3.0",
     "@inquirer/select": "^4.4.0",
+    "@preact/signals-core": "^1.12.1",
+    "@reatom/core": "^1000.1.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
     "@swc-node/core": "^1.14.1",
@@ -24,6 +26,7 @@
     "chokidar": "^4.0.3",
     "colorette": "^2.0.20",
     "fs-extra": "^11.3.2",
+    "mobx": "^6.15.0",
     "oxc-transform": "^0.95.0",
     "pino": "^9.14.0",
     "pino-pretty": "^13.1.2",
@@ -35,6 +38,7 @@
     "tsconfig-paths": "^4.2.0",
     "typedoc": "^0.27.9",
     "typescript": "~5.7.3",
+    "valtio": "^2.3.0",
     "vue": "^3.5.22"
   }
 }
