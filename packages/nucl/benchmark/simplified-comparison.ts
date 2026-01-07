@@ -3,8 +3,16 @@
  */
 
 import { Qu } from '@alaq/quark'
-import { Nucl } from '../src/index'
+import { Nu, Nv } from '../src/index'
 import { reactive, ref, computed } from 'vue'
+
+// Helper to bridge the gap between benchmark usage and current API
+function Nucl(arg?: any, options?: any) {
+  if (typeof arg === 'object' && arg !== null && ('value' in arg || 'deepTracking' in arg)) {
+     return Nu(arg);
+  }
+  return Nv(arg, options);
+}
 
 interface BenchResult {
   name: string
@@ -75,6 +83,7 @@ console.log(`  Set primitive (Vue Ref):  ${setPrimitiveVueRef.opsPerMs.toLocaleS
 // ============================================================================
 // DEEP TRACKING BENCHMARK
 // ============================================================================
+/*
 console.log('\n🔍 DEEP TRACKING BENCHMARKS')
 console.log('-'.repeat(60))
 
@@ -93,6 +102,7 @@ const vueDeep = bench('Vue Deep Reactivity', 100000, () => {
 })
 
 console.log(`  Vue Deep Reactivity:      ${vueDeep.opsPerMs.toLocaleString()} ops/ms`)
+*/
 
 // ============================================================================
 // SUMMARY

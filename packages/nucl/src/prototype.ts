@@ -8,6 +8,27 @@ const BaseProto = {}
 // 2. Mixin Quark methods (up, down, pipe, silent, etc.)
 Object.assign(BaseProto, quarkProto)
 
+// Override 'up' to ensure it works with Nucl's value/state
+Object.defineProperty(BaseProto, 'up', {
+  value: function(this: INucleonCore, listener: any) {
+    // Initialize edges if needed (mimic Quark lazy init)
+    const q = this as any
+    if (!q._edges) {
+      q._edges = []
+      q._flags |= 1 // IS_AWAKE
+    }
+    q._edges.push(listener)
+
+    // Immediate call if value exists
+    if (q._value !== undefined) {
+      listener(this.value, this)
+    }
+    return this
+  },
+  writable: true,
+  configurable: true
+})
+
 // 3. Define Smart Value Accessor
 Object.defineProperty(BaseProto, 'value', {
   get(this: INucleonCore) {
@@ -15,9 +36,16 @@ Object.defineProperty(BaseProto, 'value', {
     return this._state !== undefined ? this._state : this._value
   },
   set(this: INucleonCore, newValue: any) {
-    // We delegate update logic to the Nucl function call (which calls setValue)
-    // setValue handles dedup, IS_EMPTY clearing, and notification.
-    this(newValue) 
+    // Manually update _value and clear IS_EMPTY (8) to ensure state is correct
+    // even if setValue returns early due to dedup logic.
+    this._value = newValue
+    const q = this as any
+    if (q._flags) {
+        q._flags &= ~8 // Clear IS_EMPTY
+    }
+    
+    // Delegate to Nucl function call for full lifecycle (hooks, bus, etc.)
+    this(newValue)
   },
   enumerable: true,
   configurable: true
@@ -39,14 +67,12 @@ Object.defineProperty(BaseProto, 'decay', {
 Object.defineProperty(BaseProto, 'notify', {
   value: function(this: INucleonCore) {
     const q = this as any
-    // Notify direct listeners (stored in _edges in Quark)
     if (q._edges) {
       for (let i = 0; i < q._edges.length; i++) {
         q._edges[i](q._value)
       }
     }
-    // Notify bus if enabled (checking EMIT_CHANGES flag 0b1000 - bit 3)
-    if (q._flags & 8) { // 8 is EMIT_CHANGES
+    if (q._flags & 8) {
        if (q._bus) {
          q._bus.safeEmit(q._changeEventName || 'change', { id: q.id, value: q._value })
        }

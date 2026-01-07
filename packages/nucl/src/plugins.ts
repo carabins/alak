@@ -52,10 +52,8 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
   const beforeChangeHooks: PluginChangeHook[] = []
   const deepChangeHooks: PluginDeepChangeHandler[] = []
   
-  // Base prototype: Start with a flat object that includes NuclearProto methods directly
-  // We use flattening here so that the final proto object has all methods as own properties.
-  // This ensures Object.setPrototypeOf works reliably on the function instance.
-  const proto = { ...NuclearProto }
+  // Base prototype inherits from NuclearProto
+  const proto = Object.create(NuclearProto)
   let haveDeepWatch = false
 
   sortedPlugins.forEach(plugin => {

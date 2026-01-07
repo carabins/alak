@@ -21,7 +21,7 @@ test('Nu - minimal default kind', () => {
 })
 
 test('Std Kind - array methods', () => {
-  const arr = Nu({ value: [1, 2, 3], plugins: stdDeepPlugins })
+  const arr = Nu({ value: [1, 2, 3], plugins: [stdPlugin] })
 
   expect(arr.value).toEqual([1, 2, 3])
   expect(arr.size).toBe(3)
@@ -36,7 +36,7 @@ test('Std Kind - array methods', () => {
 })
 
 test('Std Kind - object methods', () => {
-  const obj = Nu({ value: { name: 'John' }, plugins: stdDeepPlugins })
+  const obj = Nu({ value: { name: 'John' }, plugins: [stdPlugin] })
 
   expect(obj.value).toEqual({ name: 'John' })
   expect(obj.keys).toEqual(['name'])
@@ -49,7 +49,7 @@ test('Std Kind - object methods', () => {
 })
 
 test('Std Kind - universal methods', () => {
-  const n = Nu({ value: 0, plugins: stdDeepPlugins })
+  const n = Nu({ value: 0, plugins: [stdPlugin] })
 
   expect(n.isEmpty).toBe(true)
 

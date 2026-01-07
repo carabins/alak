@@ -6,7 +6,7 @@ import {IQuOptions} from "./index";
 
 let uidCounter = 0
 
-export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: IQuOptions): IQuark<T> {
+export default function setupQuarkAndOptions<T extends any>(quark: Function & any, options?: IQuOptions, initValue: boolean = true): IQuark<T> {
 
   quark.uid = ++uidCounter
   // Enable DEDUP by default
@@ -14,7 +14,8 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
 
 
   if (options) {
-    if (options.value !== undefined) {
+    // Handle value only if initValue is true
+    if (initValue && options.value !== undefined) {
       quark.value = options.value
     }
 
@@ -51,6 +52,6 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
     }
   }
 
-  if (quark.value !== undefined) quark(quark.value)
+  if (initValue && quark.value !== undefined) quark(quark.value)
   return quark as IQuark<T>
 }

@@ -6,17 +6,22 @@ import IQuark from "@alaq/quark/IQuark";
 import {INucleonCore} from "./INucleon";
 
 const defaultKind = "+"
+// Cache default registry for performance
+const defaultReg = getRegistryForKind(defaultKind) as any
 
 export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
 
-  const kindInput = options?.kind || defaultKind
-  
-  // Resolve registry via string lookup
-  let reg = getRegistryForKind(kindInput as string) as any
+  let reg = defaultReg
 
-  // If instance-specific plugins are provided, create a specialized registry
-  if (options?.plugins && options.plugins.length > 0) {
-    reg = extendRegistry(kindInput as string, options.plugins)
+  if (options) {
+    // If kind is specified and different, resolve it
+    if (options.kind && options.kind !== defaultKind) {
+      reg = getRegistryForKind(options.kind)
+    }
+    // If instance-specific plugins are provided, create a specialized registry
+    if (options.plugins && options.plugins.length > 0) {
+      reg = extendRegistry(options.kind || defaultKind, options.plugins)
+    }
   }
 
   let isSetting = false
@@ -47,26 +52,16 @@ export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
     }
   }
 
-  // ULTRA FAST: Use pre-calculated descriptors to flatten methods onto the instance
-  // 1. Copy base methods (NuclearProto)
-  const baseProto = Object.getPrototypeOf(reg.proto)
-  if (baseProto && baseProto !== Function.prototype) {
-    Object.defineProperties(nuq, Object.getOwnPropertyDescriptors(baseProto))
-  }
-  // 2. Copy plugin methods
-  Object.defineProperties(nuq, Object.getOwnPropertyDescriptors(reg.proto))
-  
-  // Pass options WITHOUT value to setupQuarkAndOptions
-  // This ensures setupQuarkAndOptions doesn't create an instance property 'value'
-  // that would shadow our prototype getter/setter.
-  const quarkOptions = { ...options }
-  delete quarkOptions.value
-  setupQuarkAndOptions(nuq, quarkOptions)
+  // Use setPrototypeOf for max performance (matches Quark behavior)
+  Object.setPrototypeOf(nuq, reg.proto)
+
+  // Pass options directly with initValue=false to avoid cloning and premature initialization
+  setupQuarkAndOptions(nuq, options, false)
 
   // Initialize plugins
   reg.onCreate(core, options)
 
-  // Set initial value using the SETTER (which is now on the instance via flattening)
+  // Set initial value using the SETTER (which is now on the instance via setPrototypeOf)
   // This triggers the full update cycle:
   // 1. Setter updates _value
   // 2. Setter calls nuq(value) -> setValue -> clears IS_EMPTY flag
