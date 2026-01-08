@@ -3,32 +3,28 @@ import { createState } from "@alaq/deep-state"
 import { TrackTypes, TriggerOpTypes, DeepOptions } from "@alaq/deep-state/types"
 import { INucleonCore } from '../INucleon'
 
-/**
- * Setup the deep state watcher on a Nucl instance
- */
+
 function setupDeepState(n: INucleonCore, options: any, reg: any) {
   n._watcher = createState((value, from) => {
       reg.handleWatch(n, from)
-      // Force update because object reference hasn't changed (dedup would block it)
+      
       if (typeof n.notify === 'function') {
         n.notify()
       }
     },
-    // Pass options to deep-state (e.g. deepArrays: false)
+    
     options
   )
   n._isDeep = true
 }
 
-/**
- * Factory for creating a Deep State plugin with specific options.
- */
+
 export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
   return {
     name: 'deep-state',
     symbol: Symbol('deep-state'),
     
-    // High priority to wrap value ASAP
+    
     order: 100,
 
     onCreate(n: INucleonCore) {
@@ -38,7 +34,7 @@ export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
     onBeforeChange(n: INucleonCore, newValue: any) {
       if (n._isDeep) {
          const isObject = typeof newValue === 'object' && newValue !== null
-         const oldValue = n._value // access raw value directly
+         const oldValue = n._value 
 
          if (isObject) {
            n._state = n._watcher.deepWatch(newValue)
@@ -46,7 +42,7 @@ export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
            n._state = newValue
          }
 
-         // Notify that the root value is being replaced (SET operation)
+         
          if (n._reg && n._reg.handleWatch) {
             n._reg.handleWatch(n, {
               value: newValue,
@@ -62,7 +58,7 @@ export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
       value: {
         get(this: INucleonCore) {
           if (this._isDeep) {
-            // Notify GET operation for tracking
+            
             if (this._reg && this._reg.handleWatch) {
                this._reg.handleWatch(this, {
                  value: this._value,
@@ -76,8 +72,8 @@ export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
         },
         set(this: INucleonCore, value: any) {
           this._value = value
-          // Just call the function. onBeforeChange will handle state update.
-          // @ts-ignore
+          
+          
           this(value)
         },
         enumerable: true,
@@ -87,8 +83,5 @@ export function createDeepPlugin(config: DeepOptions = {}): INucleonPlugin {
   }
 }
 
-/**
- * Default instance with default options (deepObjects: true, deepArrays: false usually)
- * Retained for backward compatibility.
- */
+
 export const deepStatePlugin = createDeepPlugin()

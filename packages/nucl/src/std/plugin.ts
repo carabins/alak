@@ -1,20 +1,16 @@
-/**
- * Standard Library Plugin Definition
- */
+
 
 import { INucleonPlugin } from "@alaq/nucl/INucleonPlugin"
 import { isEmpty } from '../utils/isEmpty'
 
-/**
- * Standard plugin - combines universal, array, and object functionality
- */
+
 export const stdPlugin: INucleonPlugin = {
   name: 'std',
   symbol: Symbol('std'),
   order: 50,
 
   methods: {
-    // ============ UNIVERSAL METHODS ============
+    
     upSome(this: any, fn: Function) {
       return this.up((value: any) => {
         if (!isEmpty(value)) fn(value, this)
@@ -41,7 +37,7 @@ export const stdPlugin: INucleonPlugin = {
       return this
     },
 
-    // ============ ARRAY METHODS ============
+    
     push(this: any, ...items: any[]) {
       if (!Array.isArray(this.value)) throw new TypeError('push() requires array value')
       const newValue = [...this.value, ...items]
@@ -64,7 +60,7 @@ export const stdPlugin: INucleonPlugin = {
       return this.value.at(index)
     },
 
-    // ============ OBJECT METHODS ============
+    
     set(this: any, key: string, val: any) {
       if (typeof this.value !== 'object' || this.value === null) throw new TypeError('set() requires object value')
       const newValue = { ...this.value, [key]: val }
@@ -105,5 +101,5 @@ export const stdPlugin: INucleonPlugin = {
   }
 }
 
-// Backward compatibility alias
+
 export const nucleusPlugin = stdPlugin

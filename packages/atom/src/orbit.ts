@@ -2,10 +2,12 @@
  * @alaq/atom - Orbit Configuration
  */
 
+import { NuclearKindSelector } from '@alaq/nucl'
+
 export const ORBIT_SYMBOL = Symbol.for('atom:orbit')
 
 export interface Orbit<T = any> {
-  kind: string
+  kind: NuclearKindSelector
   value: T
   options?: Record<string, any>
   [ORBIT_SYMBOL]: true
@@ -18,7 +20,7 @@ export interface Orbit<T = any> {
  * @param value - Initial value
  * @param options - Additional configuration for the kind
  */
-export function kind<T>(kind: string, value: T, options?: Record<string, any>): Orbit<T> {
+export function kind<T>(kind: NuclearKindSelector, value: T, options?: Record<string, any>): Orbit<T> {
   return {
     kind,
     value,

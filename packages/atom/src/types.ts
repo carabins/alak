@@ -3,17 +3,35 @@
  */
 
 import { Orbit } from './orbit'
+import { NuclearKindSelector, SpaceSeparatedKeys } from '@alaq/nucl'
+
+/**
+ * Global Registry for Atomic Kinds (Plugin Presets).
+ * Users can extend this via Module Augmentation.
+ */
+export interface AtomicKindRegistry {
+  // Example: 'stored': any
+}
+
+/** Valid selector for atom kind: supports space-separated combinations */
+export type AtomicKindSelector = SpaceSeparatedKeys<AtomicKindRegistry>
 
 /**
  * Atom creation options
  */
 export interface AtomOptions<Model = any> {
   /** 
+   * Predefined set of plugins.
+   * Supports space-separated combinations.
+   */
+  kind?: AtomicKindSelector
+
+  /** 
    * Realm namespace for events (default: 'root' or isolated) 
-   * Events will be emitted to this bus realm.
    */
   realm?: string
-
+  
+  // ... (keep rest of options)
   /** 
    * Atom name for debugging and event prefixing 
    * Events will be named `{name}.{prop}`
@@ -50,7 +68,7 @@ export interface AtomOptions<Model = any> {
    * Merged with local property kinds.
    * @example 'deep stored'
    */
-  nuclearKind?: string
+  nuclearKind?: NuclearKindSelector
 }
 
 /**
@@ -83,6 +101,30 @@ export interface AtomPlugin {
 
   /** Called when atom is decayed */
   onDecay?(atom: AtomInstance): void
+}
+
+/**
+ * Convention-based reactive hooks
+ * Provides autocomplete for _prop_up and _on_Event methods
+ */
+export type AtomicConventions<T> = {
+  [K in keyof T as `_${string & K}_up`]?: (value: T[K]) => void
+} & {
+  [K in string as `_on_${K}`]?: (data: any) => void
+}
+
+/**
+ * Base class for Atomic Models.
+ * Provides type safety and autocomplete for conventions.
+ * @example class MyModel extends IAtomic<MyModel> { ... }
+ */
+export abstract class IAtomic<T = any> {
+  /** Atom Management Context */
+  abstract $: AtomContext;
+  
+  // Mapped types for conventions
+  [key: `_${string}_up`]: any;
+  [key: `_on_${string}`]: any;
 }
 
 /**

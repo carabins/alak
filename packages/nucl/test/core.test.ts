@@ -29,6 +29,21 @@ test('Nv inherits Quark behavior', () => {
   expect(callCount).toBe(2) // Called again on change
 })
 
+test('Read raw value via function call n()', () => {
+  const data = { a: 1 }
+  const n = Nv(data)
+  
+  // Basic check
+  expect(n()).toBe(data)
+  
+  // Check with deep tracking (should return raw object, not Proxy)
+  const { deepStatePlugin } = require('../src/deep-state/plugin')
+  const dn = Nv({ x: 10 }, { plugins: [deepStatePlugin] })
+  
+  expect(dn.value).not.toBe(dn()) // n.value is Proxy, n() is raw
+  expect(dn().x).toBe(10)
+})
+
 /*
 // TODO: This test fails because we cache the default registry in createNu.ts for performance.
 // Re-defining kind "+" (or any kind) AFTER the module has loaded and cached the registry is not supported.

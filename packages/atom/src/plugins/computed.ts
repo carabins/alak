@@ -12,7 +12,6 @@ export const ComputedPlugin: AtomPlugin = {
 
     let proto = Object.getPrototypeOf(atom)
 
-    // Keep track of processed keys to avoid overriding child getters with parent ones
     const processedKeys = new Set<string>()
 
     while (proto && proto !== Object.prototype) {

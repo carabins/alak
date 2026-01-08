@@ -4,8 +4,34 @@
 
 import { quantumBus } from '@alaq/quark/quantum-bus'
 import { Nu, combineKinds } from '@alaq/nucl'
-import { kind, isOrbit, Orbit } from './orbit'
-import { AtomInstance, AtomOptions, AtomPlugin, AtomContext } from './types'
+import { Orbit, isOrbit } from './orbit'
+import { AtomInstance, AtomOptions, AtomPlugin, AtomContext, AtomicKindSelector } from './types'
+
+const atomicKindDefinitions = new Map<string, AtomPlugin[]>()
+
+/**
+ * Register a set of plugins as a named "Kind"
+ */
+export function defineAtomKind(name: string, plugins: AtomPlugin[]) {
+  atomicKindDefinitions.set(name, plugins)
+}
+
+// Helper to get plugins for a kind selector
+function getPluginsForKind(kindSelector: AtomicKindSelector | undefined): AtomPlugin[] | null {
+  if (!kindSelector) return null
+  
+  const keys = kindSelector.split(' ').filter(Boolean)
+  const allPlugins: AtomPlugin[] = []
+  
+  for (const key of keys) {
+    const plugins = atomicKindDefinitions.get(key)
+    if (plugins) {
+      allPlugins.push(...plugins)
+    }
+  }
+  
+  return allPlugins.length > 0 ? allPlugins : null
+}
 
 // Global shared tracking context
 let activeTrackingSet: Set<string> | null = null
@@ -37,6 +63,19 @@ export function Atom<T extends new (...args: any[]) => any>(
   model: T,
   options: AtomOptions<InstanceType<T>> = {}
 ): AtomInstance<InstanceType<T>> {
+  // 1. Resolve Plugins
+  let plugins = options.plugins
+  
+  // If local plugins not provided, try to resolve from kind
+  if (!plugins && options.kind) {
+    plugins = getPluginsForKind(options.kind)
+  }
+  
+  // Fallback to default plugins if nothing specified
+  if (!plugins) {
+    plugins = getDefaultPlugins()
+  }
+
   const baseName = options.name || model.name || 'Atom'
   const modelName = options.name ? baseName : `${baseName}#${++atomUid}`
 
@@ -179,7 +218,6 @@ export function Atom<T extends new (...args: any[]) => any>(
   })
 
   // 4. Run Plugins
-  const plugins = options.plugins !== undefined ? options.plugins : getDefaultPlugins()
   plugins.forEach(p => p.onInit?.(proxy as any))
 
   return proxy as any

@@ -4,25 +4,25 @@ import {INucleonCore} from "@alaq/nucl/INucleon";
 import {IDeepStateChange} from "@alaq/deep-state/types";
 import quarkProto from '@alaq/quark/prototype'
 
-// --- Types ---
 
-// Alias for the compiled registry, representing a "Kind" definition
+
+
 export type INucleonKind = IPluginsRegistry
 
-// Empty hooks for optimization
+
 const noop = () => {}
 
-// Internal storage for raw plugins per kind name (Base definitions)
+
 const rawKindDefinitions: Record<string, INucleonPlugin[]> = {}
 
-// Cache for compiled registries
+
 export const kindRegistry = {} as Record<string, RegistryWithSource>
 
 interface RegistryWithSource extends IPluginsRegistry {
   _plugins: INucleonPlugin[]
 }
 
-// --- Helper Functions ---
+
 
 function compileHooks<T extends Function>(hooks: T[]): T {
   if (hooks.length === 0) return noop as unknown as T
@@ -35,12 +35,9 @@ function compileHooks<T extends Function>(hooks: T[]): T {
   } as unknown as T
 }
 
-/**
- * Creates an optimized registry from a list of plugins.
- * Sorts plugins by 'order' (descending) before compilation.
- */
+
 function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
-  // 1. Sort plugins by priority (Higher order executes first)
+  
   const sortedPlugins = [...plugins].sort((a, b) => {
     const orderA = a.order ?? 0
     const orderB = b.order ?? 0
@@ -52,7 +49,7 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
   const beforeChangeHooks: PluginChangeHook[] = []
   const deepChangeHooks: PluginDeepChangeHandler[] = []
   
-  // Base prototype inherits from NuclearProto
+  
   const proto = Object.create(NuclearProto)
   let haveDeepWatch = false
 
@@ -65,7 +62,7 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
       haveDeepWatch = true
     }
     
-    // Install hook runs immediately during definition
+    
     if (plugin.onInstall) plugin.onInstall()
 
     if (plugin.methods) {
@@ -76,12 +73,12 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
     }
   })
 
-  // Compile hooks
+  
   const compiledCreate = compileHooks(createHooks)
   const compiledDecay = compileHooks(decayHooks)
   const compiledBeforeChange = compileHooks(beforeChangeHooks)
   
-  // Compile handleWatch
+  
   const compiledDeepHooks = compileHooks(deepChangeHooks)
   const handleWatch = (n: INucleonCore, f: IDeepStateChange) => {
     if (haveDeepWatch) { 
@@ -97,11 +94,11 @@ function createRegistry(plugins: INucleonPlugin[]): RegistryWithSource {
     proto,
     haveDeepWatch,
     _plugins: sortedPlugins,
-    // _descriptors removed as we use setPrototypeOf
+    
   }
 }
 
-// --- Public API ---
+
 
 export function createKind(plugins: INucleonPlugin[]): INucleonKind {
   return createRegistry(plugins)

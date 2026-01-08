@@ -1,9 +1,6 @@
-/**
- * Type logic for space-separated key combinations with autocomplete.
- * Adapted from @alaq/atom strategy.d.ts
- */
 
-// Extract first word and rest
+
+
 type SplitFirst<S extends string> =
   S extends `${infer First} ${infer Rest}`
     ? [First, Rest]
@@ -11,7 +8,7 @@ type SplitFirst<S extends string> =
       ? ['', '']
       : [S, ''];
 
-// Generator for key combinations (up to 3 levels deep for performance)
+
 type JoinTwo<A extends string, B extends string> = `${A} ${B}`;
 
 type Combinations2<Keys extends string> = {
@@ -28,10 +25,7 @@ type Combinations3<Keys extends string> = {
   }[Exclude<Keys, K1>]
 }[Keys];
 
-/**
- * Generates all possible combinations of keys separated by spaces.
- * Supports autocomplete in IDE.
- */
+
 export type SpaceSeparatedKeys<T extends Record<string, any>> =
   | ""
   | (keyof T & string)

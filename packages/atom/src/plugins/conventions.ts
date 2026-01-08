@@ -4,6 +4,9 @@ export const ConventionsPlugin: AtomPlugin = {
   name: 'conventions',
 
   onInit(atom) {
+    // TODO: Implement a way to subscribe to events/properties of OTHER atoms in the same realm.
+    // Possible pattern: _otherAtomName_prop_up(val) or similar.
+    
     const keys = new Set<string>()
     let obj = atom
     while (obj && obj !== Object.prototype) {

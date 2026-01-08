@@ -1,6 +1,4 @@
-/**
- * Check if value is empty
- */
+
 export function isEmpty(value: any): boolean {
   if (value == null) return true
   if (typeof value === 'string') return value.length === 0
