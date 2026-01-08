@@ -59,17 +59,34 @@ export interface AtomOptions<Model = any> {
   emitChanges?: boolean
 
   /**
-   * Custom event name for changes. Default: 'change'
+   * Event scope for bubbling (e.g. 'User.1').
+   * If not provided, it is auto-generated from model name and ID.
    */
-  emitChangeName?: string
+  scope?: string
 
   /**
    * Global strategy kind for all properties.
-   * Merged with local property kinds.
-   * @example 'deep stored'
    */
   nuclearKind?: NuclearKindSelector
 }
+
+/**
+ * Pre-compiled instruction set for creating Atom instances
+ */
+export interface ModelSchema {
+  properties: string[]
+  computed: Array<{ key: string, descriptor: PropertyDescriptor }>
+  hooks: Array<{ methodKey: string, type: 'up' | 'on', target: string }>
+}
+
+/**
+ * A function that creates Atom instances using a pre-compiled schema.
+ * Allows overriding runtime options (realm, name).
+ */
+export type AtomFactory<T> = (
+  constructorArgs?: any[], 
+  runtimeOptions?: Pick<AtomOptions, 'realm' | 'name' | 'emitChanges'>
+) => AtomInstance<T>
 
 /**
  * Atom Plugin interface
@@ -77,24 +94,11 @@ export interface AtomOptions<Model = any> {
 export interface AtomPlugin {
   name: string
   
-  /** Called before model analysis starts */
-  onSetup?(model: any, options: AtomOptions): void
-
-  /** Called for each property candidate found in model */
-  onProp?(context: {
-    key: string
-    orbit: Orbit
-    atom: AtomInstance
+  /** Called during model analysis to contribute to the schema */
+  onAnalyze?(context: {
     model: any
-  }): void // Can modify orbit in place
-
-  /** Called for each method candidate found in model */
-  onMethod?(context: {
-    key: string
-    fn: Function
-    atom: AtomInstance
-    model: any
-  }): Function | void // Can return wrapped function
+    schema: ModelSchema
+  }): void
 
   /** Called after atom is fully initialized */
   onInit?(atom: AtomInstance): void

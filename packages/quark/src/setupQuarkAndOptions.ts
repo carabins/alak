@@ -32,6 +32,10 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
       }
     }
 
+    if (options.scope) {
+      quark._scope = options.scope
+    }
+
     if (options.pipe) {
       quark._flags |= HAS_PIPE
       quark._pipeFn = options.pipe
@@ -39,14 +43,13 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
 
     if (options.emitChanges) {
       quark._flags |= EMIT_CHANGES
-      quark._changeEventName = options?.emitChangeName || 'change'
     }
-    
+
     // Disable DEDUP if explicitly requested
     if (options.dedup === false) {
       quark._flags &= ~DEDUP
     }
-    
+
     if (options.stateless) {
       quark._flags |= STATELESS
     }

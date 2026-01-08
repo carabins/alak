@@ -1,54 +1,39 @@
 import { AtomPlugin } from '../types'
-import { fusion } from '@alaq/nucl'
-import { Nu } from '@alaq/nucl'
 
 export const ComputedPlugin: AtomPlugin = {
   name: 'computed',
 
-  onInit(atom) {
-    const context = atom.$ as any
-    const nuclMap = context._nucl
-
-
-    let proto = Object.getPrototypeOf(atom)
-
+  onAnalyze({ model, schema }) {
+    let proto = model.prototype
     const processedKeys = new Set<string>()
+    // Store groups of properties per prototype level
+    const hierarchy: Array<Array<{ key: string, descriptor: PropertyDescriptor }>> = []
 
     while (proto && proto !== Object.prototype) {
+      const levelProps: Array<{ key: string, descriptor: PropertyDescriptor }> = []
       const descriptors = Object.getOwnPropertyDescriptors(proto)
 
       Object.entries(descriptors).forEach(([key, desc]) => {
         if (processedKeys.has(key)) return
+        processedKeys.add(key)
 
         // Find getters (excluding internal ones)
         if (desc.get && !key.startsWith('$') && key !== 'constructor') {
-          processedKeys.add(key)
-
-          // Analyze dependencies
-          const deps = new Set<string>()
-          context._tracking(deps)
-
-          try {
-            desc.get.call(atom)
-          } catch (e) {
-            // TODO: Error swallowing warning
-          } finally {
-            context._tracking(null)
-          }
-
-          //@ts-ignore Create Fusion
-          if (deps.size > 0) {
-            const sourceNucls = Array.from(deps).map(k => nuclMap.get(k))
-            const f = fusion(...sourceNucls).alive(() => desc.get!.call(atom))
-            nuclMap.set(key, f)
-          } else {
-            const staticValue = desc.get!.call(atom)
-            nuclMap.set(key, Nu({ value: staticValue }))
-          }
+          levelProps.push({ key, descriptor: desc })
         }
       })
+      
+      if (levelProps.length > 0) {
+        hierarchy.push(levelProps)
+      }
 
       proto = Object.getPrototypeOf(proto)
+    }
+    
+    // Add to schema in reverse order of hierarchy (Base -> Derived)
+    // But keep order WITHIN each level (as defined in class)
+    for (let i = hierarchy.length - 1; i >= 0; i--) {
+      schema.computed.push(...hierarchy[i])
     }
   }
 }

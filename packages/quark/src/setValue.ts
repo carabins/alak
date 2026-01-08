@@ -1,5 +1,5 @@
 import IQuarkCore from "./IQuarkCore";
-import {DEDUP, IS_AWAKE, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS} from "./flags";
+import {DEDUP, IS_AWAKE, HAS_REALM_AND_EMIT, HAS_REALM_AWAKE, IS_EMPTY, SILENT, STATELESS, EMIT_CHANGES} from "./flags";
 import {quantumBus} from "./quantum-bus";
 import {CHANGE, AWAKE} from "./events";
 
@@ -44,16 +44,17 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
     }
   }
 
-  if ((flags & HAS_REALM_AND_EMIT) === HAS_REALM_AND_EMIT) {
-    // Standardized Event Emission
-    // Use custom event name if provided, otherwise default to CHANGE
-    const eventName = quark._changeEventName || CHANGE
-    
-    // Always emit a structured payload
-    // This allows listeners to know WHAT changed (id) and TO WHAT (value)
-    quark._bus.emit(eventName, {
-      id: quark.id,
-      value
-    })
-  }
+    if (flags & EMIT_CHANGES) {
+       if (quark._bus) {
+         const payload = { id: quark.id, value: value }
+
+
+         if (quark._scope) {
+           console.log('payload', quark._scope)
+           quark._bus.emitInScope(quark._scope, CHANGE, payload)
+         } else {
+           quark._bus.emit(CHANGE, payload)
+         }
+       }
+    }
 }

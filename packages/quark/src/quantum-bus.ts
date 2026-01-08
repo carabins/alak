@@ -17,6 +17,9 @@ function safeEmit(fn: AnyFunction, arg: any) {
 let indexes = 0
 export class RealmBus {
   private _events = new Map<string, Set<AnyFunction>>()
+  // Scope -> Event -> Listeners
+  private _scopes = new Map<string, Map<string, Set<AnyFunction>>>()
+
   private _wildcardListeners = new Set<AnyFunction>() // '*' - все события текущего realm
   private _eventCounts: Record<string, number> = {}
   public index = ++indexes
@@ -24,6 +27,80 @@ export class RealmBus {
 
   hasListeners(event: string): boolean {
     return this._eventCounts[event] > 0
+  }
+
+  /**
+   * Subscribe to events within a specific scope hierarchy
+   * @param scope "user.1" matches events from "user.1" and "user.1.name"
+   */
+  onScope(scope: string, event: string, listener: AnyFunction) {
+    let scopeMap = this._scopes.get(scope)
+    if (!scopeMap) {
+      scopeMap = new Map()
+      this._scopes.set(scope, scopeMap)
+    }
+
+    let set = scopeMap.get(event)
+    if (!set) {
+      set = new Set()
+      scopeMap.set(event, set)
+    }
+    set.add(listener)
+    return this
+  }
+
+  offScope(scope: string, event: string, listener: AnyFunction) {
+    const scopeMap = this._scopes.get(scope)
+    if (scopeMap) {
+      const set = scopeMap.get(event)
+      if (set) {
+        set.delete(listener)
+        if (set.size === 0) scopeMap.delete(event)
+      }
+      if (scopeMap.size === 0) this._scopes.delete(scope)
+    }
+    return this
+  }
+
+  /**
+   * Emit event in a specific scope with bubbling up.
+   * "user.1.name" -> "user.1" -> "user" -> global
+   */
+  emitInScope(scope: string, event: string, data: any) {
+    const parts = scope.split('.')
+
+
+    // 1. Bubble up from specific scope to root
+    for (let i = parts.length; i > 0; i--) {
+      const currentScope = i === parts.length ? scope : parts.slice(0, i).join('.')
+      const listeners = this._scopes.get(currentScope)?.get(event)
+
+      if (listeners) {
+        const eventObj = { event, data, scope: currentScope, originalScope: scope }
+        listeners.forEach(fn => safeEmit(fn, eventObj))
+      }
+    }
+
+    // 2. Notify Global Listeners (Once)
+    // Global listeners effectively listen to ALL scopes
+    const globalListeners = this._events.get(event)
+    if (globalListeners) {
+      const eventObj = { event, data, scope }
+      globalListeners.forEach(fn => safeEmit(fn, eventObj))
+    }
+
+    // 3. Notify Wildcards (Once)
+    if (this._wildcardListeners.size > 0) {
+       const eventObj = { event, data, scope, realm: this._realmName }
+       this._wildcardListeners.forEach(fn => safeEmit(fn, eventObj))
+    }
+
+    // 4. Notify Cross-Realm (if configured)
+    if (this._realmName) {
+      quantumBus.notifyCrossRealmSubscribers(this._realmName, event, data)
+    }
+
+    return this
   }
 
   on(event: string, listener: AnyFunction) {

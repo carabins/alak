@@ -11,11 +11,12 @@ export interface IQuOptions<T = any> {
   value?: T
   realm?: string
   id?: string
+  /** Scope for event bubbling (e.g. 'user.1') */
+  scope?: string
   pipe?: (value: T) => T | undefined
   dedup?: boolean
   stateless?: boolean
   emitChanges?: boolean
-  emitChangeName?: string
 }
 
 export { CHANGE, AWAKE } from './events'

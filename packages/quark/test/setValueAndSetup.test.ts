@@ -147,7 +147,7 @@ describe("setValue", () => {
     expect(emitCalls[0].data.id).toBe("testId");
     expect(emitCalls[0].data.value).toBe("test");
     // Standard payload is just { id, value }, quark reference removed
-    expect(emitCalls[0].data.quark).toBeUndefined(); 
+    expect(emitCalls[0].data.quark).toBeUndefined();
   });
 });
 
@@ -197,20 +197,12 @@ describe("setupQuarkAndOptions", () => {
     // Since HAS_PIPE is not imported, we can't test the flag directly
   });
 
-  test("should set emitChanges flag and event name", () => {
-    const options = { emitChanges: true, emitChangeName: "custom" };
-    const result = setupQuarkAndOptions(quark, options);
-
-    expect(result._flags & EMIT_CHANGES).toBe(EMIT_CHANGES);
-    expect(result._changeEventName).toBe("custom");
-  });
-
-  test("should set emitChanges flag with default event name", () => {
+  test("should set emitChanges", () => {
     const options = { emitChanges: true };
     const result = setupQuarkAndOptions(quark, options);
 
     expect(result._flags & EMIT_CHANGES).toBe(EMIT_CHANGES);
-    expect(result._changeEventName).toBe("change");
+    expect(result._changeEventName).toBe(CHANGE);
   });
 
   test("should KEEP DEDUP flag when dedup option is omitted (default)", () => {

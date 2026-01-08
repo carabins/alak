@@ -1,11 +1,12 @@
 /**
- * Comprehensive Reactivity Benchmark (Ultra-Stable Memory)
- * quark vs nucl vs vue vs signals vs mobx vs valtio vs reatom (v1000)
+ * Comprehensive Reactivity Benchmark (Quark, Nucl, Atom, Vue, Signals, MobX, Valtio, Reatom)
+ * Focus: Speed and Memory Efficiency
  */
 
 import { Qv } from '@alaq/quark'
 import { Nv, fusion } from '../src/index'
 import { deepStatePlugin } from '../src/deep-state/plugin'
+import { Atom } from '../../atom/src/index'
 import { ref, reactive, computed as vueComputed } from 'vue'
 import { signal, computed as signalComputed } from '@preact/signals-core'
 import { observable, runInAction, computed as mobxComputed } from 'mobx'
@@ -44,13 +45,13 @@ function bench(name: string, ops: number, fn: () => void): BenchResult {
 console.log('🚀 COMPREHENSIVE REACTIVITY BENCHMARK')
 console.log(`Date: ${new Date().toISOString()}`)
 console.log(`Runtime: Bun ${Bun.version}`)
-console.log('='.repeat(100))
+console.log('='.repeat(110))
 
 const results: Record<string, BenchResult[]> = {}
 
 async function runSuite(suiteName: string, ops: number, tests: Record<string, () => void>) {
   console.log(`\n📦 ${suiteName} (ops: ${ops.toLocaleString()})`)
-  console.log('-'.repeat(100))
+  console.log('-'.repeat(110))
   const suiteResults: BenchResult[] = []
   for (const [name, fn] of Object.entries(tests)) {
     const result = bench(name, ops, fn)
@@ -60,10 +61,11 @@ async function runSuite(suiteName: string, ops: number, tests: Record<string, ()
   results[suiteName] = suiteResults
 }
 
-// 1. Creation
+// 1. Creation (Primitive)
 await runSuite('Creation (Primitive)', 500000, {
   'Quark': () => { Qv(1) },
   'Nucl': () => { Nv(1) },
+  'Atom': () => { Atom(class { v = 1 }) },
   'Vue': () => { ref(1) },
   'Signal': () => { signal(1) },
   'MobX': () => { observable.box(1) },
@@ -71,22 +73,26 @@ await runSuite('Creation (Primitive)', 500000, {
   'Reatom': () => { reatomAtom(1) }
 })
 
+// 2. Creation (Object)
 await runSuite('Creation (Object)', 500000, {
   'Quark': () => { Qv({a:1}) },
   'Nucl': () => { Nv({a:1}) },
+  'Atom': () => { Atom(class { a = 1 }) },
   'Vue': () => { reactive({a:1}) },
   'Signal': () => { signal({a:1}) },
   'MobX': () => { observable({a:1}) },
   'Valtio': () => { proxy({a:1}) }
 })
 
-// 2. Read
+// 3. Read
 const qP = Qv(1), nP = Nv(1), rP = ref(1), sP = signal(1)
 const mP = observable.box(1), vP = proxy({ v: 1 }), reP = reatomAtom(1)
+const aP = Atom(class { v = 1 })
 
 await runSuite('Read (Primitive)', 5000000, {
   'Quark': () => { qP.value },
   'Nucl': () => { nP.value },
+  'Atom': () => { aP.v },
   'Vue': () => { rP.value },
   'Signal': () => { sP.value },
   'MobX': () => { mP.get() },
@@ -94,13 +100,15 @@ await runSuite('Read (Primitive)', 5000000, {
   'Reatom': () => { reP() }
 })
 
-// 3. Write
+// 4. Write
 const qW = Qv(0), nW = Nv(0), rW = ref(0), sW = signal(0)
 const mW = observable.box(0), vW = proxy({ v: 0 }), reW = reatomAtom(0)
+const aW = Atom(class { v = 0 })
 
 await runSuite('Write (Primitive)', 1000000, {
   'Quark': () => { qW(1) },
   'Nucl': () => { nW(1) },
+  'Atom': () => { aW.v = 1 },
   'Vue': () => { rW.value = 1 },
   'Signal': () => { sW.value = 1 },
   'MobX': () => { runInAction(() => mW.set(1)) },
@@ -108,7 +116,7 @@ await runSuite('Write (Primitive)', 1000000, {
   'Reatom': () => { reW.set(1) }
 })
 
-// 4. Computed
+// 5. Computed
 const nC1 = Nv(1), nC2 = Nv(2)
 const nComp = fusion(nC1, nC2).any((a, b) => a + b)
 const rC1 = ref(1), rC2 = ref(2)
@@ -119,9 +127,11 @@ const mC1 = observable.box(1), mC2 = observable.box(2)
 const mComp = mobxComputed(() => mC1.get() + mC2.get())
 const reC1 = reatomAtom(1), reC2 = reatomAtom(2)
 const reComp = reatomComputed(() => reC1() + reC2())
+const aComp = Atom(class { a = 1; b = 2; get sum() { return this.a + this.b } })
 
 await runSuite('Computed Read (Cached)', 2000000, {
   'Nucl': () => { nComp.value },
+  'Atom': () => { aComp.sum },
   'Vue': () => { rComp.value },
   'Signal': () => { sComp.value },
   'MobX': () => { mComp.get() },
@@ -130,13 +140,14 @@ await runSuite('Computed Read (Cached)', 2000000, {
 
 await runSuite('Computed Update', 500000, {
   'Nucl': () => { nC1(Math.random()); nComp.value },
+  'Atom': () => { aComp.a = Math.random(); aComp.sum },
   'Vue': () => { rC1.value = Math.random(); rComp.value },
   'Signal': () => { sC1.value = Math.random(); sComp.value },
   'MobX': () => { runInAction(() => mC1.set(Math.random())); mComp.get() },
   'Reatom': () => { reC1.set(Math.random()); reComp() }
 })
 
-// 5. Deep Mutation
+// 6. Deep Mutation
 const nD = Nv({ a: { b: { c: 1 } } }, { plugins: [deepStatePlugin] })
 const vD = proxy({ a: { b: { c: 1 } } })
 const mD = observable({ a: { b: { c: 1 } } })
@@ -149,29 +160,32 @@ await runSuite('Deep Mutation', 500000, {
   'Vue': () => { rD.a.b.c++ }
 })
 
-// 6. Memory Usage (STABLE)
+// 7. Memory Usage (FIXED)
 console.log('\n📊 Memory Usage (1,000,000 units)')
-console.log('-'.repeat(100))
+console.log('-'.repeat(110))
 
-// Important: Keep all arrays in global scope to prevent GC during the whole memory test block
 const globalRetention: any[] = [];
 
 async function getMemoryStable(fn: () => any[]) {
-  // Clear previous junk
-  Bun.gc(true); await sleep(100); 
-  Bun.gc(true); await sleep(100);
+  // Try to empty the heap as much as possible
+  for(let i=0; i<5; i++) { Bun.gc(true); await sleep(50); }
   
   const before = process.memoryUsage().heapUsed
   const arr = fn()
-  globalRetention.push(arr); // Hold it! 
+  globalRetention.push(arr); 
   
+  // Wait for things to settle
+  await sleep(100);
   const after = process.memoryUsage().heapUsed
-  return Math.max(0, after - before)
+  
+  const result = Math.round(Math.max(0, after - before) / 1024 / 1024 * 100) / 100;
+  return result;
 }
 
 const memTests = {
   'Quark': () => { const a = []; for(let i=0; i<1000000; i++) a.push(Qv(i)); return a },
   'Nucl': () => { const a = []; for(let i=0; i<1000000; i++) a.push(Nv(i)); return a },
+  'Atom': () => { const a = []; for(let i=0; i<1000000; i++) a.push(Atom(class { v = 1 })); return a },
   'Vue': () => { const a = []; for(let i=0; i<1000000; i++) a.push(ref(i)); return a },
   'Signal': () => { const a = []; for(let i=0; i<1000000; i++) a.push(signal(i)); return a },
   'MobX': () => { const a = []; for(let i=0; i<1000000; i++) a.push(observable.box(i)); return a },
@@ -181,19 +195,17 @@ const memTests = {
 
 const memResults: Record<string, number> = {}
 for (const [name, fn] of Object.entries(memTests)) {
-  const diff = await getMemoryStable(fn)
-  memResults[name] = Math.round(diff / 1024 / 1024 * 100) / 100
+  memResults[name] = await getMemoryStable(fn)
   console.log(`${name.padEnd(25)}: ${memResults[name].toString().padStart(10)} MB`)
 }
 
 // --- Generate Report ---
 
-const LIBRARIES = ['Quark', 'Nucl', 'Vue', 'Signal', 'MobX', 'Valtio', 'Reatom']
+const LIBRARIES = ['Quark', 'Nucl', 'Atom', 'Vue', 'Signal', 'MobX', 'Valtio', 'Reatom']
 const winners: Record<string, string> = {}
 
 function generateMarkdownTable(results: Record<string, BenchResult[]>): string {
-  let md = `| Benchmark | ` + LIBRARIES.join(' | ') + ` | Winner |\n|-----------|` + LIBRARIES.map(() => '---').join('|') + `|---|
-`
+  let md = `| Benchmark | ` + LIBRARIES.join(' | ') + ` | Winner |\n|-----------|` + LIBRARIES.map(() => '---').join('|') + `|---|\n`
   
   for (const [suite, res] of Object.entries(results)) {
     const vals = LIBRARIES.map(lib => {
@@ -216,14 +228,14 @@ function generateMarkdownTable(results: Record<string, BenchResult[]>): string {
   return md
 }
 
-import { writeFileSync } from 'fs'
+import { writeFileSync, unlinkSync } from 'fs'
 const table = generateMarkdownTable(results);
 const commonInfo = `**Date:** ${new Date().toLocaleDateString()}\n**Runtime:** Bun ${Bun.version}\n**System:** ${process.platform} ${process.arch}`;
 
 const reportEn = `# Reactivity Performance Benchmark (Comprehensive)\n\n${commonInfo}\n\n## Results (ops/ms - Higher is Better)\n\n${table}\n\n*Note: Memory is measured in MB for 1,000,000 instances (Lower is Better).*`
-const reportRu = `# Бенчмарк производительности реактивности\n\n**Дата:** ${new Date().toLocaleDateString('ru-RU')}\n**Среда:** Bun ${Bun.version}\n**Система:** ${process.platform} ${process.arch}\n\n## Результаты (операций/мс - чем выше, тем лучше)\n\n${table.replace(/Benchmark/g, 'Тест').replace(/Winner/g, 'Победитель').replace(/Creation \(Primitive\)/g, 'Создание (примитив)').replace(/Creation \(Object\)/g, 'Создание (объект)').replace(/Read \(Primitive\)/g, 'Чтение (примитив)').replace(/Write \(Primitive\)/g, 'Запись (примитив)').replace(/Computed Read \(Cached\)/g, 'Чтение Computed (кеш)').replace(/Computed Update/g, 'Обновление Computed').replace(/Deep Mutation/g, 'Глубокая мутация').replace(/Memory \(1M units\)/g, 'Память (1 млн юнитов)')}\n\n*Примечание: Память измеряется в МБ для 1 000 000 экземпляров (чем меньше, тем лучше).*`
 
 writeFileSync('BENCHMARK_REPORT.md', reportEn)
-writeFileSync('BENCHMARK_REPORT.ru.md', reportRu)
-console.log('\nReports saved to BENCHMARK_REPORT.md and BENCHMARK_REPORT.ru.md')
+try { unlinkSync('BENCHMARK_REPORT.ru.md') } catch(e) {}
+
+console.log('\nReport saved to BENCHMARK_REPORT.md')
 process.exit(0)

@@ -39,28 +39,43 @@ quantumBus.emit('ui', 'CLICK', { x: 10, y: 10 })
 
 Represents a specific channel (Realm) on the bus.
 
-### `.on(event, listener)`
-Subscribes to an event in this realm.
-- **event** *(string)*: Event name. Supports wildcards.
-- **listener**: `(payload) => void`
+### `.onScope(scope, event, listener)`
+Subscribes to events within a specific scope and its sub-scopes.
+- **scope** *(string)*: Scope name (e.g., `'user.1'`).
+- **event** *(string)*: Event name.
 
-**Event Patterns:**
-- `'EVENT_NAME'`: Listen to specific event.
-- `'*'`: Listen to **all** events in this realm.
-- `'realm:event'`: Listen to an event from **another** realm (Cross-Realm).
-- `'*:*'`: Global wildcard (listen to everything everywhere).
+```typescript
+// Listens to events from this specific user and all their properties
+bus.onScope('user.1', 'CHANGE', data => console.log(data))
+```
+
+### `.emitInScope(scope, event, data)`
+Emits an event into a specific scope with **bubbling**.
+The event will be delivered to:
+1. Exact scope subscribers (`user.1.name`).
+2. Parent scope subscribers (`user.1`, `user`).
+3. Global subscribers (`on(event)`).
+
+```typescript
+// Notifies:
+// 1. onScope('user.1.name', ...)
+// 2. onScope('user.1', ...)
+// 3. onScope('user', ...)
+// 4. on('CHANGE', ...)
+bus.emitInScope('user.1.name', 'CHANGE', { val: 'John' })
+```
+
+### `.offScope(scope, event, listener)`
+Unsubscribes a listener from a specific scope.
+
+### `.on(event, listener)`
+Subscribes to an event **globally** (catches events from any scope).
 
 ```typescript
 const bus = quantumBus.getRealm('app')
 
 // 1. Specific
 bus.on('LOGIN', data => console.log('User logged in', data))
-
-// 2. Wildcard
-bus.on('*', payload => {
-  // payload is { event: 'LOGIN', data: ... }
-  console.log(`Event ${payload.event} happened`)
-})
 ```
 
 ### `.off(event, listener)`
