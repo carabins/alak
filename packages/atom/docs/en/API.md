@@ -2,13 +2,34 @@
 
 **Atom** is a high-level orchestrator that transforms regular TypeScript/JavaScript classes into reactive data models.
 
-## `Atom(Model, options)` Factory
+## `Atom.define(Model, options)` — Compilation
 
-Creates an instance of the specified class, wrapping it in a Proxy to manage reactivity.
+The primary method for creating an atom repository. It analyzes the class (compiles the schema) once and returns a repository object for fast instantiation.
 
 ### Parameters
-- **`Model`**: The class describing the data structure.
-- **`options`**: Configuration object (optional).
+- **`Model`**: The model class.
+- **`options`**: Compilation options (name, realm, plugins).
+
+### Returns: `AtomRepository`
+
+The repository has methods:
+- **`.create(args?, options?)`**: Creates a new anonymous instance.
+- **`.get(idOrObj?)`**: Returns an existing instance by ID or creates a new one (Identity Map). If ID is omitted, returns a singleton.
+- **`.decay(id)`**: Destroys an instance by ID.
+- **`.clear()`**: Destroys all instances.
+
+```typescript
+const User = Atom.define(UserModel);
+const admin = User.get('admin');
+```
+
+## `Atom(Model, options)` — Quick Factory
+
+Shortcut for `Atom.define(Model, options).create(args, options)`. Convenient for one-off atoms but less efficient for mass creation due to potential factory re-creation if not cached properly.
+
+---
+
+## Options (AtomOptions)
 
 ### Options (AtomOptions)
 - **`name`** *(string)*: Model name (used for debugging and event ID generation).

@@ -18,54 +18,47 @@ npm install @alaq/atom
 
 ### 🛠 Quick Start
 
+For maximum performance (450k ops/ms), use pre-compilation via `Atom.define`.
+
 ```typescript
 import { Atom, kind } from '@alaq/atom';
-import '@alaq/nucl/presets/std'; // Enable standard helpers
+import '@alaq/nucl/presets/std'; 
 
 class CounterStore {
-  // Properties automatically become nucleons
   count = 0;
-  
-  // Define nucleon type using kind()
   history = kind('std', []);
 
-  // Getters automatically become computed properties
   get doubled() {
     return this.count * 2;
   }
 
-  // Methods work as usual, but writing to properties triggers reactivity
   increment() {
     this.count++;
     this.history.push(this.count);
   }
 }
 
-const counter = Atom(CounterStore);
+// 1. Compile schema (once)
+const Counter = Atom.define(CounterStore);
 
-// Subscribe to changes
-counter.$count.up(val => console.log('Count changed:', val));
+// 2. Create instance (instant)
+const counter = Counter.create(); 
+// or Counter.get('main') for singleton/Identity Map
 
+counter.$count.up(val => console.log('Count:', val));
 counter.increment();
-console.log(counter.doubled); // 2
 ```
-
----
-
-### 📚 Documentation
-
-*   **[Concept](./docs/en/CONCEPT.md)** — The philosophy of classes as state schemas and transparent reactivity.
-*   **[API Reference](./docs/en/API.md)** — Detailed description of the `Atom` factory, `$` context, and proxy behavior.
 
 ---
 
 ### ⚡ Performance
 
-Atom adds minimal overhead (Proxy + class instance) on top of Nucl, maintaining its speed leadership among other state managers.
+Thanks to Zero-Proxy architecture and JIT schema compilation, Atom creates instances faster than any competitor.
 
-| Metric | @alaq/atom | MobX | Zustand |
-| :--- | :--- | :--- | :--- |
-| **Property Read** | **~350k ops/ms** | ~140k ops/ms | ~180k ops/ms |
-| **Memory (1M units)** | **~180 MB** | ~240 MB | ~150 MB |
+| Metric | @alaq/atom (Compiled) | Signals (Preact) | Vue (Ref) | MobX |
+| :--- | :--- | :--- | :--- | :--- |
+| **Creation** | **~450k ops/ms** | ~85k ops/ms | ~18k ops/ms | ~7k ops/ms |
+| **Read** | **~95k ops/ms** | ~150k ops/ms | ~90k ops/ms | ~100k ops/ms |
+| **Memory (1M units)** | **~180 MB** | ~80 MB | ~120 MB | ~240 MB |
 
 *> Benchmarks run on Bun v1.3. Detailed report: [BENCHMARK_REPORT.md](../../BENCHMARK_REPORT.md)*
