@@ -5,5 +5,5 @@ const ARTIFACTS = path.resolve('./artifacts')
 export const Const = {
   PACKAGES,
   ARTIFACTS,
-  PK_JSON: 'package.json',
+  PK_JSON: 'package.yaml',
 }
