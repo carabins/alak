@@ -1,10 +1,14 @@
 {
   "name": "alak-monorepo",
+  "repository": "https://github.com/carabins/alak",
+  "author": "Gleb Panteleev (panteleew@gleb.pw)",
+  "license": "MIT",
   "private": true,
   "keywords": [],
   "scripts": {
     "format": "prettier --write --ignore-unknown .",
     "start": "bun scripts/index.ts",
+    "build": "bun scripts/index.ts art",
     "next": "bun --watch scripts/index.ts x",
     "dev": "bun scripts/dev.ts",
     "test": "bun scripts/index.ts test"

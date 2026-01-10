@@ -12,6 +12,7 @@
     "fusion"
   ],
   "dependencies": {
+    "@alaq/quark": "^6.0.0-alpha.1",
     "es-toolkit": "^1.43.0"
   }
 }
