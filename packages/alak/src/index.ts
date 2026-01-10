@@ -1,19 +1,20 @@
 import type { ActiveUnions } from './namespaces'
 
-export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus/index'
-export { nucleonExtensions } from '@alaq/nucleus/create'
-export { Atom, savedAtom } from '@alaq/atom/index'
-export { saved, stateless, tag, mixed } from '@alaq/atom/property'
+export { N, Nucleus, QuarkEventBus } from '@alaq/nucleus'
+export { nucleonExtensions } from '@alaq/nucleus'
+export { Atom, savedAtom } from '@alaq/atom'
+export { saved, stateless, tag, mixed } from '@alaq/atom'
 
 export type { UnionNamespaces } from './namespaces'
 
 export { UnionConstructor } from 'alak/UnionConstructor'
 export { GetUnionCore } from 'alak/UnionCore'
 export { UnionAtom, UnionAtomFactory } from 'alak/unionAtom'
+// export { extendUnion, createExtendableStore } from 'alak/unionBuilder'
 
-import { storage } from '@alaq/atom/storage'
+import { storage } from '@alaq/atom'
 
-import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus/index'
+import { Nucleus, N, QuarkEventBus } from '@alaq/nucleus'
 
 export { injectFacade } from 'alak/facadeInjector'
 

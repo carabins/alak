@@ -23,6 +23,7 @@ import { alive } from './utils'
 export { QuarkEventBus, Q } from '@alaq/nucleus/bus'
 
 export const installNucleonExtensions = nucleonExtensions
+export { nucleonExtensions }
 
 export const N = Object.assign(createNucleus, {
   setOnceGet(getterFun) {

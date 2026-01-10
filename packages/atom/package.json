@@ -1,6 +1,6 @@
 {
     "name": "@alaq/atom",
-    "version": "5.0.37",
+    "version": "5.1.0",
     "main": "index.js",
     "typings": "index.d.ts",
     "unpkg": "dist/atom.global.js",
@@ -8,7 +8,7 @@
     "author": "Gleb Panteleev",
     "license": "TVR",
     "dependencies": {
-        "@alaq/nucleus": "5.0.30"
+        "@alaq/nucleus": "5.1.0"
     },
     "module": "index.mjs",
     "sideEffects": false,

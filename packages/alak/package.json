@@ -1,6 +1,6 @@
 {
     "name": "alak",
-    "version": "5.0.64",
+    "version": "5.1.0",
     "description": "Alak Last Atom",
     "typings": "index.d.ts",
     "main": "index.js",
@@ -15,9 +15,8 @@
         "flow"
     ],
     "dependencies": {
-        "@alaq/nucleus": "5.0.30",
-        "@alaq/atom": "5.0.37",
-        "@alaq/rune": "0.0.12"
+        "@alaq/nucleus": "5.1.0",
+        "@alaq/atom": "5.1.0"
     },
     "license": "TVR",
     "module": "index.mjs",

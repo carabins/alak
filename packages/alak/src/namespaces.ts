@@ -1,5 +1,5 @@
 // import { alakFactory, alakModel, QuarkEventBus } from 'alak/index'
-import isBrowser from '@alaq/rune/isBrowser'
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined'
 
 export const defaultNamespace = 'defaultUnion'
 const AlakUnionNamespace = 'AlakUnionNamespace'

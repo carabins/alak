@@ -1,5 +1,8 @@
 import cloudCreate from './cloud.create'
 
+export * from './property'
+export * from './storage'
+
 export const savedAtom = <T>(name: string, model: T) =>
   Atom({
     model,

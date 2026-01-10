@@ -2,7 +2,7 @@ import { test } from 'tap'
 import {UnionConstructor, UnionModel} from 'alak/index'
 import BirdsModel from './models/BirdsModel'
 
-test('addEverythingListener test', async (t) => {
+test('tags + EverythingListener test', async (t) => {
   const uc = UnionConstructor({
     namespace: 'addEverythingListener_test',
     models: {
