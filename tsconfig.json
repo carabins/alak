@@ -16,23 +16,44 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "alak": [
+        "packages/alak/src/index.ts"
+      ],
       "alak/*": [
         "packages/alak/src/*"
+      ],
+      "@alaq/molecule": [
+        "packages/molecule/src/index.ts"
       ],
       "@alaq/molecule/*": [
         "packages/molecule/src/*"
       ],
+      "@alaq/atom": [
+        "packages/atom/src/index.ts"
+      ],
       "@alaq/atom/*": [
         "packages/atom/src/*"
+      ],
+      "@alaq/nucleus": [
+        "packages/nucleus/src/index.ts"
       ],
       "@alaq/nucleus/*": [
         "packages/nucleus/src/*"
       ],
+      "@alaq/bitmask": [
+        "packages/bitmask/src/index.ts"
+      ],
       "@alaq/bitmask/*": [
         "packages/bitmask/src/*"
       ],
+      "@alaq/datastruct": [
+        "packages/datastruct/src/index.ts"
+      ],
       "@alaq/datastruct/*": [
         "packages/datastruct/src/*"
+      ],
+      "@alaq/rune": [
+        "packages/rune/src/index.ts"
       ],
       "@alaq/rune/*": [
         "packages/rune/src/*"
