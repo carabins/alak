@@ -165,14 +165,51 @@ facade.actions.app.clearCompleted()
 
 ## Naming Convention для Listeners
 
-Alak автоматически подписывается на nucleus через имена методов:
+Alak автоматически подписывается на изменения nucleus и события через имена методов.
+Используется разделитель `$` для четкого разделения контекста.
+
+### 1. Локальные подписки на nucleus
+
+Формат: `_nucleusName$listenerType`
 
 | Паттерн | Описание | Пример |
 |---------|----------|--------|
-| `_propertyName_up(v)` | Подписка на свой nucleus | `_count_up(v)` |
-| `_propertyName_next(v)` | Только следующее изменение | `_count_next(v)` |
-| `_$atomName_property_up(v)` | Подписка на другой atom | `_$user_name_up(v)` |
-| `_on_EVENT_NAME(data)` | Обработчик события | `_on_USER_LOGIN(data)` |
+| `_count$up(v)` | Подписка на изменение `count` | `_count$up(v) { ... }` |
+| `_count$next(v)` | Только следующее изменение | `_count$next(v) { ... }` |
+
+### 2. Подписки на события
+
+Формат: `_on$EventName`
+
+| Паттерн | Описание | Пример |
+|---------|----------|--------|
+| `_on$init()` | **Обязательно** вызывается при инициализации | `_on$init() { ... }` |
+| `_on$UserLogin(user)` | Обработчик события `UserLogin` | `_on$UserLogin(u) { ... }` |
+
+> **Примечание:** Старые конвенции (`_count_up`, `_on_INIT`) продолжают поддерживаться для обратной совместимости.
+
+### Пример использования новых конвенций
+
+```typescript
+class UserModel extends UnionModel<'myApp'> {
+  name = 'Guest'
+
+  // Вызывается автоматически при создании атома
+  _on$init() {
+    console.log('UserModel initialized')
+  }
+
+  // Подписка на изменение свойства name
+  _name$up(newName) {
+    console.log('Name changed to:', newName)
+  }
+
+  // Обработка кастомного события
+  _on$Logout() {
+    this.name = 'Guest'
+  }
+}
+```
 
 ## Facade API
 
