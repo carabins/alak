@@ -54,9 +54,10 @@ import { N } from '@alaq/nucleus'
 const count = N(0)
 
 // 2. Подписка: Реакция на изменение энергии
-const unsub = count.up((val) => {
+const listener = (val) => {
   console.log(`Энергия: ${val}`)
-})
+}
+count.up(listener)
 // -> "Энергия: 0"
 
 // 3. Воздействие: Добавление энергии
@@ -68,7 +69,7 @@ console.log(count.value) // 10
 console.log(count())     // 10
 
 // 5. Очистка
-unsub() // Отписка
+count.down(listener) // Отписка
 ```
 
 ### Реактивная Математика (Quarks)
