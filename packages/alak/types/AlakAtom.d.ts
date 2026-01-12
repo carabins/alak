@@ -1,3 +1,5 @@
+/// <reference path="../../atom/types/base.d.ts" />
+
 type CanBeArray<T> = T | Array<T>
 type ActionsAndN<T> = CanBeArray<GetValues<T> | GetActions<T>>
 

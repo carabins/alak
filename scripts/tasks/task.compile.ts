@@ -1,5 +1,5 @@
-import { Project } from '../common/project'
-import { FileLog } from '../log'
+import { BuildPackage } from '~/scripts/BuildPackage'
+import { FileLog } from '~/scripts/log'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import { runTsc } from '~/scripts/common/tsc'
@@ -23,7 +23,7 @@ function tsc() {
   }))
 }
 
-export async function compile(project: Project) {
+export async function compile(project: BuildPackage) {
   const log = FileLog(project.packageJson.name + ' compiler')
   log('prepare...')
   await tsc()
@@ -33,12 +33,15 @@ export async function compile(project: Project) {
   fs.mkdirpSync(project.artPatch)
 
   log('write...')
-  declarations[project.dir].forEach(({ outFile, content }) => {
-    if (outFile.endsWith('index.d.ts')) {
-      content = `/// <reference path="types.d.ts" />\n` + content
-    }
-    writeFileSync(outFile, content)
-  })
+  if (declarations[project.dir]) {
+      declarations[project.dir].forEach(({ outFile, content }) => {
+        if (outFile.endsWith('index.d.ts')) {
+          content = "/// <reference path=\"types.d.ts\" />\n" + content
+        }
+        fs.ensureDirSync(path.dirname(outFile))
+        writeFileSync(outFile, content)
+      })
+  }
 
   const declarationsPath = project.resolveInPackage('types')
   const declarationsMix = fs.existsSync(declarationsPath)
@@ -58,17 +61,14 @@ export async function compile(project: Project) {
       declarationSource = [...refs, declarationSource].join('\n')
     }
     fs.writeFileSync(path.join(project.artPatch, 'types.d.ts'), declarationSource)
-
-    // fs.appendFileSync(
-    //   path.join(project.artPatch, 'index.d.ts'),
-    //   declarationSource
-    //     .replaceAll('type', 'export type')
-    //     .replaceAll('interface', 'export interface'),
-    // )
-    // declarationSource = ''
   }
 
   const srcFiles = sources.projects[project.dir]
+  if (!srcFiles) {
+      log('No source files found')
+      return
+  }
+
   let totalSizeCjs = 0
   let totalSizeEsm = 0
 
@@ -76,12 +76,12 @@ export async function compile(project: Project) {
   const fixEsmImports = (code: string, packageDir: string, packageName: string): string => {
     // 1. Replace internal package aliases (e.g., 'alak/namespaces' -> './namespaces.mjs')
     code = code.replace(
-      new RegExp(`(['"])${packageDir}/([^'"]+)(['"])`, 'g'),
+      new RegExp(`(['"])${packageDir}/([^'" ]+)(['"])`, 'g'),
       "$1./$2.mjs$3"
     )
 
     // 2. Replace @alaq self-imports with relative paths (e.g., '@alaq/nucleus/bus' -> './bus.mjs' in nucleus package)
-    const selfImportRegex = new RegExp(`(['"])${packageName}/([^'"]+)(['"])`, 'g')
+    const selfImportRegex = new RegExp(`(['"])${packageName}/([^'" ]+)(['"])`, 'g')
     code = code.replace(
       selfImportRegex,
       "$1./$2.mjs$3"
@@ -89,11 +89,14 @@ export async function compile(project: Project) {
 
     // 3. Replace other @alaq package imports to include .mjs extension
     code = code.replace(
-      /(['"])(@alaq\/[^'"]+)(['"])/g,
-      (match, quote1, importPath, quote2) => {
-        // Only add .mjs if there's no extension already
-        if (!importPath.endsWith('.mjs') && !importPath.endsWith('.js')) {
-          return `${quote1}${importPath}.mjs${quote2}`
+      /(['"])((@alaq\/)?([^'" ]+))(['"])/g,
+      (match, quote1, importPath, quote2, quote3, quote4) => {
+        // Only add .mjs if there's no extension already AND it is not just the package name (which resolves to index)
+        const parts = importPath.split('/');
+        if (parts.length > 1) { 
+           if (!importPath.endsWith('.mjs') && !importPath.endsWith('.js')) {
+            return `${quote1}${importPath}.mjs${quote2}`
+           }
         }
         return match
       }
@@ -125,6 +128,7 @@ export async function compile(project: Project) {
         sourcemap: false,
       })
       totalSizeCjs += cjs.code.length
+      fs.ensureDirSync(path.dirname(path.join(project.artPatch, src.name + '.js')))
       writeFileSync(path.join(project.artPatch, src.name + '.js'), cjs.code)
 
       // Generate ESM version (.mjs)
@@ -143,8 +147,28 @@ export async function compile(project: Project) {
 
   log('unminified CJS size:', (totalSizeCjs / 1024).toFixed(2), 'kb')
   log('unminified ESM size:', (totalSizeEsm / 1024).toFixed(2), 'kb')
+  
+  if (fs.existsSync('LICENSE')) {
+      fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
+  }
+  
+  // Setup package.json for v5 build
+  project.packageJson.main = 'index.js'
+  project.packageJson.module = 'index.mjs'
+  project.packageJson.types = 'index.d.ts'
   project.packageJson.license = 'TVR'
-  fs.copyFileSync('LICENSE', path.resolve(project.artPatch, 'LICENSE'))
-  //project.savePackageJsonTo.art()
+  
+  project.packageJson.exports = {
+      '.': {
+        types: './index.d.ts',
+        import: './index.mjs',
+        require: './index.js',
+      },
+      './*': './*',
+  }
+
+  project.savePackageJsonTo.art()
   log('complete')
 }
+
+export default compile

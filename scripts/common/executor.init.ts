@@ -21,16 +21,15 @@ declare type BuildAggregateTaskNames = ${BuildAggregateTaskNames}
   const tasksFile = path.resolve("scripts/tasks.d.ts")
   let prevFile = "";
   try {
-    if (fs.existsSync(tasksFile)) {
-      prevFile = fs.readFileSync(tasksFile, 'utf-8');
-    }
+    prevFile = await Bun.file(tasksFile).text();
   } catch (error) {
-    Log.trace(`Error reading ${tasksFile}: ${error}`);
+    // If file doesn't exist, prevFile remains empty string
+    Log.trace(`File ${tasksFile} does not exist, will create it`);
   }
 
   if (prevFile != typeGen) {
     Log.info(`update ${tasksFile}`)
-    fs.writeFileSync(tasksFile, typeGen)
+    Bun.write(tasksFile, typeGen)
   }
   return Object.assign(data, {
     async runPipe(pipeline: TaskPipeline, libNames: string[]) {

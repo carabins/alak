@@ -48,23 +48,10 @@ export class BuildPackage {
     fs.copyFileSync(srcPath, artPath)
   }
 
-  savePackageJsonToArtifacts(): void {
-    this.packageJson.repository = 'https://github.com/carabins/alak'
-    const artPath = path.resolve(this.artPatch, Const.PK_JSON)
-    fs.writeFileSync(artPath, JSON.stringify(this.packageJson, null, 2))
-  }
-
   savePackageJsonToSource(): void {
     const clean = pick(this.packageJson, 'name', 'version', 'description', 'keywords')
     const srcPath = path.resolve(this.packagePath, Const.PK_JSON)
     fs.writeFileSync(srcPath, JSON.stringify(clean, null, 2))
-  }
-
-  get savePackageJsonTo() {
-    return {
-      artifacts: () => this.savePackageJsonToArtifacts(),
-      source: () => this.savePackageJsonToSource()
-    }
   }
 }
 

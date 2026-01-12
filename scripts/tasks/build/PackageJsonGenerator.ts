@@ -62,7 +62,7 @@ export class PackageJsonGenerator {
     for (const entry of this.config.entryPoints) {
       const base = entry.name === 'index' ? 'index' : entry.name
 
-      pkg.exports[entry.exportPath] = entry.platformSpecific
+      const exportConfig = entry.platformSpecific
         ? {
             types: './' + entry.outputs.types,
             node: {
@@ -78,6 +78,12 @@ export class PackageJsonGenerator {
             require: './' + entry.outputs.cjs,
             default: './' + entry.outputs.esm
           }
+
+      pkg.exports[entry.exportPath] = exportConfig
+      
+      if (entry.name === 'index') {
+         pkg.exports['./index'] = exportConfig
+      }
     }
 
     pkg.exports['./package.json'] = './package.json'
@@ -93,12 +99,7 @@ export class PackageJsonGenerator {
     const all = { ...detected, ...source }
 
     if (Object.keys(all).length > 0) {
-      pkg.dependencies = Object.fromEntries(Object.keys(all).map(d => {
-        if (this.config.sourcePackageJson.dependencies && this.config.sourcePackageJson.dependencies[d]) {
-          return [d, this.config.sourcePackageJson.dependencies[d]]
-        }
-        return [d, 'latest']
-      }))
+      pkg.dependencies = Object.fromEntries(Object.keys(all).map(d => [d, 'latest']))
     }
 
     if (this.config.sourcePackageJson.peerDependencies) {
@@ -189,16 +190,26 @@ export function detectEntryPoints(sourceDir: string): DetectedEntry[] {
   const scan = (dir: string, prefix = '') => {
     for (const file of fs.readdirSync(dir)) {
       const fullPath = path.join(dir, file)
-      if (!fs.statSync(fullPath).isDirectory()) continue
+      const stat = fs.statSync(fullPath)
+      
+      if (stat.isDirectory()) {
+        const subIndexPath = path.join(fullPath, 'index.ts')
+        const moduleName = prefix ? `${prefix}/${file}` : file
 
-      const subIndexPath = path.join(fullPath, 'index.ts')
-      const moduleName = prefix ? `${prefix}/${file}` : file
+        if (fs.existsSync(subIndexPath)) {
+          entries.push(createEntry(moduleName, subIndexPath))
+        }
 
-      if (fs.existsSync(subIndexPath)) {
-        entries.push(createEntry(moduleName, subIndexPath))
+        scan(fullPath, moduleName)
+      } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+        // Also add standalone files as entry points
+        const name = path.basename(file, '.ts')
+        if (name === 'index') continue // Already handled
+        if (name.includes('.test') || name.includes('.spec')) continue // Skip tests
+
+        const moduleName = prefix ? `${prefix}/${name}` : name
+        entries.push(createEntry(moduleName, fullPath))
       }
-
-      scan(fullPath, moduleName)
     }
   }
 

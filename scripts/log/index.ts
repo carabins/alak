@@ -72,8 +72,6 @@ function wrapLog(module) {
 }
 export const Log = wrapLog(false)
 
-export function FileLog(filename) {
-  const fname = path.basename(filename)
-  const module = fname.replace(path.extname(fname), '')
+export function createModuleLogger(module) {
   return wrapLog(module)
 }

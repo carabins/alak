@@ -1,112 +1,239 @@
-# Alak v5
+# alak
 
-> **Внимание:** Это документация для устаревающей версии 5. Для новой версии используйте соответствующий тег или документацию.
+> Система управления состоянием с dependency injection через unions и namespaces
+
+Alak — это полнофункциональная библиотека управления состоянием, объединяющая несколько atom'ов в namespace с автоматической регистрацией зависимостей и умным фасадом доступа.
 
 ## Установка
 
-Для установки версии 5 используйте команду:
-
 ```bash
-npm i alak@5
+npm install alak
 ```
 
-## Документация модулей
+## Основные концепции
 
-Подробную документацию по модулям можно найти по ссылкам (в исходном репозитории):
+- **Union** — namespace для группировки atom'ов
+- **Facade** — умный Proxy для удобного доступа к atom'ам
+- **Listeners** — автоматическая подписка через naming convention
+- **Events** — глобальная шина событий для union
 
-- [@packages/alak/README.md](packages/alak/README.md)
-- [@packages/atom/README.md](packages/atom/README.md)
-- [@packages/nucleus/README.md](packages/nucleus/README.md)
+## Примеры использования
 
-## Пример использования (Модель и Подписки)
+### Пример 1: Простой Union с моделями
 
-В версии 5 модель (класс атома) поддерживает автоматические подписки через именование методов.
+```typescript
+import { UnionConstructor, UnionModel } from 'alak'
 
-### Методы инициализации
+class CounterModel extends UnionModel<'myApp'> {
+  count = 0
 
-При инициализации атома вызывается событие `INIT`. Вы можете определить метод `_on_INIT`, чтобы выполнить код в момент старта.
-
-```javascript
-class MyModel {
-  // Вызывается при инициализации атома
-  _on_INIT(data) {
-    console.log('Атом инициализирован', data);
-  }
-}
-```
-
-### Функции-подписки
-
-Методы класса могут автоматически подписываться на события и изменения данных (нуклеусов), следуя специальным соглашениям об именовании.
-
-#### 1. Подписка на события шины (`_on_`)
-
-Методы, начинающиеся с `_on_`, подписываются на соответствующие события в шине данных атома.
-
-```javascript
-// Подписка на событие 'USER_LOGIN'
-_on_USER_LOGIN(payload) {
-  console.log('Пользователь вошел:', payload);
-}
-```
-
-#### 2. Подписка на локальные нуклеусы (`_ИмяНуклеуса_Тип`)
-
-Методы, начинающиеся с `_` (но не `_on_` и не `_$`), подписываются на изменения состояния **этого же** атома.
-Формат: `_ИмяНуклеуса_ТипПодписки`
-
-*   `ИмяНуклеуса`: имя свойства в `state` или `core`.
-*   `ТипПодписки`: например, `up` (обновление).
-
-```javascript
-// state = { count: 0 }
-// Подписка на обновление 'count'
-_count_up(value) {
-  console.log('Счетчик изменился:', value);
-}
-```
-
-#### 3. Подписка на внешние атомы (`_$ИмяАтома_ИмяНуклеуса_Тип`)
-
-Методы, начинающиеся с `_$`, подписываются на изменения в **других** атомах, доступных через фасад.
-Формат: `_$ИмяАтома_ИмяНуклеуса_ТипПодписки`
-
-```javascript
-// Подписка на нуклеус 'theme' в атоме 'Settings'
-_$Settings_theme_up(theme) {
-  console.log('Тема изменилась в настройках:', theme);
-}
-```
-
-### Полный пример модели
-
-```javascript
-export class CounterModel {
-  state = {
-    count: 0
-  };
-
-  // Инициализация
-  _on_INIT() {
-    console.log('CounterModel готов');
+  increment() {
+    this.count++
   }
 
-  // Реакция на изменение собственного count
-  _count_up(val) {
-    if (val > 10) {
-      this.core.count(0); // Сброс через core
+  get doubled() {
+    return this.count * 2
+  }
+}
+
+class UserModel extends UnionModel<'myApp'> {
+  name = 'Guest'
+  isLoggedIn = false
+
+  login(name: string) {
+    this.name = name
+    this.isLoggedIn = true
+  }
+}
+
+const { facade } = UnionConstructor({
+  namespace: 'myApp',
+  models: {
+    counter: CounterModel,
+    user: UserModel
+  }
+})
+
+// Доступ через facade (4 способа!)
+facade.counterState.count        // → 0
+facade.states.counter.count      // → 0
+facade.counterCore.count.value   // → 0
+facade.cores.counter.count.value // → 0
+
+// Вызов actions
+facade.counterCore.increment()   // → count = 1
+facade.actions.counter.increment() // → count = 2
+
+// Подписка на изменения
+facade.cores.counter.count.up((v) => {
+  console.log('Count changed:', v)
+})
+```
+
+### Пример 2: Автоматические listeners (через naming convention)
+
+```typescript
+import { UnionConstructor, UnionModel } from 'alak'
+
+class StatsModel extends UnionModel<'myApp'> {
+  clicks = 0
+  lastClickTime = null
+
+  // Автоматически подписывается на this.clicks
+  _clicks_up(value) {
+    console.log('Clicks updated:', value)
+    this.lastClickTime = Date.now()
+  }
+}
+
+class CounterModel extends UnionModel<'myApp'> {
+  count = 0
+
+  increment() { this.count++ }
+
+  // Автоматически подписывается на stats.clicks из другого atom
+  _$stats_clicks_up(value) {
+    console.log('Stats clicks from counter:', value)
+  }
+}
+
+const { facade } = UnionConstructor({
+  namespace: 'myApp',
+  models: {
+    stats: StatsModel,
+    counter: CounterModel
+  }
+})
+
+facade.cores.stats.clicks(5)
+// → Clicks updated: 5
+// → Stats clicks from counter: 5
+```
+
+### Пример 3: События и фабрики atom'ов
+
+```typescript
+import { UnionConstructor, UnionMultiModel } from 'alak'
+
+// Модель для создания множества экземпляров
+class TodoModel extends UnionMultiModel<'todoApp'> {
+  text = ''
+  completed = false
+
+  toggle() {
+    this.completed = !this.completed
+  }
+
+  // Обработчик события
+  _on_CLEAR_COMPLETED() {
+    if (this.completed) {
+      this.text = ''
     }
   }
+}
 
-  // Реакция на событие RESET_ALL
-  _on_RESET_ALL() {
-    this.core.count(0);
-  }
+class AppModel extends UnionModel<'todoApp'> {
+  filter = 'all'
 
-  // Реакция на изменение user в атоме Auth
-  _$Auth_user_up(user) {
-    console.log('Пользователь изменился, сбрасываем счетчик');
-    this.core.count(0);
+  clearCompleted() {
+    // Отправить событие всем todo
+    this._.bus.dispatchEvent('CLEAR_COMPLETED')
   }
 }
+
+const { facade } = UnionConstructor({
+  namespace: 'todoApp',
+  models: {
+    app: AppModel
+  },
+  factories: {
+    todo: TodoModel  // Фабрика для создания экземпляров
+  }
+})
+
+// Создать todo экземпляры
+const todo1 = facade.atoms.todo.get(1)
+const todo2 = facade.atoms.todo.get(2)
+
+todo1.core.text('Buy milk')
+todo2.core.text('Learn Alak')
+todo1.actions.toggle() // completed = true
+
+// Очистить все завершенные
+facade.actions.app.clearCompleted()
 ```
+
+## Naming Convention для Listeners
+
+Alak автоматически подписывается на nucleus через имена методов:
+
+| Паттерн | Описание | Пример |
+|---------|----------|--------|
+| `_propertyName_up(v)` | Подписка на свой nucleus | `_count_up(v)` |
+| `_propertyName_next(v)` | Только следующее изменение | `_count_next(v)` |
+| `_$atomName_property_up(v)` | Подписка на другой atom | `_$user_name_up(v)` |
+| `_on_EVENT_NAME(data)` | Обработчик события | `_on_USER_LOGIN(data)` |
+
+## Facade API
+
+Умный Proxy предоставляет несколько способов доступа:
+
+```typescript
+const { facade } = UnionConstructor({ ... })
+
+// Суффиксы для доступа
+facade.modelNameCore     // → atom.core
+facade.modelNameState    // → atom.state
+facade.modelNameAtom     // → atom
+facade.modelNameBus      // → atom.bus
+
+// Сгруппированный доступ
+facade.cores.modelName   // → atom.core
+facade.states.modelName  // → atom.state
+facade.atoms.modelName   // → atom
+facade.buses.modelName   // → atom.bus
+facade.actions.modelName // → atom.actions
+
+// Глобальная шина событий
+facade.bus.dispatchEvent('MY_EVENT', data)
+facade.bus.addEventListener('MY_EVENT', handler)
+```
+
+## Dependency Injection
+
+```typescript
+import { injectFacade } from 'alak'
+
+// В другом модуле
+const u = injectFacade('myApp')
+u.states.counter.count // Доступ к уже созданному union
+```
+
+## TypeScript Support
+
+```typescript
+import { UnionConstructor } from 'alak'
+
+const uc = UnionConstructor({
+  namespace: 'myApp',
+  models: { counter: CounterModel }
+})
+
+// Регистрация для автодополнения
+declare module 'alak/namespaces' {
+  interface ActiveUnions {
+    myApp: typeof uc
+  }
+}
+
+// Теперь injectFacade знает типы!
+const u = injectFacade('myApp')
+```
+
+## Зависимости
+
+Включает `@alaq/nucleus`, `@alaq/atom`, `@alaq/rune`
+
+## Лицензия
+
+TVR

@@ -37,6 +37,10 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
         return src.endsWith('.d.ts')
       },
     })
+    const typesDir = path.join(project.packagePath, "types")
+    if (fs.existsSync(typesDir)) {
+      fs.copySync(typesDir, path.join(project.artPatch, "types"))
+    }
   }
   return new Promise((done) => {
     state.sources = scanAllSrc(projects)
@@ -55,15 +59,6 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
       baseUrl: '.',
       paths: tsconfig.compilerOptions.paths,
     }
-
-    const globalDeclarations: string[] = []
-    Object.values(state.sources.projects).forEach((projFiles: any) => {
-      Object.keys(projFiles).forEach((file) => {
-        if (file.endsWith('.d.ts')) {
-          globalDeclarations.push(file)
-        }
-      })
-    })
 
     // Компилируем каждый пакет отдельно в правильном порядке
     for (const project of projects) {
@@ -105,8 +100,7 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
         fs.writeFileSync(outPath, content)
       }
 
-      const programFiles = [...new Set([...projectSources, ...globalDeclarations])]
-      const program = createProgram(programFiles, tscOptions, host)
+      const program = createProgram(projectSources, tscOptions, host)
       const emitResult = program.emit()
       let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
 
@@ -129,28 +123,6 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
           log.warn(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
         }
       })
-
-      // Manually copy and reference types from packages/<pkg>/types
-      const pkgTypesDir = path.join(project.packagePath, 'types')
-      if (fs.existsSync(pkgTypesDir)) {
-        const artifactTypesDir = path.resolve(Const.ARTIFACTS, project.id, 'types')
-        fs.ensureDirSync(artifactTypesDir)
-        
-        const dtsFiles = fs.readdirSync(pkgTypesDir).filter(f => f.endsWith('.d.ts'))
-        
-        if (dtsFiles.length > 0) {
-          dtsFiles.forEach(f => {
-            fs.copyFileSync(path.join(pkgTypesDir, f), path.join(artifactTypesDir, f))
-          })
-
-          const indexDtsPath = path.join(artifactTypesDir, 'index.d.ts')
-          if (fs.existsSync(indexDtsPath)) {
-            let content = fs.readFileSync(indexDtsPath, 'utf8')
-            const refs = dtsFiles.map(f => `/// <reference path="./${f}" />`).join('\n')
-            fs.writeFileSync(indexDtsPath, refs + '\n' + content)
-          }
-        }
-      }
     }
 
     state.ready = true

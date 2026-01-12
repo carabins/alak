@@ -1,3 +1,8 @@
+/// <reference path="../../nucleus/types/Quark.d.ts" />
+/// <reference path="../../nucleus/types/INucleus.d.ts" />
+/// <reference path="../../nucleus/types/ComputeStrategy.d.ts" />
+/// <reference path="../../nucleus/types/INuclonConstructor.d.ts" />
+
 type DeepFilter<T, Condition> = {
   [Key in keyof T]: T[Key] extends Condition ? Key : never
 }

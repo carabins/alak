@@ -18,7 +18,7 @@ export const taskPipelines: Record<string, TaskPipeline> = {
   art: {
     name: 'Build project',
     desc: 'Build project artifacts',
-    aggregate: ["full-clear", "tsc"],
+    aggregate: ["tsc"],
     pipeline: ["test", "package", "build"],
   },
 

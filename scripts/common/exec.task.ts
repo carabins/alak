@@ -11,29 +11,15 @@ const logger = createModuleLogger('>');
  * @returns Array of matching file paths.
  */
 async function scanDirectory(dirPath: string, pattern: (fileName: string) => boolean): Promise<string[]> {
-  const result: string[] = [];
-
   try {
-    const items = await readdir(dirPath);
-
-    for (const item of items) {
-      const fullPath = path.join(dirPath, item);
-      const stats = await stat(fullPath);
-
-      if (stats.isDirectory()) {
-        // Recursively scan subdirectory
-        const subDirResults = await scanDirectory(fullPath, pattern);
-        result.push(...subDirResults);
-      } else if (stats.isFile() && pattern(item)) {
-        // Add matching file to results
-        result.push(fullPath);
-      }
-    }
+    const files = await readdir(dirPath, { recursive: true });
+    return files
+      .filter(f => pattern(path.basename(f)))
+      .map(f => path.join(dirPath, f));
   } catch (error) {
     logger.error(`Error scanning directory ${dirPath}:`, error);
+    return [];
   }
-
-  return result;
 }
 
 export type TaskFiles = {

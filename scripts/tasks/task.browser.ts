@@ -1,4 +1,4 @@
-import { Project } from '~/scripts/common/project'
+import { BuildPackage } from '~/scripts/BuildPackage'
 import { rollup, type ModuleFormat, type OutputOptions, type Plugin } from 'rollup'
 import path from 'path'
 import { existsSync } from 'fs'
@@ -6,8 +6,6 @@ import typescript from '@rollup/plugin-typescript'
 import terser from '@rollup/plugin-terser'
 import * as fs from 'fs-extra'
 import { FileLog } from '~/scripts/log'
-import * as module from 'module'
-import { minify } from '@swc/core'
 
 // Browser build formats - minified with sourcemaps
 type BrowserFormat = 'esm-browser' | 'global'
@@ -20,7 +18,7 @@ interface BuildConfig {
 
 const DEFAULT_FORMATS: BrowserFormat[] = ['global']
 
-export async function browser(project: Project) {
+export async function browser(project: BuildPackage) {
   const log = FileLog(project.packageJson.name + ' browser')
 
   // Read build configuration from package.json
@@ -85,7 +83,7 @@ export async function browser(project: Project) {
           skipLibCheck: true,
           skipDefaultLibCheck: true,
           declaration: false,
-          exclude: [path.resolve(project.dir, 'test')],
+          exclude: [path.resolve(project.dir, 'test'), path.resolve('scripts')],
           outDir: outDir,
         }),
         // Always minify browser builds
@@ -118,44 +116,22 @@ export async function browser(project: Project) {
       log.info(`Built ${getFileName(format)} (minified with sourcemap)`)
     }
 
-    // Update package.json - dual package support (CJS + ESM)
-    project.packageJson.main = 'index.js' // CommonJS entry point
-    project.packageJson.module = 'index.mjs' // ESM entry point for bundlers
-    project.packageJson.types = 'index.d.ts'
-    project.packageJson.typings = 'index.d.ts'
+    // Update package.json - we already did most setup in compile task, but we add unpkg here
     project.packageJson.unpkg = `${distName}/${pkgName}.global.js`
-    project.packageJson.sideEffects = sideEffects
-
-    // Add files field
-    // if (!project.packageJson.files) {
-    //   project.packageJson.files = ['index.js', 'index.mjs', 'index.d.ts', distName]
-    // }
-
-    // Build modern exports field - dual package (CJS + ESM)
-    project.packageJson.exports = {
-      '.': {
-        types: './index.d.ts',
-        import: './index.mjs', // Node.js ESM imports use .mjs
-        require: './index.js', // Node.js require() uses .js (CJS)
-        // default: './index.mjs',
-      },
-      './*': './*',
+    
+    // We can also ensure sideEffects is set if provided
+    if (sideEffects !== undefined) {
+         project.packageJson.sideEffects = sideEffects
     }
 
-    // Preserve buildOptions in package.json
-    project.packageJson.buildOptions = {
-      name: globalName,
-      formats,
-      ...buildOptions,
-    }
     project.savePackageJsonTo.art()
 
     log.info(`✓ Built browser bundles: ${formats.join(', ')}`)
-    log.info(`✓ CommonJS (require): index.js`)
-    log.info(`✓ ESM (import): index.mjs`)
     log.info(`✓ Browser (unpkg): ${distName}/${pkgName}.global.js (minified)`)
   } catch (error) {
     log.error(`Build failed: ${error.message}`)
     throw error
   }
 }
+
+export default browser
