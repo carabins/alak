@@ -1,0 +1,11 @@
+export declare const alive: (v: any) => boolean;
+export declare const isTruth: (v: any) => boolean;
+export declare const noneFilter: (f: any) => (v: any) => any;
+export declare const someFilter: (f: any) => (v: any) => any;
+export declare const trueFilter: (f: any) => (v: any) => any;
+export declare const someFalseFilter: (f: any) => (v: any) => any;
+export declare const falseFilter: (f: any) => (v: any) => any;
+export declare const upDownFilter: (fun: any) => (f: any) => (v: any, a: any) => void;
+export declare const deleteParams: (o: any) => void;
+export declare function isPromise(obj: any): boolean;
+export declare const rnd: () => number;

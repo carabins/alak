@@ -1,7 +1,7 @@
 import {GetUnionCore} from 'alak/UnionCore'
 
 const Vue = require('vue')
-import vueAtom, {watchVueAtom} from '.'
+import vueAtom, {watchVueAtom} from './vueAdapter'
 
 type Reactive<T> = typeof Vue.Reactive
 

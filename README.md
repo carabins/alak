@@ -1,52 +1,73 @@
-# Alak Monorepo
+# Alak Monorepo (v5)
 
-A proactive universe of reactive streams, atoms, and dataflow management.
+> Проактивная вселенная реактивных потоков, атомов и управления потоками данных.
 
-## ⚠️ Legacy Notice
-**Version 5.x is now considered Legacy.** 
-Active development has shifted towards stabilization. This version is maintained for compatibility and critical fixes. 
-
-## Focus Packages
-The project is centered around three core pillars:
-
-- **[`@alaq/nucleus`](./packages/nucleus)**: The engine. Handles the event bus, computed values (quarks), and the reactive backbone.
-- **[`@alaq/atom`](./packages/atom)**: The state layer. Implements reactive "atoms" with proxy-based access and storage synchronization.
-- **[`alak`](./packages/alak)**: The high-level facade. Integrates atoms and nuclei into a cohesive developer-friendly API (The Last Atom).
+## ⚠️ Уведомление о статусе Legacy
+**Версия 5.x считается устаревшей (Legacy).**
+Активная разработка перенесена на стабилизацию и поддержку критических исправлений. Эта версия поддерживается для обеспечения совместимости существующих проектов.
 
 ---
 
-## Development
+## Философия Alak v5: Проактивная Реактивность
 
-### Prerequisites
-- [Bun](https://bun.sh) (recommended) or Node.js
-- Standard dependencies installation:
+Alak v5 строится на концепции **«Проактивного управления данными»**. В отличие от традиционных реактивных систем, которые пассивно ожидают изменений, Alak рассматривает состояние как динамическое облако событий и зависимостей.
+
+### Ключевые концепции
+
+1.  **Облако электронов (Electron Cloud)**: Каждое изменение состояния в Alak — это «электрон», который движется через систему. Вместо того чтобы просто хранить значения, Alak управляет *потоком* этих электронов через «ядра» (Nuclei).
+2.  **Разделение Состояния и Логики**:
+    *   **Atoms (Атомы)**: Чистые контейнеры состояния. Они не знают о том, как их данные используются.
+    *   **Nucleus (Ядра)**: Реактивные процессоры, которые управляют зависимостями и вычислениями.
+    *   **Facades (Фасады)**: Высокоуровневые интерфейсы, объединяющие атомы и логику в понятный API.
+3.  **Проактивность**: Система спроектирована так, чтобы быть «умной» на уровне инфраструктуры. Благодаря Proxy-механизмам и именованным конвенциям (`_count$up`), связи между компонентами устанавливаются автоматически, минимизируя ручное написание «клея» (boilerplate).
+
+---
+
+## Архитектурные Столпы
+
+Проект разделен на три основных пакета, каждый из которых выполняет свою роль в иерархии:
+
+### 1. [`@alaq/nucleus`](./packages/nucleus) — Двигатель
+Базовый примитив. Это реактивная функция-контейнер, которая управляет подписками и потоками данных.
+*   **Роль**: Обработка событий, вычисляемые значения (quarks), асинхронные геттеры.
+*   **Аналогия**: Электронная орбиталь, определяющая, куда и как движется энергия (данные).
+
+### 2. [`@alaq/atom`](./packages/atom) — Слой Состояния
+Реактивная обертка над моделями данных. Автоматически превращает обычные свойства классов в `nucleus`.
+*   **Роль**: Хранение состояния, синхронизация с LocalStorage (`saved`), управление метаданными (`tag`).
+*   **Аналогия**: Физическая материя, обладающая массой (данными) и структурой.
+
+### 3. [`alak`](./packages/alak) — Фасад (Alak Atom)
+Верхнеуровневая интеграционная библиотека, которая объединяет множество атомов в единую систему через пространства имен (namespaces) и союзы (unions).
+*   **Роль**: Dependency Injection, автоматические слушатели событий, интеллектуальный Proxy-доступ.
+*   **Аналогия**: Биологический организм, где атомы и ядра работают согласованно для выполнения сложных задач.
+
+---
+
+## Разработка
+
+### Требования
+- [Bun](https://bun.sh) (рекомендуется) или Node.js.
+- Установка зависимостей:
   ```bash
   bun install
-  # or
+  # или
   npm install
   ```
 
-### Testing
-To run the full test suite across all packages:
+### Тестирование
+Запуск всех тестов во всех пакетах:
 ```bash
 npm test
 ```
-*Note: Tests use `@swc-node/register` and `tsconfig-paths` for just-in-time compilation and module resolution.*
+*Примечание: Тесты используют `@swc-node/register` для JIT-компиляции.*
 
-### Scripts & Task Runner (v6)
-The project utilizes a custom task runner located in `scripts-v6/`. This runner handles building, versioning, and publishing.
-
-To start the interactive task menu:
+### Скрипты и Task Runner (v6)
+В проекте используется кастомный раннер задач (находится в `scripts/`), который управляет сборкой, версионированием и публикацией.
+Для запуска интерактивного меню:
 ```bash
-bun scripts-v6/index.ts
+bun scripts/index.ts
 ```
 
-## Architecture
-Alak follows a "proactive" dataflow model where state (Atoms) and logic (Nucleus) are decoupled but tightly synchronized via a proxy-based reactivity system.
-
-- **Atoms**: Pure state containers.
-- **Nucleus**: The reactive core that manages dependencies and updates.
-- **Facades**: High-level abstractions (like in `alak`) to simplify complex state machines.
-
 ---
-License: TVR
+Лицензия: TVR

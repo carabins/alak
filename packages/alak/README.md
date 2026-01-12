@@ -1,8 +1,10 @@
-# alak
+# Alak (v5) — The Facade
 
-> Система управления состоянием с dependency injection через unions и namespaces
+> The Last Atom. Высокоуровневая система управления состоянием с Dependency Injection, пространствами имен и умными фасадами.
 
-Alak — это полнофункциональная библиотека управления состоянием, объединяющая несколько atom'ов в namespace с автоматической регистрацией зависимостей и умным фасадом доступа.
+Пакет `alak` — это вершина пирамиды. Он объединяет мощь `nucleus` и `atom` в целостную архитектуру приложения.
+
+В метафоре "Вселенной", `Alak` — это **Организм**. Он организует отдельные атомы в союзы (Unions), управляет их жизненным циклом и обеспечивает связь между ними.
 
 ## Установка
 
@@ -10,267 +12,149 @@ Alak — это полнофункциональная библиотека уп
 npm install alak
 ```
 
+## Философия: Организованный Хаос
+
+В больших приложениях сложно управлять тысячами атомов вручную. Alak решает эту проблему через:
+1.  **Unions (Союзы)**: Пространства имен, группирующие связанные атомы.
+2.  **Facades (Фасады)**: Единая точка доступа ко всему состоянию приложения.
+3.  **Convention over Configuration**: Автоматические подписки на основе имен методов.
+
 ## Основные концепции
 
-- **Union** — namespace для группировки atom'ов
-- **Facade** — умный Proxy для удобного доступа к atom'ам
-- **Listeners** — автоматическая подписка через naming convention
-- **Events** — глобальная шина событий для union
+### 1. Union (Союз)
+Группа атомов, живущих в одном контексте (namespace). Например, `UserUnion` может содержать атомы `Profile`, `Settings`, `Auth`.
 
-## Примеры использования
+### 2. Dependency Injection
+Вам не нужно импортировать инстансы атомов. Вы запрашиваете их через фасад, и Alak находит (или создает) их для вас.
 
-### Пример 1: Простой Union с моделями
+### 3. Автоматические Слушатели (Magic Listeners)
+Alak сканирует методы ваших моделей. Если метод называется определенным образом (например, `_counter$up`), он автоматически подписывается на соответствующие изменения.
 
-```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+---
 
-class CounterModel extends UnionModel<'myApp'> {
-  count = 0
+## Быстрый Старт
 
-  increment() {
-    this.count++
-  }
+### 1. Определение Моделей
 
-  get doubled() {
-    return this.count * 2
-  }
-}
-
-class UserModel extends UnionModel<'myApp'> {
-  name = 'Guest'
-  isLoggedIn = false
-
-  login(name: string) {
-    this.name = name
-    this.isLoggedIn = true
-  }
-}
-
-const { facade } = UnionConstructor({
-  namespace: 'myApp',
-  models: {
-    counter: CounterModel,
-    user: UserModel
-  }
-})
-
-// Доступ через facade (4 способа!)
-facade.counterState.count        // → 0
-facade.states.counter.count      // → 0
-facade.counterCore.count.value   // → 0
-facade.cores.counter.count.value // → 0
-
-// Вызов actions
-facade.counterCore.increment()   // → count = 1
-facade.actions.counter.increment() // → count = 2
-
-// Подписка на изменения
-facade.cores.counter.count.up((v) => {
-  console.log('Count changed:', v)
-})
-```
-
-### Пример 2: Автоматические listeners (через naming convention)
+Модели наследуются от `UnionModel` (для синглтонов) или `UnionMultiModel` (для фабрик).
 
 ```typescript
-import { UnionConstructor, UnionModel } from 'alak'
+import { UnionModel } from 'alak'
 
-class StatsModel extends UnionModel<'myApp'> {
-  clicks = 0
-  lastClickTime = null
-
-  // Автоматически подписывается на this.clicks
-  _clicks_up(value) {
-    console.log('Clicks updated:', value)
-    this.lastClickTime = Date.now()
-  }
-}
-
-class CounterModel extends UnionModel<'myApp'> {
+// Модель счетчика
+class Counter extends UnionModel<'myApp'> {
   count = 0
-
   increment() { this.count++ }
-
-  // Автоматически подписывается на stats.clicks из другого atom
-  _$stats_clicks_up(value) {
-    console.log('Stats clicks from counter:', value)
-  }
 }
 
-const { facade } = UnionConstructor({
-  namespace: 'myApp',
-  models: {
-    stats: StatsModel,
-    counter: CounterModel
+// Модель статистики, которая следит за счетчиком
+class Stats extends UnionModel<'myApp'> {
+  totalClicks = 0
+
+  // МАГИЯ: Авто-подписка на Counter.count
+  // _$counter_count_up -> слушать изменения 'count' в атоме 'counter'
+  _$counter_count_up(val: number) {
+    this.totalClicks++
+    console.log(`Счетчик изменился на ${val}, всего кликов: ${this.totalClicks}`)
   }
-})
-
-facade.cores.stats.clicks(5)
-// → Clicks updated: 5
-// → Stats clicks from counter: 5
-```
-
-### Пример 3: События и фабрики atom'ов
-
-```typescript
-import { UnionConstructor, UnionMultiModel } from 'alak'
-
-// Модель для создания множества экземпляров
-class TodoModel extends UnionMultiModel<'todoApp'> {
-  text = ''
-  completed = false
-
-  toggle() {
-    this.completed = !this.completed
-  }
-
-  // Обработчик события
-  _on_CLEAR_COMPLETED() {
-    if (this.completed) {
-      this.text = ''
-    }
-  }
-}
-
-class AppModel extends UnionModel<'todoApp'> {
-  filter = 'all'
-
-  clearCompleted() {
-    // Отправить событие всем todo
-    this._.bus.dispatchEvent('CLEAR_COMPLETED')
-  }
-}
-
-const { facade } = UnionConstructor({
-  namespace: 'todoApp',
-  models: {
-    app: AppModel
-  },
-  factories: {
-    todo: TodoModel  // Фабрика для создания экземпляров
-  }
-})
-
-// Создать todo экземпляры
-const todo1 = facade.atoms.todo.get(1)
-const todo2 = facade.atoms.todo.get(2)
-
-todo1.core.text('Buy milk')
-todo2.core.text('Learn Alak')
-todo1.actions.toggle() // completed = true
-
-// Очистить все завершенные
-facade.actions.app.clearCompleted()
-```
-
-## Naming Convention для Listeners
-
-Alak автоматически подписывается на изменения nucleus и события через имена методов.
-Используется разделитель `$` для четкого разделения контекста.
-
-### 1. Локальные подписки на nucleus
-
-Формат: `_nucleusName$listenerType`
-
-| Паттерн | Описание | Пример |
-|---------|----------|--------|
-| `_count$up(v)` | Подписка на изменение `count` | `_count$up(v) { ... }` |
-| `_count$next(v)` | Только следующее изменение | `_count$next(v) { ... }` |
-
-### 2. Подписки на события
-
-Формат: `_on$EventName`
-
-| Паттерн | Описание | Пример |
-|---------|----------|--------|
-| `_on$init()` | **Обязательно** вызывается при инициализации | `_on$init() { ... }` |
-| `_on$UserLogin(user)` | Обработчик события `UserLogin` | `_on$UserLogin(u) { ... }` |
-
-> **Примечание:** Старые конвенции (`_count_up`, `_on_INIT`) продолжают поддерживаться для обратной совместимости.
-
-### Пример использования новых конвенций
-
-```typescript
-class UserModel extends UnionModel<'myApp'> {
-  name = 'Guest'
-
-  // Вызывается автоматически при создании атома
-  _on$init() {
-    console.log('UserModel initialized')
-  }
-
-  // Подписка на изменение свойства name
-  _name$up(newName) {
-    console.log('Name changed to:', newName)
-  }
-
-  // Обработка кастомного события
-  _on$Logout() {
-    this.name = 'Guest'
+  
+  // Локальная подписка (на свои свойства)
+  _totalClicks$up(val: number) {
+     if (val >= 10) console.log('Achievement Unlocked!')
   }
 }
 ```
 
-## Facade API
-
-Умный Proxy предоставляет несколько способов доступа:
-
-```typescript
-const { facade } = UnionConstructor({ ... })
-
-// Суффиксы для доступа
-facade.modelNameCore     // → atom.core
-facade.modelNameState    // → atom.state
-facade.modelNameAtom     // → atom
-facade.modelNameBus      // → atom.bus
-
-// Сгруппированный доступ
-facade.cores.modelName   // → atom.core
-facade.states.modelName  // → atom.state
-facade.atoms.modelName   // → atom
-facade.buses.modelName   // → atom.bus
-facade.actions.modelName // → atom.actions
-
-// Глобальная шина событий
-facade.bus.dispatchEvent('MY_EVENT', data)
-facade.bus.addEventListener('MY_EVENT', handler)
-```
-
-## Dependency Injection
-
-```typescript
-import { injectFacade } from 'alak'
-
-// В другом модуле
-const u = injectFacade('myApp')
-u.states.counter.count // Доступ к уже созданному union
-```
-
-## TypeScript Support
+### 2. Сборка Союза
 
 ```typescript
 import { UnionConstructor } from 'alak'
 
-const uc = UnionConstructor({
-  namespace: 'myApp',
-  models: { counter: CounterModel }
+const { facade } = UnionConstructor({
+  namespace: 'myApp', // Уникальное имя союза
+  models: {
+    counter: Counter,
+    stats: Stats
+  }
 })
+```
 
-// Регистрация для автодополнения
+### 3. Использование
+
+Фасад предоставляет "умный" доступ к атомам.
+
+```typescript
+// Чтение (State)
+console.log(facade.counterState.count) // 0
+
+// Действие (Action)
+facade.counterAtom.actions.increment() 
+// -> "Счетчик изменился на 1, всего кликов: 1"
+
+// Прямой доступ к ядру (Core/Nucleus)
+facade.counterCore.count.up(v => console.log('Direct sub:', v))
+```
+
+---
+
+## Naming Convention (Правила именования)
+
+Alak использует символ `$` (или `_` в legacy режиме) для парсинга намерений разработчика.
+
+### Локальные подписки (внутри одной модели)
+Формат: `_property$trigger`
+
+*   `_count$up(val)`: При каждом изменении `this.count`.
+*   `_count$next(val)`: При *следующем* изменении.
+*   `_count$once(val)`: Один раз.
+
+### Внешние подписки (на другие атомы в союзе)
+Формат: `_$atomName_property_trigger`
+
+*   `_$user_isLoggedIn_up(val)`: Слушать свойство `isLoggedIn` в атоме `user`.
+
+### События (Event Bus)
+Формат: `_on$EventName`
+
+*   `_on$init()`: Вызывается сразу после инициализации атома.
+*   `_on$UserLogout(data)`: Слушать глобальное событие `UserLogout`.
+
+---
+
+## Facade API: 4 Пути Доступа
+
+Фасад генерирует удобные свойства для доступа к разным аспектам атомов:
+
+1.  **State** (`facade.userState`): Только значения (чтение/запись). Самый чистый синтаксис.
+2.  **Actions** (`facade.userAtom.actions`): Методы бизнес-логики.
+3.  **Core** (`facade.userCore`): Низкоуровневые `Nucleus` (для ручных подписок).
+4.  **Atom** (`facade.userAtom`): Сам инстанс атома.
+
+## Групповой доступ
+*   `facade.states.*`: Объект со всеми стейтами.
+*   `facade.cores.*`: Объект со всеми ядрами.
+*   `facade.actions.*`: Объект со всеми методами.
+
+---
+
+## TypeScript и Инъекции
+
+Чтобы `injectFacade` знал о типах вашего приложения в любом файле:
+
+```typescript
+import { injectFacade } from 'alak'
+
+// 1. Декларация типов (обычно в d.ts файле)
 declare module 'alak/namespaces' {
   interface ActiveUnions {
-    myApp: typeof uc
+    myApp: typeof MyUnionInstance // Тип, возвращаемый UnionConstructor
   }
 }
 
-// Теперь injectFacade знает типы!
-const u = injectFacade('myApp')
+// 2. Использование в любом месте
+const app = injectFacade('myApp') // Полная типизация!
+app.counterState.count // number
 ```
 
-## Зависимости
-
-Включает `@alaq/nucleus`, `@alaq/atom`, `@alaq/rune`
-
-## Лицензия
-
-TVR
+---
+Лицензия: TVR

@@ -1,0 +1,29 @@
+{
+    "name": "@alaq/atom",
+    "version": "5.0.96",
+    "main": "index.js",
+    "typings": "index.d.ts",
+    "unpkg": "dist/atom.global.js",
+    "types": "index.d.ts",
+    "author": "Gleb Panteleev",
+    "license": "TVR",
+    "dependencies": {
+        "@alaq/nucleus": "5.2.4"
+    },
+    "module": "lib/es.js",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js"
+        },
+        "./*": "./*"
+    },
+    "buildOptions": {
+        "name": "atom",
+        "formats": [
+            "global"
+        ]
+    }
+}

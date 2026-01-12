@@ -22,12 +22,6 @@
       "alak/*": [
         "packages/alak/src/*"
       ],
-      "@alaq/molecule": [
-        "packages/molecule/src/index.ts"
-      ],
-      "@alaq/molecule/*": [
-        "packages/molecule/src/*"
-      ],
       "@alaq/atom": [
         "packages/atom/src/index.ts"
       ],
@@ -39,24 +33,6 @@
       ],
       "@alaq/nucleus/*": [
         "packages/nucleus/src/*"
-      ],
-      "@alaq/bitmask": [
-        "packages/bitmask/src/index.ts"
-      ],
-      "@alaq/bitmask/*": [
-        "packages/bitmask/src/*"
-      ],
-      "@alaq/datastruct": [
-        "packages/datastruct/src/index.ts"
-      ],
-      "@alaq/datastruct/*": [
-        "packages/datastruct/src/*"
-      ],
-      "@alaq/rune": [
-        "packages/rune/src/index.ts"
-      ],
-      "@alaq/rune/*": [
-        "packages/rune/src/*"
       ],
       "~/scripts/*": [
         "scripts/*"
@@ -70,18 +46,18 @@
     ],
     "types": [
       "@types/node",
+      "@types/bun",
       "typescript"
     ]
   },
   "include": [
     "packages/atom/types/*.d.ts",
-    "packages/molecule/types/*.d.ts",
     "packages/nucleus/types/*.d.ts",
     "packages/alak/types/*.d.ts",
     "packages/vue/types/*.d.ts",
-    "packages/svg/types/*.d.ts",
 
     "packages/**/*.ts",
+    "packages/**/*.d.ts",
     "scripts/**/*.d.ts",
     "scripts/**/*.ts"
   ],

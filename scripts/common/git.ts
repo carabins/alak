@@ -1,6 +1,11 @@
 import simpleGit from 'simple-git'
-import {createModuleLogger} from '~/scripts/log'
-import {packageRegistry} from '~/scripts/common/scan.projects'
+import { Project } from '~/scripts/common/project'
+import path from 'path'
+import fs from 'fs'
+
+import { getLine } from '~/scripts/common/oneLine'
+import { FileLog } from '~/scripts/log'
+import { projects } from '~/scripts/now'
 
 const add = (o, key) => (o[key] = o[key] ? o[key] + 1 : 1)
 
@@ -9,7 +14,7 @@ const changelogFileName = 'CHANGELOG.md'
 const git = simpleGit()
 
 export async function getAffected() {
-  const trace = createModuleLogger('git')
+  const trace = FileLog('git')
   const statusResult = await git.status()
   const changes = {}
   const list = statusResult.files.map((f) => {
@@ -23,7 +28,7 @@ export async function getAffected() {
         break
     }
     if (parts.length > 1) {
-      const p = packageRegistry.all[parts[1]]
+      const p = projects[parts[1]]
       p && p.changes.push(f)
     }
     return f

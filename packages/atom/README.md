@@ -1,8 +1,10 @@
-# @alaq/atom
+# @alaq/atom — The State Layer
 
-> Реактивное управление состоянием через модели с автоматическим созданием nucleus для каждого свойства
+> Реактивная материя. Превращает классы и объекты в живые, самоуправляемые реактивные структуры.
 
-Atom — это слой управления состоянием, построенный поверх `@alaq/nucleus`. Автоматически превращает класс или объект в реактивную модель, где каждое свойство становится nucleus.
+Пакет `@alaq/atom` — это мост между абстрактной мощью `@alaq/nucleus` и прикладным кодом. Он берет обычные JS/TS классы и "оживляет" их, превращая каждое свойство в `Nucleus`.
+
+В метафоре "Облака Электронов", `Atom` — это **материя**. Она имеет структуру (поля класса), массу (данные) и поведение (методы).
 
 ## Установка
 
@@ -10,156 +12,143 @@ Atom — это слой управления состоянием, постро
 npm install @alaq/atom
 ```
 
-## Основные концепции
+## Философия: Прозрачная Реактивность
 
-- **Atom** — реактивная обертка над моделью/классом
-- **Core** — доступ к nucleus каждого свойства (`atom.core.propertyName`)
-- **State** — текущие значения всех свойств (`atom.state`)
-- **Actions** — методы модели (`atom.actions`)
+Atom позволяет писать код в стиле ООП, автоматически добавляя реактивность "под капот". Вам не нужно вручную создавать `N()`, подписываться и обновлять их. Вы просто меняете свойство `this.count = 1`, и Atom делает всё остальное.
+
+## Архитектура Атома
+
+Когда вы оборачиваете модель в `Atom`, создается структура из трех частей:
+
+1.  **Core (Ядро)**: Прямой доступ к `Nucleus` каждого свойства.
+    *   `atom.core.count` — это `Nucleus<number>`.
+    *   Используется для подписок: `atom.core.count.up(...)`.
+2.  **State (Состояние)**: Объект-фасад для чтения/записи значений.
+    *   `atom.state.count = 5` — триггерит обновление.
+    *   `console.log(atom.state.count)` — читает текущее значение.
+3.  **Actions (Действия)**: Методы вашей модели, обернутые в контекст атома.
+    *   `atom.actions.increment()` — вызывает метод модели.
+
+---
 
 ## Примеры использования
 
-### Пример 1: Простая модель счетчика
+### 1. Простая модель (Counter)
 
 ```typescript
 import { Atom } from '@alaq/atom'
 
+// Обычный класс. Никаких зависимостей от фреймворка внутри!
 class CounterModel {
   count = 0
 
   increment() {
-    this.count++
-  }
-
-  decrement() {
-    this.count--
+    this.count++ // Выглядит как мутация, но работает реактивно
   }
 }
 
+// Превращение в атом
 const counter = Atom({ model: CounterModel })
 
-// Подписаться на изменения count
-counter.core.count.up((value) => {
-  console.log('Count:', value) // Count: 0
-})
+// ПОДПИСКА (через core)
+counter.core.count.up(val => console.log('Счет:', val))
+// -> "Счет: 0"
 
-// Изменить значение напрямую
-counter.core.count(5) // Count: 5
+// ДЕЙСТВИЕ (через actions или state)
+counter.actions.increment()
+// -> "Счет: 1"
 
-// Или через action
-counter.actions.increment() // Count: 6
-
-// Получить текущее состояние
-console.log(counter.state.count) // 6
+counter.state.count = 10
+// -> "Счет: 10"
 ```
 
-### Пример 2: Модель с вычисляемыми свойствами
+### 2. Вычисляемые свойства (Getters as Quarks)
+
+Геттеры класса автоматически превращаются в вычисляемые `Nucleus` (кварки).
 
 ```typescript
-import { Atom } from '@alaq/atom'
+class User {
+  firstName = 'Neo'
+  lastName = 'Anderson'
 
-class CartModel {
-  items = []
-  tax = 0.1
-
-  get subtotal() {
-    return this.items.reduce((sum, item) => sum + item.price, 0)
-  }
-
-  get total() {
-    return this.subtotal * (1 + this.tax)
-  }
-
-  addItem(item) {
-    this.items = [...this.items, item]
+  // Этот геттер станет реактивным!
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`
   }
 }
 
-const cart = Atom({ model: CartModel })
+const user = Atom({ model: User })
 
-// Геттеры также становятся nucleus
-cart.core.total.up((value) => {
-  console.log('Total:', value)
-})
+user.core.fullName.up(name => console.log('Имя:', name))
+// -> "Имя: Neo Anderson"
 
-cart.actions.addItem({ name: 'Book', price: 100 })
-// Total: 110
+user.state.lastName = 'The One'
+// -> "Имя: Neo The One"
 ```
 
-### Пример 3: Сохранение состояния (LocalStorage)
+### 3. Сохранение состояния (Persistance)
+
+Atom умеет автоматически синхронизировать поля с внешними хранилищами (например, `localStorage`) через метаданные `saved`.
 
 ```typescript
 import { Atom, saved } from '@alaq/atom'
 
-class SettingsModel {
-  theme = saved('light') // Автоматически сохраняется в localStorage
-  fontSize = saved(14)
-  notifications = saved(true)
+class Settings {
+  // 'dark' - значение по умолчанию
+  // Автоматически загрузится из localStorage при старте
+  // И сохранится при изменении
+  theme = saved('dark') 
+  
+  volume = saved(50)
+  
+  // Обычное свойство, не сохраняется
+  tempValue = 0
 }
 
-const settings = Atom({
-  model: SettingsModel,
-  name: 'app-settings', // Ключ для localStorage
-  saved: '*' // Сохранять все свойства
+const settings = Atom({ 
+  model: Settings,
+  name: 'app-settings', // Ключ-префикс в localStorage
+  saved: '*' // Разрешить сохранение всех полей, помеченных saved
 })
-
-// При изменении автоматически сохраняется
-settings.core.theme('dark')
-
-// При следующей загрузке значения восстановятся из localStorage
 ```
 
-## Продвинутые возможности
+### 4. Метаданные (Tags & Mixed)
 
-### Теги и метаданные
+Вы можете "тегировать" свойства для добавления кастомной логики или комбинировать поведение.
 
 ```typescript
 import { Atom, tag, saved, mixed } from '@alaq/atom'
 
-class UserModel {
-  id = tag.userId(null) // Добавить метаданные
-  name = mixed(saved, tag.sync, 'John') // Комбинировать свойства
-  email = saved('user@example.com')
+class Product {
+  // tag.id - просто метка, которую можно прочитать через reflection
+  id = tag.id('prod-123') 
+  
+  // mixed - объединяет несколько модификаторов
+  // saved - сохранять
+  // tag.sync - метка для синхронизации с сервером
+  price = mixed(saved, tag.sync, 99.99)
 }
-
-const user = Atom({ model: UserModel })
-
-// Доступ к метаданным
-user.core.id.getMeta('tag') // 'userId'
 ```
 
-### Создание упрощенного API
+## API Reference
 
-```typescript
-import { coreAtom } from '@alaq/atom'
+### Фабрика `Atom(options)`
+Создает экземпляр атома.
+*   `model`: Класс или конструктор модели.
+*   `name`: Имя атома (для отладки и localStorage).
+*   `saved`: Стратегия сохранения (например, `'*'` или массив полей).
 
-class Model {
-  value = 0
-  increment() { this.value++ }
-}
+### Экземпляр Атома
+*   `.core`: Объект с `Nucleus` для каждого поля.
+*   `.state`: Proxy-объект для прямого доступа к значениям.
+*   `.actions`: Обернутые методы модели.
+*   `.bus`: Встроенная шина событий.
+*   `.decay()`: Уничтожить атом (отписать всех слушателей).
 
-// Прямой доступ к ядру (без .core)
-const atom = coreAtom(Model)
+### Хелперы полей
+*   `saved(value)`: Пометить поле для сохранения.
+*   `tag.xyz(value)`: Добавить мета-тег `xyz`.
+*   `mixed(wrapper1, wrapper2, value)`: Применить несколько оберток.
 
-atom.value.up((v) => console.log(v))
-atom.increment()
-```
-
-## API
-
-| Свойство | Описание |
-|----------|----------|
-| `atom.core` | Nucleus для каждого свойства |
-| `atom.state` | Текущие значения свойств |
-| `atom.actions` | Методы модели |
-| `atom.bus` | Шина событий |
-| `atom.known` | Метаинформация о свойствах |
-| `atom.decay()` | Очистить память |
-
-## Зависимости
-
-Требует `@alaq/nucleus`
-
-## Лицензия
-
-TVR
+---
+Лицензия: TVR

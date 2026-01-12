@@ -1,14 +1,12 @@
 {
-  "name": "alak",
-  "version": "5.0.94",
-  "description": "Alak Last Atom",
-  "keywords": [
-    "alak",
-    "reactive",
-    "atom",
-    "streams",
-    "channels",
-    "dataflow",
-    "flow"
-  ]
+    "name": "alak",
+    "version": "5.0.100",
+    "description": "Alak Atom",
+    "typings": "index.d.ts",
+    "main": "index.js",
+    "license": "TVR",
+    "dependencies": {
+        "@alaq/atom": "5.0.100",
+        "@alaq/nucleus": "5.2.6"
+    }
 }

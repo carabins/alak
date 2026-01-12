@@ -1,0 +1,36 @@
+{
+    "name": "@alaq/nucleus",
+    "version": "5.2.4",
+    "description": "Alak Nucleus part of proactive universe",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "keywords": [
+        "alak",
+        "streams",
+        "channels",
+        "dataflow",
+        "flow"
+    ],
+    "author": "Gleb Panteleev",
+    "license": "TVR",
+    "repository": "https://github.com/carabins/alak",
+    "typings": "index.d.ts",
+    "unpkg": "dist/nucleus.global.js",
+    "module": "lib/es.js",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js",
+            "default": "./index.js"
+        },
+        "./*": "./*"
+    },
+    "buildOptions": {
+        "name": "nucleus",
+        "formats": [
+            "global"
+        ]
+    }
+}

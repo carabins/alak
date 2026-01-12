@@ -1,6 +1,10 @@
 import { QuarkEventBus } from '@alaq/nucleus/bus'
 import { defaultNamespace, getNamespaces, UnionNamespaces } from 'alak/namespaces'
-import { unionAtom } from './unionAtom'
+
+let atomCreator: any
+export const registerAtomCreator = (fn: any) => {
+  atomCreator = fn
+}
 
 const atomLinked = {
   buses: 'bus',
@@ -78,7 +82,7 @@ export function GetUnionCore<N extends keyof UnionNamespaces>(namespace?: N): Un
     facade: new Proxy(services, facadeHandlers),
     bus,
     addAtom<M>(constructor: IAlakConstructor<M, any, N>): IAtom<M> {
-      return (services.atoms[constructor.name] = unionAtom(constructor))
+      return (services.atoms[constructor.name] = atomCreator(constructor))
     },
   } as any
 

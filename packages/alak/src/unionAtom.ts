@@ -2,7 +2,7 @@ import { alakConstructor } from './constructor'
 import { ActiveUnions, defaultNamespace } from 'alak/namespaces'
 import { deleteParams } from '@alaq/nucleus/utils'
 import { QuarkEventBus } from '@alaq/nucleus/bus'
-import { GetUnionCore } from 'alak/UnionCore'
+import { GetUnionCore, registerAtomCreator } from 'alak/UnionCore'
 
 // export function UnionAtom<M, E extends object, N>(constructor: IAlakConstructor<M, E, N>) {
 //   return unionAtom(constructor) as IUnionAtom<M, E>
@@ -131,3 +131,5 @@ export function UnionAtomFactory<M, E extends object, N>(constructor: IAlakConst
     bus,
   } as IAlakAtomFactory<M, E>
 }
+
+registerAtomCreator(unionAtom)

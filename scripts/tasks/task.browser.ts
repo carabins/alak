@@ -1,137 +1,72 @@
-import { BuildPackage } from '~/scripts/BuildPackage'
-import { rollup, type ModuleFormat, type OutputOptions, type Plugin } from 'rollup'
+import { Project } from '~/scripts/common/project'
+import { rollup } from 'rollup'
 import path from 'path'
 import { existsSync } from 'fs'
 import typescript from '@rollup/plugin-typescript'
+
 import terser from '@rollup/plugin-terser'
 import * as fs from 'fs-extra'
 import { FileLog } from '~/scripts/log'
+import * as module from 'module'
+import { minify } from '@swc/core'
 
-// Browser build formats - minified with sourcemaps
-type BrowserFormat = 'esm-browser' | 'global'
+const modules = new Set(['umd', 'es'])
 
-interface BuildConfig {
-  name?: string // Global variable name for IIFE builds
-  formats?: BrowserFormat[]
-  sideEffects?: boolean
-}
-
-const DEFAULT_FORMATS: BrowserFormat[] = ['global']
-
-export async function browser(project: BuildPackage) {
+export async function browser(project: Project) {
   const log = FileLog(project.packageJson.name + ' browser')
-
-  // Read build configuration from package.json
-  const rawBuildOptions = project.packageJson.buildOptions
-  const buildOptions: BuildConfig =
-    typeof rawBuildOptions === 'object' && rawBuildOptions !== null && !Array.isArray(rawBuildOptions)
-      ? (rawBuildOptions as BuildConfig)
-      : {}
-  const formats = buildOptions.formats || DEFAULT_FORMATS
-  const globalName = buildOptions.name || project.dir
-  const sideEffects = buildOptions.sideEffects ?? false
-
-  // Skip if no formats configured
-  if (!formats || formats.length === 0) {
-    log.info('skip - no formats configured in buildOptions')
-    return
+  project.packageJson.typings = 'index.d.ts'
+  project.packageJson.main = 'index.js'
+  const buildModule = !!project.packageJson.module
+  const buildCdn = !!project.packageJson.browser
+  if (!buildCdn && buildModule) {
+    log.info('skip')
   }
 
   const input = path.join(project.packagePath, 'src', 'index.ts')
-  const distName = 'dist'
+  const distName = 'lib'
   const outDir = path.join(project.artPatch, distName)
-  const pkgName = project.dir
-
-  // Clean and prepare output directory
-  if (fs.existsSync(outDir)) {
-    fs.removeSync(outDir)
-  }
+  const esDir = path.join(outDir, 'es')
+  fs.existsSync(outDir) && fs.removeSync(outDir)
   fs.mkdirpSync(outDir)
 
-  // Helper to generate output file names - always minified for browser
-  const getFileName = (format: BrowserFormat): string => {
-    switch (format) {
-      case 'esm-browser':
-        return `${pkgName}.esm-browser.js`
-      case 'global':
-        return `${pkgName}.global.js`
-      default:
-        return `${pkgName}.js`
-    }
+  const artFilePrePath = (moduleType) => path.resolve(outDir, [moduleType, 'js'].join('.'))
+  if (buildCdn) {
+    project.packageJson['unpkg'] = distName + '/es.js'
+    project.packageJson.browser = distName + '/umd.js'
   }
-
-  // Map BrowserFormat to Rollup format
-  const getRollupFormat = (format: BrowserFormat): ModuleFormat => {
-    switch (format) {
-      case 'esm-browser':
-        return 'es'
-      case 'global':
-        return 'iife'
-      default:
-        return 'es'
-    }
+  if (buildModule) {
+    project.packageJson.module = distName + '/es.js'
   }
-
-  try {
-    log.info(`Building browser formats: ${formats.join(', ')}`)
-
-    // Build each format (all minified with sourcemaps)
-    for (const format of formats) {
-      const plugins: Plugin[] = [
+  return new Promise((done) => {
+    rollup({
+      input,
+      // preserveEntrySignatures: "strict",
+      plugins: [
         typescript({
           noEmitOnError: true,
           skipLibCheck: true,
           skipDefaultLibCheck: true,
           declaration: false,
-          exclude: [path.resolve(project.dir, 'test'), path.resolve('scripts')],
+          exclude: [path.resolve(project.dir, 'test')],
           outDir: outDir,
         }),
-        // Always minify browser builds
         terser(),
-      ]
-
-      // Keep only Vue external (bundle internal dependencies for browser)
-      const external = ['vue']
-
-      const bundle = await rollup({
-        input,
-        plugins,
-        external,
+      ],
+      external: ['vue'],
+    })
+      .then((v) => {
+        Promise.all(
+          Array.from(modules).map((format: any) =>
+            v.write({
+              format,
+              globals: { vue: 'Vue' },
+              exports: 'named',
+              name: project.dir,
+              file: artFilePrePath(format),
+            }),
+          ),
+        )
       })
-
-      const output: OutputOptions = {
-        format: getRollupFormat(format),
-        file: path.join(outDir, getFileName(format)),
-        name: globalName,
-        exports: 'named' as const,
-        globals: {
-          vue: 'Vue',
-        },
-        sourcemap: true,
-      }
-
-      await bundle.write(output)
-      await bundle.close()
-
-      log.info(`Built ${getFileName(format)} (minified with sourcemap)`)
-    }
-
-    // Update package.json - we already did most setup in compile task, but we add unpkg here
-    project.packageJson.unpkg = `${distName}/${pkgName}.global.js`
-    
-    // We can also ensure sideEffects is set if provided
-    if (sideEffects !== undefined) {
-         project.packageJson.sideEffects = sideEffects
-    }
-
-    project.savePackageJsonTo.art()
-
-    log.info(`✓ Built browser bundles: ${formats.join(', ')}`)
-    log.info(`✓ Browser (unpkg): ${distName}/${pkgName}.global.js (minified)`)
-  } catch (error) {
-    log.error(`Build failed: ${error.message}`)
-    throw error
-  }
+      .then(done)
+  })
 }
-
-export default browser

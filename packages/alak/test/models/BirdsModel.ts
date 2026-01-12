@@ -1,5 +1,5 @@
 import { mixed, tag, saved, UnionModel } from 'alak/index'
-import { makeRune } from '@alaq/rune/index'
+
 
 export default class BirdsModel extends UnionModel<any> {
   one = 1
