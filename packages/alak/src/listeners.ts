@@ -14,14 +14,52 @@ const subscribeAtom = (atom, nucleusName, listener, listenerType) => {
 export default function (q: QuantumAtom) {
   const eventListeners = {}
 
+  const addEventListener = (event, action) => {
+      if (eventListeners[event]) {
+          if (Array.isArray(eventListeners[event])) {
+              eventListeners[event].push(action)
+          } else {
+              eventListeners[event] = [eventListeners[event], action]
+          }
+      } else {
+          eventListeners[event] = action
+      }
+  }
+
   for (const actionName of Object.keys(q.atom.actions)) {
     if (!actionName.startsWith('_')) {
       continue
     }
+
+    // New Scheme: $ separator
+    if (actionName.includes('$')) {
+      // Event: _on$event
+      if (actionName.startsWith('_on$')) {
+        let eventName = actionName.substring(4)
+        if (eventName === 'init') eventName = 'INIT' // Map init to INIT for compatibility
+        addEventListener(eventName, actionName)
+        continue
+      }
+
+      // Nucleus listener: _nucleus$type (excluding legacy _$ external listeners)
+      if (!actionName.startsWith('_$')) {
+        const parts = actionName.split('$')
+        if (parts.length === 2) {
+          const [prefix, listenerType] = parts
+          const nucleusName = prefix.substring(1)
+          if (nucleusName && q.atom.core[nucleusName]) {
+             subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
+             continue
+          }
+        }
+      }
+    }
+
+    // Legacy Scheme
     if (actionName.startsWith(pattern4Event)) {
       // const eventName = camelToSnakeCase(actionName.replace(pattern4Event, '')).toUpperCase()
       const eventName = actionName.replace(pattern4Event, '')
-      eventListeners[eventName] = actionName
+      addEventListener(eventName, actionName)
       continue
     }
     const parts = actionName.split("_")
@@ -40,7 +78,9 @@ export default function (q: QuantumAtom) {
       continue
     }
     ;[nucleusName, listenerType] = parts
-    subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
+    if (q.atom.core[nucleusName]) { // Add safety check
+        subscribeAtom(q.atom, nucleusName, q.atom.actions[actionName], listenerType)
+    }
   }
   return Object.keys(eventListeners).length ? eventListeners : false
 }
