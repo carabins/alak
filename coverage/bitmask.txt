@@ -1,0 +1,27 @@
+bun test v1.3.0 (b0a6feca)
+
+test\base.test.ts:
+(pass) basic
+(pass) combinations and
+(pass) combinations and not
+
+test\bitwise.test.ts:
+(pass) operations
+---------------------------------------------|---------|---------|-------------------
+File                                         | % Funcs | % Lines | Uncovered Line #s
+---------------------------------------------|---------|---------|-------------------
+All files                                    |   87.94 |   93.45 |
+ src\BitFlags.ts                             |   80.00 |   78.38 | 27-34
+ src\BitInstance.ts                          |   86.84 |   96.71 | 170-174
+ src\BitNum.ts                               |  100.00 |  100.00 | 
+ src\BitWise.ts                              |   86.67 |   90.91 | 20,28,50,55
+ src\calcCombination.ts                      |  100.00 |  100.00 | 
+ test\base.test.ts                           |  100.00 |  100.00 | 
+ test\bitwise.test.ts                        |  100.00 |  100.00 | 
+ ..\datastruct\src\IndexedVertexMap\index.ts |   50.00 |   81.63 | 33-34,38-39,43-44,72,76-77
+---------------------------------------------|---------|---------|-------------------
+
+ 4 pass
+ 0 fail
+ 20 expect() calls
+Ran 4 tests across 2 files. [28.00ms]

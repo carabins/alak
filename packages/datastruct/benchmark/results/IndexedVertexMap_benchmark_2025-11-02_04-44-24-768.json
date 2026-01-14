@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-11-02T04:44:24.768Z",
+  "iterations": 100000,
+  "original": {
+    "push": 12.128,
+    "get": 0.2723,
+    "forEach": 0.7875,
+    "size": 0.0198,
+    "remove": 0.2118
+  },
+  "optimized": {
+    "push": 13.7053,
+    "get": 0.2712,
+    "forEach": 0.8368,
+    "size": 0.0133,
+    "remove": 0.2009
+  },
+  "ultraOptimized": {
+    "push": 11.0097,
+    "get": 0.144,
+    "forEach": 0.7576,
+    "size": 0.0136,
+    "remove": 0.1371
+  },
+  "improvementsOptimized": {
+    "push": -13.00544195250659,
+    "get": 0.4039662137348476,
+    "forEach": -6.260317460317462,
+    "size": 32.82828282828284,
+    "remove": 5.146364494806418
+  },
+  "improvementsUltraOptimized": {
+    "push": 9.220811345646435,
+    "get": 47.11715020198311,
+    "forEach": 3.7968253968253873,
+    "size": 31.313131313131322,
+    "remove": 35.269121813031155
+  }
+}

@@ -1,0 +1,95 @@
+bun test v1.3.0 (b0a6feca)
+
+test\api.test.ts:
+(pass) Nu - minimal default realm
+(pass) Nucleus - array methods
+(pass) Nucleus - object methods
+(pass) Nucleus - universal methods
+(pass) fusion - standalone builder with alive strategy
+(pass) fusion - standalone builder with any strategy
+(pass) NuFusion - Nucl-based builder with alive
+(pass) NuFusion - Nucl-based builder with some (alias for alive)
+(pass) NuFusion - Nucl-based builder with any
+(pass) aliveFusion - effect without creating Nucl
+(pass) anyFusion - effect that runs even with falsy values
+
+test\core.test.ts:
+(pass) Nv creates instance with value
+(pass) Nv shorthand syntax
+(pass) Nv inherits Quark behavior
+(pass) Plugin system - createNuRealm installs plugin
+
+test\fusion-method.test.ts:
+(pass) NuFusion - basic computation with alive strategy
+(pass) NuFusion - basic computation with any strategy
+(pass) NuFusion - alive strategy behavior
+(pass) NuFusion - any strategy behavior (always recomputes)
+(pass) NuFusion - multiple sources
+(pass) NuFusion - some (alias for alive)
+
+test\fusion.test.ts:
+(pass) fusion.alive - basic computation
+(pass) fusion.alive - alive strategy (default)
+(pass) fusion.alive - multiple sources
+(pass) fusion.alive - chaining
+(pass) fusion.any - recomputes on all changes
+(pass) fusion.alive - same behavior
+(pass) aliveFusion - side-effect only when truthy
+(pass) aliveFusion - multiple sources
+(pass) anyFusion - triggers on all changes
+(pass) anyFusion - form validation use case
+(pass) fusion auto-cleanup on source decay
+
+test\nucleus.test.ts:
+(pass) isEmpty - string
+(pass) isEmpty - array
+(pass) isEmpty - object
+(pass) upSome - only triggers on truthy
+(pass) injectTo
+(pass) injectAs
+(pass) push
+(pass) pop
+(pass) find
+(pass) at
+(pass) size getter
+(pass) set
+(pass) get
+(pass) pick - returns plain object
+(pass) keys getter
+(pass) values getter
+
+test\optimization.test.ts:
+-----------------------------|---------|---------|-------------------
+File                         | % Funcs | % Lines | Uncovered Line #s
+-----------------------------|---------|---------|-------------------
+All files                    |   79.02 |   83.49 |
+ src\createNu.ts             |  100.00 |   81.82 | 22-24,31,34
+ src\defaultRealm.ts         |  100.00 |  100.00 | 
+ src\fusion\core.ts          |  100.00 |   97.14 | 32-33
+ src\fusion\effects.ts       |  100.00 |  100.00 | 
+ src\fusion\fusion.ts        |  100.00 |  100.00 | 
+ src\fusion\index.ts         |  100.00 |  100.00 | 
+ src\fusion\nu-fusion.ts     |   80.00 |   86.44 | 81-87
+ src\fusion\plugin.ts        |    0.00 |   10.13 | 45-115
+ src\fusion\strategies.ts    |  100.00 |  100.00 | 
+ src\index.ts                |  100.00 |  100.00 | 
+ src\nucleus\index.ts        |  100.00 |   92.98 | 25,83,95,109,119,131,143
+ src\plugins.ts              |   85.71 |   88.89 | 66-70
+ src\prototype.ts            |   33.33 |   44.00 | 5-8,19-28
+ test\api.test.ts            |  100.00 |  100.00 | 
+ test\core.test.ts           |  100.00 |  100.00 | 
+ test\fusion-method.test.ts  |  100.00 |  100.00 | 
+ test\fusion.test.ts         |  100.00 |  100.00 | 
+ test\nucleus.test.ts        |  100.00 |  100.00 | 
+ test\optimization.test.ts   |  100.00 |  100.00 | 
+ ..\quark\src\create.ts      |   66.67 |   58.06 | 19-21,26,36,41-46,59-63,68-72,96-98,112,117,122-126,131,136-140,143
+ ..\quark\src\flags.ts       |  100.00 |  100.00 | 
+ ..\quark\src\index.ts       |    0.00 |   92.31 | 
+ ..\quark\src\prototype.ts   |   30.77 |   34.81 | 43-47,52-68,73-74,78-83,87-92,109-126,130-147,151-155,159-169
+ ..\quark\src\quantum-bus.ts |    0.00 |   17.06 | 16,20-42,46-93,98-99,103-126,130-132,144-150,155-156,161-162,167-174,179,183-187,193-201,204-207,211-212
+-----------------------------|---------|---------|-------------------
+
+ 48 pass
+ 0 fail
+ 121 expect() calls
+Ran 48 tests across 6 files. [37.00ms]

@@ -1,0 +1,181 @@
+{
+  "timestamp": "2025-11-01T12:25:57.559Z",
+  "runtime": "Bun 1.3.0",
+  "platform": "win32",
+  "arch": "x64",
+  "results": [
+    {
+      "name": "Create empty quark",
+      "ops": 100000,
+      "time": 27.14,
+      "opsPerMs": 3685.11
+    },
+    {
+      "name": "Create with value",
+      "ops": 100000,
+      "time": 28.81,
+      "opsPerMs": 3471.2
+    },
+    {
+      "name": "Create with options",
+      "ops": 100000,
+      "time": 22.26,
+      "opsPerMs": 4492.24
+    },
+    {
+      "name": "Create with realm",
+      "ops": 100000,
+      "time": 24.29,
+      "opsPerMs": 4117.16
+    },
+    {
+      "name": "Create with all options",
+      "ops": 100000,
+      "time": 25.79,
+      "opsPerMs": 3877.92
+    },
+    {
+      "name": "Get value",
+      "ops": 1000000,
+      "time": 2.22,
+      "opsPerMs": 450227.36
+    },
+    {
+      "name": "Set value (no listeners)",
+      "ops": 1000000,
+      "time": 4.7,
+      "opsPerMs": 212720.7
+    },
+    {
+      "name": "Set value (1 listener)",
+      "ops": 100000,
+      "time": 1.14,
+      "opsPerMs": 87734.69
+    },
+    {
+      "name": "Set value (5 listeners)",
+      "ops": 100000,
+      "time": 1.86,
+      "opsPerMs": 53699.92
+    },
+    {
+      "name": "Set value (10 listeners)",
+      "ops": 100000,
+      "time": 2.17,
+      "opsPerMs": 45998.16
+    },
+    {
+      "name": "Add listener",
+      "ops": 100000,
+      "time": 25.32,
+      "opsPerMs": 3949.45
+    },
+    {
+      "name": "Remove listener",
+      "ops": 100000,
+      "time": 27.92,
+      "opsPerMs": 3581.16
+    },
+    {
+      "name": "Notify 1 listener",
+      "ops": 100000,
+      "time": 1.32,
+      "opsPerMs": 75803.52
+    },
+    {
+      "name": "Notify 5 listeners",
+      "ops": 100000,
+      "time": 2.03,
+      "opsPerMs": 49302.37
+    },
+    {
+      "name": "Notify 10 listeners",
+      "ops": 100000,
+      "time": 3.22,
+      "opsPerMs": 31026.03
+    },
+    {
+      "name": "Add event listener",
+      "ops": 50000,
+      "time": 19.84,
+      "opsPerMs": 2519.95
+    },
+    {
+      "name": "Remove event listener",
+      "ops": 50000,
+      "time": 16.54,
+      "opsPerMs": 3023.21
+    },
+    {
+      "name": "Emit local event",
+      "ops": 50000,
+      "time": 3.09,
+      "opsPerMs": 16198.53
+    },
+    {
+      "name": "Emit realm event",
+      "ops": 50000,
+      "time": 3.38,
+      "opsPerMs": 14795.53
+    },
+    {
+      "name": "Emit with wildcard listener",
+      "ops": 50000,
+      "time": 6.05,
+      "opsPerMs": 8262.96
+    },
+    {
+      "name": "Set with dedup (same value)",
+      "ops": 100000,
+      "time": 1.07,
+      "opsPerMs": 93257.48
+    },
+    {
+      "name": "Set with dedup (different value)",
+      "ops": 100000,
+      "time": 2.54,
+      "opsPerMs": 39402.66
+    },
+    {
+      "name": "Set with stateless",
+      "ops": 100000,
+      "time": 1.44,
+      "opsPerMs": 69420.34
+    },
+    {
+      "name": "Set with pipe transform",
+      "ops": 100000,
+      "time": 1.94,
+      "opsPerMs": 51466.8
+    },
+    {
+      "name": "Set with pipe reject",
+      "ops": 100000,
+      "time": 1.28,
+      "opsPerMs": 78326.94
+    },
+    {
+      "name": "Full workflow (create + subscribe + set)",
+      "ops": 50000,
+      "time": 14.98,
+      "opsPerMs": 3338.18
+    },
+    {
+      "name": "Realm communication",
+      "ops": 10000,
+      "time": 389.91,
+      "opsPerMs": 25.65
+    },
+    {
+      "name": "Complex quark lifecycle",
+      "ops": 10000,
+      "time": 10.38,
+      "opsPerMs": 963.68
+    }
+  ],
+  "summary": {
+    "totalOps": 5570000,
+    "totalTime": 724.93,
+    "avgOpsPerMs": 7683.5
+  }
+}

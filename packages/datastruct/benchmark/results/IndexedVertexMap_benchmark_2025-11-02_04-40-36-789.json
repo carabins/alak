@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-11-02T04:40:36.788Z",
+  "iterations": 100000,
+  "results": {
+    "push": 14.2867,
+    "get": 0.2762,
+    "forEach": 0.8392,
+    "size": 0.0202,
+    "remove": 0.203
+  }
+}

@@ -1,0 +1,6 @@
+bun test v1.3.0 (b0a6feca)
+No tests found!
+
+Tests need ".test", "_test_", ".spec" or "_spec_" in the filename (ex: "MyApp.test.ts")
+
+Learn more about bun test: https://bun.com/docs/cli/test

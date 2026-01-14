@@ -1,0 +1,1 @@
+error: unsupported reporter format 'text'. Available options: 'junit' (for XML test results), 'dots'

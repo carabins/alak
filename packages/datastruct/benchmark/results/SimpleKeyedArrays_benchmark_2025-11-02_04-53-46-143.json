@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-11-02T04:53:46.143Z",
+  "iterations": 100000,
+  "arraySize": 100,
+  "results": {
+    "push": 4.288,
+    "get": 0.1045,
+    "directForEach": 21.4229,
+    "wrappedForEach": 34.978,
+    "size": 0.1202,
+    "has": 0.0846,
+    "forEachOverhead": 63.27387982019243
+  }
+}

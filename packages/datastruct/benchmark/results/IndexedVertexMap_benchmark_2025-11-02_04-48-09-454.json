@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-11-02T04:48:09.454Z",
+  "iterations": 100000,
+  "original": {
+    "push": 12.5174,
+    "get": 0.3207,
+    "forEach": 0.8299,
+    "size": 0.0226,
+    "remove": 19.2505
+  },
+  "optimized": {
+    "push": 11.3466,
+    "get": 0.1399,
+    "forEach": 0.8565,
+    "size": 0.0175,
+    "remove": 11.9727
+  },
+  "ultraOptimized": {
+    "push": 11.0687,
+    "get": 0.1345,
+    "forEach": 0.7844,
+    "size": 0.0181,
+    "remove": 10.6583
+  },
+  "simple": {
+    "push": 4.8608,
+    "get": 0.0342,
+    "forEach": 0.7039,
+    "size": 0.0185,
+    "remove": 0.62
+  },
+  "improvementsOptimized": {
+    "push": 9.353380094907887,
+    "get": 56.37667602120362,
+    "forEach": -3.2052054464393382,
+    "size": 22.566371681415916,
+    "remove": 37.80577127866808
+  },
+  "improvementsUltraOptimized": {
+    "push": 11.573489702334355,
+    "get": 58.06049267227939,
+    "forEach": 5.482588263646221,
+    "size": 19.91150442477875,
+    "remove": 44.6336458793278
+  },
+  "improvementsSimple": {
+    "push": 61.167654624762335,
+    "get": 89.33582787652011,
+    "forEach": 15.182552114712616,
+    "size": 18.14159292035398,
+    "remove": 96.77930443365106
+  }
+}
