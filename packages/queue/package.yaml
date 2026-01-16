@@ -1,0 +1,17 @@
+{
+  "name": "@alaq/queue",
+  "version": "1.0.0-alpha.1",
+  "description": "High-performance reactive Job Scheduler for Alak ecosystem",
+  "homepage": "https://github.com/carabins/alaq/package/queue",
+  "keywords": [
+    "queue",
+    "job scheduler",
+    "priority queue",
+    "concurrency",
+    "reactive",
+    "quark"
+  ],
+  "dependencies": {
+    "@alaq/quark": "workspace:*"
+  }
+}

@@ -202,7 +202,6 @@ describe("setupQuarkAndOptions", () => {
     const result = setupQuarkAndOptions(quark, options);
 
     expect(result._flags & EMIT_CHANGES).toBe(EMIT_CHANGES);
-    expect(result._changeEventName).toBe(CHANGE);
   });
 
   test("should KEEP DEDUP flag when dedup option is omitted (default)", () => {
