@@ -25,7 +25,7 @@ export const quarkProto = {
     if (!(this._flags & IS_EMPTY)) {
       listener(this.value, this)
     }
-    return this
+    return () => this.down(listener)
   },
 
   down(this: IQuarkCore, listener: Listener<any>) {

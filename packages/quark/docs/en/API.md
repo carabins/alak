@@ -51,12 +51,13 @@ q.value = 30         // Write (equivalent)
 #### `.up(listener)`
 Subscribes to value changes.
 - **listener**: `(value, quark) => void`
-- *Returns:* `this` (chainable).
+- *Returns:* `Unsubscribe` function `() => void`.
 
 > **Note:** The listener is called immediately upon subscription with the current value.
 
 ```typescript
-q.up(val => console.log('Updated:', val))
+const unsub = q.up(val => console.log('Updated:', val))
+unsub() // Unsubscribe
 ```
 
 #### `.down(listener)`

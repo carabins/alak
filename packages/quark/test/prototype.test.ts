@@ -28,11 +28,15 @@ describe("quarkProto", () => {
       expect(listener).toHaveBeenCalledWith(42, quark);
     });
 
-    test("should return quark for chaining", () => {
+    test("should return unsubscribe function", () => {
       const listener = jest.fn();
-      const result = quark.up(listener);
+      const unsub = quark.up(listener);
 
-      expect(result).toBe(quark);
+      expect(typeof unsub).toBe('function');
+      unsub();
+      // Should be removed
+      // @ts-ignore
+      expect(quark._edges.includes(listener)).toBe(false);
     });
 
     test("should lazy init listeners if not present", () => {

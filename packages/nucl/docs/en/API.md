@@ -41,6 +41,14 @@ const list = Nv([1, 2], { kind: 'std' })
 A Nucl instance is a **Quark** at its core. It is a callable object.
 It inherits all Quark methods (`.up`, `.down`, `.silent`, `.decay`).
 
+### `.up(listener)`
+Subscribes to value changes. Listener is called **immediately** upon subscription and on every change.
+Returns an `Unsubscribe` function.
+```typescript
+const unsub = n.up((val) => console.log('Changed to:', val));
+unsub(); // Unsubscribe
+```
+
 Depending on the `kind` or `plugins` used, it may have additional methods.
 
 ### Standard Plugin (`std`)

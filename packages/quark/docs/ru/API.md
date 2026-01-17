@@ -45,12 +45,13 @@ Quark — это вызываемый объект (функция).
 #### `.up(listener)`
 Подписка на изменения значения.
 - **listener**: `(value, quark) => void`
-- *Возвращает:* `this`.
+- *Возвращает:* `Unsubscribe` функцию `() => void`.
 
 > **Важно:** Слушатель вызывается **сразу же** при подписке с текущим значением.
 
 ```typescript
-q.up(val => console.log('Обновлено:', val))
+const unsub = q.up(val => console.log('Обновлено:', val))
+unsub() // Отписка
 ```
 
 #### `.down(listener)`

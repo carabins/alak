@@ -58,8 +58,10 @@ n.value = 3;      // Установка через свойство
 
 ### `.up(listener)`
 Подписка на изменения. Слушатель вызывается **немедленно** при подписке и при каждом изменении.
+Возвращает функцию отписки (`Unsubscribe`).
 ```typescript
-n.up((val) => console.log('Changed to:', val));
+const unsub = n.up((val) => console.log('Changed to:', val));
+unsub(); // Отписка
 ```
 
 ### `.down(listener)`

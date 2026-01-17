@@ -34,9 +34,9 @@ export default interface IQuark<T = any> {
   /**
    * Subscribe to value changes with a callback
    * @param listener Function called when value changes
-   * @returns The quark instance for chaining
+   * @returns Unsubscribe function
    */
-  up(listener: (value: T, quark: IQuark<T>) => void): this
+  up(listener: (value: T, quark: IQuark<T>) => void): () => void
 
   /**
    * Unsubscribe a listener from value changes
