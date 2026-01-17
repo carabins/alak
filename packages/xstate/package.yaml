@@ -1,0 +1,15 @@
+{
+  "name": "@alaq/xstate",
+  "version": "0.0.1",
+  "description": "XState integration for Alak ecosystem",
+  "peerDependencies": {
+    "xstate": "^5.0.0",
+    "@alaq/quark": "workspace:*",
+    "@alaq/nucl": "workspace:*"
+  },
+  "devDependencies": {
+    "xstate": "^5.19.0",
+    "@alaq/quark": "workspace:*",
+    "@alaq/nucl": "workspace:*"
+  }
+}
