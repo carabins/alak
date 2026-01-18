@@ -40,6 +40,8 @@ export type RootNotify = (
 export interface DeepOptions {
   deepArrays?: boolean      // Глубокая реактивность для элементов массивов (по умолчанию false)
   deepObjects?: boolean     // Глубокая реактивность для объектов (по умолчанию true)
+  ghosts?: boolean          // Включить режим "Призраков" для undefined свойств
+  onGhost?: (path: string) => void // Колбэк при создании призрака (доступ к несуществующему свойству)
 }
 
 export interface IDeepState {

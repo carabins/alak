@@ -7,8 +7,10 @@ import {baseHandler} from "./handler";
  */
 export function createState(notify: NotifyFn, options: DeepOptions = {}) {
   const finalOptions: DeepOptions = {
-    deepArrays: options.deepArrays ?? true,    // ✅ По умолчанию выключено
-    deepObjects: options.deepObjects ?? true,   // ✅ По умолчанию включено
+    deepArrays: options.deepArrays ?? true,
+    deepObjects: options.deepObjects ?? true,
+    ghosts: options.ghosts ?? false,
+    onGhost: options.onGhost
   }
 
 

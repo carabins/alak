@@ -1,6 +1,7 @@
 import {IDeepState} from './types'
 import {arrayMethods, RETURN_FALSE_MAP, RETURN_RAW_MAP, RETURN_TRUE_MAP} from './constants'
 import {getPath} from "./utils";
+import {createGhost} from "./ghost";
 
 
 export const baseHandler = {
@@ -46,7 +47,22 @@ export const baseHandler = {
 
     const target = parent.value
     const value = target[key]
-    if (value == null) return value
+    
+    if (value === undefined) {
+      if (parent.root.ghosts && typeof key === 'string') {
+        const parentPath = getPath(parent)
+        const path = parentPath ? parentPath + "." + key : key
+        
+        // Trigger callback (Signal)
+        parent.root.onGhost?.(path)
+        
+        // Return Ghost Proxy
+        return createGhost(parent.root, path)
+      }
+      return value
+    }
+    
+    if (value === null) return value
 
     const type = typeof value
     if (type === 'symbol') {
