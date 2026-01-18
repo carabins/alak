@@ -25,6 +25,12 @@ export default interface IQuark<T = any> {
    */
   readonly uid: number
 
+  /**
+   * Fast identification flag for Quark instances.
+   * Used by UI libraries to avoid expensive duck-typing.
+   */
+  readonly __q: true
+
   readonly bus: RealmBus
   /**
    * Optional ID for the quark

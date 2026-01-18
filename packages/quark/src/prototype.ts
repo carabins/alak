@@ -11,6 +11,8 @@ type Listener<T> = (value: T, quark: any) => void
 
 /** Базовый прототип кварка */
 export const quarkProto = {
+  __q: true,
+
   up(this: IQuarkCore, listener: Listener<any>) {
     // Lazy init listeners - используем массив вместо Set (быстрее для <10 listeners)
     if (!this._isAwake) {

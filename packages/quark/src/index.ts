@@ -6,6 +6,9 @@ import setValue from "./setValue";
 import quarkProto from "./prototype";
 import setupQuarkAndOptions from "./setupQuarkAndOptions";
 
+/** Shorthand for IQuark */
+export type IQ<T = any> = IQuark<T>;
+export type { IQuark };
 
 export interface IQuOptions<T = any> {
   value?: T
