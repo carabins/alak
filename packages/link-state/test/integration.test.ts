@@ -45,12 +45,30 @@ test('LinkState: Nested ghosting', () => {
   expect(gold.$status.value).toBe('ready')
 })
 
-test('LinkState: Callable node(value)', () => {
+test('LinkState: Internal API _get and _node', () => {
   const store = new SyncStore()
-  const hp = store.get('me.hp')
+  store.applyPatch('player', { id: '1', stats: { hp: 80 } })
   
-  hp(100)
+  const player = store.get('player')
   
-  expect(hp.value).toBe(100)
-  expect(hp()).toBe(100)
+  // 1. _get: fast primitive access
+  expect(player._get('id')).toBe('1')
+  
+  // 2. _node: child navigation
+  const stats = player._node('stats')
+  expect(stats.$meta.path).toBe('player.stats')
+  expect(stats.value.hp).toBe(80)
+  
+  // 3. Deep _get
+  expect(stats._get('hp')).toBe(80)
+})
+
+test('LinkState: Action _act', async () => {
+  const onAction = mock((action, path, args) => Promise.resolve({ ok: true }))
+  const store = new SyncStore({ onAction })
+  
+  const player = store.get('players.1')
+  await player._act('move', { x: 10 })
+  
+  expect(onAction).toHaveBeenCalledWith('move', 'players.1', { x: 10 })
 })

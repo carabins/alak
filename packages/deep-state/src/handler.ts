@@ -143,7 +143,7 @@ export const baseHandler = {
   ownKeys(parent: IDeepState) {
     const target = parent.value
     // track(target, TrackOpTypes.ITERATE, Array.isArray(target) ? 'length' : Symbol.iterator)
-    parent.root.notify(parent.parentPath, "ownKeys", target)
+    parent.root.notify(getPath(parent), "ownKeys", target)
     return Reflect.ownKeys(target)
   }
 }

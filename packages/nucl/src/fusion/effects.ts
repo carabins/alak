@@ -1,33 +1,34 @@
 
 
+import { IQ } from '@alaq/quark'
 import { createEffectWithStrategy } from './core'
 import { strategies } from './strategies'
 
-type AnyNucl = any
+type AnyNucl = IQ
 
 
 export function aliveFusion<A>(
-  sources: [any],
+  sources: [IQ<A>],
   fn: (a: A) => void
 ): () => void
 
 export function aliveFusion<A, B>(
-  sources: [any, any],
+  sources: [IQ<A>, IQ<B>],
   fn: (a: A, b: B) => void
 ): () => void
 
 export function aliveFusion<A, B, C>(
-  sources: [any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>],
   fn: (a: A, b: B, c: C) => void
 ): () => void
 
 export function aliveFusion<A, B, C, D>(
-  sources: [any, any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>, IQ<D>],
   fn: (a: A, b: B, c: C, d: D) => void
 ): () => void
 
 export function aliveFusion<A, B, C, D, E>(
-  sources: [any, any, any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>, IQ<D>, IQ<E>],
   fn: (a: A, b: B, c: C, d: D, e: E) => void
 ): () => void
 
@@ -37,27 +38,27 @@ export function aliveFusion(sources: AnyNucl[], fn: Function): () => void {
 
 
 export function anyFusion<A>(
-  sources: [any],
+  sources: [IQ<A>],
   fn: (a: A) => void
 ): () => void
 
 export function anyFusion<A, B>(
-  sources: [any, any],
+  sources: [IQ<A>, IQ<B>],
   fn: (a: A, b: B) => void
 ): () => void
 
 export function anyFusion<A, B, C>(
-  sources: [any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>],
   fn: (a: A, b: B, c: C) => void
 ): () => void
 
 export function anyFusion<A, B, C, D>(
-  sources: [any, any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>, IQ<D>],
   fn: (a: A, b: B, c: C, d: D) => void
 ): () => void
 
 export function anyFusion<A, B, C, D, E>(
-  sources: [any, any, any, any, any],
+  sources: [IQ<A>, IQ<B>, IQ<C>, IQ<D>, IQ<E>],
   fn: (a: A, b: B, c: C, d: D, e: E) => void
 ): () => void
 

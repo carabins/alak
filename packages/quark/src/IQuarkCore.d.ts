@@ -28,6 +28,7 @@ export default interface IQuarkCore<T = any> extends IQuark<T> {
   // _emitChangeName: string
   // _evName : string
   _scope : string
+  _changeEventName?: string
   _pipeFn: (value: T) => T
   _edges: Array<(value: T, quark: IQuark<T>) => void>
 

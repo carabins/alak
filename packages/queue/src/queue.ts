@@ -1,5 +1,5 @@
 import { Qv } from '@alaq/quark';
-import type IQuark from '@alaq/quark/src/IQuark';
+import type { IQuark } from '@alaq/quark';
 import { QueueEmitter } from './events';
 import { JobImpl } from './job';
 import { PriorityQueue } from './priority-queue';

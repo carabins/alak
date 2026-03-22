@@ -22,6 +22,13 @@ export const taskPipelines: Record<string, TaskPipeline> = {
     pipeline: ["test", "package", "build"],
   },
 
+  full: {
+    name: 'Build standalone bundle',
+    desc: 'Build with all dependencies inlined (for unpkg)',
+    aggregate: ["full-clear", "tsc"],
+    pipeline: ["test", "package", "build", "build-full"],
+  },
+
   // 'coverage-generate': {
   //   name: 'Generate coverage reports',
   //   desc: 'Run tests with coverage for individual projects',

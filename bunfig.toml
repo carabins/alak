@@ -18,3 +18,23 @@ prefer = "local"
 "@alaq/rune/*" = ["./packages/rune/src/*"]
 "@alaq/bitmask/*" = ["./packages/bitmask/src/*"]
 "@alaq/datastruct/*" = ["./packages/datastruct/src/*"]
+"@alaq/fx" = ["./packages/fx/src/index.ts"]
+"@alaq/fx/*" = ["./packages/fx/src/*"]
+
+# Configure JSX for tests (Standard Factory, not React automatic runtime)
+[test]
+# preload = ["./packages/videoroll-player/test/setup.ts"]
+
+# This section configures how Bun transpiles JSX/TSX
+# We use our custom 'h' factory instead of React
+# (This applies to 'bun test' and 'bun run')
+# Note: 'jsx' section is top-level in bunfig.toml usually? 
+# Bun documentation says: "bun build --jsx-factory h" or tsconfig "jsx": "react" + "jsxFactory": "h"
+# But tsconfig.json in root might be overriding per-package settings?
+# Let's try adding it to root tsconfig first, as bunfig support for JSX might be build-only.
+
+# Wait, bunfig.toml documentation doesn't have [jsx] section. It respects tsconfig.json.
+# The error "Cannot find module 'react/jsx-dev-runtime'" means TS is using "jsx": "react-jsx".
+# We need "jsx": "react" (Classic) in tsconfig.json for pragma to work OR for factory config to apply.
+
+# I will update root tsconfig.json instead.

@@ -7,16 +7,16 @@ import type {INucleonCore} from '../INucleon' // TODO: Update to INuclCore or si
 
 export interface StdArrayMethods<T> {
   
-  push(this: INucleusQuark<T[]>, ...items: T[]): INucleusQuark<T[]>
+  push(this: INucleonCore, ...items: T[]): INucleonCore
 
   
-  pop(this: INucleusQuark<T[]>): T | undefined
+  pop(this: INucleonCore): T | undefined
 
   
-  find(this: INucleusQuark<T[]>, fn: (item: T, index: number, array: T[]) => boolean): T | undefined
+  find(this: INucleonCore, fn: (item: T, index: number, array: T[]) => boolean): T | undefined
 
   
-  at(this: INucleusQuark<T[]>, index: number): T | undefined
+  at(this: INucleonCore, index: number): T | undefined
 }
 
 
@@ -24,13 +24,13 @@ export interface StdArrayMethods<T> {
 
 export interface StdObjectMethods<T extends object> {
   
-  set<K extends keyof T>(this: INucleusQuark<T>, key: K, val: T[K]): INucleusQuark<T>
+  set<K extends keyof T>(this: INucleonCore, key: K, val: T[K]): INucleonCore
 
   
-  get<K extends keyof T>(this: INucleusQuark<T>, key: K): T[K]
+  get<K extends keyof T>(this: INucleonCore, key: K): T[K]
 
   
-  pick<K extends keyof T>(this: INucleusQuark<T>, ...keys: K[]): Pick<T, K>
+  pick<K extends keyof T>(this: INucleonCore, ...keys: K[]): Pick<T, K>
 }
 
 
@@ -38,13 +38,13 @@ export interface StdObjectMethods<T extends object> {
 
 export interface StdUniversalMethods {
   
-  upSome(this: INucleusQuark<any>, fn: (value: any, nucl: INucleusQuark<any>) => void): () => void
+  upSome(this: INucleonCore, fn: (value: any, nucl: INucleonCore) => void): () => void
 
   
-  injectTo(this: INucleusQuark<any>, obj: any): INucleusQuark<any>
+  injectTo(this: INucleonCore, obj: any): INucleonCore
 
   
-  injectAs(this: INucleusQuark<any>, key: string, obj: any): INucleusQuark<any>
+  injectAs(this: INucleonCore, key: string, obj: any): INucleonCore
 }
 
 
@@ -77,7 +77,7 @@ export interface StdObjectProperties {
 
 
 
-export type StdProto =
+export type NucleusProto =
   & StdArrayMethods<any>
   & StdObjectMethods<any>
   & StdUniversalMethods

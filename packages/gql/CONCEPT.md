@@ -21,7 +21,7 @@ We control behavior via directives (`@qos`, `@auth`, `@store`). The generator re
 
 ## 2. Directives Specification
 
-### `@sync(qos: QoS = RELIABLE, mode: SyncMode = EAGER)`
+### `@sync(qos: QoS = RELIABLE, mode: SyncMode = EAGER, atomic: Boolean = false)`
 Controls the network delivery strategy and lifecycle.
 
 **QoS (Transport):**
@@ -33,11 +33,13 @@ Controls the network delivery strategy and lifecycle.
 *   **`EAGER` (Default):** Loaded immediately with parent.
 *   **`LAZY`:** Loaded on demand (Ghost Proxy -> Fetch).
 
-*Example:*
-```graphql
-inventory: [Item!]! @sync(qos: RELIABLE, mode: LAZY)
-pos: Vec2! @sync(qos: REALTIME)
-```
+**Atomic (Structure):**
+*   **`false` (Default):** Deep sync (nested properties are tracked individually).
+*   **`true`:** Atomic blob. The object is treated as a single unit. No deep diffing. (Useful for Vec2, Matrix, JSON configs).
+
+### `@atomic`
+Standalone directive. Marks an object or field as atomic (structurally indivisible).
+Equivalent to `atomic: true` in sync configuration.
 
 ### `@auth(read: Access, write: Access)`
 Controls visibility and permissions.

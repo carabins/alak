@@ -1,6 +1,7 @@
 import {Const} from './common/constants'
 import * as path from 'path'
 import * as fs from 'fs'
+import * as YAML from 'yaml'
 import {PackageJson} from 'type-fest'
 import {FileStatusResult} from 'simple-git/dist/typings/response'
 import {pick} from './common/utils'
@@ -23,7 +24,11 @@ export class BuildPackage {
     this.artPatch = path.join(Const.ARTIFACTS, dir)
 
     const pkgPath = path.join(this.packagePath, Const.PK_JSON)
-    this.packageJson = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    try {
+      this.packageJson = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    } catch (у) {
+      this.packageJson = YAML.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    }
   }
 
   #logger

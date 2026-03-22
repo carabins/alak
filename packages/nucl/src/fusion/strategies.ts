@@ -9,7 +9,7 @@ export type Strategy = (sources: AnyNucl[]) => boolean
 export const strategies = {
   
   alive: (sources: AnyNucl[]) => {
-    return sources.every(s => !!s.value)
+    return sources.every(s => s.value !== undefined)
   },
 
   

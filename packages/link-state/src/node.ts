@@ -12,8 +12,20 @@ export function createSyncNode<T = any>(store: any, path: string, initialProxy: 
   const $status = Qv<SyncStatus>(isGhost(initialProxy) ? 'pending' : 'ready')
   const $error = Qv<any>(null)
 
+  // Fast value access with version check
+  function getLatestValue() {
+    if (_lastVersion === store._version) {
+      return _cachedValue
+    }
+    const val = store._resolvePath(path)
+    _cachedValue = val
+    _lastVersion = store._version
+    $status(isGhost(val) ? 'pending' : 'ready')
+    return val
+  }
+
   const node = function(value?: T) {
-    if (arguments.length === 0) return (node as any).value
+    if (arguments.length === 0) return getLatestValue()
     store.applyPatch(path, value)
     return value
   }
@@ -27,31 +39,46 @@ export function createSyncNode<T = any>(store: any, path: string, initialProxy: 
     $error: { value: $error },
     
     value: {
-      get() { 
-        if (_lastVersion === store._version) {
-          return _cachedValue
-        }
-
-        const val = store._resolvePath(path)
-        _cachedValue = val
-        _lastVersion = store._version
-        
-        $status(isGhost(val) ? 'pending' : 'ready')
-        
-        return val 
-      },
+      get() { return getLatestValue() },
       enumerable: true
     },
 
     $meta: {
       get() {
-        const val = (node as any).value
+        const val = getLatestValue()
         return {
           isGhost: isGhost(val),
           path: path
         }
       }
     },
+
+    // --- Internal API ---
+
+    _get: {
+      value: function(key: string) {
+        const val = getLatestValue()
+        return val ? val[key] : undefined
+      }
+    },
+
+    _node: {
+      value: function(key: string) {
+        return store.get(path + '.' + key)
+      }
+    },
+
+    _act: {
+      value: function(name: string, args?: any) {
+        if (!store.options.onAction) {
+          console.warn(`No onAction handler in SyncStore for ${name}`)
+          return Promise.resolve()
+        }
+        return store.options.onAction(name, path, args)
+      }
+    },
+
+    // --- Lifecycle ---
 
     $release: {
       value: function() { store._releaseNode(node) }
@@ -72,7 +99,10 @@ export function createSyncNode<T = any>(store: any, path: string, initialProxy: 
       value: function(listener: (val: T) => void) {
         store._unsubscribePath(path, listener)
       }
-    }
+    },
+    
+    _path: { value: path },
+    _store: { value: store }
   }
 
   Object.defineProperties(node, properties)

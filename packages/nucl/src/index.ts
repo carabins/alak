@@ -16,6 +16,7 @@ export const Nv = function <T>(value?: T, options?: INuOptions) {
 export { fusion } from './fusion/fusion'
 
 
-export type { INuOptions } from './options'
+export type { INuOptions, NuclearKindRegistry, NuclearKindSelector } from './options'
+export type { SpaceSeparatedKeys } from './types/combinations'
 export {defineKind, combineKinds} from './plugins'
 export {deepStatePlugin} from './deep-state/plugin'

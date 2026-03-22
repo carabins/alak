@@ -59,8 +59,12 @@ export interface AtomOptions<Model = any> {
   emitChanges?: boolean
 
   /**
+   * Custom event name for changes (default: 'change')
+   */
+  emitChangeName?: string
+
+  /**
    * Event scope for bubbling (e.g. 'User.1').
-   * If not provided, it is auto-generated from model name and ID.
    */
   scope?: string
 
@@ -85,7 +89,7 @@ export interface ModelSchema {
  */
 export type AtomFactory<T> = (
   constructorArgs?: any[], 
-  runtimeOptions?: Pick<AtomOptions, 'realm' | 'name' | 'emitChanges'>
+  runtimeOptions?: Pick<AtomOptions, 'realm' | 'name' | 'emitChanges' | 'scope'>
 ) => AtomInstance<T>
 
 /**

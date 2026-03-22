@@ -9,15 +9,15 @@ import type { StrategyName } from './strategies'
 export interface FusionMethods {
   
   fusion<R>(
-    this: INucleusQuark<R>,
+    this: INucleonCore,
     ...args: [...sources: any[], fn: (...values: any[]) => R]
-  ): INucleusQuark<R>
+  ): INucleonCore
 
   
   fusion<R>(
-    this: INucleusQuark<R>,
+    this: INucleonCore,
     ...args: [...sources: any[], strategy: StrategyName, fn: (...values: any[]) => R]
-  ): INucleusQuark<R>
+  ): INucleonCore
 }
 
 

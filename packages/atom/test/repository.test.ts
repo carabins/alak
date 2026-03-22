@@ -46,7 +46,7 @@ describe('Atom Repository & Scope', () => {
     expect(same).toBe(user)
   })
 
-  // 'should bubble events with correct scope' moved to failing_events.test.ts
+  // 'should bubble events with correct scope' verified in events.test.ts
   
   it('should cleanup repository on clear', () => {
     const UserRepo = Atom.define(User)

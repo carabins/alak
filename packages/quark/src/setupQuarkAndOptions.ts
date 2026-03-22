@@ -43,6 +43,9 @@ export default function setupQuarkAndOptions<T extends any>(quark: Function & an
 
     if (options.emitChanges) {
       quark._flags |= EMIT_CHANGES
+      if (options.emitChangeName) {
+        quark._changeEventName = options.emitChangeName
+      }
     }
 
     // Disable DEDUP if explicitly requested

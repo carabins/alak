@@ -48,6 +48,6 @@ describe('Atom v6 - Conventions', () => {
   })
 
   it('should support emitChanges option', () => {
-    // This functionality is tested in failing_events.test.ts due to CI instability
+    // Verified in events.test.ts
   })
 })

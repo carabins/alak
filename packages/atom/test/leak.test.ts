@@ -23,9 +23,26 @@ describe('Atom v6 - Memory Leaks', () => {
     atom.$.decay()
     
     // 3. Listener should be gone
-    // Current implementation: THIS WILL FAIL
     const listeners = events.get('ping')
     const count = listeners ? listeners.size : 0
     expect(count).toBe(0)
+  })
+
+  it('should clean up property listeners (_up) on decay', () => {
+    class UpModel {
+      count = 0
+      _count_up() {}
+    }
+    
+    const atom = Atom(UpModel)
+    const nucl = atom.$count
+    
+    // Nucl edges are listeners
+    expect((nucl as any)._edges?.length).toBe(1)
+    
+    atom.$.decay()
+    
+    // After decay, it should be null
+    expect((nucl as any)._edges).toBeNull()
   })
 })

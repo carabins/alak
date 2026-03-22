@@ -74,7 +74,7 @@ export function createEffectWithStrategy(
   fn: (...values: any[]) => void,
   strategy: Strategy
 ): () => void {
-  
+
   const runEffect = () => {
     if (strategy(sources)) {
       const values = sources.map(s => s.value)
@@ -82,26 +82,20 @@ export function createEffectWithStrategy(
     }
   }
 
-  
-  runEffect()
-
-  
+  // Подписываемся на все sources
   const listeners: Array<{ source: any, listener: any }> = []
-  let skipCount = sources.length  
 
   sources.forEach(source => {
     const listener = () => {
-      if (skipCount > 0) {
-        skipCount--
-        return
-      }
       runEffect()
     }
     source.up(listener)
     listeners.push({ source, listener })
   })
 
-  
+  // Initial run AFTER subscriptions
+  runEffect()
+
   return () => {
     listeners.forEach(({ source, listener }) => {
       source.down(listener)

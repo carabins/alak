@@ -15,6 +15,9 @@
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
     "paths": {
       "alak/*": [
         "packages/alak/src/*"
@@ -52,6 +55,18 @@
       "@alaq/rune/*": [
         "packages/rune/src/*"
       ],
+      "@alaq/fx": [
+        "packages/fx/src/index.ts"
+      ],
+      "@alaq/fx/*": [
+        "packages/fx/src/*"
+      ],
+      "@alaq/flex": [
+        "packages/flex/src/index.ts"
+      ],
+      "@alaq/flex/*": [
+        "packages/flex/src/*"
+      ],
       "~/scripts/*": [
         "scripts/*"
       ]
@@ -69,6 +84,7 @@
     ]
   },
   "include": [
+    "packages/flex/src/jsx.d.ts",
     "packages/**/*.ts",
     "scripts/**/*.d.ts",
     "scripts/**/*.ts"

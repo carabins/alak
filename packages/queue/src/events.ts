@@ -28,7 +28,7 @@ export class QueueEmitter {
     if (handlers) {
       for (const handler of handlers) {
         try {
-          handler(...args);
+          (handler as any)(...args);
         } catch (e) {
           console.error(`[QueueEmitter] Error in handler for ${event}:`, e);
         }

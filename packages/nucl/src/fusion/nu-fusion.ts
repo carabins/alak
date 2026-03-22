@@ -92,7 +92,7 @@ class NuFusionBuilderImpl<Sources extends any[]> implements NuFusionBuilder<Sour
 
 
 export function NuFusion<T = any>(): any {
-  const nucl = createNu<T>({ kind: FUSION_KIND_NAME })
+  const nucl = createNu<T>({ kind: FUSION_KIND_NAME }) as any
 
   
   nucl.from = function(...sources: AnyNucl[]) {

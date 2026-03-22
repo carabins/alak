@@ -1,4 +1,5 @@
 import { AtomInstance, AtomOptions, AtomPlugin, ModelSchema, AtomFactory, AtomContext, AtomicKindSelector } from './types'
+export type { AtomFactory }
 import { Nu, combineKinds, fusion } from '@alaq/nucl'
 import { quantumBus } from '@alaq/quark/quantum-bus'
 import { CHANGE } from '@alaq/quark'
@@ -12,7 +13,7 @@ const schemaCache = new WeakMap<any, ModelSchema>()
 
 // Helper to resolve plugins
 function resolvePlugins(
-  kindSelector: AtomicKindSelector | undefined, 
+  kindSelector: string | undefined, 
   localPlugins: AtomPlugin[] | undefined,
   registry: Map<string, AtomPlugin[]>,
   defaults: AtomPlugin[]
@@ -55,7 +56,7 @@ export function createAtomFactory<T extends new (...args: any[]) => any>(
   }
 
   // 2. Return the optimized runtime constructor
-  return function AtomConstructor(constructorArgs?: any[], runtimeOptions?: any) {
+  return function AtomConstructor(constructorArgs?: any[], runtimeOptions?: Pick<AtomOptions, 'realm' | 'name' | 'emitChanges' | 'scope'>) {
     const options = { ...compileOptions, ...runtimeOptions }
     const baseName = options.name || Model.name || 'Atom'
     const modelName = options.name ? baseName : `${baseName}#${++atomUid}`
@@ -132,6 +133,7 @@ export function createAtomFactory<T extends new (...args: any[]) => any>(
         id: `${modelName}.${key}`,
         scope: propScope,
         emitChanges: options.emitChanges,
+        emitChangeName: options.emitChangeName,
         ...finalOptions
       })
 
@@ -176,7 +178,7 @@ export function createAtomFactory<T extends new (...args: any[]) => any>(
         let nucl: any
         if (deps.size > 0) {
           const sourceNucls = Array.from(deps).map(k => nuclMap.get(k)).filter(Boolean)
-          nucl = fusion(...sourceNucls).alive(() => descriptor.get!.call(instance))
+          nucl = (fusion as any)(...sourceNucls).alive(() => descriptor.get!.call(instance))
         } else {
           // Static
           nucl = Nu({ value: descriptor.get!.call(instance) })

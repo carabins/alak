@@ -5,6 +5,8 @@ import { Subscribable, Listener, Unsubscribe, AsyncHandler } from './types';
  * Acts as a wrapper around a Subscribable source.
  */
 export class Fx<T> implements Subscribable<T> {
+  readonly __q = true; // Implement IQ interface marker
+
   constructor(private source: Subscribable<T>) {}
 
   // --- Subscribable Interface ---
@@ -14,9 +16,6 @@ export class Fx<T> implements Subscribable<T> {
   }
 
   up(listener: Listener<T>): Unsubscribe {
-    // We delegate subscription to the source.
-    // However, some sources might strictly return void on .up(),
-    // so we assume .down() is the way to unsubscribe.
     this.source.up(listener);
     return () => this.source.down(listener);
   }
@@ -35,16 +34,7 @@ export class Fx<T> implements Subscribable<T> {
     const mappedSource: Subscribable<R> = {
       get value() { return fn(parent.value); },
       up: (listener) => {
-        // We create a specific wrapper for this listener to handle the mapping
-        // We need to store it to unsubscribe later (WeakMap or closure if simple)
-        // Since Fx creates a chain, the listener passed to `mappedSource.up` is usually 
-        // the `handler` of the next node in chain.
         const wrapper = (val: T) => listener(fn(val));
-        // We rely on the parent to handle the subscription of the wrapper
-        // But how do we map `listener` back to `wrapper` for .down()?
-        // Simple solution: The chain is static during subscription.
-        // But `down` requires the reference.
-        // We use a property on the listener function to store the wrapper, or a Map.
         (listener as any)._fxWrapper = wrapper; 
         parent.up(wrapper);
       },
@@ -66,6 +56,19 @@ export class Fx<T> implements Subscribable<T> {
   }
 
   /**
+   * Only emits when the value is different from the previous one.
+   */
+  distinct(): Fx<T> {
+    let lastValue: T = this.source.value;
+    return this.chain((listener, val) => {
+      if (val !== lastValue) {
+        lastValue = val;
+        listener(val);
+      }
+    });
+  }
+
+  /**
    * Alias for filter.
    */
   when(predicate: (val: T) => boolean): Fx<T> {
@@ -76,8 +79,6 @@ export class Fx<T> implements Subscribable<T> {
    * Samples another source without subscribing to it.
    */
   with<S>(other: Subscribable<S>): Fx<[T, S]> {
-    // Since we can't create a [T, S] from just T in the simple chain helper,
-    // we implement this manually like map.
     const parent = this.source;
     return new Fx({
       get value(): [T, S] { return [parent.value, other.value]; },
@@ -106,7 +107,6 @@ export class Fx<T> implements Subscribable<T> {
   take(n: number): Fx<T> {
     let count = 0;
     const parent = this.source;
-    // Need manual impl to unsubscribe from parent
     return new Fx({
       get value() { return parent.value; },
       up: (listener) => {
@@ -114,11 +114,6 @@ export class Fx<T> implements Subscribable<T> {
           if (count < n) {
             count++;
             listener(val);
-            if (count === n) {
-              // Auto-unsubscribe logic would go here if we had full control
-              // For now, simple flow stops emitting.
-              // In a perfect world, we'd notify upstream to stop.
-            }
           }
         };
         (listener as any)._fxWrapper = wrapper;
@@ -134,23 +129,12 @@ export class Fx<T> implements Subscribable<T> {
   // --- Timing ---
 
   debounce(ms: number): Fx<T> {
-    let timer: any = null;
-    
-    // We need to store timers per listener if we support multiple subscribers.
-    // For Fx usage (usually 1 chain = 1 subscriber), closure is okay-ish,
-    // but correct implementation maps listener -> state.
-    
-    return this.wrap((listener, val) => {
-       // access state associated with listener? 
-       // Simpler: assume Fx chains are unicast or handle state in wrapper factory.
-    }, (listener) => {
-       // Factory for the wrapper
+    return this.wrap(null, (listener) => {
        let timer: any = null;
        const wrapper = (val: T) => {
          if (timer) clearTimeout(timer);
          timer = setTimeout(() => listener(val), ms);
        };
-       // Hook for cleanup when unsubscribing (down)
        (wrapper as any)._cleanup = () => { if(timer) clearTimeout(timer); };
        return wrapper;
     });
@@ -160,9 +144,6 @@ export class Fx<T> implements Subscribable<T> {
     return this.wrap(null, (listener) => {
       let timer: any = null;
       const wrapper = (val: T) => {
-        // Delay logic: if value changes, we might want to cancel previous delay?
-        // SPEC says: "If source updates... previous timer cancelled (cleanup)"
-        // This acts like switchMap with delay.
         if (timer) clearTimeout(timer);
         timer = setTimeout(() => listener(val), ms);
       };
@@ -175,27 +156,15 @@ export class Fx<T> implements Subscribable<T> {
 
   async<R>(handler: AsyncHandler<T, R>): Fx<R> {
     const parent = this.source;
-    
-    // We treat async result as the new value.
-    // Initial value is tricky... maybe undefined? 
-    // Or we just don't emit until first async resolves.
-    
     return new Fx<R>({
-      // We can't synchronously know the value of an async operation.
-      // So .value might be undefined initially or stale.
       // @ts-ignore
       get value() { return undefined as unknown as R; }, 
-      
       up: (listener) => {
         let abortCtrl: AbortController | null = null;
-        
         const wrapper = (val: T) => {
-          // Cancel previous
           if (abortCtrl) abortCtrl.abort();
-          
           abortCtrl = new AbortController();
           const signal = abortCtrl.signal;
-
           handler(val, signal)
             .then(res => {
               if (signal.aborted) return;
@@ -206,20 +175,13 @@ export class Fx<T> implements Subscribable<T> {
               console.error('Fx Async Error:', err);
             });
         };
-        
-        // Attach cleanup logic for explicit unsubscription
-        (wrapper as any)._cleanup = () => {
-          if (abortCtrl) abortCtrl.abort();
-        };
-        
+        (wrapper as any)._cleanup = () => { if (abortCtrl) abortCtrl.abort(); };
         (listener as any)._fxWrapper = wrapper;
         parent.up(wrapper);
       },
-      
       down: (listener) => {
         const wrapper = (listener as any)._fxWrapper;
         if (wrapper) {
-          // Execute cleanup (abort active requests)
           if ((wrapper as any)._cleanup) (wrapper as any)._cleanup();
           parent.down(wrapper);
         }
@@ -228,9 +190,29 @@ export class Fx<T> implements Subscribable<T> {
   }
 
   catch(errorHandler: (err: any) => void): Fx<T> {
-    // Placeholder. To implement properly, we need an error channel alongside value channel.
-    // For now, errors in .async are logged.
     return this;
+  }
+
+  // --- Events ---
+
+  /**
+   * Subscribes to an event from the source (if it's an EventTarget).
+   */
+  fromEvent(eventName: string): Fx<any> {
+    const target = this.source.value as unknown as EventTarget;
+    const eventSource: Subscribable<any> = {
+      value: undefined,
+      up: (listener) => {
+        const handler = (event: Event) => listener(event);
+        (listener as any)._eventHandler = handler;
+        target.addEventListener(eventName, handler);
+      },
+      down: (listener) => {
+        const handler = (listener as any)._eventHandler;
+        if (handler) target.removeEventListener(eventName, handler);
+      }
+    };
+    return new Fx(eventSource);
   }
 
   // --- Helpers ---
@@ -280,6 +262,41 @@ export class Fx<T> implements Subscribable<T> {
   }
 }
 
-export function fx<T>(source: Subscribable<T>): Fx<T> {
+export function fx<A>(source: Subscribable<A>): Fx<A>;
+export function fx<A extends EventTarget>(target: A): Fx<A>;
+export function fx<A, B>(sources: [Subscribable<A>, Subscribable<B>]): Fx<[A, B]>;
+export function fx<A, B, C>(sources: [Subscribable<A>, Subscribable<B>, Subscribable<C>]): Fx<[A, B, C]>;
+export function fx<A, B, C, D>(sources: [Subscribable<A>, Subscribable<B>, Subscribable<C>, Subscribable<D>]): Fx<[A, B, C, D]>;
+export function fx<A, B, C, D, E>(sources: [Subscribable<A>, Subscribable<B>, Subscribable<C>, Subscribable<D>, Subscribable<E>]): Fx<[A, B, C, D, E]>;
+export function fx(source: any): Fx<any> {
+  if (Array.isArray(source)) {
+    const sources = source;
+    const combined: Subscribable<any[]> = {
+      get value() { return sources.map(s => s.value); },
+      up: (listener) => {
+        const emit = () => listener(sources.map(s => s.value));
+        (listener as any)._combinedWrapper = emit;
+        sources.forEach(s => s.up(emit));
+      },
+      down: (listener) => {
+        const emit = (listener as any)._combinedWrapper;
+        if (emit) {
+          sources.forEach(s => s.down(emit));
+        }
+      }
+    };
+    return new Fx(combined);
+  }
+  
+  // If it's not a Subscribable, wrap it
+  if (!source || !source.up || !source.down) {
+    return new Fx({
+      value: source,
+      up: () => {},
+      down: () => {}
+    });
+  }
+  
   return new Fx(source);
 }
+

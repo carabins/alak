@@ -5,7 +5,7 @@ import setupQuarkAndOptions from "@alaq/quark/setupQuarkAndOptions";
 import IQuark from "@alaq/quark/IQuark";
 import {INucleonCore} from "./INucleon";
 
-const defaultKind = "+"
+const defaultKind = "+" as any
 
 const defaultReg = getRegistryForKind(defaultKind) as any
 

@@ -20,6 +20,8 @@ export interface IQuOptions<T = any> {
   dedup?: boolean
   stateless?: boolean
   emitChanges?: boolean
+  /** Custom event name for changes (default: 'change') */
+  emitChangeName?: string
 }
 
 export { CHANGE, AWAKE } from './events'

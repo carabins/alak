@@ -47,13 +47,12 @@ export default function setValue<T>(quark: IQuarkCore, value: T): void {
     if (flags & EMIT_CHANGES) {
        if (quark._bus) {
          const payload = { id: quark.id, value: value }
-
+         const ev = quark._changeEventName || CHANGE
 
          if (quark._scope) {
-           console.log('payload', quark._scope)
-           quark._bus.emitInScope(quark._scope, CHANGE, payload)
+           quark._bus.emitInScope(quark._scope, ev, payload)
          } else {
-           quark._bus.emit(CHANGE, payload)
+           quark._bus.emit(ev, payload)
          }
        }
     }

@@ -1,0 +1,16 @@
+{
+  "name": "@alaq/fx",
+  "version": "0.0.0-alpha.1",
+  "description": "High-performance proactive container with powerful plugin system",
+  "homepage": "https://github.com/carabins/alaq/package/quark",
+  "keywords": [
+    "state management",
+    "reactive",
+    "signals",
+    "store",
+    "atomic state",
+    "observable",
+    "quark",
+    "proactive"
+  ]
+}

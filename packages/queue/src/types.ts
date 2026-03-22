@@ -1,4 +1,4 @@
-import type IQuark from '@alaq/quark/src/IQuark';
+import type { IQuark } from '@alaq/quark';
 
 export type JobStatus = 'pending' | 'active' | 'completed' | 'failed' | 'cancelled';
 

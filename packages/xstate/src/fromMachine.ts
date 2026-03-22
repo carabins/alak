@@ -133,13 +133,13 @@ export function fromMachine<TMachine extends AnyStateMachine>(
   }) as Actor<TMachine>
 
   // --- State & Context Containers ---
-  const snapshot = actor.getSnapshot()
+  const snapshot = actor.getSnapshot() as any
   
   const state$ = createQ(snapshot.value)
   const context$ = createQ(snapshot.context)
   
   // --- Subscription ---
-  const sub = actor.subscribe((s) => {
+  const sub = actor.subscribe((s: any) => {
     state$(s.value)
     context$(s.context)
   })
@@ -157,7 +157,7 @@ export function fromMachine<TMachine extends AnyStateMachine>(
       const matcher = createQ(false)
       
       const check = () => {
-        const snap = actor.getSnapshot()
+        const snap = actor.getSnapshot() as any
         if (snap) {
           matcher(snap.matches(matches))
         }
@@ -193,7 +193,7 @@ export function fromMachine<TMachine extends AnyStateMachine>(
       const checker = createQ(false)
       
       const check = () => {
-        const snap = actor.getSnapshot()
+        const snap = actor.getSnapshot() as any
         if (snap) {
           checker(snap.can({ type: eventType } as any))
         }
