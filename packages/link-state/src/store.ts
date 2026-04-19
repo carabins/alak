@@ -47,10 +47,10 @@ export class SyncStore {
       this.options.onSubscribe?.(path)
     }
     set.add(fn)
-    
+
     // Initial value push
     fn(this._resolvePath(path))
-    
+
     return () => this._unsubscribePath(path, fn)
   }
 

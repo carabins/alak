@@ -1,3 +1,7 @@
 export * from './types'
 export { SyncStore } from './store'
-export { SyncNode } from './node'
+export { createSyncNode } from './node'
+export { createListNode } from './list-node'
+export type { SyncListNode } from './list-node'
+export { createMapNode } from './map-node'
+export type { SyncMapNode } from './map-node'

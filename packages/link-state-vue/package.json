@@ -1,0 +1,5 @@
+{
+  "name": "@alaq/link-state-vue",
+  "version": "0.1.0",
+  "description": "Vue 3 adapter for @alaq/link-state"
+}

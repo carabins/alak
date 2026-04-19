@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>@alaq/link — example</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+    #log { white-space: pre-wrap; font-size: 13px; line-height: 1.5; }
+    button { margin: 4px; padding: 6px 14px; cursor: pointer; }
+    .peer { color: #4fc3f7; }
+    .crdt { color: #aed581; }
+    .sys { color: #ffb74d; }
+    .err { color: #ef5350; }
+  </style>
+</head>
+<body>
+  <h2>@alaq/link example</h2>
+  <div>
+    <button onclick="sendIncrement()">Increment Counter</button>
+    <button onclick="sendAddWord()">Add Random Word</button>
+    <button onclick="sendRemoveWord()">Remove Last Word</button>
+    <button onclick="showState()">Show State</button>
+  </div>
+  <div id="log"></div>
+
+  <script type="module">
+    // Inline minimal client — no bundler needed
+    // Uses raw WebSocket + msgpack-lite via CDN
+
+    const log = document.getElementById('log')
+    function print(msg, cls = '') {
+      const line = document.createElement('div')
+      if (cls) line.className = cls
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`
+      log.prepend(line)
+    }
+
+    // Minimal msgpack encode/decode (subset for demo)
+    // In production, use msgpackr via bundler
+    function jsonEncode(v) { return new TextEncoder().encode(JSON.stringify(v)) }
+    function jsonDecode(d) { return JSON.parse(new TextDecoder().decode(d)) }
+
+    const peerId = 'peer-' + Math.random().toString(36).slice(2, 6)
+    print(`My peer ID: ${peerId}`, 'sys')
+
+    // State
+    let counter = 0
+    let words = []
+    let peers = []
+
+    const ws = new WebSocket(`ws://localhost:3456`)
+    ws.binaryType = 'arraybuffer'
+
+    ws.onopen = () => {
+      print('Connected to server', 'sys')
+      // Send HELLO (type=0)
+      sendMsg(0, { peerId, metadata: { name: peerId } })
+    }
+
+    ws.onmessage = (ev) => {
+      const data = new Uint8Array(ev.data)
+      const type = data[0]
+      let payload
+      try {
+        payload = jsonDecode(data.subarray(1))
+      } catch(e) {
+        print('Failed to decode: ' + e.message, 'err')
+        return
+      }
+
+      switch(type) {
+        case 1: // WELCOME
+          print(`Welcome! Crown holder: ${payload.crownHolder}`, 'sys')
+          peers = payload.peers || []
+          print(`Peers online: ${peers.map(p => p.id).join(', ') || 'none'}`, 'peer')
+          break
+        case 10: // PATCH
+          print(`Patch from network: ${payload.ch} = ${JSON.stringify(payload.d)}`, 'crdt')
+          if (payload.ch === 'counter') counter = payload.d
+          if (payload.ch === 'words') words = payload.d
+          break
+        case 20: // PEER_JOIN
+          print(`Peer joined: ${payload.id}`, 'peer')
+          break
+        case 21: // PEER_LEAVE
+          print(`Peer left: ${payload.id}`, 'peer')
+          break
+        case 30: // PING
+          sendMsg(31, { t: Date.now(), rt: payload.t })
+          break
+        case 40: // CROWN_BEAT
+          // silent
+          break
+        case 60: // CRDT_OP
+          print(`CRDT op: ${JSON.stringify(payload)}`, 'crdt')
+          break
+        default:
+          print(`Unknown msg type ${type}: ${JSON.stringify(payload)}`)
+      }
+    }
+
+    ws.onclose = () => print('Disconnected', 'err')
+    ws.onerror = () => print('WebSocket error', 'err')
+
+    function sendMsg(type, payload) {
+      const body = jsonEncode(payload)
+      const msg = new Uint8Array(1 + body.length)
+      msg[0] = type
+      msg.set(body, 1)
+      ws.send(msg)
+    }
+
+    // Expose to buttons
+    window.sendIncrement = () => {
+      counter++
+      sendMsg(10, { ch: 'counter', d: counter }) // PATCH
+      print(`Counter → ${counter}`, 'crdt')
+    }
+
+    window.sendAddWord = () => {
+      const w = ['кот', 'собака', 'крокодил', 'жираф', 'пингвин', 'медведь'][Math.floor(Math.random()*6)]
+      words.push(w)
+      sendMsg(10, { ch: 'words', d: words })
+      print(`Added word: ${w}`, 'crdt')
+    }
+
+    window.sendRemoveWord = () => {
+      const removed = words.pop()
+      if (removed) {
+        sendMsg(10, { ch: 'words', d: words })
+        print(`Removed word: ${removed}`, 'crdt')
+      }
+    }
+
+    window.showState = () => {
+      print(`Counter: ${counter}`, 'crdt')
+      print(`Words: [${words.join(', ')}]`, 'crdt')
+    }
+  </script>
+</body>
+</html>
