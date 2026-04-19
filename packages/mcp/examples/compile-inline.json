@@ -1,0 +1,8 @@
+{
+  "inputs": [
+    {
+      "path": "players.aql",
+      "source": "schema S { version: 1, namespace: \"s\" }\nrecord Player { id: ID!, name: String! }"
+    }
+  ]
+}

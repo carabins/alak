@@ -1,0 +1,25 @@
+{
+  "name": "@alaq/mcp",
+  "version": "0.1.0-draft",
+  "description": "AI-first MCP server for alaqlink: schema compile/diff + runtime observe",
+  "type": "module",
+  "main": "./src/index.ts",
+  "bin": {
+    "alaq-mcp": "./src/bin.ts",
+    "alaq-mcp-call": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "bun src/bin.ts"
+  },
+  "dependencies": {
+    "@alaq/graph": "workspace:*",
+    "@alaq/link": "workspace:*"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "agent",
+    "alaq",
+    "sdl"
+  ]
+}

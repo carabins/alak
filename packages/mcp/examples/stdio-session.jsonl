@@ -1,0 +1,3 @@
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"tools/list"}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"schema_compile","arguments":{"inputs":[{"path":"p.aql","source":"schema S { version: 1, namespace: \"s\" }\nrecord Player { id: ID!, name: String! }"}]}}}

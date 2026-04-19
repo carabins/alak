@@ -1,0 +1,11 @@
+{
+  "before": {
+    "paths": ["core.aql", "lobby.aql", "players.aql"],
+    "rootDir": "A:/source/alak/Kotelok-2/schema"
+  },
+  "after": [
+    { "path": "core.aql", "source": "schema Kotelok2 { version: 1, namespace: \"kotelok2\" }\nscalar ClientId" },
+    { "path": "lobby.aql", "source": "schema Kotelok2 { version: 1, namespace: \"kotelok2\" }\nrecord GameRoom @scope(name: \"room\") { id: ID! }" },
+    { "path": "players.aql", "source": "schema Kotelok2 { version: 1, namespace: \"kotelok2\" }\nuse \"./core\" { ClientId }\nrecord Player { id: ID!, name: String!, clientId: ClientId!, status: String }" }
+  ]
+}

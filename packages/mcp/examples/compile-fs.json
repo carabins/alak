@@ -1,0 +1,4 @@
+{
+  "paths": ["core.aql", "lobby.aql", "players.aql"],
+  "rootDir": "A:/source/alak/Kotelok-2/schema"
+}
