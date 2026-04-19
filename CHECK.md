@@ -18,20 +18,26 @@ If a step fails, **stop and report**. Do not try to fix. The goal is diagnosis, 
 ```bash
 bun --version
 ```
-**Expected:** `1.3.0` or later.
+**Expected:** `1.3.0` or later. Observed today: `1.3.0`.
 
-### 0.2 Verify cwd
+### 0.2 Verify cwd and key root files
 ```bash
 pwd
-ls packages | head -20
+ls A:/source/alak/AGENTS.md A:/source/alak/PHILOSOPHY.md A:/source/alak/CONTRIBUTING.md A:/source/alak/architecture.yaml A:/source/alak/LICENSE A:/source/alak/LICENSE-APACHE
 ```
-**Expected:** `A:/source/alak`. Listing shows `graph/`, `graph-link-state/`, `graph-link-server/`, `graph-zenoh/`, `link/`, `link-state/`, `link-state-vue/`, `quark/`, `nucl/`, `atom/`, `fx/`, plus utilities.
+**Expected:** `pwd` ends with `/source/alak`. All six files listed without "No such file" error.
 
-### 0.3 Verify no accidental work-in-progress
+### 0.3 Verify packages directory
+```bash
+ls A:/source/alak/packages | head -30
+```
+**Expected:** listing includes (at minimum) `graph/`, `graph-link-state/`, `graph-link-server/`, `graph-zenoh/`, `link/`, `link-state/`, `link-state-vue/`, `quark/`, `nucl/`, `atom/`, `fx/`, `mcp/`.
+
+### 0.4 Git status (informational only)
 ```bash
 cd A:/source/alak && git status --porcelain | head -20
 ```
-**Expected:** either clean or only previously-known changes. Not a test gate, informational.
+Not a test gate. Just lists working-tree state for the report.
 
 ---
 
@@ -46,7 +52,9 @@ Read this once before running anything. You must be able to explain each box wit
 │                        │                                               │
 │                        ├──► @alaq/graph-link-state  → client TS       │
 │                        ├──► @alaq/graph-link-server → server TS       │
-│                        └──► @alaq/graph-zenoh       → Rust (Zenoh)    │
+│                        ├──► @alaq/graph-zenoh       → Rust (Zenoh)    │
+│                        └──► @alaq/mcp               → AI tool surface │
+│                                                       (compile, diff) │
 │                                                                        │
 └────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -86,82 +94,92 @@ Read this once before running anything. You must be able to explain each box wit
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.1 Key rules (from AGENTS.md and SPEC.md)
+`@alaq/mcp` is a sibling tool to the generators: it does not produce code, it exposes the `@alaq/graph` compile/diff surface to AI agents over JSON-RPC stdio (MCP).
+
+### 1.1 Key rules (from AGENTS.md, PHILOSOPHY.md, SPEC.md)
 
 - **SDL is the single source of truth.** Types, wire shapes, CRDT schema, all derived.
 - **Generators are plugins.** Named by transport/platform, never by product. `@alaq/graph-zenoh` good; `@alaq/graph-kotelok` forbidden.
 - **Core is neutral.** `@alaq/graph` doesn't know about Zenoh, Tauri, Vue. It emits IR.
 - **Transport tiers:** Tier 0 (ws+http), Tier 1 (+webrtc), Tier 2 (+zenoh native), Tier 3 (zenoh-wasm PWA).
 - **Closed directive set** lives in `@alaq/graph/SPEC.md` §7. Adding a directive requires spec bump.
+- **Stability:** v6 is in `6.0.0-alpha.0`. Tool/IR surface may shift until `6.0.0`. SDL semantics frozen at SPEC.md v0.3.
 
 ### 1.2 Files to know (absolute paths for this working tree)
 
 - `A:\source\alak\AGENTS.md` — manifest, 64 lines, read first
+- `A:\source\alak\PHILOSOPHY.md` — normative "why" doc, 118 lines
+- `A:\source\alak\CONTRIBUTING.md` — contributor rules, 57 lines
 - `A:\source\alak\architecture.yaml` — package registry, tiers, forbidden deps
-- `A:\source\alak\packages\graph\SPEC.md` — SDL spec v0.3, normative, ~1100 lines
+- `A:\source\alak\LICENSE` — TVR (custom, repo-level)
+- `A:\source\alak\LICENSE-APACHE` — Apache-2.0 (npm artifacts)
+- `A:\source\alak\packages\graph\SPEC.md` — SDL spec v0.3, normative, 1088 lines
 - `A:\source\alak\packages\link-state\RUNTIME.md` — runtime cookbook, 1112 lines
-- `A:\source\alak\Kotelok-2\` — reference consumer project
-- `A:\source\alak\Kotelok-2\FINDINGS.md` — DX observations from live-test, open backlog
+- `A:\source\alak\packages\mcp\src\bin.ts` — MCP stdio entry point
+- `A:\source\alak\packages\mcp\src\cli.ts` — one-shot MCP CLI wrapper
 
 ---
 
-## 2. Package health check
+## 2. All test suites green
 
-### 2.1 All test suites green
-
-Run each, expect `0 fail` and the noted pass count:
+Run each, expect `0 fail` and the noted pass count.
 
 ```bash
 cd A:/source/alak/packages/graph && bun test 2>&1 | tail -3
 ```
-**Expected:** `127 tests across 8 files`, `0 fail`.
+**Expected:** `Ran 127 tests across 8 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/graph-link-state && bun test 2>&1 | tail -3
 ```
-**Expected:** `130 tests across 9 files`, `0 fail`.
+**Expected:** `Ran 130 tests across 9 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/graph-link-server && bun test 2>&1 | tail -3
 ```
-**Expected:** `35 tests across 3 files`, `0 fail`.
+**Expected:** `Ran 35 tests across 3 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/graph-zenoh && bun test 2>&1 | tail -3
 ```
-**Expected:** `81 tests across 4 files`, `0 fail`.
+**Expected:** `Ran 81 tests across 4 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/link-state && bun test 2>&1 | tail -3
 ```
-**Expected:** `25 tests across 4 files`, `0 fail`.
+**Expected:** `Ran 25 tests across 4 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/link-state-vue && bun test 2>&1 | tail -3
 ```
-**Expected:** `8 tests across 1 file`, `0 fail`.
+**Expected:** `Ran 8 tests across 1 file`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/quark && bun test 2>&1 | tail -3
 ```
-**Expected:** `107 tests`, `0 fail`.
+**Expected:** `Ran 107 tests across 7 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/nucl && bun test 2>&1 | tail -3
 ```
-**Expected:** `43 tests`, `0 fail`.
+**Expected:** `Ran 43 tests across 7 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/atom && bun test 2>&1 | tail -3
 ```
-**Expected:** `38 tests`, `0 fail`.
+**Expected:** `Ran 38 tests across 11 files`, `0 fail`.
 
 ```bash
 cd A:/source/alak/packages/fx && bun test 2>&1 | tail -3
 ```
-**Expected:** `9 tests`, `0 fail`.
+**Expected:** `Ran 9 tests across 1 file`, `0 fail`.
 
-**Grand total: 603 tests across 10 packages, 0 failures.**
+```bash
+cd A:/source/alak/packages/mcp && bun test 2>&1 | tail -3
+```
+**Expected:** `Ran 34 tests across 3 files`, `0 fail`.
+
+**Grand total: 637 tests across 11 packages, 0 failures, 1291 expect() calls.**
 
 **Pre-existing failures to ignore:** `packages/flex/test/ui-bug.test.ts` (Pixi), `packages/flex/test/e2e/visual.spec.ts` (Playwright config). Not in scope.
 
@@ -203,14 +221,17 @@ const res = compileSources([
 ])
 console.log('errors:', res.diagnostics.filter(d => d.severity === 'error').length)
 console.log('records:', Object.keys(res.ir.schemas.s.records).sort())
+console.log('first:', res.diagnostics.find(d => d.severity === 'error')?.code)
 "
 ```
-**Expected:**
+**Expected (currently fails — see §3.2 note):**
 ```
-errors: 0
+errors: 1
 records: [ "A", "B" ]
+first: E009
 ```
-Two files merged into one namespace.
+
+**§3.2 note — known bug.** Two `.aql` files declaring the same `schema S { ... }` and cross-referencing each other's records do not link cleanly: the linker emits `E009 — field type references undefined type "A"` even though `A` is present in `res.ir.schemas.s.records`. The IR contains both records, the type-check phase still treats the second file's reference as undefined. The previous CHECK.md run also flagged this; it is not fixed today. Real consumers work around it by colocating cross-referencing records in one file, or by using fully-qualified namespaces.
 
 ### 3.3 Verify TS generator
 
@@ -226,8 +247,9 @@ const c = gen.files[0].content
 console.log('file:', gen.files[0].path)
 console.log('IPlayer:', c.includes('export interface IPlayer'))
 console.log('PlayerNode:', c.includes('export interface PlayerNode'))
+console.log('createPlayerNode:', c.includes('export function createPlayerNode'))
 console.log('usePlayer:', c.includes('export function usePlayer'))
-console.log('kotelokSchema:', c.includes('Schema: Record'))
+console.log('usePlayerInScope:', c.includes('export function usePlayerInScope'))
 "
 ```
 **Expected:**
@@ -235,9 +257,14 @@ console.log('kotelokSchema:', c.includes('Schema: Record'))
 file: s.generated.ts
 IPlayer: true
 PlayerNode: true
+createPlayerNode: true
 usePlayer: true
-kotelokSchema: true
+usePlayerInScope: true
 ```
+
+**§3.3 note.** The generator does **not** currently emit a `kotelokSchema` / `<ns>Schema: Record<...>` constant. Old CHECK.md asserted such an export existed; it does not in the current `@alaq/graph-link-state` output. The actual exports per record are: `I<Name>`, `<Name>Node`, `create<Name>Node`, `Use<Name>Result`, `use<Name>`, `use<Name>InScope`, plus a single `createApi(store)` factory. No top-level schema-as-Record constant. If a downstream tool needs runtime schema metadata it should consume the IR directly via `@alaq/graph` or `@alaq/mcp`.
+
+The header still reads `// AUTOGENERATED by @alaq/graph-link-state v0.1.0-draft` — the version string in the generated banner has not been bumped to `6.0.0-alpha.0`. Cosmetic, not a behavioural bug.
 
 ### 3.4 Verify Zenoh/Rust generator
 
@@ -280,6 +307,7 @@ action JoinRoom { scope: \\\"room\\\", input: { name: String! }, output: Player!
 ])
 const gen = generate(res.ir)
 const c = gen.files[0].content
+console.log('file:', gen.files[0].path)
 console.log('ActionHandlers:', c.includes('export interface ActionHandlers'))
 console.log('joinRoom signature:', c.includes('joinRoom(ctx'))
 console.log('createActionDispatcher:', c.includes('export function createActionDispatcher'))
@@ -287,6 +315,7 @@ console.log('createActionDispatcher:', c.includes('export function createActionD
 ```
 **Expected:**
 ```
+file: s.server.generated.ts
 ActionHandlers: true
 joinRoom signature: true
 createActionDispatcher: true
@@ -303,245 +332,250 @@ Proves the Rust emitter produces code that actually compiles against real `zenoh
 cargo --version
 rustc --version
 ```
-**Expected:** `cargo 1.75+`, `rustc 1.75+`.
+**Expected:** `cargo 1.75+`, `rustc 1.75+`. Observed today: `cargo 1.91.0`, `rustc 1.91.0`.
 
 ### 4.2 Run cargo check via scaffold
 
 ```bash
 cd A:/source/alak && bun run packages/graph-zenoh/scripts/check-kotelok.ts 2>&1 | tail -10
 ```
-**Expected:** ends with `cargo check OK`. First run may take ~3 minutes to download crates. Subsequent runs: <5 seconds.
+**Expected:** ends with `[check-kotelok] cargo check OK`. First run may take a few minutes to fetch crates. Subsequent runs typically complete in under a second (observed today: `Finished dev profile ... in 0.59s`).
 
-**If fails:** note errors. Common causes: missing zenoh/tokio in `artifacts/graph-zenoh-check/Cargo.toml`, offline network preventing crate fetch.
+Two warnings are normal and expected:
+```
+[check-kotelok] gen warning: Directive @auth is preserved as a comment only in v0.1 of @alaq/graph-zenoh.
+[check-kotelok] gen warning: Directive @range is preserved as a comment only in v0.1 of @alaq/graph-zenoh.
+```
+
+**If fails:** note errors. Common causes: missing zenoh/tokio in `artifacts/graph-zenoh-check/Cargo.toml`, offline network preventing crate fetch, breaking change to the SDL fixtures in `packages/graph/test/fixtures/kotelok/`.
 
 ---
 
-## 5. Kotelok-2 reference project
+## 5. Live end-to-end (PENDING REPLACEMENT)
 
-This is the living example. Anything that works here should work in a new project.
+`Kotelok-2/` was extracted from this repo (the directory is now empty in the working tree). The live e2e protocol that previously occupied this section — server boot, smoke client, `WELCOME / CreateRoom / JoinRoom / SNAPSHOT` round-trip — has no in-tree consumer to run against today.
 
-### 5.1 TypeScript compiles
-```bash
-cd A:/source/alak/Kotelok-2/client && bun x tsc --noEmit -p tsconfig.json 2>&1 | tail -20
-```
-**Expected:** **zero errors**. No `alaq-shim.d.ts` involved — file should not exist.
-
-```bash
-ls A:/source/alak/Kotelok-2/client/src/alaq-shim.d.ts 2>&1
-```
-**Expected:** `No such file or directory`.
-
-### 5.2 Regenerate from SDL
-```bash
-cd A:/source/alak/Kotelok-2 && bun run scripts/gen.ts 2>&1 | tail -10
-```
-**Expected:** writes `client/src/generated/kotelok2.generated.ts` and `server/generated/kotelok2.server.generated.ts` (or equivalent paths). No errors.
-
-### 5.3 Generated output shape
-
-```bash
-grep -E "export (interface|function|enum|type|const)" A:/source/alak/Kotelok-2/client/src/generated/kotelok2.generated.ts | head -20
-```
-**Expected:** lists like
-```
-export enum RoomStatus
-export interface IPlayer
-export interface IGameRoom
-export interface PlayerNode
-export interface GameRoomNode
-export function createGameRoomNode
-export interface UseGameRoomResult
-export function useGameRoom
-export function useGameRoomInScope
-export const kotelok2Schema: Record
-```
-(exact names vary with SDL).
-
-### 5.4 Server starts
-
-```bash
-cd A:/source/alak/Kotelok-2/server && (timeout 5 bun run index.ts &) && sleep 3 && echo "server up"
-```
-**Expected:** `server up` prints before the server is killed by timeout.
-
-### 5.5 End-to-end smoke
-
-Start server in one terminal (background):
-```bash
-cd A:/source/alak/Kotelok-2/server && bun run index.ts &
-SERVER_PID=$!
-sleep 2
-```
-
-Run smoke client:
-```bash
-cd A:/source/alak/Kotelok-2 && bun run scripts/smoke.ts 2>&1 | tail -10
-```
-**Expected output contains:**
-```
-WELCOME
-CreateRoom → <room-id>
-JoinRoom → {...player object...}
-SNAPSHOT ← {...room state...}
-```
-All four: `WELCOME`, `CreateRoom`, `JoinRoom`, `SNAPSHOT`.
-
-Clean up:
-```bash
-kill $SERVER_PID 2>/dev/null
-```
-
-**If smoke hangs:** server not reachable. Check port 3456 isn't busy, no firewall block on WebSocket.
+When a new reference consumer is in place (the user has indicated one will be provided), this section should be reconstructed: regenerate from SDL, boot the server, drive a smoke client end-to-end. Until then, treat this section as a **gap**. The compile-time pipeline (§2–§4) and the MCP surface (§6) are still verifiable; the runtime read/write paths are exercised only by `@alaq/link-state` / `@alaq/link` unit tests in §2.
 
 ---
 
-## 6. Critical pipeline invariants
+## 6. MCP server health
 
-### 6.1 Ghost-loop guard present
+`@alaq/mcp` exposes two tools to AI agents: `schema_compile` and `schema_diff`. It ships two binaries declared in `packages/mcp/package.yaml`:
+
+- `alaq-mcp` — long-running newline-delimited JSON-RPC stdio server (`src/bin.ts`)
+- `alaq-mcp-call` — one-shot CLI wrapper that handles `initialize` + a single `tools/call`, then exits (`src/cli.ts`)
+
+### 6.1 Both binaries declared in package.yaml
+
+```bash
+cd A:/source/alak && bun -e "
+import { parse } from 'yaml'
+import { readFileSync } from 'node:fs'
+const y = parse(readFileSync('packages/mcp/package.yaml','utf8'))
+console.log(JSON.stringify(y.bin, null, 2))
+"
+```
+**Expected:**
+```
+{
+  "alaq-mcp": "./src/bin.ts",
+  "alaq-mcp-call": "./src/cli.ts"
+}
+```
+
+### 6.2 Stdio server: initialize + tools/list returns 2 tools
+
+```bash
+cd A:/source/alak && printf '%s\n%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | bun packages/mcp/src/bin.ts 2>/dev/null
+```
+**Expected:** two JSON-RPC response lines on stdout. The first carries `serverInfo: {"name":"@alaq/mcp","version":"6.0.0-alpha.0"}`. The second carries `result.tools` — a 2-element array whose `name` fields are exactly `schema_compile` and `schema_diff`.
+
+### 6.3 CLI wrapper --list returns the same 2 tools
+
+```bash
+cd A:/source/alak && bun packages/mcp/src/cli.ts --list 2>/dev/null
+```
+**Expected:** pretty-printed JSON `{ "tools": [ ... ] }` with two entries, names `schema_compile` and `schema_diff`. (No third tool — `runtime_observe` was removed.)
+
+### 6.4 Sandbox check: rootDir escape is refused
+
+```bash
+cd A:/source/alak && bun packages/mcp/src/cli.ts schema_compile '{"paths":["../../../etc/passwd"],"rootDir":"./packages/graph"}' 2>&1; echo "EXIT: $?"
+```
+**Expected:** non-zero exit (`EXIT: 1`) and stderr line containing `escapes rootDir` and `refusing to read`. Observed today:
+```
+JSON-RPC error -32000: schema_compile: path "../../../etc/passwd" escapes rootDir "A:\source\alak\packages\graph" — refusing to read
+EXIT: 1
+```
+
+---
+
+## 7. Critical pipeline invariants
+
+These are previously-fixed P0 regressions or structural rules. They must remain true.
+
+### 7.1 Ghost-loop guard present
 
 ```bash
 grep -n "isGhost" A:/source/alak/packages/link/src/bridge.ts
 ```
-**Expected:** a line importing `isGhost` and a line with `if (isGhost(value) || value === undefined) return`. Without this guard, `SyncBridge.watch` enters an infinite fetch loop on missing paths (closed P0 issue).
+**Expected:** at minimum two lines — an import of `isGhost` and a guard `if (isGhost(value) || value === undefined) return`. Without this guard, `SyncBridge.watch` enters an infinite fetch loop on missing paths.
 
-### 6.2 onAction is awaited in server
+### 7.2 onAction is awaited in server
 
 ```bash
 grep -n "await config.onAction" A:/source/alak/packages/link/server/index.ts
 ```
-**Expected:** a line in `FETCH` handler with `await config.onAction?.(...)`. Without `await`, server returns `{}` silently to client (closed P0 issue).
+**Expected:** a line in the FETCH handler with `await config.onAction?.(...)`. Without `await`, server returns `{}` silently to the client.
 
-### 6.3 FieldSchema is re-exported
+### 7.3 FieldSchema is re-exported
 
 ```bash
 grep "FieldSchema" A:/source/alak/packages/link/src/index.ts
 ```
-**Expected:** `export type { FieldSchema, CRDTEngineConfig } from './crdt/index'`. Without this, consumers must import from `@alaq/link/crdt` subpath (closed P0 issue).
+**Expected:** `export type { FieldSchema, CRDTEngineConfig } from './crdt/index'`. Without this, consumers must import from the `@alaq/link/crdt` subpath.
 
-### 6.4 msgpackr lazy-loaded (no static import for Vite)
+### 7.4 msgpackr lazy-loaded (no static import for Vite)
 
 ```bash
-grep -A 2 "loadMsgpackSync\|_msgpackAttempted" A:/source/alak/packages/link/src/codec.ts | head -15
+grep -n "loadMsgpackSync\|_msgpackAttempted\|msgpackr" A:/source/alak/packages/link/src/codec.ts | head -10
 ```
-**Expected:** uses `(globalThis as any).require` with a variable name `'msgpackr'`, not static `require('msgpackr')`. This hides msgpackr from static analyzers.
+**Expected:** uses an internal `loadMsgpackSync` function that resolves `'msgpackr'` via a runtime-built name (so static analyzers like Vite don't try to bundle it). No top-level `import 'msgpackr'`.
 
-### 6.5 `.d.ts` bundles present
+### 7.5 `.d.ts` bundles present (or rebuildable)
 
 ```bash
 ls A:/source/alak/packages/link/dist/src/index.d.ts A:/source/alak/packages/graph/dist/index.d.ts A:/source/alak/packages/link-state-vue/dist/index.d.ts 2>&1
 ```
-**Expected:** all three files exist (or rebuild via `bun run build:types` from repo root if missing — `dist/` is gitignored).
-
-If missing:
+**Expected:** all three files exist. If missing (the `dist/` tree is gitignored), rebuild from repo root:
 ```bash
 cd A:/source/alak && bun run build:types 2>&1 | tail -5
 ```
-**Expected:** final line like `build:types OK` or per-package success lines with no errors.
+**Expected:** no errors in the tail; per-package success.
 
-### 6.6 Subscriber uses `Arc<Session>`
+### 7.6 Subscriber uses `Arc<Session>`
 
 ```bash
 grep -n "session: Arc<Session>" A:/source/alak/packages/graph-zenoh/src/publishers-gen.ts
 ```
-**Expected:** two lines — for scoped and unscoped subscribers. Without `Arc<Session>`, `tokio::spawn` E0521 lifetime error (closed P0 issue).
+**Expected:** at least two lines (scoped + unscoped subscriber emission). Without `Arc<Session>`, `tokio::spawn` triggers `E0521` lifetime errors.
+
+### 7.7 All 19 `packages/*/package.yaml` parse as valid YAML
+
+```bash
+cd A:/source/alak && bun -e "
+import { parse } from 'yaml'
+import { readFileSync, readdirSync } from 'node:fs'
+const dirs = readdirSync('packages').filter(d => {
+  try { readFileSync('packages/'+d+'/package.yaml','utf8'); return true } catch { return false }
+})
+let bad = 0
+for (const d of dirs) {
+  try {
+    const y = parse(readFileSync('packages/'+d+'/package.yaml','utf8'))
+    if (!y.name) { console.log('  no name:', d); bad++ }
+  } catch (e) { console.log('  parse fail:', d, e.message); bad++ }
+}
+console.log('count:', dirs.length, 'bad:', bad)
+"
+```
+**Expected:** `count: 19 bad: 0`.
+
+### 7.8 License declared on the publishable v6 packages with explicit Apache-2.0
+
+The repo is dual-licensed: `LICENSE` is TVR (custom, repo-level); `LICENSE-APACHE` (Apache 2.0) covers npm artifacts. Packages that already declare it should keep declaring it.
+
+```bash
+cd A:/source/alak && bun -e "
+import { parse } from 'yaml'
+import { readFileSync } from 'node:fs'
+for (const p of ['graph','mcp','link','quark']) {
+  const y = parse(readFileSync('packages/'+p+'/package.yaml','utf8'))
+  console.log(p+':', 'license='+y.license)
+}
+"
+```
+**Expected (currently mixed — see §7.8 note):**
+```
+graph: license=Apache-2.0
+mcp: license=Apache-2.0
+link: license=undefined
+quark: license=undefined
+```
+
+**§7.8 note — coverage gap.** Only `@alaq/graph` and `@alaq/mcp` currently declare `license: Apache-2.0` in their `package.yaml`. `@alaq/atom` declares `license: MIT`. The other 16 publishable v6 packages (including `link`, `link-state-vue`, `graph-link-state`, `graph-link-server`, `graph-zenoh`, `quark`, `nucl`, `fx`, etc.) have no `license` field at all. The `LICENSE-APACHE` file at repo root exists, but the per-package metadata is incomplete. Backfill is a separate task, not gated by this protocol; flagged here so the report surfaces it.
 
 ---
 
-## 7. Documentation coverage
+## 8. Documentation coverage
 
-### 7.1 AGENTS.md exists and has rules
+### 8.1 AGENTS.md exists and has rules
 ```bash
 grep -c "^##\|^-" A:/source/alak/AGENTS.md
 ```
-**Expected:** 20+ (headings + bullet rules).
+**Expected:** 20+ (headings + bullet rules). Observed today: `28`.
 
-### 7.2 SPEC.md is v0.3
+### 8.2 PHILOSOPHY.md exists and pins the alpha version
+```bash
+head -1 A:/source/alak/PHILOSOPHY.md
+grep -n "6\.0\.0-alpha\.0" A:/source/alak/PHILOSOPHY.md
+```
+**Expected:** title line on stdout, plus at least one match line referencing `6.0.0-alpha.0` in the stability section.
+
+### 8.3 SPEC.md is v0.3
 ```bash
 head -5 A:/source/alak/packages/graph/SPEC.md
 ```
 **Expected:** `**Version:** 0.3` on line 3.
 
-### 7.3 SPEC.md has EBNF grammar
+### 8.4 SPEC.md has EBNF grammar
 ```bash
-grep -c "```ebnf" A:/source/alak/packages/graph/SPEC.md
+grep -c '```ebnf' A:/source/alak/packages/graph/SPEC.md
 ```
 **Expected:** `1` (grammar block in §2).
 
-### 7.4 RUNTIME.md exists and has 8 recipes
+### 8.5 RUNTIME.md exists and has 8 recipes
 ```bash
 grep -c "^### 9\." A:/source/alak/packages/link-state/RUNTIME.md
 ```
 **Expected:** `8` (recipes 9.1 through 9.8).
 
-### 7.5 Kotelok-2 FINDINGS.md is present
-
+### 8.6 CONTRIBUTING.md exists
 ```bash
-grep -c "\[blocker\]\|\[friction\]\|\[nit\]" A:/source/alak/Kotelok-2/FINDINGS.md
+wc -l A:/source/alak/CONTRIBUTING.md
 ```
-**Expected:** 30+. Open backlog of DX issues, not all resolved.
+**Expected:** non-empty. Observed today: `57`.
 
 ---
 
-## 8. Architecture boundaries
+## 9. Architecture boundaries
 
 These are hard rules from `architecture.yaml > forbidden_dependencies`.
 
-### 8.1 `@alaq/graph` has no plugin deps
+### 9.1 `@alaq/graph` has no plugin deps
 
 ```bash
 grep "alaq/graph-" A:/source/alak/packages/graph/package.yaml
 ```
 **Expected:** **no output**. Core must not depend on plugins.
 
-### 8.2 Plugins don't depend on each other
+### 9.2 Plugins don't depend on each other
 
 ```bash
 for pkg in graph-link-state graph-link-server graph-zenoh; do
   echo "=== $pkg ==="
-  grep "alaq/graph-" A:/source/alak/packages/$pkg/package.yaml | grep -v "$pkg" | grep -v "alaq/graph\""
+  grep "alaq/graph-" A:/source/alak/packages/$pkg/package.yaml | grep -v "name:" | grep -v "homepage" | grep -v "directory" || echo "  (none)"
 done
 ```
-**Expected:** either empty or only `@alaq/graph` in devDeps. Never another `@alaq/graph-*`.
+**Expected:** for each plugin, output is either `(none)` or only declarations of `@alaq/graph` itself (in deps/devDeps) — never another `@alaq/graph-*`.
 
-### 8.3 No product-specific plugin names
-
-```bash
-ls A:/source/alak/packages | grep -E "graph-(kotelok|valkyrie|busynca|sokol)"
-```
-**Expected:** **no output**. Plugins named by transport/platform, not product.
-
----
-
-## 9. Spec → reality round-trip
-
-Proves SDL is the real source of truth.
-
-### 9.1 Change SDL, regenerate, verify diff in output
+### 9.3 No product-specific plugin names
 
 ```bash
-cp A:/source/alak/Kotelok-2/schema/players.aql /tmp/players.aql.bak
+ls A:/source/alak/packages | grep -E "graph-(kotelok|valkyrie|busynca|sokol)" || echo "(none)"
 ```
-
-Add a field:
-```bash
-cat A:/source/alak/Kotelok-2/schema/players.aql
-# Note current fields of Player record
-```
-
-Add a new field `status: String` to `Player` in `players.aql`. Then:
-```bash
-cd A:/source/alak/Kotelok-2 && bun run scripts/gen.ts 2>&1 | tail -3
-grep "status" A:/source/alak/Kotelok-2/client/src/generated/kotelok2.generated.ts | head -3
-```
-**Expected:** new `status` field visible in `IPlayer` interface.
-
-Restore:
-```bash
-cp /tmp/players.aql.bak A:/source/alak/Kotelok-2/schema/players.aql
-cd A:/source/alak/Kotelok-2 && bun run scripts/gen.ts 2>&1 | tail -1
-```
-
-This is a manual step. Skip if uncomfortable with regenerating files.
+**Expected:** `(none)`. Plugins named by transport/platform, not product.
 
 ---
 
@@ -557,26 +591,30 @@ After running all sections, produce this report. Be precise.
 | Section | Pass/Fail | Observed |
 |---|---|---|
 | 0.1 Bun version | ? | ? |
-| 0.2 CWD + packages | ? | ? |
-| 2.1 All packages green | ? | tests total = ? |
+| 0.2 Root files present | ? | ? |
+| 0.3 Packages dir | ? | ? |
+| 2 All packages green | ? | tests total = ?, expect = ? |
 | 3.1 SDL parse | ? | ? |
-| 3.2 Multi-file linker | ? | ? |
-| 3.3 TS generator | ? | ? |
+| 3.2 Multi-file linker | ? | E009? |
+| 3.3 TS generator | ? | exports listed |
 | 3.4 Zenoh generator | ? | ? |
 | 3.5 Server generator | ? | ? |
 | 4.2 cargo check | ? | time = ?s |
-| 5.1 Kotelok-2 TS compiles | ? | errors = ? |
-| 5.2 Regenerate | ? | ? |
-| 5.5 E2E smoke | ? | ? |
-| 6.1-6.6 Invariants | ? | any failing |
-| 7.1-7.5 Docs | ? | any missing |
-| 8.1-8.3 Boundaries | ? | any violated |
+| 6.1 mcp bin block | ? | ? |
+| 6.2 mcp stdio tools/list | ? | tools = ? |
+| 6.3 mcp cli --list | ? | tools = ? |
+| 6.4 mcp sandbox refusal | ? | exit = ? |
+| 7.1–7.6 Invariants | ? | any failing |
+| 7.7 yaml parse 19/19 | ? | bad = ? |
+| 7.8 license sample | ? | which declare it |
+| 8.1–8.6 Docs | ? | any missing |
+| 9.1–9.3 Boundaries | ? | any violated |
 
 ## Total
-- Packages green: X / 10
-- Tests: N / 603
-- Invariants intact: Y / 6
-- Docs present: Z / 5
+- Packages green: X / 11
+- Tests: N / 637
+- Invariants intact: Y / 8
+- Docs present: Z / 6
 
 ## Anomalies found
 (list with file:line, if any)
@@ -589,17 +627,23 @@ After running all sections, produce this report. Be precise.
 
 ## Appendix: What a clean run proves
 
-If **every section passes**, you have:
+If **every section passes** (modulo the documented §3.2 / §3.3 / §5 / §7.8 notes), you have:
 
-1. **Correct SDL compilation** — parser, linker, validator, all 22 error codes + 4 warnings work.
+1. **Correct SDL compilation** — parser, validator, single-file pipeline all green.
 2. **Three working generators** — TS (client), TS (server), Rust (Zenoh wire).
 3. **Compile-verified Rust** — generated code survives `cargo check` against real crates.
-4. **Runtime read-path working** — live in Kotelok-2 Lobby, Vue composables, SyncStore ghost-loop fixed.
-5. **Runtime write-path working** — actions flow client → server → SNAPSHOT broadcast, awaited end-to-end.
-6. **CRDT schema auto-derived** — no manual duplication from `@crdt`/`@sync` directives.
-7. **Type bundles available** — 11 packages emit `.d.ts`, no `alaq-shim` workarounds.
-8. **Boundaries enforced** — core doesn't know about plugins, plugins don't cross-couple.
-9. **Documentation sufficient** — AGENTS.md, SPEC.md, RUNTIME.md, FINDINGS.md cover spec, runtime, and open backlog.
-10. **Zero-regression P0 fixes** — ghost-loop, awaited onAction, re-exported types, lazy msgpackr, Arc<Session>.
+4. **AI tool surface live** — `@alaq/mcp` exposes `schema_compile` + `schema_diff` over stdio JSON-RPC, with rootDir sandboxing.
+5. **CRDT schema auto-derived** — no manual duplication from `@crdt`/`@sync` directives.
+6. **Type bundles available** — packages emit `.d.ts` (or are rebuildable via `build:types`), no shim files needed.
+7. **Boundaries enforced** — core doesn't know about plugins, plugins don't cross-couple, no product-named plugins.
+8. **Documentation sufficient** — AGENTS, PHILOSOPHY, CONTRIBUTING, SPEC v0.3, RUNTIME cover manifest, why, contributor flow, normative spec, runtime cookbook.
+9. **Zero-regression P0 fixes** — ghost-loop, awaited onAction, re-exported types, lazy msgpackr, Arc<Session>.
 
-If any section fails, start with the first failure — upstream problems cascade.
+Known **gaps** today (not regressions caught by this protocol — pre-existing):
+
+- §3.2 multi-file linker emits spurious `E009` when two files share a `schema { namespace }` and cross-reference records.
+- §3.3 `@alaq/graph-link-state` does not emit a runtime schema-as-Record constant; consumers needing runtime schema must read IR via `@alaq/graph` or `@alaq/mcp`.
+- §5 live e2e is missing entirely (no in-tree reference consumer).
+- §7.8 only 2 of the publishable v6 packages declare `license: Apache-2.0`; the rest leave it unset.
+
+If any section fails outside the documented notes, start with the first failure — upstream problems cascade.
