@@ -51,6 +51,48 @@ export default async function (project: BuildPackage): Promise<void> {
     entryPoints.forEach(entryPoint => {
       logger.debug(`Found ${entryPoint.name}`)
     })
+
+    // License handling:
+    // Apache-2.0 licensed packages get the canonical Apache text from the
+    // repo root (LICENSE-APACHE). Other licenses (if any) are left alone —
+    // the package must ship its own LICENSE file in its directory in that
+    // case, or this step is extended.
+    //
+    // See root LICENSE §"Scope and precedence" for the two-layer license
+    // model that makes this necessary.
+    const declaredLicense = (packageJson as any).license as string | undefined
+    if (declaredLicense === 'Apache-2.0') {
+      // Resolve repo root relative to this file (scripts/tasks/build/).
+      // ESM-safe: use import.meta.url instead of __dirname.
+      const { fileURLToPath } = await import('node:url')
+      const thisDir = path.dirname(fileURLToPath(import.meta.url))
+      const repoRoot = path.resolve(thisDir, '..', '..', '..')
+      const rootApacheLicense = path.join(repoRoot, 'LICENSE-APACHE')
+      const targetLicense = path.join(artifactsDir, 'LICENSE')
+      try {
+        await fs.promises.copyFile(rootApacheLicense, targetLicense)
+        logger.debug(`Copied LICENSE-APACHE → ${targetLicense}`)
+      } catch (err: any) {
+        logger.error(
+          `Apache-2.0 package "${packageJson.name}" but root LICENSE-APACHE ` +
+          `missing at ${rootApacheLicense}. Cannot produce a compliant tarball.`
+        )
+        throw err
+      }
+    }
+
+    // Copy the package's own README if present. npm shows it on the package
+    // page; missing README = sad empty page.
+    const sourceReadme = path.join(sourceDir, 'README.md')
+    const targetReadme = path.join(artifactsDir, 'README.md')
+    try {
+      await fs.promises.access(sourceReadme)
+      await fs.promises.copyFile(sourceReadme, targetReadme)
+      logger.debug(`Copied README.md`)
+    } catch {
+      // README is soft-required — warn but don't fail. Author can add one later.
+      logger.warn(`No README.md in ${sourceDir} — package will ship without one`)
+    }
   } catch (error) {
     logger.error('Failed to generate package.json:', error)
     throw error

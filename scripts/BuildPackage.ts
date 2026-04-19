@@ -24,11 +24,7 @@ export class BuildPackage {
     this.artPatch = path.join(Const.ARTIFACTS, dir)
 
     const pkgPath = path.join(this.packagePath, Const.PK_JSON)
-    try {
-      this.packageJson = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
-    } catch (у) {
-      this.packageJson = YAML.parse(fs.readFileSync(pkgPath, 'utf-8'))
-    }
+    this.packageJson = YAML.parse(fs.readFileSync(pkgPath, 'utf-8'))
   }
 
   #logger
@@ -56,7 +52,7 @@ export class BuildPackage {
   savePackageJsonToSource(): void {
     const clean = pick(this.packageJson, 'name', 'version', 'description', 'keywords')
     const srcPath = path.resolve(this.packagePath, Const.PK_JSON)
-    fs.writeFileSync(srcPath, JSON.stringify(clean, null, 2))
+    fs.writeFileSync(srcPath, YAML.stringify(clean))
   }
 }
 

@@ -31,12 +31,17 @@ export class PackageJsonGenerator {
     const { sourcePackageJson: src, rootPackageJson: root } = this.config
 
     // Copy metadata
-    const metaFields = ['name', 'version', 'description', 'keywords'] as const
+    const metaFields = ['name', 'version', 'description'] as const
     metaFields.forEach(f => { if (src[f]) pkg[f] = src[f] })
 
-    // Copy root fields
-    const rootFields = ['license', 'repository', 'author', 'homepage', 'bugs'] as const
-    rootFields.forEach(f => { if (root[f]) pkg[f] = root[f] })
+    // Source package.yaml wins. Root package.json is a fallback for fields the
+    // source pkg doesn't declare (saves duplicating license/repo/author across
+    // every workspace member that inherits them).
+    const inheritable = ['license', 'repository', 'author', 'homepage', 'bugs', 'keywords'] as const
+    inheritable.forEach(f => {
+      if (src[f] !== undefined) pkg[f] = src[f]
+      else if (root[f] !== undefined) pkg[f] = root[f]
+    })
 
     // Entry points
     const mainEntry = this.config.entryPoints.find(e => e.name === 'index')
