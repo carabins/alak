@@ -1,6 +1,6 @@
 {
   "name": "@alaq/bitmask",
-  "version": "6.0.0-alpha.4",
+  "version": "6.0.0-alpha.0",
   "description": "High-performance bitmask utilities for flag management",
   "type": "module",
   "keywords": [

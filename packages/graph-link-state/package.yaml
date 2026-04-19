@@ -1,6 +1,6 @@
 {
   "name": "@alaq/graph-link-state",
-  "version": "0.1.0-draft",
+  "version": "6.0.0-alpha.0",
   "description": "@alaq/graph generator: emits typed SyncStore + SyncNode<T> bindings for @alaq/link-state.",
   "type": "module",
   "main": "./src/index.ts",

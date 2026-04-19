@@ -1,6 +1,6 @@
 {
   "name": "@alaq/mcp",
-  "version": "0.1.0-draft",
+  "version": "6.0.0-alpha.0",
   "description": "AI-first MCP server for alaqlink: schema compile/diff + runtime observe",
   "type": "module",
   "main": "./src/index.ts",

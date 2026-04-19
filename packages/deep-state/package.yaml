@@ -1,6 +1,6 @@
 {
   "name": "@alaq/deep-state",
-  "version": "6.0.0-alpha.4",
+  "version": "6.0.0-alpha.0",
   "description": "State tracking and proxy-based deep reactivity core",
   "type": "module",
   "main": "./src/index.ts",

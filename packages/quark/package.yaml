@@ -1,8 +1,13 @@
 {
   "name": "@alaq/quark",
-  "version": "6.0.0-alpha.1",
+  "version": "6.0.0-alpha.0",
   "description": "High-performance proactive container with powerful plugin system",
   "homepage": "https://github.com/carabins/alaq/package/quark",
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build:types": "tsc -p tsconfig.build.json"
+  },
   "keywords": [
     "state management",
     "reactive",
