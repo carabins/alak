@@ -1,0 +1,7 @@
+schema Identity {
+  version: 1
+  namespace: "core.identity"
+}
+
+scalar UUID
+scalar DeviceID

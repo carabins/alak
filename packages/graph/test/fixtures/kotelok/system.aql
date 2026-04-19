@@ -1,0 +1,9 @@
+schema Kotelok {
+  version: 1
+  namespace: "kotelok"
+}
+
+record SystemInfo @sync(qos: REALTIME) {
+  online: Int!
+  ping: Int!
+}

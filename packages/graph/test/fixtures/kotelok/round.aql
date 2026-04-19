@@ -1,0 +1,38 @@
+schema Kotelok {
+  version: 1
+  namespace: "kotelok"
+}
+
+use "./lobby" { GameRoom }
+
+enum RoundPhase { PREPARE, ACTIVE, REVIEW }
+enum WordOutcome { GUESSED, SKIPPED }
+
+record RoundStats {
+  guessed: [String!]!
+  skipped: [String!]!
+}
+
+record RoundState {
+  phase: RoundPhase!
+  activePlayerId: ID!
+  timeLeft: Int! @sync(qos: REALTIME)
+  currentWord: String @auth(read: "owner")
+  stats: RoundStats!
+}
+
+extend record GameRoom {
+  currentRound: RoundState
+  currentTeamId: ID
+}
+
+action PlayerReady  { scope: "room", output: Boolean! }
+action GuessWord    { scope: "room", output: Boolean! }
+action SkipWord     { scope: "room", output: Boolean! }
+action ConfirmRound { scope: "room", output: Boolean! }
+
+action FixScore {
+  scope: "room"
+  input: { word: String!, outcome: WordOutcome! }
+  output: Boolean!
+}

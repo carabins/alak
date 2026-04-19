@@ -1,0 +1,19 @@
+{
+  "name": "@alaq/graph-link-state",
+  "version": "0.1.0-draft",
+  "description": "@alaq/graph generator: emits typed SyncStore + SyncNode<T> bindings for @alaq/link-state.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build:types": "tsc -p tsconfig.build.json"
+  },
+  "keywords": [
+    "alaq",
+    "graph",
+    "generator",
+    "link-state",
+    "sync-node",
+    "codegen"
+  ]
+}

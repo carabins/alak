@@ -1,0 +1,62 @@
+schema Kotelok {
+  version: 1
+  namespace: "kotelok"
+}
+
+use "./players" { Player, Team }
+
+enum RoomStatus { LOBBY, GAME_ACTIVE, FINISHED }
+
+record GameSettings {
+  wordsPerPlayer: Int! @default(value: 10) @range(min: 1, max: 100)
+  roundTime: Int! @default(value: 60) @range(min: 10, max: 600)
+}
+
+record WordSubmission {
+  playerId: ID!
+  count: Int!
+  isDone: Boolean!
+}
+
+record GameRoom @scope(name: "room") @sync(qos: RELIABLE) {
+  id: ID!
+  status: RoomStatus! @default(value: LOBBY)
+  settings: GameSettings!
+  players: [Player!]!
+  teams: [Team!]!
+  wordSubmissions: [WordSubmission!]!
+  totalWordsCount: Int!
+}
+
+action CreateRoom {
+  input: { settings: GameSettings }
+  output: ID!
+}
+
+action JoinRoom {
+  scope: "room"
+  input: { name: String! }
+  output: Player!
+}
+
+action CreateTeam {
+  scope: "room"
+  input: { name: String! }
+  output: Team!
+}
+
+action JoinTeam {
+  scope: "room"
+  input: { teamId: ID! }
+  output: Boolean!
+}
+
+action SubmitWords {
+  scope: "room"
+  input: { words: [String!]! }
+  output: Boolean!
+}
+
+action StartGame {
+  scope: "room"
+}

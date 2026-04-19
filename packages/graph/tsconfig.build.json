@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "composite": false,
+    "types": ["node"],
+    "paths": {}
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.test.ts", "test/**", "node_modules/**"]
+}

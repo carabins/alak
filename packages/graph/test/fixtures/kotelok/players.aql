@@ -1,0 +1,18 @@
+schema Kotelok {
+  version: 1
+  namespace: "kotelok"
+}
+
+record Player {
+  id: ID!
+  name: String!
+  avatar: String
+  myWords: [String!]! @auth(read: "owner")
+}
+
+record Team {
+  id: ID!
+  name: String!
+  score: Int! @default(value: 0)
+  memberIds: [ID!]!
+}

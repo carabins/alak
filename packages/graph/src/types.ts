@@ -1,0 +1,328 @@
+// @alaq/graph — types: AST, IR, Token, Diagnostic
+// Stable interface consumed by generators. Do not break across minor spec versions.
+
+// ────────────────────────────────────────────────────────────────
+// Tokens (lexer output)
+// ────────────────────────────────────────────────────────────────
+
+export type TokenKind =
+  | 'KEYWORD'
+  | 'IDENTIFIER'
+  | 'STRING_LIT'
+  | 'INT_LIT'
+  | 'FLOAT_LIT'
+  | 'BOOL_LIT'
+  | 'LBRACE'
+  | 'RBRACE'
+  | 'LBRACKET'
+  | 'RBRACKET'
+  | 'LPAREN'
+  | 'RPAREN'
+  | 'LT'
+  | 'GT'
+  | 'COLON'
+  | 'COMMA'
+  | 'BANG'
+  | 'EQ'
+  | 'AT'
+  | 'EOF'
+
+export interface Token {
+  kind: TokenKind
+  value: string
+  line: number
+  column: number
+}
+
+export const KEYWORDS = new Set([
+  'schema',
+  'record',
+  'extend',
+  'action',
+  'enum',
+  'scalar',
+  'opaque',
+  'stream',
+  'use',
+  'input',
+  'output',
+  'scope',
+  'version',
+  'namespace',
+  'qos',
+  'max_size',
+  'true',
+  'false',
+])
+
+// ────────────────────────────────────────────────────────────────
+// AST — shape emitted by parser, consumed by IR builder
+// ────────────────────────────────────────────────────────────────
+
+export interface SourceLoc {
+  file?: string
+  line: number
+  column: number
+}
+
+export type Value =
+  | { kind: 'string'; value: string; loc: SourceLoc }
+  | { kind: 'int'; value: number; loc: SourceLoc }
+  | { kind: 'float'; value: number; loc: SourceLoc }
+  | { kind: 'bool'; value: boolean; loc: SourceLoc }
+  | { kind: 'enum'; value: string; loc: SourceLoc }
+  | { kind: 'list'; values: Value[]; loc: SourceLoc }
+
+export interface DirectiveArg {
+  name: string
+  value: Value
+  loc: SourceLoc
+}
+
+export interface DirectiveNode {
+  name: string
+  args: DirectiveArg[]
+  loc: SourceLoc
+}
+
+export interface TypeExprNode {
+  /** Base identifier name (for scalar types). For lists this is "List",
+   *  for maps this is "Map". */
+  name: string
+  /** true if outer type ends with `!` */
+  required: boolean
+  /** true if this is a list `[T]` */
+  list: boolean
+  /** true if this is a map `Map<K, V>` (v0.3) */
+  map?: boolean
+  /** For lists: the inner element type */
+  inner?: TypeExprNode
+  /** For maps: the key type (v0.3) */
+  keyType?: TypeExprNode
+  /** For maps: the value type (v0.3) */
+  valueType?: TypeExprNode
+  loc: SourceLoc
+}
+
+export interface FieldNode {
+  name: string
+  type: TypeExprNode
+  directives: DirectiveNode[]
+  loc: SourceLoc
+}
+
+export interface RecordNode {
+  kind: 'record'
+  name: string
+  directives: DirectiveNode[]
+  fields: FieldNode[]
+  loc: SourceLoc
+}
+
+export interface ExtendRecordNode {
+  kind: 'extend'
+  name: string
+  fields: FieldNode[]
+  loc: SourceLoc
+}
+
+export interface ActionNode {
+  kind: 'action'
+  name: string
+  scope: string | null
+  input: FieldNode[] | null
+  output: TypeExprNode | null
+  loc: SourceLoc
+}
+
+export interface EnumNode {
+  kind: 'enum'
+  name: string
+  values: string[]
+  loc: SourceLoc
+}
+
+export interface ScalarNode {
+  kind: 'scalar'
+  name: string
+  loc: SourceLoc
+}
+
+export interface OpaqueNode {
+  kind: 'opaque'
+  name: string
+  qos: string
+  maxSize: number | null
+  loc: SourceLoc
+}
+
+export type Definition =
+  | RecordNode
+  | ExtendRecordNode
+  | ActionNode
+  | EnumNode
+  | ScalarNode
+  | OpaqueNode
+
+export interface UseDeclNode {
+  path: string
+  imports: string[]
+  loc: SourceLoc
+}
+
+export interface SchemaDeclNode {
+  name: string
+  version: number | null
+  namespace: string | null
+  loc: SourceLoc
+  /** true if `version` key appeared in source */
+  hasVersion: boolean
+  /** true if `namespace` key appeared in source */
+  hasNamespace: boolean
+}
+
+export interface FileAST {
+  schema: SchemaDeclNode | null
+  uses: UseDeclNode[]
+  definitions: Definition[]
+}
+
+// ────────────────────────────────────────────────────────────────
+// IR — output shape, per §10 JSON Schema
+// ────────────────────────────────────────────────────────────────
+
+export interface IRDirective {
+  name: string
+  args: Record<string, unknown>
+}
+
+/**
+ * Nested type reference — used inside map key/value slots in IR. Mirrors
+ * the AST's `TypeExprNode` shape but flattened to an IR-safe, JSON-clean
+ * structure. Kept intentionally separate from `IRField` so that map
+ * children never carry field-only concepts like `name` or `directives`.
+ *
+ * v0.3: added as part of the Map<K, V> feature. Pre-0.3 IR consumers that
+ * ignore `map`/`mapKey`/`mapValue` keep working unchanged.
+ */
+export interface IRTypeRef {
+  /** Base identifier (scalar / record / enum / user scalar / "List" / "Map"). */
+  type: string
+  required: boolean
+  list: boolean
+  listItemRequired?: boolean
+  /** true when this ref itself is a map. */
+  map?: boolean
+  mapKey?: IRTypeRef
+  mapValue?: IRTypeRef
+}
+
+export interface IRField {
+  name: string
+  type: string
+  required: boolean
+  list: boolean
+  listItemRequired?: boolean
+  /** v0.3: true when this field is a Map<K, V>. */
+  map?: boolean
+  /** v0.3: map key type reference. Present iff `map === true`. */
+  mapKey?: IRTypeRef
+  /** v0.3: map value type reference. Present iff `map === true`. */
+  mapValue?: IRTypeRef
+  directives?: IRDirective[]
+}
+
+export interface IRRecord {
+  name: string
+  fields: IRField[]
+  directives?: IRDirective[]
+  scope?: string | null
+  topic?: string | null
+}
+
+export interface IRAction {
+  name: string
+  scope?: string | null
+  input?: IRField[]
+  output?: string | null
+  outputRequired?: boolean
+  directives?: IRDirective[]
+}
+
+export interface IREnum {
+  name: string
+  values: string[]
+}
+
+export interface IRScalar {
+  name: string
+}
+
+export interface IROpaque {
+  name: string
+  qos: string
+  maxSize?: number
+}
+
+export interface IRSchema {
+  name: string
+  namespace: string
+  version: number
+  records: Record<string, IRRecord>
+  actions: Record<string, IRAction>
+  enums: Record<string, IREnum>
+  scalars: Record<string, IRScalar>
+  opaques: Record<string, IROpaque>
+  /** Optional: list of source files that contributed definitions into this
+   *  namespace. Populated by the linker; single-file parseSource leaves it
+   *  undefined. Purely informational. */
+  sourceFiles?: string[]
+}
+
+export interface IR {
+  schemas: Record<string, IRSchema>
+}
+
+// ────────────────────────────────────────────────────────────────
+// Diagnostic
+// ────────────────────────────────────────────────────────────────
+
+export type DiagnosticCode =
+  | 'E001'
+  | 'E002'
+  | 'E003'
+  | 'E004'
+  | 'E005'
+  | 'E006'
+  | 'E007'
+  | 'E008'
+  | 'E009'
+  | 'E010'
+  | 'E011'
+  | 'E012'
+  | 'E013'
+  | 'E014'
+  | 'E015'
+  | 'E016'
+  | 'E017'
+  | 'E018'
+  | 'E019'
+  | 'E020'
+  | 'E021'
+  | 'E022'
+  | 'W001'
+  | 'W002'
+  | 'W003'
+  | 'W004'
+  // Reserved for generic structural parse errors (lexical / syntactic). Not in §12
+  // but needed so the pipeline can report malformed source without crashing.
+  | 'E000'
+
+export interface Diagnostic {
+  code: DiagnosticCode
+  severity: 'error' | 'warning'
+  message: string
+  file?: string
+  line: number
+  column: number
+}
