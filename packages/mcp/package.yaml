@@ -1,25 +1,33 @@
-{
-  "name": "@alaq/mcp",
-  "version": "6.0.0-alpha.0",
-  "description": "AI-first MCP server for alaqlink: schema compile/diff + runtime observe",
-  "type": "module",
-  "main": "./src/index.ts",
-  "bin": {
-    "alaq-mcp": "./src/bin.ts",
-    "alaq-mcp-call": "./src/cli.ts"
-  },
-  "scripts": {
-    "start": "bun src/bin.ts"
-  },
-  "dependencies": {
-    "@alaq/graph": "workspace:*",
-    "@alaq/link": "workspace:*"
-  },
-  "keywords": [
-    "mcp",
-    "ai",
-    "agent",
-    "alaq",
-    "sdl"
-  ]
-}
+name: "@alaq/mcp"
+version: "6.0.0-alpha.0"
+description: "AI-first MCP server for alaqlink: schema compile/diff tools for agents"
+license: Apache-2.0
+author: "Gleb Panteleev <panteleew@gleb.pw>"
+homepage: https://github.com/carabins/alak/tree/master/packages/mcp
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/mcp
+bugs: https://github.com/carabins/alak/issues
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+bin:
+  alaq-mcp: ./src/bin.ts
+  alaq-mcp-call: ./src/cli.ts
+scripts:
+  start: bun src/bin.ts
+dependencies:
+  "@alaq/graph": "6.0.0-alpha.0"
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
+keywords:
+  - mcp
+  - ai
+  - agent
+  - alaq
+  - alaqlink
+  - sdl
+publishConfig:
+  access: public

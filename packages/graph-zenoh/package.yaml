@@ -1,21 +1,17 @@
-{
-  "name": "@alaq/graph-zenoh",
-  "version": "6.0.0-alpha.0",
-  "description": "@alaq/graph generator: emits Rust structs + zenoh pub/sub/query handlers from an AQL IR.",
-  "type": "module",
-  "keywords": [
-    "alaq",
-    "graph",
-    "generator",
-    "zenoh",
-    "rust",
-    "wire-protocol",
-    "codegen"
-  ],
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "check": "bun run scripts/check-kotelok.ts",
-    "build:types": "tsc -p tsconfig.build.json"
-  }
-}
+name: "@alaq/graph-zenoh"
+version: "6.0.0-alpha.0"
+description: "@alaq/graph generator: emits Rust structs + zenoh pub/sub/query handlers from an AQL IR."
+type: module
+keywords:
+  - alaq
+  - graph
+  - generator
+  - zenoh
+  - rust
+  - wire-protocol
+  - codegen
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  check: bun run scripts/check-kotelok.ts
+  build:types: tsc -p tsconfig.build.json

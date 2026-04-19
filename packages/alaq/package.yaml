@@ -1,0 +1,11 @@
+name: alaq
+version: 0.0.26
+description: Alak Last Atom
+keywords:
+  - alak
+  - reactive
+  - atom
+  - streams
+  - channels
+  - dataflow
+  - flow

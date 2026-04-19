@@ -1,15 +1,11 @@
-{
-  "name": "@alaq/xstate",
-  "version": "6.0.0-alpha.0",
-  "description": "XState integration for Alak ecosystem",
-  "peerDependencies": {
-    "xstate": "^5.0.0",
-    "@alaq/quark": "alpha",
-    "@alaq/nucl": "alpha"
-  },
-  "devDependencies": {
-    "xstate": "^5.19.0",
-    "@alaq/quark": "alpha",
-    "@alaq/nucl": "alpha"
-  }
-}
+name: "@alaq/xstate"
+version: "6.0.0-alpha.0"
+description: XState integration for Alak ecosystem
+peerDependencies:
+  xstate: ^5.0.0
+  "@alaq/quark": alpha
+  "@alaq/nucl": alpha
+devDependencies:
+  xstate: ^5.19.0
+  "@alaq/quark": alpha
+  "@alaq/nucl": alpha

@@ -1,32 +1,26 @@
-{
-  "name": "@alaq/plugin-logi",
-  "version": "6.0.0-alpha.0",
-  "description": "Logi observability plugin for Nucl and Atom — streams state mutations, actions, and errors to a self-hosted Logi endpoint. AI-first: fingerprints, traces, and release/reload tracking built-in.",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build:types": "tsc -p tsconfig.build.json",
-    "test": "bun test"
-  },
-  "keywords": [
-    "alaq",
-    "plugin",
-    "logi",
-    "observability",
-    "ai-first",
-    "telemetry",
-    "nucl",
-    "atom"
-  ],
-  "dependencies": {
-    "@alaq/nucl": "^6.0.0-alpha.4",
-    "@alaq/quark": "^6.0.0-alpha.1"
-  },
-  "peerDependencies": {
-    "@logi/browser": "^0.1.0"
-  },
-  "peerDependenciesMeta": {
-    "@logi/browser": { "optional": true }
-  }
-}
+name: "@alaq/plugin-logi"
+version: "6.0.0-alpha.0"
+description: "Logi observability plugin for Nucl and Atom — streams state mutations, actions, and errors to a self-hosted Logi endpoint. AI-first: fingerprints, traces, and release/reload tracking built-in."
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
+  test: bun test
+keywords:
+  - alaq
+  - plugin
+  - logi
+  - observability
+  - ai-first
+  - telemetry
+  - nucl
+  - atom
+dependencies:
+  "@alaq/nucl": ^6.0.0-alpha.4
+  "@alaq/quark": ^6.0.0-alpha.1
+peerDependencies:
+  "@logi/browser": ^0.1.0
+peerDependenciesMeta:
+  "@logi/browser":
+    optional: true

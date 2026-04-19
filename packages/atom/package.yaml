@@ -1,33 +1,27 @@
-{
-  "name": "@alaq/atom",
-  "version": "6.0.0-alpha.0",
-  "description": "Minimal reactive state management built on Quark",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "bun run ../../scripts/index.ts build",
-    "build:types": "tsc -p tsconfig.build.json",
-    "test": "bun test",
-    "dev": "bun test --watch"
-  },
-  "keywords": [
-    "reactive",
-    "state",
-    "atom",
-    "quark",
-    "alaq"
-  ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@alaq/quark": "alpha",
-    "@alaq/nucl": "alpha"
-  },
-  "peerDependencies": {
-    "@alaq/quark": "^1.0.0",
-    "@alaq/nucl": "^6.0.0"
-  }
-}
+name: "@alaq/atom"
+version: "6.0.0-alpha.0"
+description: Minimal reactive state management built on Quark
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build: bun run ../../scripts/index.ts build
+  build:types: tsc -p tsconfig.build.json
+  test: bun test
+  dev: bun test --watch
+keywords:
+  - reactive
+  - state
+  - atom
+  - quark
+  - alaq
+author: ""
+license: MIT
+dependencies: {}
+devDependencies:
+  "@types/bun": latest
+  "@alaq/quark": alpha
+  "@alaq/nucl": alpha
+peerDependencies:
+  "@alaq/quark": ^1.0.0
+  "@alaq/nucl": ^6.0.0

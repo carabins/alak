@@ -1,14 +1,11 @@
-{
-  "name": "@alaq/graph-link-server",
-  "version": "6.0.0-alpha.0",
-  "description": "@alaq/graph generator: emits typed ActionHandlers interface + dispatcher wiring createLinkServer.onAction.",
-  "type": "module",
-  "keywords": [
-    "alaq",
-    "graph",
-    "generator",
-    "link-server",
-    "action-dispatcher",
-    "codegen"
-  ]
-}
+name: "@alaq/graph-link-server"
+version: "6.0.0-alpha.0"
+description: "@alaq/graph generator: emits typed ActionHandlers interface + dispatcher wiring createLinkServer.onAction."
+type: module
+keywords:
+  - alaq
+  - graph
+  - generator
+  - link-server
+  - action-dispatcher
+  - codegen

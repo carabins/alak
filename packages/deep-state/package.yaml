@@ -1,22 +1,17 @@
-{
-  "name": "@alaq/deep-state",
-  "version": "6.0.0-alpha.0",
-  "description": "State tracking and proxy-based deep reactivity core",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build:types": "tsc -p tsconfig.build.json"
-  },
-  "keywords": [
-    "reactive",
-    "state",
-    "deep",
-    "proxy",
-    "tracking"
-  ],
-  "dependencies": {},
-  "devDependencies": {
-    "@alaq/quark": "alpha"
-  }
-}
+name: "@alaq/deep-state"
+version: "6.0.0-alpha.0"
+description: State tracking and proxy-based deep reactivity core
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
+keywords:
+  - reactive
+  - state
+  - deep
+  - proxy
+  - tracking
+dependencies: {}
+devDependencies:
+  "@alaq/quark": alpha

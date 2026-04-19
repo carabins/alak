@@ -1,31 +1,25 @@
-{
-  "name": "@alaq/link-state-vue",
-  "version": "6.0.0-alpha.0",
-  "description": "Vue 3 adapter for @alaq/link-state — useNode composable, provide/inject for SyncStore",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build:types": "tsc -p tsconfig.build.json"
-  },
-  "keywords": [
-    "vue",
-    "vue3",
-    "reactive",
-    "sync",
-    "link-state",
-    "alaq",
-    "composable"
-  ],
-  "peerDependencies": {
-    "vue": "^3.0.0",
-    "@alaq/link-state": "alpha",
-    "@alaq/quark": "alpha"
-  },
-  "devDependencies": {
-    "@alaq/link-state": "alpha",
-    "@alaq/quark": "alpha",
-    "@alaq/deep-state": "alpha",
-    "vue": "^3.5.0"
-  }
-}
+name: "@alaq/link-state-vue"
+version: "6.0.0-alpha.0"
+description: "Vue 3 adapter for @alaq/link-state — useNode composable, provide/inject for SyncStore"
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
+keywords:
+  - vue
+  - vue3
+  - reactive
+  - sync
+  - link-state
+  - alaq
+  - composable
+peerDependencies:
+  vue: ^3.0.0
+  "@alaq/link-state": alpha
+  "@alaq/quark": alpha
+devDependencies:
+  "@alaq/link-state": alpha
+  "@alaq/quark": alpha
+  "@alaq/deep-state": alpha
+  vue: ^3.5.0
