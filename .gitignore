@@ -35,3 +35,6 @@ packages/*/coverage/
 # Deferred experiments (do not commit per AGENTS.md)
 packages/state.draft/
 packages/gql.replaced/
+
+# Per-machine Claude settings
+.claude/settings.local.json
