@@ -1,0 +1,221 @@
+# Alaq v6 — package roles and boundaries
+# Machine-readable architecture manifest. AGENTS.md references this.
+
+version: 1
+
+tiers:
+  tier0:
+    name: Lightweight SPA
+    drivers: [ws, http]
+    note: No Zenoh. Browser-friendly bundle.
+  tier1:
+    name: Rich web app
+    drivers: [ws, http, webrtc]
+    note: Adds P2P. Still browser-friendly.
+  tier2:
+    name: Native
+    drivers: [ws, http, zenoh]
+    note: Tauri, CLI, server. Zenoh as primary.
+  tier3:
+    name: PWA mesh peer
+    drivers: [zenoh-wasm]
+    note: Rare. Explicit opt-in. ~2MB WASM cost.
+
+packages:
+
+  # ── Reactive core ──
+
+  - name: "@alaq/quark"
+    path: packages/quark
+    role: core-primitive
+    layer: runtime
+    depends_on: []
+    exports: [Quark, IQuark, createQuark]
+    note: Zero-dependency reactive primitive. Stable, 107 tests green.
+
+  - name: "@alaq/nucl"
+    path: packages/nucl
+    role: primitive
+    layer: runtime
+    depends_on: ["@alaq/quark"]
+    exports: [Nucl, kind, Fusion]
+    note: Stable, 43 tests green.
+
+  - name: "@alaq/atom"
+    path: packages/atom
+    role: state-model
+    layer: runtime
+    depends_on: ["@alaq/quark", "@alaq/nucl"]
+    exports: [Atom]
+    note: Stable, 38 tests green.
+
+  - name: "@alaq/fx"
+    path: packages/fx
+    role: effects
+    layer: runtime
+    depends_on: ["@alaq/quark"]
+    note: 9 tests green.
+
+  # ── Transport and sync ──
+
+  - name: "@alaq/link"
+    path: packages/link
+    role: transport-core
+    layer: runtime
+    depends_on: []
+    tiers: [tier0, tier1, tier2, tier3]
+    capabilities:
+      - qos
+      - crdt-primitives
+      - drivers-pluggable
+      - sync-bridge
+      - clock-sync
+    drivers_included: [ws, http, webrtc]
+    note: Core transport. Additional drivers are separate packages.
+
+  - name: "@alaq/link-state"
+    path: packages/link-state
+    role: client-replica
+    layer: runtime
+    depends_on: ["@alaq/link", "@alaq/deep-state"]
+    exports: [SyncStore, SyncNode, createSyncNode, createListNode, createMapNode, SyncListNode, SyncMapNode]
+    note: SyncStore with Ghost Proxies + per-entry accessors for lists/maps. Target of @alaq/graph-link-state generator.
+
+  # ── Graph compiler and plugins ──
+
+  - name: "@alaq/graph"
+    path: packages/graph
+    role: spec-core
+    layer: compile-time
+    depends_on: []
+    exports: [parseSchema, compileToIR, IR types]
+    owns_directives: [sync, store, scope, auth, this, crdt, atomic, liveness, deprecated, added, range]
+    note: SDL parser + IR. Transport-neutral. See packages/graph/SPEC.md.
+
+  - name: "@alaq/graph-link-state"
+    path: packages/graph-link-state
+    role: generator
+    layer: compile-time
+    depends_on: ["@alaq/graph"]
+    target: "@alaq/link-state"
+    output: "TypeScript SyncStore + SyncNode<T> bindings"
+    status: planned
+
+  - name: "@alaq/graph-link-server"
+    path: packages/graph-link-server
+    role: generator
+    layer: compile-time
+    depends_on: ["@alaq/graph"]
+    target: "@alaq/link/server"
+    output: "TypeScript ActionHandlers + dispatcher wiring createLinkServer onAction"
+    status: alpha
+
+  - name: "@alaq/graph-tauri"
+    path: packages/graph-tauri
+    role: generator
+    layer: compile-time
+    depends_on: ["@alaq/graph"]
+    target: Tauri v2 commands + typed invoke wrappers
+    output: "Rust #[tauri::command] + TS invoke(...)"
+    status: planned
+
+  - name: "@alaq/graph-zenoh"
+    path: packages/graph-zenoh
+    role: generator
+    layer: compile-time
+    depends_on: ["@alaq/graph"]
+    target: Zenoh-compatible wire protocol
+    output: "Rust structs + pub/sub/query handlers using zenoh crate"
+    note: Reference runtime. Used to validate wire compatibility with Sokol-Bus-class peers.
+    status: alpha
+
+  # ── Helpers and utilities (existing, not in active redesign) ──
+
+  - name: "@alaq/deep-state"
+    path: packages/deep-state
+    role: reactive-helper
+
+  - name: "@alaq/bitmask"
+    path: packages/bitmask
+    role: utility
+
+  - name: "@alaq/datastruct"
+    path: packages/datastruct
+    role: utility
+
+  - name: "@alaq/queue"
+    path: packages/queue
+    role: utility
+
+  - name: "@alaq/rune"
+    path: packages/rune
+    role: utility
+
+  - name: "@alaq/svg"
+    path: packages/svg
+    role: ui-helper
+
+  - name: "@alaq/vite"
+    path: packages/vite
+    role: tooling
+
+  - name: "@alaq/vue"
+    path: packages/vue
+    role: ui-adapter
+
+  - name: "@alaq/link-state-vue"
+    path: packages/link-state-vue
+    role: ui-adapter
+    depends_on: ["@alaq/link-state", "@alaq/quark"]
+    peer: ["vue ^3"]
+    exports: [useNode, useNodeWithDefault, toRefNoScope, provideStore, useStore, SYNC_STORE_KEY]
+    note: |
+      Bridges ISyncNode<T> into Vue's Ref via up/down subscription. Automatic cleanup
+      via onScopeDispose. provideStore/useStore for tree-wide SyncStore injection.
+
+  - name: "@alaq/flex"
+    path: packages/flex
+    role: ui-adapter
+    note: PixiJS layout/components.
+
+  - name: "@alaq/xstate"
+    path: packages/xstate
+    role: ui-adapter
+
+  - name: "@alaq/ws"
+    path: packages/ws
+    role: transport-helper
+
+  - name: "@alaq/gql"
+    path: packages/gql.replaced
+    status: replaced-by "@alaq/graph"
+    note: |
+      Early draft with GraphQL SDL. Replaced by @alaq/graph (.aql format, v0.3).
+      Content moved to packages/gql.replaced/ on 2026-04-19 after the @alaq/graph
+      stack reached 346 tests green + cargo-verified. Do not import, do not extend.
+      Kept for reference only.
+
+  # ── Deferred / draft ──
+
+  - name: "@alaq/state"
+    path: packages/state.draft
+    status: deferred
+    note: UI view/data/actions/children DSL. Reopen when runtime UI generation is needed.
+
+forbidden_dependencies:
+  - from: "@alaq/graph"
+    to: "@alaq/graph-*"
+    reason: Core must not depend on plugins.
+  - from: "@alaq/graph-*"
+    to: "@alaq/graph-*"
+    reason: Plugins must not depend on each other.
+  - from: "@alaq/link"
+    to: "@alaq/link-zenoh"
+    reason: Core transport stays tier0-sufficient.
+
+plugin_naming_rule:
+  pattern: "@alaq/<family>-<transport-or-platform>"
+  forbidden:
+    - "@alaq/graph-<product>"  # e.g. graph-kotelok, graph-valkyrie
+    - "@alaq/link-<product>"
+  reason: Products consume plugins; they are not compilation targets.
