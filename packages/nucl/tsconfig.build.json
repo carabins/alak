@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "composite": false,
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@alaq/quark": ["../quark/dist/index.d.ts"],
+      "@alaq/quark/*": ["../quark/dist/*"],
+      "@alaq/deep-state": ["../deep-state/dist/index.d.ts"],
+      "@alaq/deep-state/*": ["../deep-state/dist/*"],
+      "@alaq/nucl": ["./src/index.ts"],
+      "@alaq/nucl/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.test.ts", "test/**", "benchmark/**", "docs/**", "node_modules/**"]
+}
