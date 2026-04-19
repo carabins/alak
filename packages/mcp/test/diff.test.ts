@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test'
-import { compileSources } from '../../graph/src/index'
+import { compileSources } from '@alaq/graph'
 import { diffIR } from '../src/diff'
 
 function ir(source: string) {

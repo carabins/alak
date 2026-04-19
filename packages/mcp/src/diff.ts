@@ -10,7 +10,7 @@
 // "Non-breaking": adding optional fields, new declarations, new enum values.
 // "Review": directive changes — semantically loaded, can't classify mechanically.
 
-import type { IR, IRField, IRRecord, IRAction, IREnum } from '../../graph/src/types'
+import type { IR, IRField, IRRecord, IRAction, IREnum } from '@alaq/graph'
 
 export type ChangeKind = 'breaking' | 'non_breaking' | 'review'
 

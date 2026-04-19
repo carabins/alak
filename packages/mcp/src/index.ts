@@ -1,11 +1,9 @@
-export { schemaCompile, schemaDiff, runtimeObserve } from './tools'
+export { schemaCompile, schemaDiff } from './tools'
 export type {
   SchemaCompileInput,
   SchemaCompileOutput,
   SchemaDiffInput,
   SchemaDiffOutput,
-  RuntimeObserveInput,
-  RuntimeObserveOutput,
 } from './tools'
 export { diffIR } from './diff'
 export type { DiffReport, SchemaChange, ChangeKind } from './diff'

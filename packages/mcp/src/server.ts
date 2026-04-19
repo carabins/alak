@@ -5,7 +5,7 @@
 // Why not @modelcontextprotocol/sdk: zero deps keeps install lightweight and
 // matches @alaq/graph's ethos. The protocol surface we need is ~100 lines.
 
-import { schemaCompile, schemaDiff, runtimeObserve } from './tools'
+import { schemaCompile, schemaDiff } from './tools'
 
 const PROTOCOL_VERSION = '2024-11-05'
 
@@ -72,20 +72,6 @@ const TOOLS = [
       required: ['before', 'after'],
     },
   },
-  {
-    name: 'runtime_observe',
-    description:
-      'Connect to a running LinkServer over WebSocket, collect server messages for durationMs (default 2000, max 30000), then return them. Read-only. No auth in MVP — do not point at production.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', description: 'ws:// or wss:// URL of the LinkServer.' },
-        scope: { type: 'string', description: 'Optional scope to subscribe to.' },
-        durationMs: { type: 'number', description: 'Listen duration; clamped [100, 30000].' },
-      },
-      required: ['url'],
-    },
-  },
 ]
 
 function ok(id: JsonRpcRes['id'], result: any): JsonRpcRes {
@@ -112,7 +98,7 @@ async function handle(req: JsonRpcReq, state: ServerState): Promise<JsonRpcRes |
       state.initialized = true
       return ok(id, {
         protocolVersion: PROTOCOL_VERSION,
-        serverInfo: { name: '@alaq/mcp', version: '0.1.0-draft' },
+        serverInfo: { name: '@alaq/mcp', version: '6.0.0-alpha.0' },
         capabilities: { tools: {} },
       })
 
@@ -138,8 +124,6 @@ async function handle(req: JsonRpcReq, state: ServerState): Promise<JsonRpcRes |
             return ok(id, toolContent(await schemaCompile(args)))
           case 'schema_diff':
             return ok(id, toolContent(await schemaDiff(args)))
-          case 'runtime_observe':
-            return ok(id, toolContent(await runtimeObserve(args)))
           default:
             return err(id, -32601, `unknown tool: ${name}`)
         }

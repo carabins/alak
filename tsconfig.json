@@ -40,6 +40,18 @@
       "@alaq/deep-state/*": [
         "packages/deep-state/src/*"
       ],
+      "@alaq/graph": [
+        "packages/graph/src/index.ts"
+      ],
+      "@alaq/graph/*": [
+        "packages/graph/src/*"
+      ],
+      "@alaq/mcp": [
+        "packages/mcp/src/index.ts"
+      ],
+      "@alaq/mcp/*": [
+        "packages/mcp/src/*"
+      ],
       "@alaq/nucl": [
         "packages/nucl/src/index.ts"
       ],

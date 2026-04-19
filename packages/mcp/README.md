@@ -1,12 +1,12 @@
 # @alaq/mcp
 
-AI-first MCP server for alaqlink. Exposes the SDL pipeline and live-runtime observation as machine-readable tools.
+AI-first MCP server for alaqlink. Exposes the SDL pipeline as machine-readable tools.
 
-**Status:** 0.1.0-draft. MVP. Not production-hardened.
+**Status:** 6.0.0-alpha.0. Unstable; breaking changes expected before 6.0.0 GA.
 
 ## Why
 
-Until now, alaqlink's compile + runtime tooling spoke only to humans (CLIs, file outputs). An AI agent had to scrape stdout and guess at structure. This package gives agents three first-class tools so they can design schemas, reason about breaking changes, and watch live state without a human in the middle.
+Until now, alaqlink's compile tooling spoke only to humans (CLIs, file outputs). An AI agent had to scrape stdout and guess at structure. This package gives agents first-class tools so they can design schemas and reason about breaking changes without a human in the middle.
 
 ## Tools
 
@@ -48,21 +48,6 @@ Classification rules:
 - **non_breaking**: added optional field, new declaration, added enum value.
 - **review**: required → optional (read-side hazard), loosened list-item nullability, schema version bump. *The agent must apply judgement — not all read-side relaxations are safe even though no writer breaks.*
 
-### `runtime_observe`
-
-Connect to a running `LinkServer` over WebSocket and collect server messages.
-
-```json
-{ "url": "ws://localhost:3456", "scope": "room/42", "durationMs": 2000 }
-```
-
-Returns `{ ok, snapshots[] }`. `durationMs` is clamped to [100, 30000].
-
-**MVP caveats:**
-- No auth/capability tokens. Do not point at production.
-- One-shot collect, not a stream.
-- Subscribe message format is best-effort — depends on server protocol.
-
 ## One-shot CLI (no MCP client needed)
 
 For shell scripts and agents driving the server ad-hoc:
@@ -95,3 +80,12 @@ Any MCP-aware client (Claude Desktop, Claude Code, etc.). Example config:
 ```bash
 cd A:/source/alak/packages/mcp && bun test
 ```
+
+## License
+
+This package ships under a dual-license arrangement. Read both before redistributing.
+
+- **Source code** (what you see on GitHub): governed by the TVR license — see the root `LICENSE` file in the [alak monorepo](https://github.com/carabins/alak/blob/master/LICENSE).
+- **Published npm artifact** (`@alaq/mcp` on the npm registry, the `lib/` / `legacy/` / `types/` output): released under **Apache-2.0**.
+
+In practice: if you installed from npm, Apache-2.0 applies to the code you received. If you cloned the repo, TVR applies to the sources. This split is intentional — it keeps the upstream project's development terms intact while giving downstream npm consumers a conventional permissive license.

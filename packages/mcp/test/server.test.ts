@@ -32,7 +32,7 @@ describe('mcp server protocol', () => {
     params: {},
   })
 
-  test('tools/list → returns 3 tools after initialize', async () => {
+  test('tools/list → returns 2 tools after initialize', async () => {
     const { io, output } = makeMockIO([
       initReq,
       JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
@@ -40,7 +40,7 @@ describe('mcp server protocol', () => {
     await runServer(io)
     const res = JSON.parse(output[1])
     const names = res.result.tools.map((t: any) => t.name).sort()
-    expect(names).toEqual(['runtime_observe', 'schema_compile', 'schema_diff'])
+    expect(names).toEqual(['schema_compile', 'schema_diff'])
   })
 
   test('tools/list before initialize → JSON-RPC -32002', async () => {

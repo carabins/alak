@@ -1,7 +1,7 @@
 // Tool implementations — pure async functions. Decoupled from the MCP
 // transport so they can be unit-tested directly.
 
-import { compileSources, type MultiFileInput, type CompileResult } from '../../graph/src/index'
+import { compileSources, type MultiFileInput, type CompileResult } from '@alaq/graph'
 import { diffIR, type DiffReport } from './diff'
 import { resolve, isAbsolute, sep } from 'node:path'
 import { readFile } from 'node:fs/promises'
@@ -158,77 +158,3 @@ export async function schemaDiff(args: SchemaDiffInput): Promise<SchemaDiffOutpu
   }
 }
 
-// runtime_observe — connects to a LinkServer over WebSocket and collects
-// SNAPSHOT messages for the requested duration. Imported lazily so the MCP
-// server starts even when @alaq/link's WebSocket dep can't be resolved
-// (e.g. in CI without ws lib).
-
-export interface RuntimeObserveInput {
-  url: string
-  scope?: string
-  durationMs?: number
-}
-
-export interface RuntimeObserveOutput {
-  ok: boolean
-  url: string
-  scope: string | null
-  durationMs: number
-  snapshots: unknown[]
-  message?: string
-}
-
-export async function runtimeObserve(args: RuntimeObserveInput): Promise<RuntimeObserveOutput> {
-  if (!args || typeof args.url !== 'string') {
-    throw new Error('runtime_observe: "url" (string) is required')
-  }
-  const durationMs = Math.max(100, Math.min(args.durationMs ?? 2000, 30_000))
-  const scope = args.scope ?? null
-  const snapshots: unknown[] = []
-
-  const WS = (globalThis as any).WebSocket
-  if (!WS) {
-    return {
-      ok: false,
-      url: args.url,
-      scope,
-      durationMs,
-      snapshots,
-      message: 'no global WebSocket — run on Bun 1.3+ or Node 22+',
-    }
-  }
-
-  return await new Promise<RuntimeObserveOutput>(resolve => {
-    let ws: any
-    let timer: any
-    const finish = (message?: string) => {
-      try {
-        ws?.close()
-      } catch {}
-      clearTimeout(timer)
-      resolve({ ok: !message, url: args.url, scope, durationMs, snapshots, message })
-    }
-    try {
-      ws = new WS(args.url)
-    } catch (e: any) {
-      return finish(`connect failed: ${e?.message ?? e}`)
-    }
-    ws.onerror = (e: any) => finish(`socket error: ${e?.message ?? 'unknown'}`)
-    ws.onopen = () => {
-      if (scope) {
-        try {
-          ws.send(JSON.stringify({ op: 'SUBSCRIBE', scope }))
-        } catch {}
-      }
-      timer = setTimeout(() => finish(), durationMs)
-    }
-    ws.onmessage = (ev: any) => {
-      try {
-        const data = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data
-        snapshots.push(data)
-      } catch {
-        snapshots.push({ raw: String(ev.data) })
-      }
-    }
-  })
-}
