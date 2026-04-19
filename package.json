@@ -9,6 +9,8 @@
     "format": "prettier --write --ignore-unknown .",
     "start": "bun scripts/index.ts",
     "build": "bun scripts/index.ts art",
+    "build:types": "bun scripts/build-types.ts",
+    "build:types:clean": "bun scripts/build-types.ts --clean",
     "next": "bun --watch scripts/index.ts x",
     "dev": "bun scripts/dev.ts",
     "test": "bun scripts/index.ts test"
@@ -50,6 +52,9 @@
     "xstate": "^5.25.1"
   },
   "dependencies": {
+    "@alaq/quark": "alpha",
+    "@alaq/nucl": "alpha",
+    "@alaq/atom": "alpha",
     "graphql": "^16.12.0",
     "yaml": "^2.8.2"
   }

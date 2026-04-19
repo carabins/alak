@@ -93,7 +93,15 @@ export class PackageJsonGenerator {
     const all = { ...detected, ...source }
 
     if (Object.keys(all).length > 0) {
-      pkg.dependencies = Object.fromEntries(Object.keys(all).map(d => [d, 'latest']))
+      pkg.dependencies = {}
+      for (const d of Object.keys(all)) {
+        if (d.startsWith('@alaq/')) {
+          pkg.dependencies[d] = this.config.sourcePackageJson.version || 'latest'
+        } else {
+          // Preserve version from source package.yaml, fall back to installed version
+          pkg.dependencies[d] = source[d] || all[d] || 'latest'
+        }
+      }
     }
 
     if (this.config.sourcePackageJson.peerDependencies) {
@@ -153,17 +161,26 @@ export function detectEntryPoints(sourceDir: string): DetectedEntry[] {
   const srcDir = path.join(sourceDir, 'src')
   if (!fs.existsSync(srcDir)) return entries
 
-  const createEntry = (name: string, indexPath: string, platformSpecific?: DetectedEntry['platformSpecific']): DetectedEntry => ({
-    name,
-    path: indexPath,
-    exportPath: name === 'index' ? '.' : `./${name}`,
-    outputs: {
-      esm: `lib/${name}.js`,
-      cjs: `legacy/${name}.cjs`,
-      types: `types/${name}.d.ts`
-    },
-    platformSpecific
-  })
+  const createEntry = (name: string, indexPath: string, platformSpecific?: DetectedEntry['platformSpecific']): DetectedEntry => {
+    // Submodules (e.g. fusion/index.ts) produce types/fusion/index.d.ts, not types/fusion.d.ts
+    const isSubmodule = name.includes('/') || (
+      fs.existsSync(path.join(srcDir, name)) &&
+      fs.statSync(path.join(srcDir, name)).isDirectory()
+    )
+    const typesPath = isSubmodule ? `types/${name}/index.d.ts` : `types/${name}.d.ts`
+
+    return {
+      name,
+      path: indexPath,
+      exportPath: name === 'index' ? '.' : `./${name}`,
+      outputs: {
+        esm: `lib/${name}.js`,
+        cjs: `legacy/${name}.cjs`,
+        types: typesPath
+      },
+      platformSpecific
+    }
+  }
 
   // Main entry
   const indexPath = path.join(srcDir, 'index.ts')
@@ -180,7 +197,17 @@ export function detectEntryPoints(sourceDir: string): DetectedEntry[] {
     entries.push(createEntry('index', indexPath))
   }
 
-  // Scan submodules
+  // 2. Scan top-level files (other than index)
+  for (const file of fs.readdirSync(srcDir)) {
+    const fullPath = path.join(srcDir, file)
+    if (fs.statSync(fullPath).isDirectory()) continue
+    if (!file.endsWith('.ts') || file.endsWith('.d.ts') || file.endsWith('.test.ts') || file.startsWith('index.')) continue
+
+    const name = file.replace(/\.ts$/, '')
+    entries.push(createEntry(name, fullPath))
+  }
+
+  // 3. Scan submodules
   const scan = (dir: string, prefix = '') => {
     for (const file of fs.readdirSync(dir)) {
       const fullPath = path.join(dir, file)

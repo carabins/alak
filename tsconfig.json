@@ -22,11 +22,11 @@
       "alak/*": [
         "packages/alak/src/*"
       ],
+      "@alaq/atom": [
+        "packages/atom/src/index.ts"
+      ],
       "@alaq/atom/*": [
         "packages/atom/src/*"
-      ],
-      "@alaq/nucleus/*": [
-        "packages/nucleus/src/*"
       ],
       "@alaq/quark": [
         "packages/quark/src/index.ts"
@@ -66,6 +66,30 @@
       ],
       "@alaq/flex/*": [
         "packages/flex/src/*"
+      ],
+      "@alaq/link": [
+        "packages/link/src/index.ts"
+      ],
+      "@alaq/link/*": [
+        "packages/link/src/*"
+      ],
+      "@alaq/link-state": [
+        "packages/link-state/src/index.ts"
+      ],
+      "@alaq/link-state/*": [
+        "packages/link-state/src/*"
+      ],
+      "@alaq/link-state-vue": [
+        "packages/link-state-vue/src/index.ts"
+      ],
+      "@alaq/link-state-vue/*": [
+        "packages/link-state-vue/src/*"
+      ],
+      "@alaq/plugin-logi": [
+        "packages/plugin-logi/src/index.ts"
+      ],
+      "@alaq/plugin-logi/*": [
+        "packages/plugin-logi/src/*"
       ],
       "~/scripts/*": [
         "scripts/*"

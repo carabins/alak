@@ -4,6 +4,10 @@
     "": {
       "name": "alak-monorepo",
       "dependencies": {
+        "@alaq/atom": "alpha",
+        "@alaq/nucl": "alpha",
+        "@alaq/quark": "alpha",
+        "@alaq/vue": "alpha",
         "graphql": "^16.12.0",
         "yaml": "^2.8.2",
       },
@@ -46,6 +50,16 @@
     },
   },
   "packages": {
+    "@alaq/atom": ["@alaq/atom@6.0.0-alpha.1", "http://core:4873/@alaq/atom/-/atom-6.0.0-alpha.1.tgz", { "dependencies": { "@alaq/nucl": "latest", "@alaq/quark": "latest" } }, "sha512-Tw/GpoVWe32oqgMbdY+81SDgzp9yup74EFeC5nTBzzBTb+Td72fKc3KSpT2JGntJFYaiRtACEOM+7fxHQ92tqw=="],
+
+    "@alaq/deep-state": ["@alaq/deep-state@6.0.0-alpha.1", "http://core:4873/@alaq/deep-state/-/deep-state-6.0.0-alpha.1.tgz", {}, "sha512-KuWAta0DDFb+rM98YIzfRfvnCY/oKtIMbczu1ig9jHJH54Zt+2pqiCt27HabL7Ylg0u+xJ8Pycz7jz3mi910Ng=="],
+
+    "@alaq/nucl": ["@alaq/nucl@6.0.0-alpha.1", "http://core:4873/@alaq/nucl/-/nucl-6.0.0-alpha.1.tgz", { "dependencies": { "@alaq/deep-state": "latest", "@alaq/quark": "latest", "es-toolkit": "latest" } }, "sha512-7Trj+FkUyQPhBsS2ssW6aWZCh+hLDoTklCekdai7fOr7SwvMYNqtDKjizr/bvp5J2RZRNw6QzvSb8diw8VxJgw=="],
+
+    "@alaq/quark": ["@alaq/quark@6.0.0-alpha.1", "http://core:4873/@alaq/quark/-/quark-6.0.0-alpha.1.tgz", {}, "sha512-l6/GOrfzYOD4iIuLKn1lbYkSuWg8BOmovRDTC8g1dxCJBVH+8RmrBDDOSBO+5+SnFrMoTpPOExjefNZ4keizlQ=="],
+
+    "@alaq/vue": ["@alaq/vue@6.0.0-alpha.1", "http://core:4873/@alaq/vue/-/vue-6.0.0-alpha.1.tgz", { "dependencies": { "@alaq/nucl": "latest" }, "peerDependencies": { "vue": "^3.0.0" } }, "sha512-y0RRM5JEwQhEFwSHn8cvWwvNmjYG8p+R8xTiYD1L59bwUriA7SKm+UiaRzZrgB096LiszOyj5IFfopGeRTQCUA=="],
+
     "@babel/helper-string-parser": ["@babel/helper-string-parser@7.27.1", "", {}, "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA=="],
 
     "@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.28.5", "", {}, "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q=="],
@@ -409,6 +423,8 @@
     "end-of-stream": ["end-of-stream@1.4.5", "", { "dependencies": { "once": "^1.4.0" } }, "sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg=="],
 
     "entities": ["entities@4.5.0", "", {}, "sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw=="],
+
+    "es-toolkit": ["es-toolkit@1.45.1", "http://core:4873/es-toolkit/-/es-toolkit-1.45.1.tgz", {}, "sha512-/jhoOj/Fx+A+IIyDNOvO3TItGmlMKhtX8ISAHKE90c4b/k1tqaqEZ+uUqfpU8DMnW5cgNJv606zS55jGvza0Xw=="],
 
     "estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
