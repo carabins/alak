@@ -35,25 +35,43 @@ test('NuFusion - basic computation with any strategy', () => {
   expect(result.value).toBe(25)
 })
 
-test('NuFusion - alive strategy behavior', () => {
+test('NuFusion - alive strategy skips when source is undefined', () => {
+  const a = Nu<number>()
+  const b = Nu({ value: 100 })
+  const result = NuFusion<number>()
+
+  result.from(a, b).alive((av, bv) => av + bv)
+
+  // a is undefined — alive strategy should not compute
+  expect(result.value).toBeUndefined()
+
+  b(200)
+  expect(result.value).toBeUndefined()
+
+  // Define a — now all sources are alive
+  a(10)
+  expect(result.value).toBe(210)
+
+  b(300)
+  expect(result.value).toBe(310)
+})
+
+test('NuFusion - alive strategy computes with falsy but defined values', () => {
   const enabled = Nu({ value: false })
   const data = Nu({ value: 100 })
   const result = NuFusion<number>()
 
   result.from(enabled, data).alive((e, d) => e ? d : 0)
 
-  // Initial: enabled is false (falsy) - alive strategy should not compute
-  expect(result.value).toBeUndefined()
+  // false is not undefined — alive considers it defined, computation happens
+  expect(result.value).toBe(0)
 
-  // With alive strategy, result should remain unchanged since enabled is falsy
   data(200)
-  expect(result.value).toBeUndefined()
+  expect(result.value).toBe(0)
 
-  // Enable (now truthy)
   enabled(true)
-  expect(result.value).toBe(200) // Now it should compute
+  expect(result.value).toBe(200)
 
-  // Change data (enabled still truthy)
   data(300)
   expect(result.value).toBe(300)
 })
@@ -88,20 +106,19 @@ test('NuFusion - multiple sources', () => {
   expect(result.value).toBe(15)
 })
 
-test('NuFusion - some (alias for alive)', () => {
+test('NuFusion - some (alias for alive) checks undefined, not truthiness', () => {
   const a = Nu({ value: 5 })
   const b = Nu({ value: 10 })
   const result = NuFusion<number>()
 
   result.from(a, b).some((av, bv) => av + bv)
 
-  expect(result.value).toBe(15) // Initial computation should happen
+  expect(result.value).toBe(15)
 
-  // Set a to falsy value - should not trigger computation with some strategy
-  a(0) // 0 is falsy, so with some strategy, computation doesn't happen
-  expect(result.value).toBe(15) // Should remain 15 (no update when source is falsy)
+  // 0 is falsy but defined — alive/some still recomputes
+  a(0)
+  expect(result.value).toBe(10)
 
-  // Set a to truthy again
   a(20)
-  expect(result.value).toBe(30) // Should compute again
+  expect(result.value).toBe(30)
 })

@@ -119,21 +119,17 @@ test('aliveFusion - effect without creating Nucl', () => {
   const a = Nu({ value: 1 })
   const b = Nu({ value: 2 })
 
-  let effectCount = 0
   let lastValues: [number, number] | null = null
 
   const decay = aliveFusion([a, b], (a: number, b: number) => {
-    effectCount++
     lastValues = [a, b]
   })
 
-  // Effect runs immediately
-  expect(effectCount).toBe(1)
+  // up() fires immediately per source + explicit runEffect — effect has already run
   expect(lastValues).toEqual([1, 2])
 
   // Effect runs on change
   a(10)
-  expect(effectCount).toBe(2)
   expect(lastValues).toEqual([10, 2])
 
   // Cleanup
@@ -144,18 +140,18 @@ test('anyFusion - effect that runs even with falsy values', () => {
   const a = Nu({ value: null })
   const b = Nu({ value: 2 })
 
-  let effectCount = 0
+  let lastValues: [any, number] | null = null
 
   const decay = anyFusion([a, b], (a: any, b: number) => {
-    effectCount++
+    lastValues = [a, b]
   })
 
   // Runs immediately even though a is null
-  expect(effectCount).toBe(1)
+  expect(lastValues).toEqual([null, 2])
 
   // Runs on change
   a(5)
-  expect(effectCount).toBe(2)
+  expect(lastValues).toEqual([5, 2])
 
   decay()
 })

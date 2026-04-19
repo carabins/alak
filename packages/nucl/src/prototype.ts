@@ -74,7 +74,7 @@ Object.defineProperty(BaseProto, 'notify', {
     }
     if (q._flags & 8) {
        if (q._bus) {
-         q._bus.safeEmit(q._changeEventName || 'change', { id: q.id, value: q._value })
+         q._bus.emit(q._changeEventName || 'change', { id: q.id, value: q._value })
        }
     }
   },

@@ -119,6 +119,7 @@ export function setupNuclearKinds(kinds: Record<string, INucleonPlugin[]>) {
 
 export function defineKind(kind: string, ...plugins: INucleonPlugin[]): void {
   setupNuclearKinds({ [kind]: plugins })
+  // Cache is already cleared in setupNuclearKinds
 }
 
 export function getRegistryForKind(kindSelector: string): IPluginsRegistry {

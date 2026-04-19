@@ -7,11 +7,9 @@ import {INucleonCore} from "./INucleon";
 
 const defaultKind = "+" as any
 
-const defaultReg = getRegistryForKind(defaultKind) as any
-
 export function createNu<T = any>(options?: INuOptions<T>): IQuark<T> {
 
-  let reg = defaultReg
+  let reg = getRegistryForKind(defaultKind)
 
   if (options) {
     
