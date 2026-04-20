@@ -1,11 +1,36 @@
 name: alaq
-version: 0.0.26
-description: Alak Last Atom
+version: "6.0.0-alpha.0"
+description: "AI-first frontdoor for the v6 ecosystem — CLI + MCP wiring + capability manifest."
+license: Apache-2.0
+author: "Gleb Panteleev <panteleew@gleb.pw>"
+homepage: https://github.com/carabins/alak/tree/master/packages/alaq
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/alaq
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+bin:
+  alaq: ./src/bin.ts
+scripts:
+  start: bun src/bin.ts
+dependencies:
+  "@alaq/mcp": "6.0.0-alpha.0"
 keywords:
-  - alak
+  - alaq
+  - ai-first
+  - mcp
+  - frontdoor
+  - cli
+  - alaqlink
   - reactive
   - atom
-  - streams
-  - channels
   - dataflow
-  - flow
+publishConfig:
+  access: public
