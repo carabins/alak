@@ -1,3 +1,4 @@
+import { uuidV7 } from '@alaq/rune'
 import type { LinkDriver, DriverCapabilities, DriverConfig, DriverState, QoS, MessageHandler, PeerInfo } from '../types'
 
 interface RTCPeerState {
@@ -50,7 +51,7 @@ export class WebRTCDriver implements LinkDriver {
   }
 
   async connect(config: DriverConfig): Promise<void> {
-    this.localPeerId = config.peerId ?? crypto.randomUUID()
+    this.localPeerId = config.peerId ?? uuidV7()
     this.setState('connected') // WebRTC driver is "ready" once signaling is available
   }
 

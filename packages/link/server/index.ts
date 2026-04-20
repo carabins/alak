@@ -1,3 +1,4 @@
+import { nanoid } from '@alaq/rune'
 import { ServerMsg } from '../src/types'
 import { encodeMessage, decodeMessage, msgpackCodec } from '../src/codec'
 import type { Codec } from '../src/types'
@@ -84,7 +85,7 @@ export function createLinkServer(config: LinkServerConfig = {}) {
   }
 
   function generatePeerId(): string {
-    return Math.random().toString(36).slice(2, 10)
+    return nanoid(8)
   }
 
   const server = Bun.serve({

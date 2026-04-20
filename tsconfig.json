@@ -64,6 +64,9 @@
       "@alaq/datastruct/*": [
         "packages/datastruct/src/*"
       ],
+      "@alaq/rune": [
+        "packages/rune/src/index.ts"
+      ],
       "@alaq/rune/*": [
         "packages/rune/src/*"
       ],
@@ -102,6 +105,18 @@
       ],
       "@alaq/plugin-logi/*": [
         "packages/plugin-logi/src/*"
+      ],
+      "@alaq/plugin-idb": [
+        "packages/plugin-idb/src/index.ts"
+      ],
+      "@alaq/plugin-idb/*": [
+        "packages/plugin-idb/src/*"
+      ],
+      "@alaq/plugin-tauri": [
+        "packages/plugin-tauri/src/index.ts"
+      ],
+      "@alaq/plugin-tauri/*": [
+        "packages/plugin-tauri/src/*"
       ],
       "~/scripts/*": [
         "scripts/*"

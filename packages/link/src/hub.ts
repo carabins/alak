@@ -1,3 +1,4 @@
+import { uuidV7 } from '@alaq/rune'
 import type {
   LinkHub as ILinkHub,
   LinkDriver,
@@ -35,7 +36,7 @@ export class LinkHub implements ILinkHub {
   private crown: CrownManager
 
   constructor() {
-    this._peerId = crypto.randomUUID()
+    this._peerId = uuidV7()
     this.codec = getDefaultCodec()
 
     // Init clock sync

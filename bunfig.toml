@@ -15,6 +15,7 @@ prefer = "local"
 "@alaq/quark/*" = ["./packages/quark/src/*"]
 "@alaq/nucl" = ["./packages/nucl/src/index.ts"]
 "@alaq/nucl/*" = ["./packages/nucl/src/*"]
+"@alaq/rune" = ["./packages/rune/src/index.ts"]
 "@alaq/rune/*" = ["./packages/rune/src/*"]
 "@alaq/bitmask/*" = ["./packages/bitmask/src/*"]
 "@alaq/datastruct/*" = ["./packages/datastruct/src/*"]
