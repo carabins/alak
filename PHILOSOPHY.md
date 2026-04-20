@@ -1,118 +1,163 @@
-# alaqlink — философия
+# v6 — philosophy
 
-**alaqlink** — стек для синхронизированного состояния, в котором SDL описывает контракт один раз, а всё остальное выводится.
+**Audience:** an LLM reading this repo for the first or nth time. Not a human.
 
-Это документ про **зачем**, не про **как**. Про **как** — `packages/graph/SPEC.md`, `packages/link-state/RUNTIME.md`, `architecture.yaml`.
+This document answers **why**. For **how**, see `AGENTS.md`, `architecture.yaml`, `CHECK.md`, and per-package `SPEC.md` / `README.md`.
 
----
-
-## Проблема
-
-Распределённое приложение описывает одну и ту же сущность в пяти местах: TypeScript-интерфейс на клиенте, типы на сервере, wire-формат (proto/json), CRDT-конфиг, валидация. Любая правка — синхронная во всех пяти. Рассинхрон ловится в проде.
-
-GraphQL решает чтение, не синхронизацию. gRPC — RPC, не реактивное состояние. tRPC завязан на TS на обоих концах. Effect Schema — валидация, не транспорт. Yjs / Automerge — CRDT, без типизированного контракта.
-
-alaqlink — **типизированный контракт + реактивная синхронизация + CRDT-семантика, выведенные из одной SDL.**
+A Russian mirror exists at `PHILOSOPHY.RU.md` — same content, same authority.
 
 ---
 
-## Принципы
+## One line
 
-### 1. SDL — единственная истина
-
-Контракт пишется один раз в `.aql`. Типы, wire-формат, CRDT-схема, серверные хендлеры, Vue-композаблы — генерируются. Если что-то можно вывести из схемы — выводим, не дублируем руками.
-
-Закрытый набор директив зафиксирован в `SPEC.md §7`. Расширение — через bump версии спеки, не через "добавил inline".
-
-### 2. Core нейтрален. Generators — плагины
-
-`@alaq/graph` ничего не знает про Zenoh, Vue, Tauri, Bun. Он эмитит IR — и всё.
-
-Каждый генератор — отдельный пакет с одной целью: IR → код для одной мишени. Имя плагина — по транспорту или платформе (`graph-zenoh`, `graph-link-state`), **никогда** по продукту (`graph-kotelok`, `graph-valkyrie` запрещены). Продукты — потребители, не мишени.
-
-### 3. Tier-based транспорт
-
-Приложение явно выбирает уровень. Tree-shaking — механизм enforcement.
-
-- T0: ws + http (минимум, SPA).
-- T1: + webrtc (rich web, p2p).
-- T2: + zenoh native (десктоп, сервер).
-- T3: zenoh-wasm (PWA mesh, явный opt-in).
-
-Поднимаешься по тирам по мере роста требований, не наоборот.
-
-### 4. Типы > рантайм-проверки
-
-CRDT-семантика, scoping, QoS — выводятся из директив SDL во время генерации. Рантайм не валидирует то, что компилятор уже доказал. Валидация — на границе системы (входящие wire-сообщения), не внутри.
-
-### 5. AI — первоклассный потребитель
-
-Стек спроектирован так, чтобы AI-агент мог им пользоваться без человека-посредника:
-
-- Диагностики компилятора — машиночитаемый JSON со стабильными кодами.
-- `@alaq/mcp` — MCP-сервер, через который агент собирает схему, считает diff, наблюдает рантайм.
-- Sandbox-границы (`rootDir` в filesystem-режиме) — реальные, не декоративные.
-- Diff-классификатор различает `breaking` / `non_breaking` / **`review`** — последняя категория сообщает агенту: "это решение требует осмысления, не автоматики".
-
-Это не "AI генерирует SDL по NL-описанию". SDL остаётся формальным контрактом, его сила — в точности. AI-first означает другое: **агент имеет тот же уровень доступа к примитивам, что и человек-разработчик и Vue-клиент, через стабильные машинные интерфейсы**.
-
-### 6. Скоупы — не singleton по умолчанию
-
-`@scope(name: "room")` означает: один инстанс на комнату, клиент подписывается на конкретный `room/<id>`, сервер маршрутизирует действия в правильный инстанс. Это ключевая абстракция, отличающая alaqlink от RPC-стеков: ты подписываешься на **кусок** состояния, а не запрашиваешь весь объект.
-
-### 7. Запреты, на которых стек стоит
-
-- Нет директив для конкретного рантайма в `@alaq/graph`. Они живут в плагинах.
-- Нет TS AST-парсинга для извлечения схем. Схема — в `.aql`, не в коде.
-- Нет cross-import между генераторами. Каждый читает IR независимо.
-- Нет `graph-<productname>` пакетов.
+v6 is a reactive TypeScript ecosystem designed so that **an LLM agent is a first-class consumer**, equal to a human developer.
 
 ---
 
-## Что alaqlink **не делает**
+## What this means for you as an LLM
 
-- Не управляет identity / authentication. Это слой выше.
-- Не описывает deployment / infrastructure.
-- Не предписывает UI-фреймворк. Vue-адаптер — один из возможных потребителей.
-- Не пытается быть GraphQL. Read-паттерны — другая задача.
-- Не runtime-валидирует то, что компилятор может доказать.
+1. **One entry: `alaq`.** A human runs `npm install alaq` and gets everything. You, entering a new project, run `alaq` and receive a **capability manifest** — machine-readable JSON describing the ecosystem: which packages are available, which MCP tools you hold, what you can do.
 
----
+2. **MCP is your main interface.** `@alaq/mcp` is a stdio JSON-RPC server. Through it you **compile SDL** (`schema_compile`), **analyze changes** (`schema_diff` — with `breaking` / `non_breaking` / `review` classes), **observe a live runtime** (7 `alaq_*` tools backed by Logi). Without MCP you scrape stdout and guess; through MCP you get structured answers.
 
-## Соотношение со смежными инструментами
+3. **Diagnostics are stable JSON.** Error codes (`E001`–`E022`, `W001`–`W004`) do not change across minor versions. You can build automation on a specific code.
 
-| Инструмент       | Что делает         | Где не пересекается с alaqlink                        |
-|------------------|--------------------|-------------------------------------------------------|
-| GraphQL          | Query language     | alaqlink — codegen + sync state, не query             |
-| gRPC / protobuf  | RPC + wire format  | alaqlink — реактивные подписки, не вызов-ответ        |
-| tRPC             | Type-safe RPC TS   | alaqlink не привязан к TS на обоих концах             |
-| Yjs / Automerge  | CRDT               | alaqlink даёт типизированный SDL поверх CRDT          |
-| Effect Schema    | Runtime validation | alaqlink — wire-контракт + транспорт                  |
-| Zod / Valibot    | TS validation      | alaqlink — кросс-language SDL                         |
+4. **The sandbox is real.** `rootDir` in MCP filesystem mode is not a decoration. `../etc/passwd` is refused. You can trust it.
+
+5. **The `review` class in `schema_diff` is your right to stop.** When the classifier says `review`, that is a signal: "this decision requires judgement, not automation." Do not paper over it.
 
 ---
 
-## alaq vs alaqlink
+## Ecosystem map
 
-- **`alaq`** — npm-scope (`@alaq/*`) и название монорепо.
-- **`alaqlink`** — стек как продукт: SDL + генераторы + runtime + MCP.
+6 layers, 23 packages. Know them by role, not by name:
 
-Один scope, один стек. Внутри scope могут жить пакеты, не относящиеся к alaqlink (например, `@alaq/quark` — реактивный примитив общего назначения).
+```
+┌──────────────────────────────────────────────────┐
+│  L0 Frontdoor       alaq                         │  AI door, CLI, capability manifest
+├──────────────────────────────────────────────────┤
+│  L1 AI tooling      @alaq/mcp                    │  MCP server (compile + observe)
+├──────────────────────────────────────────────────┤
+│  L2 alaqlink        @alaq/graph (SDL → IR)       │  SDL compiler
+│                     @alaq/graph-link-state       │  TS client generator
+│                     @alaq/graph-link-server      │  TS server generator
+│                     @alaq/graph-zenoh            │  Rust/Zenoh generator
+│                     @alaq/link                   │  transport (ws/http/webrtc/CRDT)
+│                     @alaq/link-state             │  SyncStore + SyncNode
+│                     @alaq/link-state-vue         │  Vue adapter
+├──────────────────────────────────────────────────┤
+│  L3 Reactive core   @alaq/quark                  │  base particle (zero-dep)
+│                     @alaq/nucl                   │  particle + plugin system
+│                     @alaq/atom                   │  state model
+│                     @alaq/fx                     │  effects and timing
+├──────────────────────────────────────────────────┤
+│  L4 Plugins         @alaq/plugin-idb             │  IndexedDB for nucl
+│                     @alaq/plugin-logi            │  Logi observability
+│                     @alaq/plugin-tauri           │  Tauri IPC bridge
+├──────────────────────────────────────────────────┤
+│  L5 Utilities       @alaq/rune (random+IDs)      │  UUIDv7, ULID, nanoid, PRNG
+│                     @alaq/bitmask                │  bit masks
+│                     @alaq/datastruct             │  data structures
+│                     @alaq/queue                  │  reactive job scheduler
+│                     @alaq/deep-state             │  deep reactivity
+│                     @alaq/ws                     │  WebSocket client
+│                     @alaq/xstate                 │  XState integration
+└──────────────────────────────────────────────────┘
+```
+
+**alaqlink** (L2) is not all of v6. It is **one track inside**: SDL + codegen + runtime sync for distributed applications. The other layers exist independently.
 
 ---
 
-## Стабильность контракта
+## Seven principles (normative)
 
-`6.0.0-alpha.0` — это первый релиз очищенной v6 базы. Поверхность будет меняться **до выхода `6.0.0`**: имена тулов, форма IR, набор директив, signature генераторов. Семантика SDL зафиксирована в `SPEC.md` v0.3 — ломаться не должна, расширения — через minor bump спеки.
+### 1. SDL is the single truth (applies to alaqlink)
+`.aql` is authored once. Types, wire, CRDT, handlers, composables are generated. Closed directive set in `packages/graph/SPEC.md §7`.
 
-Публичные API после `6.0.0` GA — semver. До GA — двигаемся свободно, отмечаем breaking в CHANGELOG.
+### 2. Core is neutral, plugins are named by transport
+`@alaq/graph` does not know about Zenoh/Vue/Tauri. A generator is named by its **target** (`graph-zenoh`, `graph-link-state`), **never** by a product (`graph-kotelok` is forbidden). Products are consumers.
+
+### 3. Types beat runtime checks
+What the compiler proved, the runtime does not re-validate. Validation lives at the boundary (incoming messages only).
+
+### 4. AI is a first-class consumer
+This is not a slogan — it is a physical property of the stack. MCP server, machine-readable diagnostics, stable error codes, capability manifest in `alaq`, `review` class in diff — all of it so an LLM works without a human in the middle.
+
+### 5. Scopes, not singletons
+`@scope(name: "room")` — one instance per named scope. Client subscribes to `room/<id>`, server routes. You get a **slice** of state, not the whole object.
+
+### 6. Tier-based transport
+T0: ws+http. T1: +webrtc. T2: +zenoh. T3: zenoh-wasm. Tree-shaking is the enforcement mechanism. You go up tiers by requirement, not by habit.
+
+### 7. Hard nos
+- No runtime-specific directives in `@alaq/graph` (they live in plugins).
+- No TS AST parsing to extract schemas (the schema lives in `.aql`).
+- No cross-imports between generators.
+- No `graph-<productname>` packages.
 
 ---
 
-## Кто на это отвечает
+## What v6 does **not** do
 
-- **`packages/graph/SPEC.md`** — нормативная семантика SDL.
-- **`AGENTS.md`** — правила для агентов, работающих в репо.
-- **`CHECK.md`** — процедура верификации стека после изменений.
-- **`architecture.yaml`** — машиночитаемый реестр пакетов и зависимостей.
-- **`PHILOSOPHY.md`** — этот документ. Зачем, не как.
+- Does not manage identity / auth. Layer above.
+- Does not describe deployment.
+- Does not prescribe a UI framework.
+- Does not try to be GraphQL. Read patterns are a different problem.
+- Does not embed an LLM. `alaq` is a doorway to tools; it does not think.
+- Does not runtime-validate what the compiler already proved.
+
+---
+
+## Relation to neighboring tools
+
+| Tool              | Where it overlaps        | Where it does not                                |
+|-------------------|--------------------------|--------------------------------------------------|
+| GraphQL           | typed contract           | v6 is codegen+sync, not query                    |
+| gRPC / protobuf   | wire + IDL               | v6 is reactive subscriptions, not call-response  |
+| tRPC              | typesafe RPC             | v6 is not tied to TS on both ends                |
+| Yjs / Automerge   | CRDT                     | v6 gives a typed SDL over CRDT                   |
+| Effect Schema     | validation + types       | v6 is wire + transport + runtime                 |
+| Sentry            | observability            | Logi (via `@alaq/plugin-logi`) is MCP-first      |
+
+---
+
+## Names
+
+- **`alaq`** — npm name of the frontdoor (unscoped). `npm install alaq`.
+- **`@alaq`** — npm scope for all individual packages (`@alaq/graph`, `@alaq/mcp`, …).
+- **`v6`** — common name for the ecosystem and the major cycle. Not a product — an era.
+- **`alaqlink`** — track inside v6 (L2): SDL + generators + runtime sync. Not a synonym for v6.
+
+If you see "alaqlink", look in L2. If you see "v6", think of the whole ecosystem.
+
+---
+
+## Stability
+
+Current: `6.0.0-alpha.0`. Before `6.0.0` GA the surface moves: tool names, IR shape, directive set. SDL semantics in `SPEC.md` v0.3 is stable.
+
+After GA — strict semver on public APIs. Before GA — breaking changes are flagged in the CHANGELOG, not silent.
+
+---
+
+## Where to go next
+
+If you are an LLM entering this repo for the first time:
+
+1. **Read `AGENTS.md`** — normative rules for your behavior.
+2. **Run or read `CHECK.md`** — the verification protocol for the current state of the stack.
+3. **Open `architecture.yaml`** — machine-readable registry, navigate by it.
+4. **If MCP is wired** — first call: `alaq_capabilities`. It tells you what you hold.
+5. **If MCP is not wired** — tell the human how to wire it (`alaq mcp install <client>`), then repeat step 4.
+
+---
+
+## Who owns what
+
+- **`PHILOSOPHY.md` / `.RU.md`** — why. This document.
+- **`AGENTS.md`** — how an agent behaves in the repo.
+- **`CHECK.md`** — how to verify the stack.
+- **`architecture.yaml`** — what exists and how it connects.
+- **`CONTRIBUTING.md`** — how to change things.
+- **`packages/graph/SPEC.md`** — normative SDL semantics.
+- **`packages/*/README.md`** — per-package interface.
