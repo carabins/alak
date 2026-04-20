@@ -10,7 +10,7 @@ This document specifies the shape of the `alaq` npm package for the v6 ecosystem
 
 - An **LLM-first CLI**. The first audience is an AI agent dropped into a fresh repo; humans are a degenerate case (an agent with fewer tools). Output is machine-readable by default; pretty output is opt-in.
 - A **capability manifest publisher**. `alaq` and `alaq mcp list` print a compact, diffable JSON manifest describing the ecosystem at the installed version. Agents paste this into context to learn what exists.
-- An **MCP wiring tool**. `alaq mcp install <client>` writes the stanza that connects `@alaq/mcp` to Claude Desktop, Claude Code, Cursor, etc. It is the shortest path from "I installed alaq" to "my agent can call `schema_compile`".
+- An **MCP wiring tool**. `alaq mcp install` prints the standard MCP server stanza that any MCP-compatible client can consume. It is the shortest path from "I installed alaq" to "my agent can call `schema_compile`".
 - A **shell fallback** to MCP. `alaq mcp call <tool> <args>` invokes the server one-shot, for humans and CI. It subsumes `alaq-mcp-call` from `@alaq/mcp`.
 
 `alaq` is **not** a runtime. It does not re-export `@alaq/graph` / `@alaq/atom` APIs at v6.0.0 (see §7). It does not embed an LLM. It does not manage project code.
@@ -30,10 +30,10 @@ $ npx alaq
 Prints the capability manifest (JSON, ~1.5 KB) — ecosystem version, list of `@alaq/*` packages with roles, MCP tool catalog with one-line descriptions, pointers to `schema_compile` and `schema_diff`. The agent reads this, understands the surface, and decides whether to continue. Next call:
 
 ```
-$ npx alaq mcp install claude-code
+$ npx alaq mcp install
 ```
 
-The agent's host is Claude Code; `alaq` edits the local `.mcp.json` (or user-scoped equivalent) and reports the exact path and merged config. From here on the agent uses MCP tools directly. No further `alaq` invocations needed for most of the session.
+Prints the standard MCP server stanza to stdout (JSON). The agent pipes or pastes it into whatever config file its host MCP client uses. From here on the agent uses MCP tools directly. No further `alaq` invocations needed for most of the session.
 
 ### 2.2. Human developer who read a blog post
 
@@ -42,7 +42,7 @@ $ bun add alaq
 $ bunx alaq doctor
 ```
 
-`doctor` reports: Bun version OK, `@alaq/mcp` reachable, no MCP clients detected, suggests `alaq mcp install claude-desktop`. User runs it, restarts Claude Desktop, opens a chat, types "list the alaq tools" — the MCP client responds with nine tools. From curious to usable in under a minute.
+`doctor` reports: Bun version OK, `@alaq/mcp` reachable, optional Logi endpoint status. Suggests `alaq mcp install` to print the stanza for the user's MCP client of choice. User pastes the stanza into their client's config file, restarts the client, and the tools appear.
 
 ### 2.3. CI pipeline running schema_diff on a PR
 
@@ -51,17 +51,11 @@ $ bunx alaq doctor
 - run: node ./ci/gate.js diff.json  # fails if report.summary.breaking > 0
 ```
 
-The CI runner never starts an MCP client. It gets the same structured output a Claude agent would. Exit code is `0` if the tool returned ok, `1` on tool error, `2` on usage error (matches `alaq-mcp-call`).
+The CI runner never starts an MCP client. It gets the same structured output an agent would. Exit code is `0` if the tool returned ok, `1` on tool error, `2` on usage error (matches `alaq-mcp-call`).
 
-### 2.4. Claude Desktop user wiring alaq
+### 2.4. User wiring alaq into an MCP client
 
-The user types `alaq mcp install claude-desktop`. `alaq`:
-
-1. Resolves the Claude Desktop config path (`%APPDATA%/Claude/claude_desktop_config.json` on Windows, `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, `~/.config/Claude/claude_desktop_config.json` on Linux).
-2. Loads the JSON (or creates `{ "mcpServers": {} }` if missing).
-3. Merges an `alaq` entry. If one exists, prompts (interactive) or refuses (`--no-interactive`) unless `--force`.
-4. Writes atomically (temp file + rename). Prints the final path and diff.
-5. Tells the user to restart Claude Desktop.
+The user types `alaq mcp install`. `alaq` prints the stanza to stdout. The user appends or merges it into their MCP client's config file (whatever path that client uses) and restarts the client. If the user passes `--write <path>`, `alaq` merges into the given file directly — but `alaq` does not resolve client-specific paths itself.
 
 ### 2.5. `alaq init` in a new project
 
@@ -69,7 +63,7 @@ The user types `alaq mcp install claude-desktop`. `alaq`:
 $ mkdir myproj && cd myproj && npx alaq init
 ```
 
-Creates `alaq.yaml`, `schema/`, `.alaq/` state dir. The project is now alaq-aware: `alaq mcp call schema_compile` without arguments reads `alaq.yaml` for defaults (`schemaDir: ./schema`). The LLM in that repo has a well-known place to stash decisions (see §6).
+Creates `alaq.yaml` and `schema/`. The project is now alaq-aware: `alaq mcp call schema_compile` without arguments reads `alaq.yaml` for defaults (`schemaDir: ./schema`). If `~/.alaq/` does not exist, `init` creates it as a side effect so ambient state has a home.
 
 ---
 
@@ -82,12 +76,10 @@ All commands support `--json` (default for non-TTY stdout) and `--pretty` (defau
 | `alaq` | Print capability manifest. |
 | `alaq doctor` | Check environment. |
 | `alaq init [path]` | Scaffold an alaq-aware project. |
-| `alaq mcp install <client>` | Wire `@alaq/mcp` into a client. |
-| `alaq mcp uninstall <client>` | Reverse of install. |
+| `alaq mcp install` | Print the standard MCP server stanza for any MCP client. |
 | `alaq mcp start` | Spawn `@alaq/mcp` on stdio (delegate). |
 | `alaq mcp call <tool> <args>` | One-shot tool call. |
 | `alaq mcp list` | List MCP tools grouped by `compile_time` / `runtime_observation`. |
-| `alaq decide <question>` | **v6.1+ placeholder.** Ecosystem-advisor query. |
 
 ### 3.1. `alaq` (no args)
 
@@ -101,7 +93,6 @@ Checks:
 
 - Runtime: `bun --version` or `node --version` (engines: `bun >= 1.3`, `node >= 20`).
 - Reachability: `@alaq/mcp` resolves (either bundled or peer-installed, see §7).
-- MCP clients found: Claude Desktop, Claude Code, Cursor, Continue — by probing known config paths.
 - Optional: Logi endpoint at `http://localhost:2025/health` if `LOGI_ENDPOINT` set or default reachable.
 
 Output JSON: `{ ok: bool, checks: [{ name, ok, detail }], hints: [...] }`. Exit 0 if all `ok`, 1 otherwise.
@@ -119,25 +110,28 @@ Creates (see §6 for content):
   alaq.yaml
   schema/
     .gitkeep
-  .alaq/
-    state.json
-    decisions.jsonl    # append-only, for `alaq decide`
-  .gitignore           # if missing; appends .alaq/cache/
 ```
+
+Side effect: if `~/.alaq/` does not exist, it is created (empty). No files are written inside the project for ambient state — that lives in `~/.alaq/` (§6).
 
 Prints the list of created files, JSON array by default.
 
-### 3.4. `alaq mcp install <client>`
+### 3.4. `alaq mcp install`
 
-`<client>` ∈ `claude-desktop`, `claude-code`, `cursor`, `continue` (v1). Future: `zed`, `windsurf`, `vscode-copilot`.
+Prints the standard MCP server stanza to stdout. No client argument: MCP is a protocol, and `alaq` does not privilege any vendor.
 
-Flags: `--scope user|project` (where applicable), `--force`, `--no-interactive`, `--dry-run` (prints the merged config to stdout, writes nothing).
+Flags:
 
-Per-client behaviour detailed in §4.
+- `--format <json|toml|yaml>` — output format (default `json`). For clients that consume non-JSON configs.
+- `--write <path>` — instead of stdout, merge the stanza into the file at `<path>`. `alaq` does not know which client that path belongs to; the user picks it. Merge is atomic (temp file + rename), preserves unknown keys, and refuses to clobber an existing `alaq` entry unless `--force`.
+- `--force` — overwrite an existing `alaq` entry when writing.
+- `--dry-run` — with `--write`, print the merged file to stdout instead of writing.
+
+See §4 for the stanza shape.
 
 ### 3.5. `alaq mcp start`
 
-Spawns `@alaq/mcp` on stdio. Forwards stdin/stdout/stderr. This is what `command: "alaq"`, `args: ["mcp", "start"]` resolves to in the generated config — so the wired entry never references file paths inside `node_modules`.
+Spawns `@alaq/mcp` on stdio. Forwards stdin/stdout/stderr. This is what `command: "alaq"`, `args: ["mcp", "start"]` resolves to in the printed stanza — so the wired entry never references file paths inside `node_modules`.
 
 Exit code matches the child.
 
@@ -149,7 +143,7 @@ One-shot tool call. Mirrors `alaq-mcp-call` exactly:
 - `alaq mcp call schema_diff --args-file ./diff-args.json`
 - `alaq mcp list` (covered as a separate command below — do not also accept `alaq mcp call --list`; one syntax per concept).
 
-Output: unwrapped tool payload JSON. Exit: 0 ok / 1 tool error / 2 usage error. If `alaq.yaml` is present and the tool supports `rootDir`, `alaq` injects it as a default.
+Output: unwrapped tool payload JSON. Exit: 0 ok / 1 tool error / 2 usage error. If `alaq.yaml` is present in the project root and the tool supports `rootDir`, `alaq` injects it as a default. Project-local `alaq.yaml` drives schema defaults; ambient agent state lives in `~/.alaq/` (§6).
 
 ### 3.7. `alaq mcp list`
 
@@ -171,32 +165,13 @@ Prints the MCP tool catalog, grouped:
 
 Pulled from `@alaq/mcp`'s `tools/list` at runtime, not hardcoded — the list stays truthful across `@alaq/mcp` versions.
 
-### 3.8. `alaq decide <question>` (v6.1+)
-
-Placeholder. Shape designed now so `alaq init` writes the right files:
-
-```
-alaq decide "do I need @alaq/plugin-logi for this project?"
-```
-
-Reads `alaq.yaml` + `.alaq/state.json`, composes a prompt with the manifest + the question, calls an LLM (via the user's configured MCP client or a direct Anthropic/OpenAI key — **TBD**), appends the exchange to `.alaq/decisions.jsonl`, prints the decision summary. **Not implemented in v6.0.0.** Reserved in CLI so the command exists and returns a stub: `{ status: "unimplemented", eta: "6.1.0" }`.
-
 ---
 
 ## 4. MCP wiring design
 
-Target-file and merge semantics per client. All writers use atomic write (temp file + rename) and preserve unknown keys.
+`alaq mcp install` emits one stanza, client-agnostic. MCP is a protocol; `alaq` does not ship a list of vendor adapters. The user (or agent) pastes the stanza into whatever config file their MCP client reads.
 
-### 4.1. `claude-desktop`
-
-Path:
-- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Linux: `~/.config/Claude/claude_desktop_config.json`
-
-File may not exist — create as `{ "mcpServers": {} }`.
-
-Generated stanza:
+Stanza (JSON, default):
 
 ```json
 {
@@ -212,27 +187,11 @@ Generated stanza:
 }
 ```
 
-`env.LOGI_ENDPOINT` included only if present in caller env or `alaq.yaml`. `command: "npx"` chosen over `bun` because Claude Desktop users overwhelmingly have Node; Bun detection is a `--command bun` flag override.
+`env.LOGI_ENDPOINT` is written with the default value. `alaq mcp install` does not probe the network to auto-fill it; silent modification of config is riskier than a one-line edit by the user. `command: "npx"` is the default because it works across Node and Bun installs; override with `--command bun` if a Bun-only stanza is preferred.
 
-Collision: if `mcpServers.alaq` exists, prompt (interactive) or refuse (`--no-interactive`) unless `--force`.
+`--format toml` and `--format yaml` emit the equivalent structure. `--write <path>` merges into the given file atomically (temp + rename), preserving unknown keys; an existing `alaq` entry is kept unless `--force`. With `--dry-run`, the merged result is printed to stdout instead of written.
 
-### 4.2. `claude-code`
-
-Project-scoped by default — writes to `./.mcp.json` at `--cwd`. User-scoped — writes to `~/.claude.json` with `--scope user`. Same stanza shape as 4.1.
-
-Collision: same rule as 4.1.
-
-### 4.3. `cursor`
-
-Path: `~/.cursor/mcp.json` (user-scoped) or `./.cursor/mcp.json` (project-scoped). Same stanza shape.
-
-### 4.4. Future
-
-`continue`, `zed`, `windsurf`, `vscode-copilot` — handwave. Each client gets a small adapter module that resolves path(s) and knows the enclosing JSON shape. The merge logic is shared.
-
-### 4.5. Uninstall
-
-`alaq mcp uninstall <client>` removes only the `alaq` entry. Leaves other servers untouched. If the resulting `mcpServers` is empty and the file was created by `alaq`, the file is kept (less surprising).
+Uninstall is a user action: delete the `alaq` entry from the client config. `alaq` does not ship an `uninstall` command because it would require the same per-client path resolution that `install` deliberately avoids.
 
 ---
 
@@ -269,7 +228,7 @@ Printed by `alaq` (no args). Target: **under 2 KB gzipped**, ~1.5 KB typical. St
   },
   "hints": {
     "first_call_for_agents": "alaq_capabilities",
-    "wire_up": "alaq mcp install <client>",
+    "wire_up": "alaq mcp install",
     "schema_dir_default": "./schema"
   }
 }
@@ -286,9 +245,12 @@ Package list is deliberately **not exhaustive** — 8 entries vs ~22 in `archite
 
 ---
 
-## 6. `.alaq/` project state
+## 6. Project config and ambient state
 
-`alaq init` creates a hybrid: one top-level YAML (readable, diff-friendly) plus a hidden dir for mutable state.
+Two separate things, different homes:
+
+- **Project-local config** — `alaq.yaml` at the project root. Committed. Read by `alaq mcp call` for defaults like `schemaDir`.
+- **Ambient agent state** — `~/.alaq/` in the user's home dir. Not committed anywhere. Ephemeral scratch space for the agent across projects.
 
 ### 6.1. `alaq.yaml` (project root, committed)
 
@@ -300,27 +262,23 @@ mcp:
   env:
     LOGI_ENDPOINT: http://localhost:2025
     LOGI_PROJECT:  demo_project_token
-decide:                 # v6.1+ placeholder, keys reserved
-  provider: null
-  model: null
 ```
 
-### 6.2. `.alaq/` (project root, gitignore by default except decisions.jsonl)
+### 6.2. `~/.alaq/` (user home, never committed)
 
 ```
-.alaq/
+~/.alaq/
   state.json           # ephemeral: last-seen ecosystem version, last doctor run
-  decisions.jsonl      # append-only, committed — decisions made via `alaq decide`
-  cache/               # ignored; manifest cache, gzipped
+  cache/               # manifest cache, gzipped
 ```
 
-`decisions.jsonl` is committed so the team shares reasoning. `cache/` and `state.json` are ignored. `alaq init` appends to `.gitignore` if present.
+Home-scoped because it is agent-personal memory that outlives any individual project. Nothing in `~/.alaq/` belongs in a repo, so there is no gitignore concern — no project ever references it.
 
 ### 6.3. Rationale
 
-- A single YAML for human-edited config is boring and correct.
-- A hidden dir for machine-written artifacts keeps the top level clean.
-- `decisions.jsonl` is the scaffolding for future AI workflows (§3.8). Reserving it now costs nothing.
+- A single YAML for human-edited project config is boring and correct.
+- Ambient state lives in the user's home so an agent can carry context across projects without polluting repos.
+- The directory is just ephemeral state + cache; no append-only logs, no reserved future files.
 
 ---
 
@@ -335,7 +293,7 @@ decide:                 # v6.1+ placeholder, keys reserved
 
 `main: ./src/index.ts` exposes only:
 - `readManifest(): CapabilityManifest` — the object printed by `alaq`.
-- `resolveMcpClient(client: string): { path: string, kind: string }` — used by `alaq mcp install`.
+- `renderMcpStanza(opts): string` — the stanza emitted by `alaq mcp install`.
 - `spawnMcp(): ChildProcess` — used by `alaq mcp start`.
 
 These are for tooling authors, not application code.
@@ -361,21 +319,17 @@ Install-size budget: **under 2 MB unpacked** for `alaq + @alaq/mcp + @alaq/graph
 
 - **Not a runtime aggregator.** No re-exports of `@alaq/atom`, `@alaq/nucl`, `@alaq/quark`, `@alaq/link*`.
 - **Not a scaffolder for apps.** `alaq init` creates a minimal alaq-aware project, not a Vue/Tauri/Bun app.
-- **No embedded LLM.** `alaq decide` is a v6.1+ placeholder; it does not ship a model binary or API key.
-- **No VS Code / JetBrains extension install.** MCP wiring writes config files; it does not drive editor extension marketplaces.
+- **No embedded LLM.** `alaq` does not ship a model binary or API key, and does not call one.
+- **No per-client MCP adapters.** `alaq mcp install` prints a single stanza; it does not resolve vendor-specific config paths or drive editor extension marketplaces.
 - **No Logi deployment.** `alaq doctor` can detect a running Logi endpoint, but it does not start one. `docker compose up -d` in `A:/source/logi` is a user action.
 - **No `graph` runtime wrapper.** `schema_compile` is reached via MCP or `alaq mcp call`, not `alaq compile` — one concept, one syntax.
 - **No telemetry.** `alaq` sends nothing over the network. Logi is a user-configured endpoint, not a vendor hook.
 
 ---
 
-## 9. Open questions for the user
+## 9. Implementation notes
 
 1. **Dual-runtime support for `@alaq/mcp`.** Per user decision, Bun and Node are first-class equals. Current `@alaq/mcp` bin is `bun src/bin.ts` — a Bun-only shebang. Before `alaq` v1 ships, `@alaq/mcp` must build a Node-runnable entry too (compiled `.js` + `#!/usr/bin/env node`). `alaq mcp start` picks the right one at runtime based on which interpreter launched the process. This is a task, not a choice.
-2. **MCP clients in v1.** Design covers `claude-desktop`, `claude-code`, `cursor`, `continue`. Is that the shipping set? Drop any? Add `zed` or `windsurf` immediately?
-3. **`.alaq/` location.** Project-local (current design) vs user-home (`~/.alaq/`) vs both. Project-local wins for team workflows; home-dir would be useful for agent-personal memory that outlives projects. Design allows both if we want — `alaq init --scope user` could write to `~/.alaq/`.
-4. **Logi discovery at install.** Should `alaq mcp install` probe `localhost:2025` and auto-fill `LOGI_ENDPOINT` in the env block if found? Or always write the default and let users edit? Auto-fill is friendlier; silent modification of config is riskier.
-5. **`alaq decide` provider.** When we ship v6.1, does it call through the user's existing MCP client (relay pattern), or take an `ANTHROPIC_API_KEY` directly? Relay is purer (no key management) but couples `alaq` to the client's availability. Direct key is simpler but duplicates auth.
 
 ---
 

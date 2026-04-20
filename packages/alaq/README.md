@@ -38,7 +38,7 @@ Prints the capability manifest — ecosystem version, package roles, MCP tool ca
 ```sh
 npx alaq doctor
 ```
-Checks runtime, reachability of `@alaq/mcp`, which MCP clients are installed locally, optional Logi endpoint.
+Checks runtime, reachability of `@alaq/mcp`, optional Logi endpoint.
 
 ```sh
 npx alaq mcp list
@@ -46,29 +46,27 @@ npx alaq mcp list
 Lists MCP tools grouped by `compile_time` (`schema_compile`, `schema_diff`) and `runtime_observation` (`alaq_capabilities` + six `alaq_*` tools that read the Logi HTTP API).
 
 ```sh
-npx alaq mcp install claude-code
+npx alaq mcp install
 ```
-Writes (or merges) the `alaq` MCP server entry into the local `.mcp.json`. Supported clients in v1: `claude-desktop`, `claude-code`, `cursor`, `continue`. Use `--dry-run` to see the config without writing.
+Prints the standard MCP server stanza (JSON by default). Paste it into your MCP client's config file. `--format toml|yaml` for non-JSON clients; `--write <path>` to merge into a file you point at.
 
 ```sh
 npx alaq init
 ```
-Scaffolds a minimal alaq-aware project: `alaq.yaml`, `schema/`, `.alaq/`.
+Scaffolds a minimal alaq-aware project: `alaq.yaml`, `schema/`. Ambient agent state lives in `~/.alaq/`, not in the project.
 
 ```sh
 npx alaq mcp call schema_compile '{"paths":["core.aql"],"rootDir":"./schema"}'
 ```
-One-shot MCP call — no client needed. Output is the unwrapped tool payload. Same tool, same schema, whether invoked here or from Claude.
+One-shot MCP call — no client needed. Output is the unwrapped tool payload. Same tool, same schema, whether invoked here or from an MCP client.
 
 ## Install as MCP server
 
-### Claude Desktop
-
 ```sh
-npx alaq mcp install claude-desktop
+npx alaq mcp install
 ```
 
-Or, by hand, add this to `claude_desktop_config.json`:
+Prints the stanza below. Append or merge it into your MCP client's config file (whatever path that client uses), then restart the client.
 
 ```json
 {
@@ -81,15 +79,9 @@ Or, by hand, add this to `claude_desktop_config.json`:
 }
 ```
 
-### Claude Code
+Flags: `--format <json|toml|yaml>` for non-JSON configs, `--write <path>` to merge into a file directly, `--dry-run` to preview the merge, `--force` to overwrite an existing `alaq` entry. `alaq` does not resolve client-specific config paths — MCP is a protocol, and the set of clients keeps growing; pick the file yourself.
 
-```sh
-npx alaq mcp install claude-code
-```
-
-Writes to `./.mcp.json` (project-scoped) or `~/.claude.json` with `--scope user`. Stanza shape is the same.
-
-Restart the client. The `alaq` server exposes both the compile-time and runtime-observation tool groups.
+Once the stanza is in place and the client is restarted, the `alaq` server exposes both the compile-time and runtime-observation tool groups.
 
 ## Shell usage
 
