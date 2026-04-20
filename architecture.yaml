@@ -56,6 +56,65 @@ packages:
     depends_on: ["@alaq/quark"]
     note: 9 tests green.
 
+  # ── Nucl/Atom plugins (kind-based extensions of reactive core) ──
+
+  - name: "@alaq/plugin-logi"
+    path: packages/plugin-logi
+    role: plugin-observability
+    layer: runtime
+    depends_on: ["@alaq/quark", "@alaq/nucl"]
+    peer_optional: ["@logi/browser"]
+    exports: [logiPlugin, emitFrame, traceAction, beginSpan, endSpan, withTrace, currentTrace, shapeOf, getReload, createLogiBrowserTransport]
+    kinds: [logi]
+    backend_service:
+      name: logi
+      dev_endpoint: "http://localhost:8080"
+      dev_token: demo_project_token
+      how_to_start: "cd A:/source/logi && docker compose up -d"
+    capabilities:
+      - nucl-mutation-frames
+      - action-span-tracing
+      - release-reload-tagging
+      - shape-only-by-default
+      - debug-values-opt-in
+    note: 8 tests green. Emits LogiFrame objects over configurable transport; default transport lazy-loads @logi/browser.
+
+  - name: "@alaq/plugin-idb"
+    path: packages/plugin-idb
+    role: plugin-persistence
+    layer: runtime
+    depends_on: ["@alaq/quark", "@alaq/nucl"]
+    peer_optional: ["@alaq/plugin-logi"]
+    exports: [idbPlugin, createFakeIDB]
+    kinds: [idb, idb-collection]
+    capabilities:
+      - kv-single-value
+      - collection-with-indexes
+      - optimistic-writes
+      - debounced-flush
+      - ready-and-saved-companion-nucls
+      - logi-integration-optional
+    note: 20 tests green. Fake IDB shipped for bun tests (no external deps).
+
+  - name: "@alaq/plugin-tauri"
+    path: packages/plugin-tauri
+    role: plugin-ipc
+    layer: runtime
+    depends_on: ["@alaq/quark", "@alaq/nucl"]
+    peer_optional: ["@alaq/plugin-logi", "@tauri-apps/api"]
+    exports: [tauriPlugin, createFakeIPC]
+    kinds: [tauri, tauri-command]
+    capabilities:
+      - state-mode-read-write-listen
+      - command-mode-ad-hoc-invoke
+      - ready-saved-error-companion-nucls
+      - lazy-tauri-api-import
+      - graceful-degradation-non-tauri
+    note: |
+      17 tests green. Not to be confused with future @alaq/link-tauri — that one
+      is a LinkDriver for Tauri-specific peer discovery in CRDT mesh (different
+      layer). plugin-tauri is a flat IPC wrapper for nucl atoms.
+
   # ── Transport and sync ──
 
   - name: "@alaq/link"
@@ -195,12 +254,44 @@ packages:
       stack reached 346 tests green + cargo-verified. Do not import, do not extend.
       Kept for reference only.
 
+  # ── AI-facing tooling ──
+
+  - name: "@alaq/mcp"
+    path: packages/mcp
+    role: ai-tooling
+    layer: tooling
+    depends_on: ["@alaq/graph"]
+    exports: [schemaCompile, schemaDiff, diffIR, runServer, alaqCapabilities, alaqTrace, alaqAtomActivity, alaqHotAtoms, alaqIdbStores, alaqIdbStoreStats, alaqIdbErrors]
+    bin: { alaq-mcp: "src/bin.ts", alaq-mcp-call: "src/cli.ts" }
+    tool_groups:
+      compile_time: [schema_compile, schema_diff]
+      runtime_observation: [alaq_capabilities, alaq_trace, alaq_atom_activity, alaq_hot_atoms, alaq_idb_stores, alaq_idb_store_stats, alaq_idb_errors]
+    reads_from:
+      logi_http_api:
+        endpoint_default: "http://localhost:8080"
+        endpoint_env: LOGI_ENDPOINT
+        project_env: LOGI_PROJECT
+    note: |
+      Stdio JSON-RPC MCP server. 50 tests green (14 new runtime unit + 1 live integration).
+      Runtime tools read Logi HTTP API directly (no proxy through Logi MCP).
+      Self-describing via alaq_capabilities: AI in a fresh session calls it first.
+
   # ── Deferred / draft ──
 
   - name: "@alaq/state"
     path: packages/state.draft
     status: deferred
     note: UI view/data/actions/children DSL. Reopen when runtime UI generation is needed.
+
+  - name: "alaq"
+    path: packages/alaq (planned)
+    status: planned
+    role: meta-seed
+    layer: tooling
+    note: |
+      AI-first seed package. `bun add alaq` installs a minimal surface + manifest.json
+      (ecosystem catalog) + doctor/new/install/decide/sync CLI. Drops `.alaq/project.json`
+      in consumer projects for long-term decision/runtime memory. See alaq.md (planned).
 
 forbidden_dependencies:
   - from: "@alaq/graph"
@@ -212,10 +303,27 @@ forbidden_dependencies:
   - from: "@alaq/link"
     to: "@alaq/link-zenoh"
     reason: Core transport stays tier0-sufficient.
+  - from: "@alaq/plugin-*"
+    to: "@alaq/plugin-*"
+    reason: |
+      Plugins must not hard-depend on each other. Cross-plugin integration
+      (e.g. plugin-idb emitting frames through plugin-logi) uses optional peer
+      dependencies + runtime-nullable hooks (like emitFrame returning noop
+      when plugin-logi runtime is not registered).
+  - from: "@alaq/nucl"
+    to: "@alaq/plugin-*"
+    reason: Core reactive primitive must not depend on extensions.
 
 plugin_naming_rule:
-  pattern: "@alaq/<family>-<transport-or-platform>"
+  pattern: "@alaq/<family>-<transport-or-platform-or-function>"
+  examples:
+    - "@alaq/graph-link-state"     # family=graph, target=link-state
+    - "@alaq/graph-zenoh"          # family=graph, target=zenoh
+    - "@alaq/plugin-logi"          # family=plugin, function=logi observability
+    - "@alaq/plugin-idb"           # family=plugin, platform=IndexedDB
+    - "@alaq/plugin-tauri"         # family=plugin, platform=Tauri
   forbidden:
-    - "@alaq/graph-<product>"  # e.g. graph-kotelok, graph-valkyrie
+    - "@alaq/graph-<product>"      # e.g. graph-kotelok, graph-valkyrie
     - "@alaq/link-<product>"
-  reason: Products consume plugins; they are not compilation targets.
+    - "@alaq/plugin-<product>"     # e.g. plugin-kladinets
+  reason: Products consume plugins; they are not compilation or extension targets.

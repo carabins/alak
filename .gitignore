@@ -25,6 +25,7 @@ packages/*/src/**/*.d.ts
 
 # Per-package e2e build artifacts
 packages/*/test/e2e/dist/
+packages/*/playwright/bundle.js
 
 # Local dev artifacts
 .claude/skills/

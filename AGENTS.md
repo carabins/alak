@@ -4,14 +4,31 @@ Read this before any change in this repo. These rules are normative, not advisor
 
 ## Ecosystem layout
 
+**Reactive core (generic, not alaqlink-specific):**
+
 - **`@alaq/quark`** — reactive primitive. Zero deps. Do not add deps.
 - **`@alaq/nucl`** — enhanced primitive on quark. Depends on quark only.
 - **`@alaq/atom`** — state model on nucl. Used by application code.
 - **`@alaq/fx`** — reactive effects and timings.
+
+**Nucl/Atom plugins (kind-based, extend reactive core):**
+
+- **`@alaq/plugin-logi`** — observability. Streams mutations/actions/errors into a self-hosted Logi endpoint. Shape-only by default, `debugValues` opt-in for dev. Trace-aware (action spans), release-aware (`version+build.rN`).
+- **`@alaq/plugin-idb`** — persistence. Two kinds: `idb` (single-value KV) and `idb-collection` (records with indexes). Optimistic sync + `$ready` / `$saved` companion nucls. Integrates with `plugin-logi` when present.
+- **`@alaq/plugin-tauri`** — IPC bridge for Tauri v2. Two kinds: `tauri` (state atoms backed by Rust commands + events) and `tauri-command` (ad-hoc invokes). Graceful degradation in non-Tauri environments.
+
+Plugins follow `@alaq/plugin-<function-or-platform>` naming. Plugin for X ≠ plugin-X-for-Y — keep families flat.
+
+**alaqlink stack (SDL-driven synchronized state):**
+
 - **`@alaq/link`** — transport core (ws/webrtc/http, QoS, CRDT primitives, SyncBridge).
 - **`@alaq/link-state`** — client-side replica (SyncStore, SyncNode, Ghost Proxies).
 - **`@alaq/graph`** — SDL spec compiler (see `packages/graph/SPEC.md`). This is the source of truth for wire protocols across the ecosystem.
-- **`@alaq/graph-*`** — target-specific generators (plugins). Named by transport/platform, not by product. Examples: `@alaq/graph-link-state`, `@alaq/graph-tauri`, `@alaq/graph-zenoh`.
+- **`@alaq/graph-*`** — target-specific generators. Named by transport/platform, not by product. Examples: `@alaq/graph-link-state`, `@alaq/graph-tauri`, `@alaq/graph-zenoh`.
+
+**AI-facing tooling:**
+
+- **`@alaq/mcp`** — MCP server exposing both compile-time tools (`schema_compile`, `schema_diff`) and runtime observation tools (`alaq_capabilities`, `alaq_trace`, `alaq_atom_activity`, `alaq_hot_atoms`, `alaq_idb_*`). Runtime tools read from Logi HTTP API directly. Dev default endpoint: `http://localhost:8080`.
 
 ## Transport tiers
 
@@ -37,6 +54,7 @@ Generator plugins follow `@alaq/graph-<transport-or-platform>`. Never name a plu
 - `@alaq/graph` core is transport-neutral. No knowledge of Zenoh, Tauri, or any specific runtime.
 - Advanced capabilities (key expressions, storages, liveliness queries) live in driver packages (`@alaq/link-zenoh` etc.), not in `@alaq/link` core.
 - `@alaq/graph` directives that target a specific runtime live in the plugin that owns that target.
+- `@alaq/plugin-*` packages extend `@alaq/nucl`/`@alaq/atom` kind system. Each plugin is one concern (observability, persistence, IPC). Plugins never depend on other plugins; cross-plugin integration (e.g. `plugin-idb` emitting via `plugin-logi`) uses optional peer dependencies.
 
 ## When writing or modifying SDL
 
