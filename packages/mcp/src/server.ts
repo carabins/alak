@@ -6,6 +6,15 @@
 // matches @alaq/graph's ethos. The protocol surface we need is ~100 lines.
 
 import { schemaCompile, schemaDiff } from './tools'
+import {
+  alaqCapabilities,
+  alaqTrace,
+  alaqAtomActivity,
+  alaqHotAtoms,
+  alaqIdbStores,
+  alaqIdbStoreStats,
+  alaqIdbErrors,
+} from './tools-runtime'
 
 const PROTOCOL_VERSION = '2024-11-05'
 
@@ -72,6 +81,106 @@ const TOOLS = [
       required: ['before', 'after'],
     },
   },
+  // ── Runtime observation tools (read from self-hosted Logi HTTP API) ────
+  {
+    name: 'alaq_capabilities',
+    description:
+      'Self-describing meta-tool. Reads recent Logi activity to report which alaq runtime plugins are active (logi itself, plugin-idb, potentially plugin-tauri). Use at the start of a session to orient yourself in a running app. Detection: any frames → "logi"; messages starting with "idb:" → "idb"; messages starting with "tauri:" → "tauri".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hours: { type: 'number', description: 'Lookback window in hours. Default 24.' },
+        endpoint: { type: 'string', description: 'Logi base URL. Defaults to env LOGI_ENDPOINT or http://localhost:8080.' },
+        project: { type: 'string', description: 'Project slug. Defaults to env LOGI_PROJECT or "demo".' },
+      },
+    },
+  },
+  {
+    name: 'alaq_trace',
+    description:
+      'Full causal chain for a single trace_id. Groups frames into a semantic tree by parent_span relationships: action root → mutations inside the action → sub-actions. Each node surfaces fingerprint, phase, duration_ms, prev/next shape. Use to answer "what caused X?" questions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        trace_id: { type: 'string', description: 'The trace_id to reconstruct. Get one from alaq_atom_activity or logi_search_events.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+      required: ['trace_id'],
+    },
+  },
+  {
+    name: 'alaq_atom_activity',
+    description:
+      'Activity timeline for a specific atom (fingerprint = "${realm}.${atom}.${prop}"). Returns mutation count, error count, aggregated shape transitions (primitive:number → object:keys=3 etc.), and recent frames. Fingerprint filtering is post-hoc client-side (Logi search `q` is a message ILIKE).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        fingerprint: { type: 'string', description: 'Stable atom key. Example: "app.counter.count".' },
+        hours: { type: 'number', description: 'Lookback window. Default 1.' },
+        limit: { type: 'number', description: 'Max recent_frames to include. Default 100.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+      required: ['fingerprint'],
+    },
+  },
+  {
+    name: 'alaq_hot_atoms',
+    description:
+      'Top atoms by write frequency in a window. Identifies performance hot spots and noisy mutations. Writes count excludes span-boundary action frames; errors are counted separately.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hours: { type: 'number', description: 'Window in hours. Default 1.' },
+        limit: { type: 'number', description: 'Max rows. Default 10.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+    },
+  },
+  {
+    name: 'alaq_idb_stores',
+    description:
+      'List all IndexedDB-backed atoms seen in the window. Filters frames by message LIKE "idb:%". Mode inference is a heuristic: presence of `numeric.op_count` implies "collection"; single-message fingerprints (only "idb:open") report "unknown".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hours: { type: 'number', description: 'Window in hours. Default 24.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+    },
+  },
+  {
+    name: 'alaq_idb_store_stats',
+    description:
+      'Detailed operation stats for a single IDB-backed atom: open count, get hits/misses, put count, put errors, average put duration (ms). Use when alaq_idb_stores flags a store as suspicious.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        fingerprint: { type: 'string', description: 'The IDB-backed atom to inspect.' },
+        hours: { type: 'number', description: 'Window in hours. Default 24.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+      required: ['fingerprint'],
+    },
+  },
+  {
+    name: 'alaq_idb_errors',
+    description:
+      'Recent IDB errors (quota exceeded, data clone, constraint, unavailable) across all stores. Returned in DESC timestamp order, truncated to `limit`.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hours: { type: 'number', description: 'Window in hours. Default 24.' },
+        limit: { type: 'number', description: 'Max errors to return. Default 20.' },
+        endpoint: { type: 'string' },
+        project: { type: 'string' },
+      },
+    },
+  },
 ]
 
 function ok(id: JsonRpcRes['id'], result: any): JsonRpcRes {
@@ -124,6 +233,20 @@ async function handle(req: JsonRpcReq, state: ServerState): Promise<JsonRpcRes |
             return ok(id, toolContent(await schemaCompile(args)))
           case 'schema_diff':
             return ok(id, toolContent(await schemaDiff(args)))
+          case 'alaq_capabilities':
+            return ok(id, toolContent(await alaqCapabilities(args)))
+          case 'alaq_trace':
+            return ok(id, toolContent(await alaqTrace(args)))
+          case 'alaq_atom_activity':
+            return ok(id, toolContent(await alaqAtomActivity(args)))
+          case 'alaq_hot_atoms':
+            return ok(id, toolContent(await alaqHotAtoms(args)))
+          case 'alaq_idb_stores':
+            return ok(id, toolContent(await alaqIdbStores(args)))
+          case 'alaq_idb_store_stats':
+            return ok(id, toolContent(await alaqIdbStoreStats(args)))
+          case 'alaq_idb_errors':
+            return ok(id, toolContent(await alaqIdbErrors(args)))
           default:
             return err(id, -32601, `unknown tool: ${name}`)
         }

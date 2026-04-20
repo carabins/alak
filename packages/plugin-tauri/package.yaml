@@ -1,0 +1,26 @@
+name: "@alaq/plugin-tauri"
+version: "6.0.0-alpha.0"
+description: "Tauri v2 IPC bridge for Nucl — nucl atoms backed by Rust-side state (invoke/listen) with $ready/$saved companions, optional @alaq/plugin-logi integration."
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  test: bun test
+keywords:
+  - alaq
+  - plugin
+  - tauri
+  - ipc
+  - bridge
+  - nucl
+dependencies:
+  "@alaq/nucl": ^6.0.0-alpha.4
+  "@alaq/quark": ^6.0.0-alpha.1
+peerDependencies:
+  "@alaq/plugin-logi": ^6.0.0-alpha.0
+  "@tauri-apps/api": ^2.0.0
+peerDependenciesMeta:
+  "@alaq/plugin-logi":
+    optional: true
+  "@tauri-apps/api":
+    optional: true

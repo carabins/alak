@@ -1,0 +1,27 @@
+name: "@alaq/plugin-idb"
+version: "6.0.0-alpha.0"
+description: "IndexedDB persistence plugin for Nucl — optimistic sync with $ready/$saved companions, single-value and collection modes, optional @alaq/plugin-logi integration."
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  test: bun test
+  test:browser: bun playwright/build.ts && bunx playwright test --config=playwright/playwright.config.ts
+  test:browser:build: bun playwright/build.ts
+  test:browser:run: bunx playwright test --config=playwright/playwright.config.ts
+keywords:
+  - alaq
+  - plugin
+  - idb
+  - indexeddb
+  - persistence
+  - nucl
+  - offline
+dependencies:
+  "@alaq/nucl": ^6.0.0-alpha.4
+  "@alaq/quark": ^6.0.0-alpha.1
+peerDependencies:
+  "@alaq/plugin-logi": ^6.0.0-alpha.0
+peerDependenciesMeta:
+  "@alaq/plugin-logi":
+    optional: true
