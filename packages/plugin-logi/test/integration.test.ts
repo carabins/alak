@@ -1,5 +1,5 @@
 /**
- * Live integration test — talks to a real Logi instance at http://localhost:8080.
+ * Live integration test — talks to a real Logi instance at http://localhost:2025.
  * Skipped automatically if /health is unreachable.
  *
  * Flow:

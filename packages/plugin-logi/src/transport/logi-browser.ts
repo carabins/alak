@@ -43,7 +43,7 @@ export interface LogiBrowserTransportOptions {
  *
  *   logiPlugin()  // just works in dev if Logi is running locally
  */
-export const DEFAULT_DEV_ENDPOINT = 'http://localhost:8080'
+export const DEFAULT_DEV_ENDPOINT = 'http://localhost:2025'
 export const DEFAULT_DEV_TOKEN = 'demo_project_token'
 
 /**

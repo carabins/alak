@@ -90,7 +90,7 @@ const TOOLS = [
       type: 'object',
       properties: {
         hours: { type: 'number', description: 'Lookback window in hours. Default 24.' },
-        endpoint: { type: 'string', description: 'Logi base URL. Defaults to env LOGI_ENDPOINT or http://localhost:8080.' },
+        endpoint: { type: 'string', description: 'Logi base URL. Defaults to env LOGI_ENDPOINT or http://localhost:2025.' },
         project: { type: 'string', description: 'Project slug. Defaults to env LOGI_PROJECT or "demo".' },
       },
     },

@@ -68,7 +68,7 @@ packages:
     kinds: [logi]
     backend_service:
       name: logi
-      dev_endpoint: "http://localhost:8080"
+      dev_endpoint: "http://localhost:2025"
       dev_token: demo_project_token
       how_to_start: "cd A:/source/logi && docker compose up -d"
     capabilities:
@@ -242,7 +242,7 @@ packages:
       runtime_observation: [alaq_capabilities, alaq_trace, alaq_atom_activity, alaq_hot_atoms, alaq_idb_stores, alaq_idb_store_stats, alaq_idb_errors]
     reads_from:
       logi_http_api:
-        endpoint_default: "http://localhost:8080"
+        endpoint_default: "http://localhost:2025"
         endpoint_env: LOGI_ENDPOINT
         project_env: LOGI_PROJECT
     note: |

@@ -65,7 +65,7 @@ logiPlugin({ debugValues: true, ... })
 
 ```typescript
 import { logiPlugin } from '@alaq/plugin-logi'
-logiPlugin()  // → http://localhost:8080, demo_project_token
+logiPlugin()  // → http://localhost:2025, demo_project_token
 ```
 
 **Production** — свой endpoint и токен:
@@ -171,7 +171,7 @@ withTrace(span, () => {
 
 ### Проверено в живую
 
-Integration-test шлёт реальные фреймы в `http://localhost:8080/ingest/v1/json`. Через MCP `logi_get_trace` возвращается полная цепочка:
+Integration-test шлёт реальные фреймы в `http://localhost:2025/ingest/v1/json`. Через MCP `logi_get_trace` возвращается полная цепочка:
 
 ```
 action:begin increment  (span: ...w59iu5, parent: -)

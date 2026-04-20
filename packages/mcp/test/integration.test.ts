@@ -9,7 +9,7 @@
 import { describe, expect, test, beforeAll } from 'bun:test'
 import { alaqCapabilities, alaqAtomActivity } from '../src/tools-runtime'
 
-const ENDPOINT = process.env.LOGI_ENDPOINT ?? 'http://localhost:8080'
+const ENDPOINT = process.env.LOGI_ENDPOINT ?? 'http://localhost:2025'
 const TOKEN = process.env.LOGI_TOKEN ?? 'demo_project_token'
 const PROJECT = process.env.LOGI_PROJECT ?? 'demo'
 

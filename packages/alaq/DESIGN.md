@@ -102,7 +102,7 @@ Checks:
 - Runtime: `bun --version` or `node --version` (engines: `bun >= 1.3`, `node >= 20`).
 - Reachability: `@alaq/mcp` resolves (either bundled or peer-installed, see §7).
 - MCP clients found: Claude Desktop, Claude Code, Cursor, Continue — by probing known config paths.
-- Optional: Logi endpoint at `http://localhost:8080/health` if `LOGI_ENDPOINT` set or default reachable.
+- Optional: Logi endpoint at `http://localhost:2025/health` if `LOGI_ENDPOINT` set or default reachable.
 
 Output JSON: `{ ok: bool, checks: [{ name, ok, detail }], hints: [...] }`. Exit 0 if all `ok`, 1 otherwise.
 
@@ -205,7 +205,7 @@ Generated stanza:
       "command": "npx",
       "args": ["-y", "alaq", "mcp", "start"],
       "env": {
-        "LOGI_ENDPOINT": "http://localhost:8080"
+        "LOGI_ENDPOINT": "http://localhost:2025"
       }
     }
   }
@@ -298,7 +298,7 @@ schemaDir: ./schema     # default rootDir for schema_compile / schema_diff
 mcp:
   server: "@alaq/mcp"
   env:
-    LOGI_ENDPOINT: http://localhost:8080
+    LOGI_ENDPOINT: http://localhost:2025
     LOGI_PROJECT:  demo_project_token
 decide:                 # v6.1+ placeholder, keys reserved
   provider: null
@@ -374,7 +374,7 @@ Install-size budget: **under 2 MB unpacked** for `alaq + @alaq/mcp + @alaq/graph
 1. **Dual-runtime support for `@alaq/mcp`.** Per user decision, Bun and Node are first-class equals. Current `@alaq/mcp` bin is `bun src/bin.ts` — a Bun-only shebang. Before `alaq` v1 ships, `@alaq/mcp` must build a Node-runnable entry too (compiled `.js` + `#!/usr/bin/env node`). `alaq mcp start` picks the right one at runtime based on which interpreter launched the process. This is a task, not a choice.
 2. **MCP clients in v1.** Design covers `claude-desktop`, `claude-code`, `cursor`, `continue`. Is that the shipping set? Drop any? Add `zed` or `windsurf` immediately?
 3. **`.alaq/` location.** Project-local (current design) vs user-home (`~/.alaq/`) vs both. Project-local wins for team workflows; home-dir would be useful for agent-personal memory that outlives projects. Design allows both if we want — `alaq init --scope user` could write to `~/.alaq/`.
-4. **Logi discovery at install.** Should `alaq mcp install` probe `localhost:8080` and auto-fill `LOGI_ENDPOINT` in the env block if found? Or always write the default and let users edit? Auto-fill is friendlier; silent modification of config is riskier.
+4. **Logi discovery at install.** Should `alaq mcp install` probe `localhost:2025` and auto-fill `LOGI_ENDPOINT` in the env block if found? Or always write the default and let users edit? Auto-fill is friendlier; silent modification of config is riskier.
 5. **`alaq decide` provider.** When we ship v6.1, does it call through the user's existing MCP client (relay pattern), or take an `ANTHROPIC_API_KEY` directly? Relay is purer (no key management) but couples `alaq` to the client's availability. Direct key is simpler but duplicates auth.
 
 ---

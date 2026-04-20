@@ -28,7 +28,7 @@ Plugins follow `@alaq/plugin-<function-or-platform>` naming. Plugin for X ≠ pl
 
 **AI-facing tooling:**
 
-- **`@alaq/mcp`** — MCP server exposing both compile-time tools (`schema_compile`, `schema_diff`) and runtime observation tools (`alaq_capabilities`, `alaq_trace`, `alaq_atom_activity`, `alaq_hot_atoms`, `alaq_idb_*`). Runtime tools read from Logi HTTP API directly. Dev default endpoint: `http://localhost:8080`.
+- **`@alaq/mcp`** — MCP server exposing both compile-time tools (`schema_compile`, `schema_diff`) and runtime observation tools (`alaq_capabilities`, `alaq_trace`, `alaq_atom_activity`, `alaq_hot_atoms`, `alaq_idb_*`). Runtime tools read from Logi HTTP API directly. Dev default endpoint: `http://localhost:2025`.
 
 ## Transport tiers
 

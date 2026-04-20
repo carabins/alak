@@ -49,7 +49,7 @@ interface Config {
 function resolveConfig(args: { endpoint?: string; project?: string }): Config {
   const env = (typeof process !== 'undefined' && process.env) ? process.env : {}
   return {
-    endpoint: args.endpoint ?? env.LOGI_ENDPOINT ?? 'http://localhost:8080',
+    endpoint: args.endpoint ?? env.LOGI_ENDPOINT ?? 'http://localhost:2025',
     project: args.project ?? env.LOGI_PROJECT ?? 'demo',
   }
 }
