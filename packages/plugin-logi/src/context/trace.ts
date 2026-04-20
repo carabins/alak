@@ -17,6 +17,8 @@
  * surprising AsyncLocalStorage behavior.
  */
 
+import { ulid } from '@alaq/rune'
+
 export interface TraceFrame {
   trace_id: string
   span_id: string
@@ -26,12 +28,9 @@ export interface TraceFrame {
 
 const stack: TraceFrame[] = []
 
-/** 12-char base36 id — enough uniqueness for a browser session. */
+/** ULID id — 26 chars, time-prefixed, monotonic, human-readable. */
 function mkId(): string {
-  return (
-    Date.now().toString(36).slice(-6) +
-    Math.random().toString(36).slice(2, 8)
-  )
+  return ulid()
 }
 
 export function current(): TraceFrame | undefined {

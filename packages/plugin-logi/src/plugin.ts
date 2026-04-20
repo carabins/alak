@@ -16,6 +16,7 @@
 import type { INucleonPlugin } from '@alaq/nucl/INucleonPlugin'
 import type { INucleonCore } from '@alaq/nucl/INucleon'
 import type { INuOptions } from '@alaq/nucl/options'
+import { randomFloat, ulid } from '@alaq/rune'
 import type { LogiFrame, LogiPluginConfig, LogiTransport } from './types'
 import { shapeOf } from './shape'
 import { current as currentTrace } from './context/trace'
@@ -32,9 +33,9 @@ interface RuntimeState {
 
 let runtime: RuntimeState | null = null
 
-/** 10-char span id for standalone (no-action) mutations. */
+/** ULID span id for standalone (no-action) mutations. */
 function mkSpanId(): string {
-  return Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2, 7)
+  return ulid()
 }
 
 function shouldEmit(kind: LogiFrame['kind']): boolean {
@@ -132,7 +133,7 @@ export function logiPlugin(config: LogiPluginConfig = {}): LogiPlugin {
 
     onBeforeChange(core: INucleonCore, nextValue: unknown) {
       if (!shouldEmit('change')) return
-      if (runtime!.config.changeSampling < 1 && Math.random() >= runtime!.config.changeSampling) return
+      if (runtime!.config.changeSampling < 1 && randomFloat() >= runtime!.config.changeSampling) return
 
       const realm = (core as any).realm ?? ''
       const { atom, prop } = splitId((core as any).id)

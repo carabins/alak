@@ -19,6 +19,7 @@ keywords:
 dependencies:
   "@alaq/nucl": ^6.0.0-alpha.4
   "@alaq/quark": ^6.0.0-alpha.1
+  "@alaq/rune": "6.0.0-alpha.0"
 peerDependencies:
   "@logi/browser": ^0.1.0
 peerDependenciesMeta:
