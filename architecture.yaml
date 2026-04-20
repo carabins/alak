@@ -210,18 +210,6 @@ packages:
     path: packages/rune
     role: utility
 
-  - name: "@alaq/svg"
-    path: packages/svg
-    role: ui-helper
-
-  - name: "@alaq/vite"
-    path: packages/vite
-    role: tooling
-
-  - name: "@alaq/vue"
-    path: packages/vue
-    role: ui-adapter
-
   - name: "@alaq/link-state-vue"
     path: packages/link-state-vue
     role: ui-adapter
@@ -232,11 +220,6 @@ packages:
       Bridges ISyncNode<T> into Vue's Ref via up/down subscription. Automatic cleanup
       via onScopeDispose. provideStore/useStore for tree-wide SyncStore injection.
 
-  - name: "@alaq/flex"
-    path: packages/flex
-    role: ui-adapter
-    note: PixiJS layout/components.
-
   - name: "@alaq/xstate"
     path: packages/xstate
     role: ui-adapter
@@ -244,15 +227,6 @@ packages:
   - name: "@alaq/ws"
     path: packages/ws
     role: transport-helper
-
-  - name: "@alaq/gql"
-    path: packages/gql.replaced
-    status: replaced-by "@alaq/graph"
-    note: |
-      Early draft with GraphQL SDL. Replaced by @alaq/graph (.aql format, v0.3).
-      Content moved to packages/gql.replaced/ on 2026-04-19 after the @alaq/graph
-      stack reached 346 tests green + cargo-verified. Do not import, do not extend.
-      Kept for reference only.
 
   # ── AI-facing tooling ──
 
@@ -276,22 +250,16 @@ packages:
       Runtime tools read Logi HTTP API directly (no proxy through Logi MCP).
       Self-describing via alaq_capabilities: AI in a fresh session calls it first.
 
-  # ── Deferred / draft ──
+  # ── AI-first frontdoor (meta package, no scope) ──
 
-  - name: "@alaq/state"
-    path: packages/state.draft
-    status: deferred
-    note: UI view/data/actions/children DSL. Reopen when runtime UI generation is needed.
-
-  - name: "alaq"
-    path: packages/alaq (planned)
-    status: planned
-    role: meta-seed
+  - name: alaq
+    path: packages/alaq
+    role: frontdoor
     layer: tooling
     note: |
-      AI-first seed package. `bun add alaq` installs a minimal surface + manifest.json
-      (ecosystem catalog) + doctor/new/install/decide/sync CLI. Drops `.alaq/project.json`
-      in consumer projects for long-term decision/runtime memory. See alaq.md (planned).
+      Unscoped front door for AI-first workflows. `npm install alaq` / `npx alaq`
+      pulls the v6 ecosystem as a single surface. Form (thin aggregator, CLI,
+      or both) resolves as concrete AI-consumer needs emerge.
 
 forbidden_dependencies:
   - from: "@alaq/graph"

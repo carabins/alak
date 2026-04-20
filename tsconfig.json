@@ -76,12 +76,6 @@
       "@alaq/fx/*": [
         "packages/fx/src/*"
       ],
-      "@alaq/flex": [
-        "packages/flex/src/index.ts"
-      ],
-      "@alaq/flex/*": [
-        "packages/flex/src/*"
-      ],
       "@alaq/link": [
         "packages/link/src/index.ts"
       ],
@@ -135,7 +129,6 @@
     ]
   },
   "include": [
-    "packages/flex/src/jsx.d.ts",
     "packages/**/*.ts",
     "scripts/**/*.d.ts",
     "scripts/**/*.ts"

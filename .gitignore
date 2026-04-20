@@ -33,9 +33,8 @@ packages/*/playwright/bundle.js
 image_*.png
 packages/*/coverage/
 
-# Deferred experiments (do not commit per AGENTS.md)
-packages/state.draft/
-packages/gql.replaced/
+# Playwright / test runner artifacts
+test-results/
 
 # Per-machine Claude settings
 .claude/settings.local.json
