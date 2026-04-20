@@ -131,9 +131,26 @@ See §4 for the stanza shape.
 
 ### 3.5. `alaq mcp start`
 
-Spawns `@alaq/mcp` on stdio. Forwards stdin/stdout/stderr. This is what `command: "alaq"`, `args: ["mcp", "start"]` resolves to in the printed stanza — so the wired entry never references file paths inside `node_modules`.
+Spawns the `@alaq/mcp` server on stdio. Forwards stdin/stdout/stderr. This is what `command: "alaq"`, `args: ["mcp", "start"]` resolves to in the printed stanza — so the wired entry never references file paths inside `node_modules`.
+
+Dual-runtime is `alaq`'s problem, not `@alaq/mcp`'s. `@alaq/mcp` stays Bun-source (`bin: bun src/bin.ts`); `alaq` is the piece that must run cleanly under **both** Bun and Node. To make that work, `alaq` ships with a pre-bundled Node-compatible copy of the MCP server — see §3.5.1 for the launcher logic and §9.1 for how the bundle is produced.
 
 Exit code matches the child.
+
+### 3.5.1. Launcher decision tree
+
+Applies to both `alaq mcp start` and `alaq mcp call` (they share one launcher function; `call` wraps a one-shot stdio session around it).
+
+1. **Detect host runtime.** `typeof process.versions.bun === "string"` ⇒ Bun host; else Node host. `BUN_INSTALL` / argv[0] are not consulted — `process.versions.bun` is authoritative.
+2. **Resolve upstream `@alaq/mcp`.** `require.resolve("@alaq/mcp/package.json")` (or the ESM equivalent). If resolvable, read its `version`.
+3. **Pick target.**
+   - Bun host **and** upstream resolves ⇒ spawn `process.execPath` (the active `bun`) with `[<resolved>/src/bin.ts]`. Source-level, zero bundling cost, honors whatever `@alaq/mcp` version the user installed.
+   - Bun host **and** upstream does not resolve ⇒ fall through to bundled Node copy, still spawned under `bun` (Bun runs plain ESM JS fine). Emit a one-line stderr notice: `alaq: @alaq/mcp not installed, using bundled fallback`.
+   - Node host ⇒ always spawn `process.execPath` (the active `node`) with `[<alaq>/dist/mcp-server.node.mjs]`. The upstream Bun source is not invokable under Node; the bundled copy is the only option.
+4. **Version coupling.** When upstream resolves and its version is `>=` the bundled snapshot's version, upstream wins (under Bun) — the user's explicit install is respected. If upstream is older than the snapshot, `alaq` still prefers upstream under Bun and logs a one-line hint to stderr; downgrades are the user's call, not `alaq`'s.
+5. **stdio + signals.** `stdio: "inherit"`, `SIGINT` / `SIGTERM` forwarded, exit code propagated. No buffering, no line-mangling — MCP is a framed stdio protocol.
+
+Failure modes: Node host with the bundled file missing is a packaging bug, exits `3` with a clear message. Bun host with neither upstream nor bundle resolvable is the same. Everything else (spawn failure, non-zero child exit) propagates the child's exit code unchanged.
 
 ### 3.6. `alaq mcp call <tool> <args>`
 
@@ -284,6 +301,21 @@ Home-scoped because it is agent-personal memory that outlives any individual pro
 
 ## 7. Distribution strategy
 
+### 7.0. Tarball layout
+
+The published `alaq` tarball, once installed at `node_modules/alaq/`, contains:
+
+```
+node_modules/alaq/
+  package.json
+  src/            # TS sources (bin, index, manifest, launcher)
+  dist/
+    index.d.ts
+    mcp-server.node.mjs   # bundled Node-runnable copy of @alaq/mcp's server, shebang #!/usr/bin/env node
+```
+
+`dist/mcp-server.node.mjs` is produced by `alaq`'s own build pipeline at publish time (see §9.1). It is a single-file ESM bundle of `@alaq/mcp/src/bin.ts` + its transitive TS imports (`server.ts`, `tools.ts`, `tools-runtime.ts`, `diff.ts`, and the subset of `@alaq/graph` they reach), compiled to JS targeting Node 20. Bundle is fully self-contained: `@alaq/mcp` is hand-rolled stdio JSON-RPC with no third-party deps, and `@alaq/graph` is zero-dep TS. Only Node stdlib is external.
+
 ### 7.1. Runtime API re-exports: **no**
 
 `alaq` at v6.0.0 does **not** re-export TS APIs from `@alaq/graph`, `@alaq/atom`, etc. Two reasons:
@@ -300,7 +332,10 @@ These are for tooling authors, not application code.
 
 ### 7.2. `dependencies`: minimal
 
-`alaq` depends only on `@alaq/mcp`. That brings in `@alaq/graph` transitively.
+`alaq` depends on `@alaq/mcp` at runtime **and** at build time, but for different reasons:
+
+- **`dependencies`** — `@alaq/mcp` stays a regular runtime dep so that under Bun the launcher resolves the user-installed source directly (preferred path, §3.5.1). Dropping it would force every user onto the bundled fallback and defeat the point of `@alaq/mcp` being a first-class package.
+- **`devDependencies`** — `@alaq/mcp` (and `@alaq/graph`) are also consumed by `alaq`'s build pipeline to produce `dist/mcp-server.node.mjs`. Since the runtime `dependencies` entry already brings them into the dev tree, no separate `devDependencies` entry is needed; the build simply imports from the hoisted workspace copy.
 
 ```yaml
 dependencies:
@@ -311,7 +346,7 @@ Everything else in the ecosystem (`@alaq/atom`, `@alaq/plugin-logi`, etc.) is **
 
 Adding plugins is the user's project concern, not the frontdoor's: `npm i @alaq/plugin-logi` lives in the user's `package.json`, not dragged in transitively by `alaq`.
 
-Install-size budget: **under 2 MB unpacked** for `alaq + @alaq/mcp + @alaq/graph` combined.
+Install-size budget: **under 2 MB unpacked** for `alaq + @alaq/mcp + @alaq/graph` combined. The bundled `dist/mcp-server.node.mjs` is budgeted at **≤ 200 KB minified, ≤ 60 KB gzipped**; it counts against `alaq`'s own tarball size, not the aggregate.
 
 ---
 
@@ -329,7 +364,7 @@ Install-size budget: **under 2 MB unpacked** for `alaq + @alaq/mcp + @alaq/graph
 
 ## 9. Implementation notes
 
-1. **Dual-runtime support for `@alaq/mcp`.** Per user decision, Bun and Node are first-class equals. Current `@alaq/mcp` bin is `bun src/bin.ts` — a Bun-only shebang. Before `alaq` v1 ships, `@alaq/mcp` must build a Node-runnable entry too (compiled `.js` + `#!/usr/bin/env node`). `alaq mcp start` picks the right one at runtime based on which interpreter launched the process. This is a task, not a choice.
+1. **Dual-runtime support lives in `alaq`, not in `@alaq/mcp`.** `@alaq/mcp` stays Bun-source (`bin: bun src/bin.ts`) — no Node build step, no second shebang, no changes to its `package.yaml`. `alaq` owns the cross-runtime story: at its own publish time, `alaq`'s build pipeline bundles `@alaq/mcp/src/bin.ts` and its transitive TS imports (the reached subset of `@alaq/graph` plus `@alaq/mcp`'s own zero-dep stdio JSON-RPC implementation) into `dist/mcp-server.node.mjs` — single-file ESM, Node-20 target, `#!/usr/bin/env node` shebang. Nothing external: `@alaq/mcp` is hand-rolled (no `@modelcontextprotocol/sdk` dependency), so the bundle is fully self-contained. Bundler choice (esbuild / `bun build` / rollup) is whatever the monorepo build pipeline already uses; this is a workspace-build question, not an `alaq` design question. The launcher (§3.5.1) picks upstream Bun source under Bun and the bundled Node file under Node; users and agents see one command, `alaq mcp start`, on both runtimes.
 
 ---
 

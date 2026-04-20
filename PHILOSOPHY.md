@@ -148,7 +148,7 @@ If you are an LLM entering this repo for the first time:
 2. **Run or read `CHECK.md`** — the verification protocol for the current state of the stack.
 3. **Open `architecture.yaml`** — machine-readable registry, navigate by it.
 4. **If MCP is wired** — first call: `alaq_capabilities`. It tells you what you hold.
-5. **If MCP is not wired** — tell the human how to wire it (`alaq mcp install <client>`), then repeat step 4.
+5. **If MCP is not wired** — run `alaq mcp install` to print the standard MCP server stanza, tell the human to paste it into their MCP client's config, then repeat step 4.
 
 ---
 

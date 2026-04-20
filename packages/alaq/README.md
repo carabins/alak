@@ -33,7 +33,7 @@ Six commands an LLM runs on first contact with a fresh repo:
 ```sh
 npx alaq
 ```
-Prints the capability manifest — ecosystem version, package roles, MCP tool catalog. ~1.5 KB JSON. Paste into context.
+Prints the capability manifest — ecosystem version, package roles, MCP tool catalog. ~1.5 KB JSON. Paste into context. The manifest reflects the *installed* `alaq` and `@alaq/mcp` snapshot, not the live monorepo state — pin versions if you need reproducibility.
 
 ```sh
 npx alaq doctor
@@ -106,7 +106,7 @@ Output is the unwrapped tool payload (pure JSON). Exit codes: `0` ok, `1` tool e
 - **Frontdoor** — `alaq` (this package).
 - **Reactive core** — `@alaq/quark`, `@alaq/nucl`, `@alaq/atom`, `@alaq/fx`.
 - **Plugins** (kind-based extensions of reactive core) — `@alaq/plugin-logi` (observability), `@alaq/plugin-idb` (persistence), `@alaq/plugin-tauri` (IPC).
-- **alaqlink stack** (SDL-driven synchronized state) — `@alaq/graph` (SDL compiler), `@alaq/link`, `@alaq/link-state`, `@alaq/graph-*` generators.
+- **alaqlink stack** — one *track inside* v6, not a synonym for v6. SDL-driven synchronized state for distributed apps: write a `.aql` schema once, `@alaq/graph` compiles it to IR, `@alaq/graph-*` generators emit typed TS clients/servers/Rust-Zenoh handlers, `@alaq/link` + `@alaq/link-state` are the runtime. See [`../../PHILOSOPHY.md`](../../PHILOSOPHY.md) for the full ecosystem map.
 - **Utilities** — `@alaq/bitmask`, `@alaq/queue`, `@alaq/rune`, `@alaq/datastruct`, `@alaq/deep-state`.
 - **UI adapters** — `@alaq/link-state-vue`, `@alaq/xstate`.
 - **AI tooling** — `@alaq/mcp` (the MCP server `alaq mcp start` spawns).
