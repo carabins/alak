@@ -148,8 +148,9 @@ packages:
     layer: compile-time
     depends_on: []
     exports: [parseSchema, compileToIR, IR types]
+    bin: { aqc: "bin/aqc.ts" }
     owns_directives: [sync, store, scope, auth, this, crdt, atomic, liveness, deprecated, added, range]
-    note: SDL parser + IR. Transport-neutral. See packages/graph/SPEC.md.
+    note: SDL parser + IR. Transport-neutral. See packages/graph/SPEC.md. CLI `aqc` compiles .aql → IR.json and runs generators (`bunx aqc gen <target> schema.aql -o <out>`).
 
   - name: "@alaq/graph-link-state"
     path: packages/graph-link-state
@@ -223,10 +224,6 @@ packages:
   - name: "@alaq/xstate"
     path: packages/xstate
     role: ui-adapter
-
-  - name: "@alaq/ws"
-    path: packages/ws
-    role: transport-helper
 
   # ── AI-facing tooling ──
 

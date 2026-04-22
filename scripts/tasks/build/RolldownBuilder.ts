@@ -18,7 +18,6 @@ export interface RolldownBuildOptions {
 }
 
 const OPTIMIZE_CONFIG = {
-  cleanDir: false,
   minify: {mangle: false}
 } as const
 

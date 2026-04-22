@@ -78,6 +78,15 @@ const DEFAULTS: Required<Omit<GenerateOptions, 'namespace'>> = {
 }
 
 /**
+ * v0.3.4 (W8), tightened v0.3.5 (C7): transport kinds this generator emits
+ * code for. Compared against `IRSchema.transport` (projected from
+ * `@transport(kind: "...")`, SPEC §7.14). Mismatch → E025 error, generator
+ * returns `files: []`. `"any"` is always compatible — schemas without
+ * `@transport` are treated as `"any"` per R222.
+ */
+const SUPPORTED_TRANSPORTS: ReadonlyArray<string> = ['zenoh', 'any']
+
+/**
  * Transform an IR into Rust source files. Pure function: no FS, no network,
  * deterministic for a given IR + options. The caller decides where to write
  * `files[*].path`.
@@ -101,6 +110,20 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
       continue
     }
 
+    // v0.3.4 (W8), tightened v0.3.5 (C7): E025 on @transport mismatch —
+    // generator refuses emission (SPEC §7.14 R221/R224). Unset / "any"
+    // suppress per R222.
+    if (schema.transport && !SUPPORTED_TRANSPORTS.includes(schema.transport)) {
+      diagnostics.push({
+        severity: 'error',
+        message:
+          `schema "${schema.namespace}" declares @transport(kind: "${schema.transport}") ` +
+          `which is outside @alaq/graph-zenoh supported transports [${SUPPORTED_TRANSPORTS.join(', ')}]; ` +
+          `generation refused (E025). Set @transport(kind: "any") or omit the directive to opt out.`,
+      })
+      return { files: [], diagnostics }
+    }
+
     const content = generateNamespace(schema, opts, diagnostics)
     // Filesystem-friendly module name: dots in namespaces (e.g. core.identity)
     // become underscores for the Rust path. The caller may override by writing
@@ -111,6 +134,9 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
 
   return { files, diagnostics }
 }
+
+/** v0.3.4 (W8): exported so tests/tooling can read the supported set. */
+export { SUPPORTED_TRANSPORTS }
 
 // ────────────────────────────────────────────────────────────────
 // Namespace emitter

@@ -86,4 +86,194 @@ record R { bad: Map<Player, Int>! }`
     const codes = diagnostics.map(d => d.code)
     expect(codes).toContain('E022')
   })
+
+  // v0.3.1 additive — action.output carries list/itemRequired flags.
+  // Pre-fix IR dropped these, so generators could not distinguish
+  // `output: Foo` from `output: [Foo!]!`. See stress.md Arsenal/C.0 + P.0.
+  describe('13.11: action output list shape (v0.3.1)', () => {
+    test('output: [Foo!]! → outputList=true, outputRequired=true, outputListItemRequired=true', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record Foo { id: ID! }
+action X { output: [Foo!]! }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const a = ir!.schemas['s']!.actions['X']!
+      expect(a.output).toBe('Foo')
+      expect(a.outputRequired).toBe(true)
+      expect(a.outputList).toBe(true)
+      expect(a.outputListItemRequired).toBe(true)
+    })
+
+    test('output: [Foo] → outputList=true, outputRequired=false, outputListItemRequired=false', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record Foo { id: ID! }
+action X { output: [Foo] }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const a = ir!.schemas['s']!.actions['X']!
+      expect(a.output).toBe('Foo')
+      expect(a.outputRequired).toBe(false)
+      expect(a.outputList).toBe(true)
+      expect(a.outputListItemRequired).toBe(false)
+    })
+
+    test('output: Foo! → outputRequired=true, outputList absent/false', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record Foo { id: ID! }
+action X { output: Foo! }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const a = ir!.schemas['s']!.actions['X']!
+      expect(a.output).toBe('Foo')
+      expect(a.outputRequired).toBe(true)
+      expect(a.outputList ?? false).toBe(false)
+      expect(a.outputListItemRequired ?? false).toBe(false)
+    })
+  })
+
+  // v0.3.3 additive — IRDirective.argTypes tags each directive arg with its
+  // source literal kind. Closes stress-journal О18 (enum-literal vs string-
+  // literal indistinguishable in IR). Pre-0.3.3 consumers ignore.
+  describe('13.12: directive arg literal kinds (v0.3.3)', () => {
+    test('@default(value: UNKNOWN) on enum field → argTypes.value = "enum_ref"', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+enum K { A, UNKNOWN }
+record R { k: K! @default(value: UNKNOWN) }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const dflt = f.directives!.find(d => d.name === 'default')!
+      expect(dflt.args.value).toBe('UNKNOWN')
+      expect(dflt.argTypes?.value).toBe('enum_ref')
+    })
+
+    test('@default(value: "hello") on String field → argTypes.value = "string"', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { name: String! @default(value: "hello") }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const dflt = f.directives!.find(d => d.name === 'default')!
+      expect(dflt.args.value).toBe('hello')
+      expect(dflt.argTypes?.value).toBe('string')
+    })
+
+    test('@range(min: 1, max: 10) → argTypes.min = "int", argTypes.max = "int"', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { n: Int! @range(min: 1, max: 10) }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const rng = f.directives!.find(d => d.name === 'range')!
+      expect(rng.argTypes?.min).toBe('int')
+      expect(rng.argTypes?.max).toBe('int')
+    })
+
+    test('@sync(qos: REALTIME, atomic: true) → enum_ref + bool', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { x: Int! @sync(qos: REALTIME, atomic: true) }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const sync = f.directives!.find(d => d.name === 'sync')!
+      expect(sync.argTypes?.qos).toBe('enum_ref')
+      expect(sync.argTypes?.atomic).toBe('bool')
+    })
+
+    test('@default(value: [1, 2, 3]) on list field → argTypes.value = "list"', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { xs: [Int!]! @default(value: [1, 2, 3]) }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const dflt = f.directives!.find(d => d.name === 'default')!
+      expect(dflt.argTypes?.value).toBe('list')
+    })
+
+    test('zero-arg directive → argTypes absent (pre-0.3.3 shape preserved)', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { x: Int! @atomic }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const at = f.directives!.find(d => d.name === 'atomic')!
+      expect(at.argTypes).toBeUndefined()
+    })
+
+    test('@deprecated(since: "0.2", reason: "x") → both "string"', () => {
+      const src = `schema S { version: 1, namespace: "s" }
+record R { x: Int! @deprecated(since: "0.2", reason: "x") }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const f = ir!.schemas['s']!.records['R']!.fields[0]!
+      const dep = f.directives!.find(d => d.name === 'deprecated')!
+      expect(dep.argTypes?.since).toBe('string')
+      expect(dep.argTypes?.reason).toBe('string')
+    })
+  })
+
+  // v0.3.4 (W8) — `@transport` schema-level directive: parses, projects
+  // IRSchema.transport, validator rejects unknown kinds. Closes Q15.
+  describe('13.13: @transport schema-level directive (v0.3.4)', () => {
+    test('@transport(kind: "tauri") → IRSchema.transport === "tauri"', () => {
+      const src = `schema S @transport(kind: "tauri") { version: 1, namespace: "s" }
+record R { id: ID! }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      expect(ir!.schemas['s']!.transport).toBe('tauri')
+      // Directive is also preserved on the raw list.
+      expect(ir!.schemas['s']!.directives?.[0]?.name).toBe('transport')
+      expect(ir!.schemas['s']!.directives?.[0]?.args.kind).toBe('tauri')
+    })
+
+    test('@transport(kind: "http") → IRSchema.transport === "http"', () => {
+      const src = `schema S @transport(kind: "http") { version: 1, namespace: "s" }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      expect(ir!.schemas['s']!.transport).toBe('http')
+    })
+
+    test('@transport(kind: "zenoh") → IRSchema.transport === "zenoh"', () => {
+      const src = `schema S @transport(kind: "zenoh") { version: 1, namespace: "s" }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      expect(ir!.schemas['s']!.transport).toBe('zenoh')
+    })
+
+    test('@transport(kind: "any") → IRSchema.transport === "any"', () => {
+      const src = `schema S @transport(kind: "any") { version: 1, namespace: "s" }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      expect(ir!.schemas['s']!.transport).toBe('any')
+    })
+
+    test('no @transport → IRSchema.transport absent (back-compat)', () => {
+      const src = `schema S { version: 1, namespace: "s" }`
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      expect(ir!.schemas['s']!.transport).toBeUndefined()
+      expect(ir!.schemas['s']!.directives).toBeUndefined()
+    })
+
+    test('@transport(kind: "bogus") → E003 (closed kind set)', () => {
+      const src = `schema S @transport(kind: "bogus") { version: 1, namespace: "s" }`
+      const { diagnostics } = parseSource(src)
+      const codes = diagnostics.map(d => d.code)
+      expect(codes).toContain('E003')
+    })
+
+    test('@transport without kind → E023 (required arg missing)', () => {
+      const src = `schema S @transport { version: 1, namespace: "s" }`
+      const { diagnostics } = parseSource(src)
+      const codes = diagnostics.map(d => d.code)
+      expect(codes).toContain('E023')
+    })
+
+    test('@unknownSchemaDir on schema → E001', () => {
+      const src = `schema S @frobnicate { version: 1, namespace: "s" }`
+      const { diagnostics } = parseSource(src)
+      const codes = diagnostics.map(d => d.code)
+      expect(codes).toContain('E001')
+    })
+  })
 })

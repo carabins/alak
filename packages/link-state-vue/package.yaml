@@ -1,6 +1,19 @@
 name: "@alaq/link-state-vue"
-version: "6.0.0-alpha.0"
-description: "Vue 3 adapter for @alaq/link-state — useNode composable, provide/inject for SyncStore"
+version: 6.0.0-alpha.0
+description: Vue 3 adapter for @alaq/link-state — useNode composable,
+  provide/inject for SyncStore
+license: Apache-2.0
+author: Gleb Panteleev <panteleew@gleb.pw>
+homepage: https://github.com/carabins/alak/tree/master/packages/link-state-vue
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/link-state-vue
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
@@ -16,10 +29,12 @@ keywords:
   - composable
 peerDependencies:
   vue: ^3.0.0
-  "@alaq/link-state": alpha
-  "@alaq/quark": alpha
+  "@alaq/link-state": 6.0.0-alpha.0
+  "@alaq/quark": 6.0.0-alpha.0
 devDependencies:
-  "@alaq/link-state": alpha
-  "@alaq/quark": alpha
-  "@alaq/deep-state": alpha
+  "@alaq/link-state": 6.0.0-alpha.0
+  "@alaq/quark": 6.0.0-alpha.0
+  "@alaq/deep-state": 6.0.0-alpha.0
   vue: ^3.5.0
+publishConfig:
+  access: public

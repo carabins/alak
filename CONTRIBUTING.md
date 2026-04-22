@@ -50,7 +50,7 @@ Open an issue with your proposal. Wait for a direction ack before writing code. 
 - Product-named generator plugins (`graph-kotelok`, `graph-valkyrie` — forbidden per `AGENTS.md`).
 - Directives embedded in `@alaq/graph` that target a specific runtime (they belong in the plugin).
 - TS AST parsing to extract schemas (schemas live in `.aql`, not in code).
-- Code reviving `packages/state.draft/` or `packages/gql.replaced/`.
+- Reviving the deleted `packages/state.draft/` or `packages/gql.replaced/` experiments (directories were removed; do not recreate under those names or their concepts verbatim).
 
 ## Questions
 

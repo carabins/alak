@@ -1,11 +1,30 @@
 name: "@alaq/xstate"
-version: "6.0.0-alpha.0"
+version: 6.0.0-alpha.0
 description: XState integration for Alak ecosystem
+license: Apache-2.0
+author: Gleb Panteleev <panteleew@gleb.pw>
+homepage: https://github.com/carabins/alak/tree/master/packages/xstate
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/xstate
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
 peerDependencies:
   xstate: ^5.0.0
-  "@alaq/quark": alpha
-  "@alaq/nucl": alpha
+  "@alaq/quark": 6.0.0-alpha.0
+  "@alaq/nucl": 6.0.0-alpha.0
 devDependencies:
   xstate: ^5.19.0
-  "@alaq/quark": alpha
-  "@alaq/nucl": alpha
+  "@alaq/quark": 6.0.0-alpha.0
+  "@alaq/nucl": 6.0.0-alpha.0
+publishConfig:
+  access: public

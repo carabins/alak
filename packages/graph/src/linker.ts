@@ -308,7 +308,32 @@ function mergeGroup(
     enums: {},
     scalars: {},
     opaques: {},
+    // v0.3.4 (W9): events are merged just like records — one bucket per ns.
+    events: {},
     sourceFiles: [],
+  }
+
+  // v0.3.4 (W8): schema-level `@transport` / `IRSchema.directives` merge.
+  // Convention: the first file to declare `@transport(kind: ...)` wins.
+  // Subsequent files that declare a *different* kind emit an advisory
+  // diagnostic but do not override — split schemas with conflicting
+  // transports should live in different namespaces by design. Files without
+  // `@transport` contribute nothing to the merged value (left absent = any).
+  for (const f of group) {
+    const firSchema = f.ir?.schemas[ns]
+    if (!firSchema) continue
+    if (firSchema.transport && !mergedSchema.transport) {
+      mergedSchema.transport = firSchema.transport
+    }
+    if (firSchema.directives && firSchema.directives.length > 0) {
+      mergedSchema.directives = (mergedSchema.directives ?? []).concat(
+        firSchema.directives.map(d => ({
+          name: d.name,
+          args: { ...d.args },
+          ...(d.argTypes ? { argTypes: { ...d.argTypes } } : {}),
+        })),
+      )
+    }
   }
 
   // First pass: copy full definitions per file into the merged schema.
@@ -354,6 +379,24 @@ function mergeGroup(
         const loc = findDefLoc(f.ast, 'action', name) ?? { line: 1, column: 1 }
         diagnostics.push(diag('E010', MSG.E010(name), loc))
       } else mergedSchema.actions[name] = { ...act, input: act.input?.map(f => ({ ...f })) }
+    }
+    // v0.3.4 (W9): merge events the same way records merge. Duplicate event
+    // names across files of the same namespace → E010.
+    for (const [name, ev] of Object.entries(fSchema.events ?? {})) {
+      if (mergedSchema.events[name]) {
+        const loc = findDefLoc(f.ast, 'event', name) ?? { line: 1, column: 1 }
+        diagnostics.push(diag('E010', MSG.E010(name), loc))
+      } else {
+        mergedSchema.events[name] = {
+          name: ev.name,
+          fields: ev.fields.map(fld => ({
+            ...fld,
+            directives: fld.directives?.map(d => ({ name: d.name, args: { ...d.args } })),
+          })),
+          directives: ev.directives?.map(d => ({ name: d.name, args: { ...d.args } })),
+          leadingComments: ev.leadingComments?.slice(),
+        }
+      }
     }
   }
 
@@ -464,7 +507,7 @@ function findRecordLoc(ast: FileAST, name: string): SourceLoc | null {
 
 function findDefLoc(
   ast: FileAST,
-  kind: 'enum' | 'scalar' | 'opaque' | 'action',
+  kind: 'enum' | 'scalar' | 'opaque' | 'action' | 'event',
   name: string,
 ): SourceLoc | null {
   for (const d of ast.definitions) {
@@ -546,6 +589,9 @@ function applyGlobalTypeChecks(
       } else if (def.kind === 'action') {
         if (def.input) for (const a of def.input) checkType(a.type, defined, keySafe, diagnostics)
         if (def.output) checkType(def.output, defined, keySafe, diagnostics)
+      } else if (def.kind === 'event') {
+        // v0.3.4 (W9): same field-type validation as records.
+        for (const fld of def.fields) checkType(fld.type, defined, keySafe, diagnostics)
       }
     }
   }

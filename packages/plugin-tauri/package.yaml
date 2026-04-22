@@ -1,6 +1,20 @@
 name: "@alaq/plugin-tauri"
-version: "6.0.0-alpha.0"
-description: "Tauri v2 IPC bridge for Nucl — nucl atoms backed by Rust-side state (invoke/listen) with $ready/$saved companions, optional @alaq/plugin-logi integration."
+version: 6.0.0-alpha.0
+description: Tauri v2 IPC bridge for Nucl — nucl atoms backed by Rust-side state
+  (invoke/listen) with $ready/$saved companions, optional @alaq/plugin-logi
+  integration.
+license: Apache-2.0
+author: Gleb Panteleev <panteleew@gleb.pw>
+homepage: https://github.com/carabins/alak/tree/master/packages/plugin-tauri
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/plugin-tauri
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
@@ -14,13 +28,17 @@ keywords:
   - bridge
   - nucl
 dependencies:
-  "@alaq/nucl": ^6.0.0-alpha.4
-  "@alaq/quark": ^6.0.0-alpha.1
+  "@alaq/nucl": 6.0.0-alpha.0
+  "@alaq/quark": 6.0.0-alpha.0
+devDependencies:
+  "@tauri-apps/api": ^2.10.1
 peerDependencies:
-  "@alaq/plugin-logi": ^6.0.0-alpha.0
+  "@alaq/plugin-logi": 6.0.0-alpha.0
   "@tauri-apps/api": ^2.0.0
 peerDependenciesMeta:
   "@alaq/plugin-logi":
     optional: true
   "@tauri-apps/api":
     optional: true
+publishConfig:
+  access: public

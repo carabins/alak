@@ -1,7 +1,23 @@
 name: "@alaq/datastruct"
 version: "6.0.0-alpha.0"
 description: Optimized data structures for reactive systems
+license: Apache-2.0
+author: "Gleb Panteleev <panteleew@gleb.pw>"
+homepage: https://github.com/carabins/alak/tree/master/packages/datastruct
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/datastruct
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
 keywords:
   - data-structures
   - collections
@@ -9,3 +25,5 @@ keywords:
   - reactive
 dependencies: {}
 devDependencies: {}
+publishConfig:
+  access: public

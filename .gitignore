@@ -38,3 +38,7 @@ test-results/
 
 # Per-machine Claude settings
 .claude/settings.local.json
+
+# Rust build artifacts (library crates)
+crates/*/target/
+crates/*/Cargo.lock

@@ -77,6 +77,12 @@ Generator plugins follow `@alaq/graph-<transport-or-platform>`. Never name a plu
 - Generating code that hardcodes Zenoh, Tauri, or any runtime — target abstractions (`@alaq/link` API, `@alaq/link-state` SyncNode).
 - Parsing TypeScript AST to extract schemas — schemas live in `.aql`, not in code.
 
+## Package metadata
+
+Packages declare their manifest in `package.yaml`, not `package.json`. Root build scripts generate `package.json` on publish. Do not create `package.json` or per-package `tsconfig.json` by hand — path resolution lives in the root `tsconfig.json`.
+
+Run tests with `bun test ./packages/<name>/test/` (or `cd packages/<name> && bun test`).
+
 ## Memory discipline
 
 Check `architecture.yaml` for package roles before assuming. Check `SPEC.md` for SDL semantics before writing. Do not guess.

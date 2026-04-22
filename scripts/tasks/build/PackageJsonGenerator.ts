@@ -54,11 +54,30 @@ export class PackageJsonGenerator {
     // Exports, files, deps, fixed fields
     this.addExports(pkg)
     this.addFiles(pkg)
+    this.addBin(pkg)
     this.addDependencies(pkg)
     this.addFixedFields(pkg)
     this.addUmdFields(pkg)
 
     return pkg
+  }
+
+  private addBin(pkg: any): void {
+    const srcBin = (this.config.sourcePackageJson as any).bin
+    if (!srcBin || typeof srcBin !== 'object') return
+
+    const remapped: Record<string, string> = {}
+    for (const [cmd, srcPath] of Object.entries(srcBin)) {
+      if (typeof srcPath !== 'string') continue
+      // Match source path basename (e.g. ./src/bin.ts → bin) against a detected
+      // entry point and rewrite to its ESM output. The shebang lives there.
+      const base = path.basename(srcPath, path.extname(srcPath))
+      const entry = this.config.entryPoints.find(e => e.name === base)
+      if (entry) remapped[cmd] = './' + entry.outputs.esm
+      // Sources outside src/ (e.g. ./bin/aqc.ts) aren't bundled — skip rather
+      // than ship a path that won't resolve in the published tarball.
+    }
+    if (Object.keys(remapped).length > 0) pkg.bin = remapped
   }
 
   private addExports(pkg: any): void {
@@ -110,7 +129,20 @@ export class PackageJsonGenerator {
     }
 
     if (this.config.sourcePackageJson.peerDependencies) {
-      pkg.peerDependencies = this.config.sourcePackageJson.peerDependencies
+      const srcPeers = this.config.sourcePackageJson.peerDependencies
+      const ownVersion = this.config.sourcePackageJson.version
+      pkg.peerDependencies = {}
+      for (const [name, range] of Object.entries(srcPeers)) {
+        // Normalize internal @alaq/* peer ranges to the current version. Authors
+        // routinely leave stale ranges ("alpha", "^1.0.0") which would publish
+        // unsatisfiable constraints. Single source of truth: this package's
+        // own version.
+        if ((name.startsWith('@alaq/') || name === 'alaq') && ownVersion) {
+          pkg.peerDependencies[name] = '^' + ownVersion
+        } else {
+          pkg.peerDependencies[name] = range
+        }
+      }
     }
   }
 

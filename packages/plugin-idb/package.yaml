@@ -1,12 +1,27 @@
 name: "@alaq/plugin-idb"
-version: "6.0.0-alpha.0"
-description: "IndexedDB persistence plugin for Nucl — optimistic sync with $ready/$saved companions, single-value and collection modes, optional @alaq/plugin-logi integration."
+version: 6.0.0-alpha.0
+description: IndexedDB persistence plugin for Nucl — optimistic sync with
+  $ready/$saved companions, single-value and collection modes, optional
+  @alaq/plugin-logi integration.
+license: Apache-2.0
+author: Gleb Panteleev <panteleew@gleb.pw>
+homepage: https://github.com/carabins/alak/tree/master/packages/plugin-idb
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/plugin-idb
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
 scripts:
   test: bun test
-  test:browser: bun playwright/build.ts && bunx playwright test --config=playwright/playwright.config.ts
+  test:browser: bun playwright/build.ts && bunx playwright test
+    --config=playwright/playwright.config.ts
   test:browser:build: bun playwright/build.ts
   test:browser:run: bunx playwright test --config=playwright/playwright.config.ts
 keywords:
@@ -18,10 +33,12 @@ keywords:
   - nucl
   - offline
 dependencies:
-  "@alaq/nucl": ^6.0.0-alpha.4
-  "@alaq/quark": ^6.0.0-alpha.1
+  "@alaq/nucl": 6.0.0-alpha.0
+  "@alaq/quark": 6.0.0-alpha.0
 peerDependencies:
-  "@alaq/plugin-logi": ^6.0.0-alpha.0
+  "@alaq/plugin-logi": 6.0.0-alpha.0
 peerDependenciesMeta:
   "@alaq/plugin-logi":
     optional: true
+publishConfig:
+  access: public

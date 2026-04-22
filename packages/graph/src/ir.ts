@@ -13,7 +13,9 @@ import type {
   IRAction,
   IRDirective,
   IREnum,
+  IREvent,
   IRField,
+  IRLiteralKind,
   IROpaque,
   IRRecord,
   IRScalar,
@@ -28,10 +30,32 @@ import type {
 export type DirectiveArgType = 'string' | 'int' | 'float' | 'bool' | 'enum' | 'any' | 'list'
 export interface DirectiveSignature {
   args: Record<string, DirectiveArgType>
+  /** Required argument names — enforced by validator via E023. Args declared
+   *  with `!` in SPEC §7 go here. Everything else is optional (may or may not
+   *  have a default at generator level, but the compiler does not require it
+   *  to appear in source). */
+  required?: string[]
   // Enum values are validated when argType is 'enum' or 'enum-or-string'
   enumValues?: Record<string, string[]>
 }
 
+// Required-arg lists are derived from SPEC §7:
+//   §7.5  @scope(name: String!)
+//   §7.8  @default(value: Any)            — value is implicitly required
+//                                            (the directive has no meaning
+//                                            without a value)
+//   §7.9  @liveness(source: String!, timeout: Duration!, on_lost: ... = ...)
+//   §7.10 @range(min: Number, max: Number) — both required (R181 presumes
+//                                            both bounds; neither has a
+//                                            meaningful default)
+//   §7.11 @deprecated(since: String!, reason: String)
+//   §7.12 @added(in: String!)
+//   §7.13 @topic(pattern: String!)
+// @sync, @crdt, @auth, @atomic, @this, @store have no required args per SPEC:
+//   - @sync: all three args have defaults
+//   - @crdt: `key` is required only for LWW_* (enforced by E004, not E023)
+//   - @auth: both args default to "public"
+//   - @atomic/@this/@store: no args
 export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
   sync: {
     args: { qos: 'enum', mode: 'enum', atomic: 'bool' },
@@ -48,20 +72,39 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
   },
   atomic: { args: {} },
   auth: { args: { read: 'string', write: 'string' } },
-  scope: { args: { name: 'string' } },
+  scope: { args: { name: 'string' }, required: ['name'] },
   this: { args: {} },
   store: { args: {} },
-  default: { args: { value: 'any' } },
+  default: { args: { value: 'any' }, required: ['value'] },
   liveness: {
     args: { source: 'string', timeout: 'int', on_lost: 'enum' },
+    required: ['source', 'timeout'],
     enumValues: {
       on_lost: ['MARK_ABSENT', 'REMOVE', 'EMIT_EVENT'],
     },
   },
-  range: { args: { min: 'any', max: 'any' } }, // Number — Int or Float
-  deprecated: { args: { since: 'string', reason: 'string' } },
-  added: { args: { in: 'string' } },
-  topic: { args: { pattern: 'string' } },
+  range: { args: { min: 'any', max: 'any' }, required: ['min', 'max'] }, // Number — Int or Float
+  deprecated: { args: { since: 'string', reason: 'string' }, required: ['since'] },
+  added: { args: { in: 'string' }, required: ['in'] },
+  topic: { args: { pattern: 'string' }, required: ['pattern'] },
+  // v0.3.4 (W8) — §7.14. Schema-level marker directive. `kind` is a string
+  // from a closed set; validator enforces membership in `{tauri, http, zenoh,
+  // any}` via `enumValues`. `kind` is typed `'string'` (not `'enum'`) so
+  // authors write `@transport(kind: "tauri")`, matching `@auth(read:
+  // "public")` style (string literal, closed value set).
+  transport: {
+    args: { kind: 'string' },
+    required: ['kind'],
+    enumValues: { kind: ['tauri', 'http', 'zenoh', 'any'] },
+  },
+}
+
+/** Map AST Value.kind to the IR-level literal-kind tag. See §10. */
+function valueKindToLiteralKind(v: Value): IRLiteralKind {
+  switch (v.kind) {
+    case 'enum': return 'enum_ref'
+    default:     return v.kind
+  }
 }
 
 // Unwrap a Value into its raw JS value (for IR storage).
@@ -78,8 +121,17 @@ export function valueToRaw(v: Value): unknown {
 
 function directiveToIR(d: DirectiveNode): IRDirective {
   const args: Record<string, unknown> = {}
-  for (const a of d.args) args[a.name] = valueToRaw(a.value)
-  return { name: d.name, args }
+  const argTypes: Record<string, IRLiteralKind> = {}
+  for (const a of d.args) {
+    args[a.name] = valueToRaw(a.value)
+    argTypes[a.name] = valueKindToLiteralKind(a.value)
+  }
+  const ir: IRDirective = { name: d.name, args }
+  // v0.3.3 additive: only emit `argTypes` when there is at least one arg, so
+  // arg-less directives keep the pre-0.3.3 on-disk shape exactly. Consumers
+  // that ignore `argTypes` continue to work unchanged.
+  if (d.args.length > 0) ir.argTypes = argTypes
+  return ir
 }
 
 function flattenType(t: TypeExprNode): {
@@ -186,8 +238,28 @@ export function buildIR(ast: FileAST): IR {
     enums: {},
     scalars: {},
     opaques: {},
+    // v0.3.4 (W9): events live in their own bucket alongside records/actions.
+    events: {},
   }
   ir.schemas[ast.schema.namespace] = schema
+
+  // v0.3.4 (W8): schema-level directives. Project `@transport(kind: "...")`
+  // into the dedicated `IRSchema.transport` slot and preserve the full
+  // directive list on `IRSchema.directives` for generators that want to
+  // enumerate uniformly. Directives are additive: parser already only attaches
+  // `directives` when at least one exists; we mirror that in IR (absent, not
+  // `[]`, when none were written).
+  const schemaDirs = ast.schema.directives ?? []
+  if (schemaDirs.length > 0) {
+    schema.directives = schemaDirs.map(directiveToIR)
+    const transportDir = schemaDirs.find(d => d.name === 'transport')
+    if (transportDir) {
+      const kindArg = transportDir.args.find(a => a.name === 'kind')
+      if (kindArg && kindArg.value.kind === 'string') {
+        schema.transport = kindArg.value.value
+      }
+    }
+  }
 
   for (const def of ast.definitions) {
     if (def.kind === 'record') {
@@ -209,6 +281,10 @@ export function buildIR(ast: FileAST): IR {
         const patArg = topicDir.args.find(a => a.name === 'pattern')
         if (patArg && patArg.value.kind === 'string') rec.topic = patArg.value.value
       }
+      // v0.3.2 additive: pass through leading `#`-comments for generators.
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        rec.leadingComments = def.leadingComments.slice()
+      }
 
       if (schema.records[def.name]) {
         // Collision with an earlier record — leave validator to surface a
@@ -218,12 +294,22 @@ export function buildIR(ast: FileAST): IR {
       }
     } else if (def.kind === 'enum') {
       const existing: IREnum = { name: def.name, values: def.values.slice() }
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        existing.leadingComments = def.leadingComments.slice()
+      }
       schema.enums[def.name] = existing
     } else if (def.kind === 'scalar') {
-      schema.scalars[def.name] = { name: def.name }
+      const sc: IRScalar = { name: def.name }
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        sc.leadingComments = def.leadingComments.slice()
+      }
+      schema.scalars[def.name] = sc
     } else if (def.kind === 'opaque') {
       const op: IROpaque = { name: def.name, qos: def.qos }
       if (def.maxSize !== null) op.maxSize = def.maxSize
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        op.leadingComments = def.leadingComments.slice()
+      }
       schema.opaques[def.name] = op
     } else if (def.kind === 'action') {
       const act: IRAction = { name: def.name }
@@ -233,21 +319,47 @@ export function buildIR(ast: FileAST): IR {
         const flat = flattenType(def.output)
         act.output = flat.base
         act.outputRequired = flat.required
+        // v0.3.1 additive: preserve list-ness of action output so that
+        // generators targeting typed languages (graph-axum, graph-tauri,
+        // graph-tauri-rs) can emit `Vec<T>` / `T[]` correctly. Pre-0.3.1 IR
+        // consumers ignore the new fields — `output` still carries the
+        // element's base type name as before. See §10 Action schema and the
+        // stress-journal Arsenal/C.0 finding.
         if (flat.list) {
-          // Encode list-ness on output through a sentinel: we prefix with '[]'
-          // Simpler: keep base name and set a separate field.
-          // Schema §10 only allows `output: string`; generators will need the
-          // AST for nuanced list outputs. For the conformance tests used
-          // here, all outputs are scalar, so this is fine.
+          act.outputList = true
+          act.outputListItemRequired = !!flat.listItemRequired
         }
+      }
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        act.leadingComments = def.leadingComments.slice()
       }
       schema.actions[def.name] = act
     } else if (def.kind === 'extend') {
       // Merge into existing record if present. If not, leave it: validator
       // will emit E011.
+      // Note: leadingComments on `extend record` blocks are currently dropped
+      // — `extend` only contributes fields into an existing record and the
+      // IRRecord already owns its own leadingComments from the base decl.
+      // Generators that want comments on extends should consume the AST.
       const target = schema.records[def.name]
       if (!target) continue
       for (const f of def.fields) target.fields.push(fieldToIR(f))
+    } else if (def.kind === 'event') {
+      // v0.3.4 (W9): first-class broadcast-event payload declaration. Shape
+      // mirrors IRRecord exactly — same fields, same directives, same
+      // leadingComments passthrough — but stored under `schema.events` so
+      // generators fan out pub/sub emitters separately from state records.
+      const ev: IREvent = {
+        name: def.name,
+        fields: def.fields.map(fieldToIR),
+      }
+      if (def.directives.length) ev.directives = def.directives.map(directiveToIR)
+      if (def.leadingComments && def.leadingComments.length > 0) {
+        ev.leadingComments = def.leadingComments.slice()
+      }
+      if (!schema.events[def.name]) {
+        schema.events[def.name] = ev
+      }
     }
   }
 

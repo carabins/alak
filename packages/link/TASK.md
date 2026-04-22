@@ -11,7 +11,7 @@ Read existing design docs in this directory:
 - `DISCUSSION.md` — open questions
 
 Existing implemented packages to integrate with:
-- `packages/ws/src/index.ts` — reactive WebSocket client (Nucleus-based, auto-reconnect, queue)
+- `packages/link/src/drivers/ws.ts` — WebSocket driver (absorbed the former `@alaq/ws` package; auto-reconnect, queue)
 - `packages/link-state/src/` — SyncStore + SyncNode (reactive state replica with ghost proxies, versioned cache)
 - `packages/deep-state/src/` — deep proxy state tracking with ghost proxies
 
@@ -110,7 +110,7 @@ interface Peer {
 ### Phase 2: Drivers
 
 #### 2.1 WebSocketDriver
-- Wraps existing `@alaq/ws` or replaces it with same capabilities
+- Implemented in `src/drivers/ws.ts` (absorbs the former `@alaq/ws` package)
 - Auto-reconnect with exponential backoff
 - Message queue during disconnection
 - Binary frames (Uint8Array), not JSON

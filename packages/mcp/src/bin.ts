@@ -54,4 +54,7 @@ function makeStdinIO(): ServerIO {
   }
 }
 
-await runServer(makeStdinIO())
+// Wrapped in IIFE: top-level await breaks rolldown's CJS output bundling.
+void (async () => {
+  await runServer(makeStdinIO())
+})()

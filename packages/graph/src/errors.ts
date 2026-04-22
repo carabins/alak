@@ -25,10 +25,19 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   E020: 'error',
   E021: 'error',
   E022: 'error',
+  E023: 'error',
+  E024: 'error',
+  // v0.3.5 (C7): @transport mismatch is now an error (generator-emitted).
+  // Supersedes W005 — see §7.14 R221/R224 and §15 Changelog.
+  E025: 'error',
   W001: 'warning',
   W002: 'warning',
   W003: 'warning',
   W004: 'warning',
+  // W005 is retired as of v0.3.5 (replaced by E025). The entry is kept so
+  // DiagnosticCode stays a strict superset of historical codes and any
+  // stored/cached diagnostic referencing 'W005' still types.
+  W005: 'warning',
 }
 
 export function diag(
@@ -80,6 +89,15 @@ export const MSG = {
   E021: (name: string, path: string) =>
     `'use' imports undeclared name '${name}' from '${path}'`,
   E022: (type: string) => `Map key type must be scalar (got '${type}')`,
+  E023: (directive: string, arg: string) =>
+    `directive @${directive} is missing required argument "${arg}"`,
+  E024: (eventName: string) =>
+    `event ${eventName} cannot carry @scope — events are broadcast payloads, not lifecycle-bound state`,
+  // v0.3.5 (C7): @transport mismatch is generator-level, now an error.
+  E025: (generator: string, schemaNamespace: string, schemaTransport: string, supported: string) =>
+    `schema "${schemaNamespace}" declares @transport(kind: "${schemaTransport}") ` +
+    `which is outside ${generator} supported transports [${supported}]; ` +
+    `generation refused (E025). Set @transport(kind: "any") or omit the directive to opt out.`,
 
   W001: (field: string) =>
     `@sync(qos: REALTIME) on composite field "${field}" without @atomic`,
@@ -87,4 +105,9 @@ export const MSG = {
   W003: (record: string) =>
     `record ${record} has @crdt but no Timestamp! field named "updated_at"`,
   W004: (what: string) => `directive declared but target does not use it: ${what}`,
+  // W005 retired as of v0.3.5 (replaced by E025). Message template kept
+  // for back-compat tooling that reads historical diagnostics by code.
+  W005: (generator: string, schemaTransport: string, supported: string) =>
+    `schema @transport(kind: "${schemaTransport}") does not match ` +
+    `${generator} supported transports [${supported}]; generation proceeds`,
 }

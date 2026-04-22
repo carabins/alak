@@ -1,7 +1,13 @@
 // @alaq/graph — hand-written tokenizer. Follows EBNF §2.
 //
-// Produces a flat Token[] stream (plus EOF sentinel). Comments and whitespace
-// are skipped. Line/column tracking is 1-based.
+// Produces a flat Token[] stream (plus EOF sentinel). Whitespace is skipped.
+// Line/column tracking is 1-based.
+//
+// v0.3.2 — comments are emitted as `COMMENT` tokens (payload = comment body
+// with leading `#` and one optional space stripped). Per SPEC R001 comments
+// are still "not part of the parse tree" — the parser skips them for
+// structural purposes, but may harvest them as `leadingComments` on top-level
+// declarations. Pre-0.3.2 lexer dropped them entirely.
 //
 // The lexer is permissive: it reports lexical errors through diagnostics
 // (never throws) and emits a best-effort token stream so the parser can
@@ -54,9 +60,25 @@ export function lex(source: string, file?: string): LexResult {
       continue
     }
 
-    // Comments: # ... \n  (R001)
+    // Comments: # ... \n  (R001). v0.3.2: emit as COMMENT token so the parser
+    // can optionally attach leading comments to top-level declarations. The
+    // newline itself is NOT consumed — whitespace handling above consumes it
+    // on the next iteration, so the parser can still see line numbers to
+    // determine adjacency (comment on line N vs keyword on line N+1 vs
+    // blank line between them).
     if (ch === '#') {
-      while (i < len && peek() !== '\n') advance()
+      const cLine = line
+      const cCol = column
+      advance() // consume '#'
+      // Preserve the raw comment body verbatim, then strip one optional
+      // leading space for readability (`# foo` → `foo`, `#foo` → `foo`).
+      // Trailing whitespace is trimmed; interior whitespace untouched.
+      let body = ''
+      while (i < len && peek() !== '\n') body += advance()
+      if (body.length > 0 && body.charCodeAt(0) === 0x20) body = body.slice(1)
+      // Trim trailing whitespace (spaces, tabs, \r) but not interior.
+      body = body.replace(/[ \t\r]+$/u, '')
+      push('COMMENT', body, cLine, cCol)
       continue
     }
 

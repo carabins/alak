@@ -107,9 +107,9 @@ Read this once before running anything. You must be able to explain each box wit
 
 ### 1.2 Files to know (absolute paths for this working tree)
 
-- `A:\source\alak\AGENTS.md` — manifest, 64 lines, read first
-- `A:\source\alak\PHILOSOPHY.md` — normative "why" doc, 118 lines
-- `A:\source\alak\CONTRIBUTING.md` — contributor rules, 57 lines
+- `A:\source\alak\AGENTS.md` — manifest, read first
+- `A:\source\alak\PHILOSOPHY.md` — normative "why" doc
+- `A:\source\alak\CONTRIBUTING.md` — contributor rules
 - `A:\source\alak\architecture.yaml` — package registry, tiers, forbidden deps
 - `A:\source\alak\LICENSE` — TVR (custom, repo-level)
 - `A:\source\alak\LICENSE-APACHE` — Apache-2.0 (npm artifacts)
@@ -177,11 +177,24 @@ cd A:/source/alak/packages/fx && bun test 2>&1 | tail -3
 ```bash
 cd A:/source/alak/packages/mcp && bun test 2>&1 | tail -3
 ```
-**Expected:** `Ran 34 tests across 3 files`, `0 fail`.
+**Expected:** `Ran 50 tests across 6 files`, `0 fail`. (Was 34 / 3 before the runtime-observation tools landed in 2026-04-19; see `DIGEST.md`.)
 
-**Grand total: 637 tests across 11 packages, 0 failures, 1291 expect() calls.**
+```bash
+cd A:/source/alak/packages/plugin-logi && bun test 2>&1 | tail -3
+```
+**Expected:** `Ran 8 tests`, `0 fail`.
 
-**Pre-existing failures to ignore:** `packages/flex/test/ui-bug.test.ts` (Pixi), `packages/flex/test/e2e/visual.spec.ts` (Playwright config). Not in scope.
+```bash
+cd A:/source/alak/packages/plugin-idb && bun test 2>&1 | tail -3
+```
+**Expected:** `Ran 20 tests`, `0 fail`. (Browser e2e harness in `packages/plugin-idb/playwright/` is separate — see `DIGEST.md` 2026-04-19 late entry.)
+
+```bash
+cd A:/source/alak/packages/plugin-tauri && bun test 2>&1 | tail -3
+```
+**Expected:** `Ran 17 tests`, `0 fail`.
+
+**Grand total: ~920 tests across 14 packages, 0 failures.** (637 core + 283 plugin/mcp additions from 2026-04-19; re-count exact total on next run.)
 
 ---
 
@@ -484,27 +497,24 @@ console.log('count:', dirs.length, 'bad:', bad)
 
 ### 7.8 License declared on the publishable v6 packages with explicit Apache-2.0
 
-The repo is dual-licensed: `LICENSE` is TVR (custom, repo-level); `LICENSE-APACHE` (Apache 2.0) covers npm artifacts. Packages that already declare it should keep declaring it.
+The repo is dual-licensed: `LICENSE` is TVR (custom, repo-level); `LICENSE-APACHE` (Apache 2.0) covers npm artifacts. Every publishable package must declare `license: Apache-2.0` in its `package.yaml`.
 
 ```bash
 cd A:/source/alak && bun -e "
 import { parse } from 'yaml'
-import { readFileSync } from 'node:fs'
-for (const p of ['graph','mcp','link','quark']) {
-  const y = parse(readFileSync('packages/'+p+'/package.yaml','utf8'))
-  console.log(p+':', 'license='+y.license)
+import { readFileSync, readdirSync } from 'node:fs'
+const dirs = readdirSync('packages').filter(d => {
+  try { readFileSync('packages/'+d+'/package.yaml','utf8'); return true } catch { return false }
+})
+let bad = 0
+for (const d of dirs) {
+  const y = parse(readFileSync('packages/'+d+'/package.yaml','utf8'))
+  if (y.license !== 'Apache-2.0') { console.log('  not Apache-2.0:', d, '→', y.license); bad++ }
 }
+console.log('count:', dirs.length, 'non-compliant:', bad)
 "
 ```
-**Expected (currently mixed — see §7.8 note):**
-```
-graph: license=Apache-2.0
-mcp: license=Apache-2.0
-link: license=undefined
-quark: license=undefined
-```
-
-**§7.8 note — coverage gap.** Only `@alaq/graph` and `@alaq/mcp` currently declare `license: Apache-2.0` in their `package.yaml`. `@alaq/atom` declares `license: MIT`. The other 16 publishable v6 packages (including `link`, `link-state-vue`, `graph-link-state`, `graph-link-server`, `graph-zenoh`, `quark`, `nucl`, `fx`, etc.) have no `license` field at all. The `LICENSE-APACHE` file at repo root exists, but the per-package metadata is incomplete. Backfill is a separate task, not gated by this protocol; flagged here so the report surfaces it.
+**Expected:** `count: 25 non-compliant: 0`. All 25 packages declare `license: Apache-2.0`. (Before the 2026-04-20 backfill, only `@alaq/graph` and `@alaq/mcp` declared it and `@alaq/atom` had `MIT`. Keep this check so a regression is caught the next time a package is added.)
 
 ---
 
@@ -627,7 +637,7 @@ After running all sections, produce this report. Be precise.
 
 ## Appendix: What a clean run proves
 
-If **every section passes** (modulo the documented §3.2 / §3.3 / §5 / §7.8 notes), you have:
+If **every section passes** (modulo the documented §3.2 / §3.3 / §5 notes), you have:
 
 1. **Correct SDL compilation** — parser, validator, single-file pipeline all green.
 2. **Three working generators** — TS (client), TS (server), Rust (Zenoh wire).
@@ -644,6 +654,5 @@ Known **gaps** today (not regressions caught by this protocol — pre-existing):
 - §3.2 multi-file linker emits spurious `E009` when two files share a `schema { namespace }` and cross-reference records.
 - §3.3 `@alaq/graph-link-state` does not emit a runtime schema-as-Record constant; consumers needing runtime schema must read IR via `@alaq/graph` or `@alaq/mcp`.
 - §5 live e2e is missing entirely (no in-tree reference consumer).
-- §7.8 only 2 of the publishable v6 packages declare `license: Apache-2.0`; the rest leave it unset.
 
 If any section fails outside the documented notes, start with the first failure — upstream problems cascade.

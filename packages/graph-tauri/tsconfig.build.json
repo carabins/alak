@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "composite": false,
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@alaq/graph": ["../graph/dist/index.d.ts"],
+      "@alaq/graph/*": ["../graph/dist/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.test.ts", "test/**", "node_modules/**"]
+}

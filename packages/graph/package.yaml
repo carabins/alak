@@ -16,6 +16,8 @@ engines:
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
+bin:
+  aqc: ./bin/aqc.ts
 scripts:
   build:types: tsc -p tsconfig.build.json
 keywords:

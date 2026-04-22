@@ -141,6 +141,83 @@ describe('validator — errors E001–E020', () => {
     const src = base + `record R { m: Map<NoSuchType, String>! }`
     expect(codesOf(src)).toContain('E009')
   })
+
+  // E023 — required directive args (v0.3.3, closes stress-journal О19).
+  // SPEC §7.11 says `@deprecated(since: String!, ...)`; the `!` on `since`
+  // was not enforced before W2 — see stress.md Belladonna step 3.
+  describe('E023 — missing required directive args', () => {
+    test('@added without `in` → E023', () => {
+      expect(codesOf(base + 'record R { x: Int! @added }')).toContain('E023')
+    })
+
+    test('@added with `in` → clean', () => {
+      expect(codesOf(base + 'record R { x: Int! @added(in: "0.2") }')).not.toContain('E023')
+    })
+
+    test('@deprecated without `since` → E023', () => {
+      // `reason` alone is not enough; `since` is the required one.
+      expect(codesOf(base + 'record R { x: Int! @deprecated(reason: "x") }')).toContain('E023')
+    })
+
+    test('@deprecated with `since` only → clean (`reason` is optional)', () => {
+      expect(codesOf(base + 'record R { x: Int! @deprecated(since: "0.2") }')).not.toContain('E023')
+    })
+
+    test('@default without `value` → E023', () => {
+      expect(codesOf(base + 'record R { x: Int! @default }')).toContain('E023')
+    })
+
+    test('@range without min → E023', () => {
+      expect(codesOf(base + 'record R { n: Int! @range(max: 10) }')).toContain('E023')
+    })
+
+    test('@range without max → E023', () => {
+      expect(codesOf(base + 'record R { n: Int! @range(min: 1) }')).toContain('E023')
+    })
+
+    test('@range with both → clean', () => {
+      expect(codesOf(base + 'record R { n: Int! @range(min: 1, max: 10) }')).not.toContain('E023')
+    })
+
+    test('@scope without name → E023', () => {
+      expect(codesOf(base + 'record R @scope { id: ID! }')).toContain('E023')
+    })
+
+    test('@topic without pattern → E023', () => {
+      expect(codesOf(base + 'record R @topic { id: ID! }')).toContain('E023')
+    })
+
+    test('@liveness without source/timeout → E023 (two of them)', () => {
+      const codes = codesOf(base + 'record R @liveness { id: ID! }')
+      // Two required args missing → two diagnostics at the directive loc.
+      expect(codes.filter(c => c === 'E023').length).toBe(2)
+    })
+
+    test('@liveness with source+timeout → clean (on_lost is optional)', () => {
+      const src = base +
+        'record R @liveness(source: "ws:x", timeout: 3000) { id: ID! }'
+      expect(codesOf(src)).not.toContain('E023')
+    })
+
+    test('@sync without args — clean (all sync args optional)', () => {
+      expect(codesOf(base + 'record R @sync { id: ID! }')).not.toContain('E023')
+    })
+
+    test('@auth without args — clean (both auth args optional)', () => {
+      expect(codesOf(base + 'record R @auth { id: ID! }')).not.toContain('E023')
+    })
+
+    test('@atomic — zero-arg directive, never E023', () => {
+      expect(codesOf(base + 'record R @atomic { id: ID! }')).not.toContain('E023')
+    })
+
+    test('@crdt without required — NOT E023 (LWW key handled by E004)', () => {
+      // @crdt has no hard-required args at signature level. `key` becomes
+      // required only for LWW_* types; that remains E004's job.
+      expect(codesOf(base + 'record R @crdt(type: OR_SET) { id: ID!, updated_at: Timestamp! }'))
+        .not.toContain('E023')
+    })
+  })
 })
 
 describe('validator — warnings W001–W004', () => {

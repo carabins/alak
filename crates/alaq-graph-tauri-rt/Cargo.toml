@@ -1,0 +1,17 @@
+[package]
+name = "alaq-graph-tauri-rt"
+version = "0.1.0"
+edition = "2021"
+description = "Runtime support for @alaq/graph-tauri-rs generated code (canonical AppError, DisplayError bound)."
+license = "Apache-2.0"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+# Dev-only: the `tests/smoke_belladonna.rs` smoke pulls a generated Tauri
+# tree via `#[path]` include. That tree uses `#[tauri::command]` and
+# `#[async_trait::async_trait]` — neither is a runtime-crate dependency,
+# they only need to resolve when the test compiles.
+[dev-dependencies]
+tauri = { version = "2", features = [] }
+async-trait = "0.1"

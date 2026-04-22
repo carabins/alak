@@ -63,6 +63,17 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
       if (!ast.schema.hasNamespace) {
         out.push(diag('E018', MSG.E018('namespace'), ast.schema.loc))
       }
+      // v0.3.4 (W8): schema-level directives participate in the same
+      // closed-set / arg-shape / required-arg validation path as record-level
+      // directives. Unknown directives emit E001, wrong arg types E003,
+      // missing required args E023. The only schema-level directive defined
+      // in v0.3.4 is `@transport`; closed value set for `kind` is enforced
+      // through DIRECTIVE_SIGS.transport.enumValues (yields E003 on mismatch).
+      if (ast.schema.directives) {
+        for (const d of ast.schema.directives) {
+          validateDirective(d, out, 'record', ast.schema.name)
+        }
+      }
     }
 
     // Type name universe: all schema members + imported + builtin scalars.
@@ -212,6 +223,47 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
       }
     }
 
+    // ── Events (v0.3.4 / W9)
+    //
+    // Events share IRRecord's shape but live at `schema.events`. We run the
+    // same field-level validation pass (E009/E022/W001/etc.) and reject
+    // event-level directives that don't make sense for broadcast payloads:
+    // events are never scoped, never @store, never @crdt — emit an advisory
+    // via the ordinary unknown-directive path. E024 reserves the rejection
+    // of `@scope` on events (no lifecycle container for a broadcast).
+    for (const evName of Object.keys(schema.events)) {
+      const evNode = ast?.definitions.find(
+        d => d.kind === 'event' && d.name === evName,
+      )
+      if (!evNode || evNode.kind !== 'event') continue
+
+      // Event-level directives — allow @topic / @deprecated / @added; reject
+      // @scope explicitly via E024 since events are broadcast and not scoped.
+      for (const d of evNode.directives) {
+        if (d.name === 'scope') {
+          out.push(diag('E024', MSG.E024(evName), d.loc))
+          continue
+        }
+        validateDirective(d, out, 'record', evName)
+      }
+
+      // E010-style: duplicate field names inside the event body.
+      const seenNames = new Map<string, SourceLoc>()
+      for (const f of evNode.fields) {
+        if (seenNames.has(f.name)) {
+          out.push(diag('E010', MSG.E010(f.name), f.loc))
+        } else {
+          seenNames.set(f.name, f.loc)
+        }
+      }
+
+      // Field-level validation — reuse the record pass; events ride the same
+      // type system (SPEC §5.5).
+      for (const f of evNode.fields) {
+        validateField(f, evName, out, definedTypes, schema.enums, keySafeTypes)
+      }
+    }
+
     // ── Actions
     for (const actName of Object.keys(schema.actions)) {
       const actNode = ast?.definitions.find(
@@ -356,6 +408,20 @@ function validateDirective(
   }
   const sig = DIRECTIVE_SIGS[d.name]!
 
+  // E023: required arguments missing. Emitted once per missing arg at the
+  // directive's source location (not the arg's — the arg doesn't exist).
+  // SPEC §7.11/§7.12 etc. declare `!` on certain args; this closes the gap
+  // noted in stress.md О19. The `@crdt(key)`-for-LWW_* case is covered by
+  // E004 (context-sensitive requirement) and not repeated here.
+  if (sig.required) {
+    const present = new Set(d.args.map(a => a.name))
+    for (const req of sig.required) {
+      if (!present.has(req)) {
+        out.push(diag('E023', MSG.E023(d.name, req), d.loc))
+      }
+    }
+  }
+
   for (const a of d.args) {
     // E002: unknown argument
     if (!(a.name in sig.args)) {
@@ -372,6 +438,15 @@ function validateDirective(
     if (expected === 'enum' && a.value.kind === 'enum' && sig.enumValues?.[a.name]) {
       if (!sig.enumValues[a.name]!.includes(a.value.value)) {
         out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${sig.enumValues[a.name]!.join(', ')}]`), a.loc))
+      }
+    }
+    // v0.3.4 (W8): closed-set string membership. For `@transport(kind: "...")`
+    // and any future directive that declares a string-typed arg with a closed
+    // set via `enumValues`, enforce membership on the string value. Mirrors
+    // the 'enum'-typed variant above but for string literals.
+    if (expected === 'string' && a.value.kind === 'string' && sig.enumValues?.[a.name]) {
+      if (!sig.enumValues[a.name]!.includes(a.value.value)) {
+        out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${sig.enumValues[a.name]!.map(s => `"${s}"`).join(', ')}]`), a.loc))
       }
     }
   }

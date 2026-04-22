@@ -1,7 +1,18 @@
 name: "@alaq/queue"
-version: "6.0.0-alpha.0"
+version: 6.0.0-alpha.0
 description: High-performance reactive Job Scheduler for Alak ecosystem
+license: Apache-2.0
+author: Gleb Panteleev <panteleew@gleb.pw>
 homepage: https://github.com/carabins/alaq/package/queue
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/queue
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 keywords:
   - queue
   - job scheduler
@@ -10,4 +21,6 @@ keywords:
   - reactive
   - quark
 dependencies:
-  "@alaq/quark": alpha
+  "@alaq/quark": 6.0.0-alpha.0
+publishConfig:
+  access: public

@@ -173,5 +173,6 @@ export type {
   IREnum,
   IRScalar,
   IROpaque,
+  IREvent,
   IRSchema,
 } from './types'

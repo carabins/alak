@@ -100,6 +100,7 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
       const emitResult = program.emit()
       let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
 
+      const errors: string[] = []
       allDiagnostics.forEach((diagnostic) => {
         if (diagnostic.file) {
           let {line, character} = ts.getLineAndCharacterOfPosition(
@@ -107,18 +108,17 @@ export default async function (projects: BuildPackage[]): Promise<typeof state> 
             diagnostic.start!,
           )
           let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
-
-          console.log(`
-(╯°□°)╯︵ ${message}
-`)
-          log.error(`${diagnostic.file.fileName} (${line + 1},${character + 1})`)
-          log.error(`ts.getPreEmitDiagnostics`)
-
-          process.exit()
+          const loc = `${diagnostic.file.fileName} (${line + 1},${character + 1})`
+          errors.push(`${loc}: ${message}`)
+          log.error(loc)
+          log.error(message)
         } else {
           log.warn(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
         }
       })
+      if (errors.length) {
+        throw new Error(`tsc failed for ${project.id}:\n${errors.slice(0, 5).join('\n')}`)
+      }
     }
 
     state.ready = true

@@ -1,7 +1,18 @@
 name: "@alaq/quark"
 version: "6.0.0-alpha.0"
 description: High-performance proactive container with powerful plugin system
+license: Apache-2.0
+author: "Gleb Panteleev <panteleew@gleb.pw>"
 homepage: https://github.com/carabins/alaq/package/quark
+repository:
+  type: git
+  url: git+https://github.com/carabins/alak.git
+  directory: packages/quark
+bugs:
+  url: https://github.com/carabins/alak/issues
+engines:
+  bun: ">=1.3.0"
+  node: ">=20"
 main: ./src/index.ts
 types: ./dist/index.d.ts
 scripts:
@@ -15,3 +26,5 @@ keywords:
   - observable
   - quark
   - proactive
+publishConfig:
+  access: public

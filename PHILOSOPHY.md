@@ -30,7 +30,7 @@ v6 is a reactive TypeScript ecosystem designed so that **an LLM agent is a first
 
 ## Ecosystem map
 
-6 layers, 23 packages. Know them by role, not by name:
+6 layers, 22 packages. Know them by role, not by name:
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -60,7 +60,6 @@ v6 is a reactive TypeScript ecosystem designed so that **an LLM agent is a first
 │                     @alaq/datastruct             │  data structures
 │                     @alaq/queue                  │  reactive job scheduler
 │                     @alaq/deep-state             │  deep reactivity
-│                     @alaq/ws                     │  WebSocket client
 │                     @alaq/xstate                 │  XState integration
 └──────────────────────────────────────────────────┘
 ```
@@ -85,6 +84,11 @@ This is not a slogan — it is a physical property of the stack. MCP server, mac
 
 ### 5. Scopes, not singletons
 `@scope(name: "room")` — one instance per named scope. Client subscribes to `room/<id>`, server routes. You get a **slice** of state, not the whole object.
+
+**Boundaries (normative, see `packages/graph/SPEC.md §7.5`):**
+- **Scope is single-axis by design.** A record opts into exactly one scope. Multi-axis data slicing (e.g. `channel × region × user`) is not expressed by stacking `@scope`; the primary axis is the scope, the rest are plain `input` arguments plus server-side filtering in the handler. If you feel the urge to write `@scope(channel, admin)`, the answer is no — pick the primary axis, push the others into arguments.
+- **Auth is not scope.** `@scope` controls reactive slicing and lifecycle, never authorization. Authentication and authorization live at the **transport layer** — HTTP middleware for `graph-axum`, Tauri capabilities / command-level checks for `graph-tauri-rs`, per-topic ACL at the runtime for `graph-zenoh`. SDL does not describe auth. Actions without `scope` are the valid shape for admin mutations; the generator config or middleware decides who may call them.
+- **Transport is not scope.** Whether an action travels over HTTP, Tauri IPC, or Zenoh is decided by **which generator consumes the IR**, not by `@scope`. See the out-of-scope list in `SPEC.md §17`.
 
 ### 6. Tier-based transport
 T0: ws+http. T1: +webrtc. T2: +zenoh. T3: zenoh-wasm. Tree-shaking is the enforcement mechanism. You go up tiers by requirement, not by habit.

@@ -1,4 +1,4 @@
-export type TokenKind = 'KEYWORD' | 'IDENTIFIER' | 'STRING_LIT' | 'INT_LIT' | 'FLOAT_LIT' | 'BOOL_LIT' | 'LBRACE' | 'RBRACE' | 'LBRACKET' | 'RBRACKET' | 'LPAREN' | 'RPAREN' | 'LT' | 'GT' | 'COLON' | 'COMMA' | 'BANG' | 'EQ' | 'AT' | 'EOF';
+export type TokenKind = 'KEYWORD' | 'IDENTIFIER' | 'STRING_LIT' | 'INT_LIT' | 'FLOAT_LIT' | 'BOOL_LIT' | 'LBRACE' | 'RBRACE' | 'LBRACKET' | 'RBRACKET' | 'LPAREN' | 'RPAREN' | 'LT' | 'GT' | 'COLON' | 'COMMA' | 'BANG' | 'EQ' | 'AT' | 'COMMENT' | 'EOF';
 export interface Token {
     kind: TokenKind;
     value: string;
@@ -76,12 +76,17 @@ export interface RecordNode {
     directives: DirectiveNode[];
     fields: FieldNode[];
     loc: SourceLoc;
+    /** v0.3.2 (additive): `#`-comments on consecutive lines directly before
+     *  the keyword, in source order. Absent (not `[]`) when none attached. */
+    leadingComments?: string[];
 }
 export interface ExtendRecordNode {
     kind: 'extend';
     name: string;
     fields: FieldNode[];
     loc: SourceLoc;
+    /** v0.3.2 (additive): see RecordNode.leadingComments. */
+    leadingComments?: string[];
 }
 export interface ActionNode {
     kind: 'action';
@@ -90,17 +95,23 @@ export interface ActionNode {
     input: FieldNode[] | null;
     output: TypeExprNode | null;
     loc: SourceLoc;
+    /** v0.3.2 (additive): see RecordNode.leadingComments. */
+    leadingComments?: string[];
 }
 export interface EnumNode {
     kind: 'enum';
     name: string;
     values: string[];
     loc: SourceLoc;
+    /** v0.3.2 (additive): see RecordNode.leadingComments. */
+    leadingComments?: string[];
 }
 export interface ScalarNode {
     kind: 'scalar';
     name: string;
     loc: SourceLoc;
+    /** v0.3.2 (additive): see RecordNode.leadingComments. */
+    leadingComments?: string[];
 }
 export interface OpaqueNode {
     kind: 'opaque';
@@ -108,6 +119,8 @@ export interface OpaqueNode {
     qos: string;
     maxSize: number | null;
     loc: SourceLoc;
+    /** v0.3.2 (additive): see RecordNode.leadingComments. */
+    leadingComments?: string[];
 }
 export type Definition = RecordNode | ExtendRecordNode | ActionNode | EnumNode | ScalarNode | OpaqueNode;
 export interface UseDeclNode {
@@ -174,6 +187,11 @@ export interface IRRecord {
     directives?: IRDirective[];
     scope?: string | null;
     topic?: string | null;
+    /** v0.3.2 (additive): raw `#`-comment lines immediately preceding the
+     *  declaration, leading `#` + one optional space stripped. Absent when
+     *  no leading comments were attached. Generator extension point — no
+     *  built-in semantics. */
+    leadingComments?: string[];
 }
 export interface IRAction {
     name: string;
@@ -181,19 +199,36 @@ export interface IRAction {
     input?: IRField[];
     output?: string | null;
     outputRequired?: boolean;
+    /** v0.3.1 (additive): true when `output` is a list type `[T]` / `[T!]` /
+     *  `[T]!` / `[T!]!`. Absent (or `false`) means scalar output. Generators
+     *  needing to emit `Vec<T>` / `T[]` for action results MUST consult this
+     *  flag — `output` alone is just the element's base type. */
+    outputList?: boolean;
+    /** v0.3.1 (additive): true when `output` is a list AND the list's element
+     *  type carries `!` (i.e. `[T!]` or `[T!]!`). Meaningful only when
+     *  `outputList === true`. */
+    outputListItemRequired?: boolean;
     directives?: IRDirective[];
+    /** v0.3.2 (additive): see IRRecord.leadingComments. */
+    leadingComments?: string[];
 }
 export interface IREnum {
     name: string;
     values: string[];
+    /** v0.3.2 (additive): see IRRecord.leadingComments. */
+    leadingComments?: string[];
 }
 export interface IRScalar {
     name: string;
+    /** v0.3.2 (additive): see IRRecord.leadingComments. */
+    leadingComments?: string[];
 }
 export interface IROpaque {
     name: string;
     qos: string;
     maxSize?: number;
+    /** v0.3.2 (additive): see IRRecord.leadingComments. */
+    leadingComments?: string[];
 }
 export interface IRSchema {
     name: string;

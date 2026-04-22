@@ -102,6 +102,15 @@ const DEFAULTS: Required<Omit<GenerateOptions, 'namespace'>> = {
 }
 
 /**
+ * v0.3.4 (W8), tightened v0.3.5 (C7): transport kinds this generator emits
+ * code for. `graph-link-state` sits on top of a WebSocket/HTTP-style
+ * runtime; classified as `"http"` for the intent-check purposes of SPEC
+ * §7.14. `"any"` is always compatible per R222. Schemas without `@transport`
+ * are treated as `"any"` and suppress the check.
+ */
+const SUPPORTED_TRANSPORTS: ReadonlyArray<string> = ['http', 'any']
+
+/**
  * Transform an IR into TypeScript source files. Pure function: no FS,
  * no network, deterministic for a given IR + options. The caller decides
  * where to write `files[*].path`.
@@ -125,6 +134,20 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
       continue
     }
 
+    // v0.3.4 (W8), tightened v0.3.5 (C7): E025 on @transport mismatch —
+    // generator refuses emission (SPEC §7.14 R221/R224). Unset / "any"
+    // suppress per R222.
+    if (schema.transport && !SUPPORTED_TRANSPORTS.includes(schema.transport)) {
+      diagnostics.push({
+        severity: 'error',
+        message:
+          `schema "${schema.namespace}" declares @transport(kind: "${schema.transport}") ` +
+          `which is outside @alaq/graph-link-state supported transports [${SUPPORTED_TRANSPORTS.join(', ')}]; ` +
+          `generation refused (E025). Set @transport(kind: "any") or omit the directive to opt out.`,
+      })
+      return { files: [], diagnostics }
+    }
+
     const content = generateNamespace(schema, opts, diagnostics)
     // Namespaces like "core.identity" contain dots; Windows and bundlers
     // handle them fine, but keep one output file per namespace.
@@ -133,6 +156,9 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
 
   return { files, diagnostics }
 }
+
+/** v0.3.4 (W8): exported so tests/tooling can read the supported set. */
+export { SUPPORTED_TRANSPORTS }
 
 // ────────────────────────────────────────────────────────────────
 // Namespace emitter

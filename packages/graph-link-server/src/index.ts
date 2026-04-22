@@ -84,6 +84,15 @@ const DEFAULTS: Required<Omit<GenerateOptions, 'namespace' | 'fileName'>> = {
 }
 
 /**
+ * v0.3.4 (W8), tightened v0.3.5 (C7): transport kinds this generator emits
+ * code for. The server side of `@alaq/link/server` speaks over HTTP/WebSocket;
+ * classified as `"http"` for the intent-check purposes of SPEC §7.14.
+ * `"any"` is always compatible per R222; schemas without `@transport` are
+ * treated as `"any"` and suppress the check.
+ */
+const SUPPORTED_TRANSPORTS: ReadonlyArray<string> = ['http', 'any']
+
+/**
  * Transform an IR into server-side TypeScript. Pure function — no FS, no
  * network, deterministic for a given IR + options.
  */
@@ -106,6 +115,20 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
       continue
     }
 
+    // v0.3.4 (W8), tightened v0.3.5 (C7): E025 on @transport mismatch —
+    // generator refuses emission, returns files: [] + error diagnostic
+    // (SPEC §7.14 R221/R224). Unset / "any" suppress the check per R222.
+    if (schema.transport && !SUPPORTED_TRANSPORTS.includes(schema.transport)) {
+      diagnostics.push({
+        severity: 'error',
+        message:
+          `schema "${schema.namespace}" declares @transport(kind: "${schema.transport}") ` +
+          `which is outside @alaq/graph-link-server supported transports [${SUPPORTED_TRANSPORTS.join(', ')}]; ` +
+          `generation refused (E025). Set @transport(kind: "any") or omit the directive to opt out.`,
+      })
+      return { files: [], diagnostics }
+    }
+
     const content = generateNamespace(schema, opts, diagnostics)
     const path = options.fileName ?? `${ns}.server.generated.ts`
     files.push({ path, content })
@@ -113,6 +136,9 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
 
   return { files, diagnostics }
 }
+
+/** v0.3.4 (W8): exported so tests/tooling can read the supported set. */
+export { SUPPORTED_TRANSPORTS }
 
 function generateNamespace(
   schema: IRSchema,

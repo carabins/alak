@@ -57,10 +57,29 @@ describe('lexer', () => {
     ])
   })
 
-  test('comments are skipped', () => {
+  // v0.3.2 — comments are no longer dropped in the lexer; they are emitted
+  // as COMMENT tokens so the parser can optionally harvest them as
+  // `leadingComments` on top-level definitions (R001 remains: they are
+  // still not part of the parse tree for structural purposes).
+  test('comments emit COMMENT tokens with trimmed body', () => {
     const { tokens, diagnostics } = lex('# line comment\nrecord X')
     expect(diagnostics).toEqual([])
-    expect(tokens.map(t => t.value).slice(0, -1)).toEqual(['record', 'X'])
+    expect(tokens.map(t => t.kind).slice(0, -1)).toEqual(['COMMENT', 'KEYWORD', 'IDENTIFIER'])
+    expect(tokens[0]!.value).toBe('line comment') // leading '#' and one space stripped
+    expect(tokens[0]!.line).toBe(1)
+    expect(tokens[1]!.value).toBe('record')
+  })
+
+  test('comment without leading space keeps full body', () => {
+    const { tokens } = lex('#no-space')
+    expect(tokens[0]!.kind).toBe('COMMENT')
+    expect(tokens[0]!.value).toBe('no-space')
+  })
+
+  test('comment trailing whitespace is trimmed', () => {
+    const { tokens } = lex('# body with trailing   \t\r\nrecord X')
+    expect(tokens[0]!.kind).toBe('COMMENT')
+    expect(tokens[0]!.value).toBe('body with trailing')
   })
 
   test('line/column tracking', () => {
