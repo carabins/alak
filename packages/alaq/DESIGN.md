@@ -204,7 +204,9 @@ Stanza (JSON, default):
 }
 ```
 
-`env.LOGI_ENDPOINT` is written with the default value. `alaq mcp install` does not probe the network to auto-fill it; silent modification of config is riskier than a one-line edit by the user. `command: "npx"` is the default because it works across Node and Bun installs; override with `--command bun` if a Bun-only stanza is preferred.
+`env.LOGI_ENDPOINT` is written with the default value. `alaq mcp install` does not probe the network to auto-fill it; silent modification of config is riskier than a one-line edit by the user.
+
+**`npx` and `bunx` are equal.** The default `command` is `"npx"` because it is the more common entry on fresh machines; the Bun equivalent `"bunx"` is produced by `--command bunx`. Both launch the same CLI and route through the same launcher (§3.5.1) — the choice is a match to how the user's MCP client spawns subprocesses, not a preference of `alaq`. If documentation ever suggests one runtime is canonical, that is a bug (see [`../../AI_FIRST.md`](../../AI_FIRST.md) §"Runtime parity").
 
 `--format toml` and `--format yaml` emit the equivalent structure. `--write <path>` merges into the given file atomically (temp + rename), preserving unknown keys; an existing `alaq` entry is kept unless `--force`. With `--dry-run`, the merged result is printed to stdout instead of written.
 

@@ -4,22 +4,28 @@ import { generate } from '../src'
 describe('HttpCodegen (Rust)', () => {
   it('1. generates correct Rust code from IR', () => {
     const ir: any = {
-      namespaces: [{
-        name: 'test.ns',
-        enums: [{ name: 'Status', variants: ['Active', 'Idle'] }],
-        records: [{
-          name: 'User',
-          fields: [
-            { name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true },
-            { name: 'meta', type: { kind: 'Scalar', name: 'String' }, required: false }
-          ]
-        }],
-        actions: [{
-          name: 'GetUser',
-          input: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }],
-          output: { kind: 'Record', name: 'User' }
-        }]
-      }]
+      schemas: {
+        'test.ns': {
+          namespace: 'test.ns',
+          enums: { 'Status': { name: 'Status', values: ['Active', 'Idle'] } },
+          records: {
+            'User': {
+              name: 'User',
+              fields: [
+                { name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true },
+                { name: 'meta', type: { kind: 'Scalar', name: 'String' }, required: false }
+              ]
+            }
+          },
+          actions: {
+            'GetUser': {
+              name: 'GetUser',
+              input: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }],
+              output: { kind: 'Record', name: 'User' } as any
+            }
+          }
+        }
+      }
     }
 
     const { files } = generate(ir)

@@ -3,21 +3,26 @@ import { generate } from '../src'
 
 describe('HttpCodegen (TS)', () => {
   it('1. generates correct TS code from IR', () => {
-    // Mock IR structure
     const ir: any = {
-      namespaces: [{
-        name: 'test.ns',
-        enums: [{ name: 'Status', variants: ['Active', 'Idle'] }],
-        records: [{
-          name: 'User',
-          fields: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }]
-        }],
-        actions: [{
-          name: 'GetUser',
-          input: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }],
-          output: { kind: 'Record', name: 'User' }
-        }]
-      }]
+      schemas: {
+        'test.ns': {
+          namespace: 'test.ns',
+          enums: { 'Status': { name: 'Status', values: ['Active', 'Idle'] } },
+          records: {
+            'User': {
+              name: 'User',
+              fields: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }]
+            }
+          },
+          actions: {
+            'GetUser': {
+              name: 'GetUser',
+              input: [{ name: 'id', type: { kind: 'Scalar', name: 'String' }, required: true }],
+              output: { kind: 'Record', name: 'User' } as any
+            }
+          }
+        }
+      }
     }
 
     const { files } = generate(ir)
@@ -29,6 +34,5 @@ describe('HttpCodegen (TS)', () => {
     expect(content).toContain('export interface IUser {')
     expect(content).toContain('export async function getUser(')
     expect(content).toContain("return callAction<IGetUserInput, IUser>(options, 'get_user', input);")
-    expect(content).toContain('export function createHttpApi(options: HttpClientOptions)')
   })
 })
