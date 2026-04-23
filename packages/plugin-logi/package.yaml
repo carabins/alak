@@ -3,18 +3,6 @@ version: 6.0.0-alpha.0
 description: "Logi observability plugin for Nucl and Atom — streams state
   mutations, actions, and errors to a self-hosted Logi endpoint. AI-first:
   fingerprints, traces, and release/reload tracking built-in."
-license: Apache-2.0
-author: Gleb Panteleev <panteleew@gleb.pw>
-homepage: https://github.com/carabins/alak/tree/master/packages/plugin-logi
-repository:
-  type: git
-  url: git+https://github.com/carabins/alak.git
-  directory: packages/plugin-logi
-bugs:
-  url: https://github.com/carabins/alak/issues
-engines:
-  bun: ">=1.3.0"
-  node: ">=20"
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
@@ -38,8 +26,5 @@ devDependencies:
   "@logi/browser": file:../../../logi/packages/logi-js
 peerDependencies:
   "@logi/browser": ^0.1.0
-peerDependenciesMeta:
-  "@logi/browser":
-    optional: true
 publishConfig:
   access: public

@@ -34,10 +34,12 @@ export class PackageJsonGenerator {
     const metaFields = ['name', 'version', 'description'] as const
     metaFields.forEach(f => { if (src[f]) pkg[f] = src[f] })
 
-    // Source package.yaml wins. Root package.json is a fallback for fields the
-    // source pkg doesn't declare (saves duplicating license/repo/author across
-    // every workspace member that inherits them).
-    const inheritable = ['license', 'repository', 'author', 'homepage', 'bugs', 'keywords'] as const
+    // Force ESM and Distribution License
+    pkg.type = 'module'
+    pkg.license = 'Apache-2.0'
+
+    // Source package.yaml wins. Root package.json is a fallback...
+    const inheritable = ['repository', 'author', 'homepage', 'bugs', 'keywords'] as const
     inheritable.forEach(f => {
       if (src[f] !== undefined) pkg[f] = src[f]
       else if (root[f] !== undefined) pkg[f] = root[f]

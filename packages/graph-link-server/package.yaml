@@ -1,25 +1,12 @@
 name: "@alaq/graph-link-server"
-version: "6.0.0-alpha.0"
-description: "@alaq/graph generator: emits typed ActionHandlers interface + dispatcher wiring createLinkServer.onAction."
-license: Apache-2.0
-author: "Gleb Panteleev <panteleew@gleb.pw>"
-homepage: https://github.com/carabins/alak/tree/master/packages/graph-link-server
-repository:
-  type: git
-  url: git+https://github.com/carabins/alak.git
-  directory: packages/graph-link-server
-bugs:
-  url: https://github.com/carabins/alak/issues
-engines:
-  bun: ">=1.3.0"
-  node: ">=20"
+version: 6.0.0-alpha.0
+description: "@alaq/graph generator: emits typed ActionHandlers interface +
+  dispatcher wiring createLinkServer.onAction."
 type: module
 main: ./src/index.ts
 types: ./dist/index.d.ts
 scripts:
   build:types: tsc -p tsconfig.build.json
-dependencies:
-  "@alaq/graph": "6.0.0-alpha.0"
 keywords:
   - alaq
   - graph
@@ -27,5 +14,7 @@ keywords:
   - link-server
   - action-dispatcher
   - codegen
+dependencies:
+  "@alaq/graph": 6.0.0-alpha.0
 publishConfig:
   access: public

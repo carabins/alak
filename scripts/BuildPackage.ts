@@ -50,7 +50,7 @@ export class BuildPackage {
   }
 
   savePackageJsonToSource(): void {
-    const clean = pick(this.packageJson, 'name', 'version', 'description', 'keywords')
+    const clean = pick(this.packageJson, 'name', 'version', 'description', 'bin', 'scripts', 'keywords', 'dependencies', 'devDependencies', 'peerDependencies', 'publishConfig')
     const srcPath = path.resolve(this.packagePath, Const.PK_JSON)
     fs.writeFileSync(srcPath, YAML.stringify(clean))
   }
