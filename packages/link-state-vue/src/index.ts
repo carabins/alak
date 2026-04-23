@@ -9,8 +9,11 @@
  * Plus a provide/inject pair for sharing a SyncStore across a component tree:
  *   - provideStore(store)
  *   - useStore()
+ *
+ * For extreme DX, see magic.ts (global proxy-less reactivity).
  */
 
 export { useNode, useNodeWithDefault, toRefNoScope } from './use-node'
 export { provideStore, useStore, SYNC_STORE_KEY } from './use-store'
-export type { UseNodeOptions, ScopedNodeRef, Ref, ISyncNode } from './types'
+export { VueNuclearPlugin, setupMagicVue } from './magic'
+export type { ScopedNodeRef, Ref, ISyncNode } from './types'
