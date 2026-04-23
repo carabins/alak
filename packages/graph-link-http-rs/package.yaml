@@ -1,0 +1,14 @@
+name: "@alaq/graph-link-http-rs"
+version: 6.0.0-alpha.0
+description: "Generator: compiles .aql IR into Rust HTTP client wrappers"
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
+dependencies:
+  "@alaq/graph": 6.0.0-alpha.0
+devDependencies:
+  typescript: latest
+publishConfig:
+  access: public

@@ -1,0 +1,13 @@
+name: "@alaq/link-http-client"
+version: 6.0.0-alpha.0
+description: Lightweight HTTP client for Alaq actions
+type: module
+main: ./src/index.ts
+types: ./dist/index.d.ts
+scripts:
+  build:types: tsc -p tsconfig.build.json
+dependencies: {}
+devDependencies:
+  typescript: latest
+publishConfig:
+  access: public
