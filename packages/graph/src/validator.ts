@@ -21,11 +21,17 @@ import type {
   Value,
 } from './types'
 import { diag, MSG } from './errors'
-import { DIRECTIVE_SIGS } from './ir'
+import { DIRECTIVE_SIGS, argType, argEnumValues, argRequiredIf } from './ir'
+import type { Site } from './ir'
 
 const BUILTIN_SCALARS = new Set([
-  'ID', 'String', 'Int', 'Float', 'Boolean',
+  'ID', 'String', 'Int', 'Float', 'Float32', 'Boolean',
   'Timestamp', 'UUID', 'Bytes', 'Duration',
+  // v0.3.6 — `Any` is a runtime-typed opaque CBOR value. E009 treats it as a
+  // valid type; E026 (below) enforces positional constraints (permitted only
+  // as a record field type or a Map<K, Any> value; forbidden in action
+  // input/output, event fields, list elements, and map keys).
+  'Any',
 ])
 
 const KNOWN_DIRECTIVES = new Set(Object.keys(DIRECTIVE_SIGS))
@@ -71,7 +77,12 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
       // through DIRECTIVE_SIGS.transport.enumValues (yields E003 on mismatch).
       if (ast.schema.directives) {
         for (const d of ast.schema.directives) {
-          validateDirective(d, out, 'record', ast.schema.name)
+          // Site override: schema-level directives are at SCHEMA. Without
+          // the override the centralised site check would treat them as
+          // RECORD-level (the validator's `_target` enum still says
+          // `'record'` for legacy reasons) and erroneously fire E029 for
+          // `@transport`, `@crdt_doc_topic`, `@schema_version`.
+          validateDirective(d, out, 'record', ast.schema.name, 'SCHEMA')
         }
       }
     }
@@ -223,6 +234,19 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
       }
     }
 
+    // ── v0.3.7: Enum-level directives. Currently only `@rename_case`
+    // is valid at this placement; other directives fall through to
+    // E001 / E003 / E023 via validateDirective.
+    if (ast) {
+      for (const def of ast.definitions) {
+        if (def.kind !== 'enum') continue
+        if (!def.directives) continue
+        for (const d of def.directives) {
+          validateDirective(d, out, 'enum', def.name)
+        }
+      }
+    }
+
     // ── Events (v0.3.4 / W9)
     //
     // Events share IRRecord's shape but live at `schema.events`. We run the
@@ -239,12 +263,13 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
 
       // Event-level directives — allow @topic / @deprecated / @added; reject
       // @scope explicitly via E024 since events are broadcast and not scoped.
+      // v0.3.7: target='event' so `@rename_case` on an event fires E028.
       for (const d of evNode.directives) {
         if (d.name === 'scope') {
           out.push(diag('E024', MSG.E024(evName), d.loc))
           continue
         }
-        validateDirective(d, out, 'record', evName)
+        validateDirective(d, out, 'event', evName)
       }
 
       // E010-style: duplicate field names inside the event body.
@@ -258,9 +283,13 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
       }
 
       // Field-level validation — reuse the record pass; events ride the same
-      // type system (SPEC §5.5).
+      // type system (SPEC §5.5). v0.3.6: `Any` is forbidden in event fields
+      // (SPEC §4.1), so topLevelAnyAllowed=false here — a bare `Any` at field
+      // position fires E026.
       for (const f of evNode.fields) {
-        validateField(f, evName, out, definedTypes, schema.enums, keySafeTypes)
+        validateField(
+          f, evName, out, definedTypes, schema.enums, keySafeTypes, false,
+        )
       }
     }
 
@@ -285,11 +314,27 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
           }
           // Argument type resolution
           checkTypeRef(arg.type, out, definedTypes, keySafeTypes)
+          // E026 (v0.3.6): `Any` forbidden in action input — action contracts
+          // must stay typed. topLevel=false flags a bare `Any` at argument
+          // position; the helper recurses for list/map cases.
+          checkAnyPlacement(
+            arg.type,
+            `an action input argument (${actName}.${arg.name})`,
+            false,
+            out,
+          )
         }
       }
       // Output type resolution
       if (actNode.output) {
         checkTypeRef(actNode.output, out, definedTypes, keySafeTypes)
+        // E026 (v0.3.6): `Any` forbidden as action output.
+        checkAnyPlacement(
+          actNode.output,
+          `an action output type (${actName})`,
+          false,
+          out,
+        )
       }
 
       // E019: scope declared but no scoped records of that scope.
@@ -305,6 +350,15 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
         }
       }
     }
+
+    // ── v0.3.6: composite CRDT document consistency (E027).
+    // Covers SPEC §7.15 / §7.16 / §7.17. Collects all `@crdt_doc_topic` and
+    // `@schema_version` at the schema level, all `@crdt_doc_member` on
+    // records, then cross-checks: every member needs a matching topic, every
+    // topic needs ≥1 member, members sharing a `doc:` cannot collide on the
+    // `map:` slot or carry `@scope`, every `@schema_version` needs a matching
+    // topic.
+    if (ast) validateCompositeDocs(ast, schema, out)
 
     // ── Opaques
     for (const opName of Object.keys(schema.opaques)) {
@@ -333,9 +387,19 @@ function validateField(
   definedTypes: Set<string>,
   enums: Record<string, { values: string[] }>,
   keySafeTypes: Set<string>,
+  // v0.3.6 (E026): record and event fields are permitted hosts for `Any` at
+  // their outermost position. `topLevelAnyAllowed: false` is used when the
+  // same validator is driven from a forbidden host (action input/output,
+  // currently handled inline at the call site — kept as a parameter so that
+  // future forbidden hosts route through here cleanly).
+  topLevelAnyAllowed: boolean = true,
 ) {
   // E009: referenced type exists (also drives E022 for map keys)
   checkTypeRef(f.type, out, definedTypes, keySafeTypes)
+  // E026 (v0.3.6): `Any` placement. The outermost type is a permitted host
+  // (record field / event field); recursion still fires for list elements
+  // and map keys.
+  checkAnyPlacement(f.type, `field "${recordName}.${f.name}"`, topLevelAnyAllowed, out)
 
   // Per-field directives
   let hasSync = false
@@ -395,11 +459,42 @@ function validateField(
   }
 }
 
+/** Map the validator's per-call `target` enum to the canonical `Site` enum
+ *  declared on every directive signature. The mapping is intentionally lossy
+ *  for `RECORD` (the validator currently passes `'record'` for both real
+ *  records and schema-level directive checks); callers that need a finer
+ *  site discrimination — e.g. `'SCHEMA'` for schema-level placements —
+ *  pass it via `siteOverride`. */
+function targetToSite(t: 'record' | 'field' | 'argument' | 'enum' | 'event'): Site {
+  switch (t) {
+    case 'record':   return 'RECORD'
+    case 'field':    return 'FIELD'
+    case 'argument': return 'ARGUMENT'
+    case 'enum':     return 'ENUM'
+    case 'event':    return 'EVENT'
+  }
+}
+
+function siteLabel(s: Site): string {
+  switch (s) {
+    case 'SCHEMA':     return 'a schema'
+    case 'RECORD':     return 'a record'
+    case 'FIELD':      return 'a field'
+    case 'ENUM':       return 'an enum'
+    case 'ENUM_VALUE': return 'an enum value'
+    case 'ARGUMENT':   return 'an action argument'
+    case 'EVENT':      return 'an event'
+    case 'ACTION':     return 'an action'
+    case 'OPAQUE':     return 'an opaque stream'
+  }
+}
+
 function validateDirective(
   d: DirectiveNode,
   out: Diagnostic[],
-  _target: 'record' | 'field' | 'argument',
+  _target: 'record' | 'field' | 'argument' | 'enum' | 'event',
   _context: string,
+  siteOverride?: Site,
 ) {
   // E001: unknown directive
   if (!KNOWN_DIRECTIVES.has(d.name)) {
@@ -408,18 +503,76 @@ function validateDirective(
   }
   const sig = DIRECTIVE_SIGS[d.name]!
 
-  // E023: required arguments missing. Emitted once per missing arg at the
-  // directive's source location (not the arg's — the arg doesn't exist).
-  // SPEC §7.11/§7.12 etc. declare `!` on certain args; this closes the gap
-  // noted in stress.md О19. The `@crdt(key)`-for-LWW_* case is covered by
-  // E004 (context-sensitive requirement) and not repeated here.
+  // v0.3.7 — E028: `@rename_case` is only valid on RECORD | ENUM. Other
+  // placements (field, argument, event) fire E028 at the directive site.
+  // Event-level `@rename_case` is reserved for a future spec bump.
+  // The centralised site check below would also catch this case, but E028
+  // keeps a tailored message ("a field" vs the generic "@X not valid on …")
+  // and is referenced by the SPEC §12 catalog, so it stays.
+  if (d.name === 'rename_case' && _target !== 'record' && _target !== 'enum') {
+    const where = _target === 'argument' ? 'an action argument'
+                : _target === 'event'    ? 'an event'
+                                         : `a ${_target}`
+    out.push(diag('E028', MSG.E028(where), d.loc))
+    // Still run arg-shape checks below so E003/E023 surface alongside E028.
+  }
+
+  // DRIFT-2 (Wave 3A): centralised site check. Each directive declares its
+  // permitted Sites in `DIRECTIVE_SIGS.<name>.sites`. When a directive turns
+  // up at an unsupported site, emit E029 — generic "directive not valid
+  // here". E028 / E006 / E024 keep their tailored messages and fire
+  // alongside (catalog-referenced); the central check is a fall-back so that
+  // every new directive added to DIRECTIVE_SIGS automatically gets site
+  // validation without bespoke validator code.
+  if (sig.sites && sig.sites.length > 0) {
+    const site: Site = siteOverride ?? targetToSite(_target)
+    if (!sig.sites.includes(site)) {
+      // Skip the redundant E029 when one of the legacy bespoke errors
+      // (E028 / E006 / E024) has already fired at this site for this
+      // directive — those carry a more specific message.
+      const suppressed =
+        (d.name === 'rename_case' && site !== 'RECORD' && site !== 'ENUM') ||
+        (d.name === 'this' && site !== 'ARGUMENT') /* E006 path (separate
+          check at action-input level) */
+      if (!suppressed) {
+        out.push(diag('E029', MSG.E029(d.name, site, sig.sites), d.loc))
+      }
+    }
+  }
+
+  // E023: required arguments missing. Two sources: signature-level `required`
+  // (§7 args declared with `!`) and per-arg `requiredIf` predicates (e.g.
+  // `@crdt.key` is required iff `@crdt.type` is `LWW_*` — DRIFT-3). The
+  // `@crdt(key)`-for-LWW_* case keeps its tailored E004 message; the
+  // centralised E023 from `requiredIf` is suppressed for that exact case
+  // to avoid double-reporting. Future LWW_* additions would trip the
+  // generic predicate path automatically.
+  const present = new Set(d.args.map(a => a.name))
   if (sig.required) {
-    const present = new Set(d.args.map(a => a.name))
     for (const req of sig.required) {
       if (!present.has(req)) {
         out.push(diag('E023', MSG.E023(d.name, req), d.loc))
       }
     }
+  }
+  // Materialise the args as a plain record once for `requiredIf` predicates.
+  const argMap: Record<string, unknown> = {}
+  for (const a of d.args) {
+    if (a.value.kind === 'string') argMap[a.name] = a.value.value
+    else if (a.value.kind === 'int') argMap[a.name] = a.value.value
+    else if (a.value.kind === 'float') argMap[a.name] = a.value.value
+    else if (a.value.kind === 'bool') argMap[a.name] = a.value.value
+    else if (a.value.kind === 'enum') argMap[a.name] = a.value.value
+    else argMap[a.name] = undefined
+  }
+  for (const argName of Object.keys(sig.args)) {
+    const pred = argRequiredIf(sig, argName)
+    if (!pred) continue
+    if (present.has(argName)) continue
+    if (!pred(argMap)) continue
+    // DRIFT-3: `@crdt(key)`-for-LWW_* keeps its tailored E004 message.
+    if (d.name === 'crdt' && argName === 'key') continue
+    out.push(diag('E023', MSG.E023(d.name, argName), d.loc))
   }
 
   for (const a of d.args) {
@@ -429,24 +582,28 @@ function validateDirective(
       continue
     }
     // E003: wrong type
-    const expected = sig.args[a.name]!
+    const expected = argType(sig.args[a.name]!)
     if (!matchesType(a.value, expected)) {
       out.push(diag('E003', MSG.E003(d.name, a.name, expected), a.loc))
       continue
     }
-    // Enum value membership
-    if (expected === 'enum' && a.value.kind === 'enum' && sig.enumValues?.[a.name]) {
-      if (!sig.enumValues[a.name]!.includes(a.value.value)) {
-        out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${sig.enumValues[a.name]!.join(', ')}]`), a.loc))
+    // Enum value membership — checks the canonical closed set whether it
+    // was declared at signature level (legacy `enumValues`) or per-arg
+    // (`ArgSpec.enumValues`). Source of truth: `argEnumValues()`.
+    const closedSet = argEnumValues(sig, a.name)
+    if (expected === 'enum' && a.value.kind === 'enum' && closedSet) {
+      if (!closedSet.includes(a.value.value)) {
+        out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${closedSet.join(', ')}]`), a.loc))
       }
     }
-    // v0.3.4 (W8): closed-set string membership. For `@transport(kind: "...")`
-    // and any future directive that declares a string-typed arg with a closed
-    // set via `enumValues`, enforce membership on the string value. Mirrors
-    // the 'enum'-typed variant above but for string literals.
-    if (expected === 'string' && a.value.kind === 'string' && sig.enumValues?.[a.name]) {
-      if (!sig.enumValues[a.name]!.includes(a.value.value)) {
-        out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${sig.enumValues[a.name]!.map(s => `"${s}"`).join(', ')}]`), a.loc))
+    // DRIFT-1: closed-set string membership. For `@transport(kind: "...")`,
+    // `@auth(read: "...")`, `@auth(write: "...")`, and any future directive
+    // that declares a string-typed arg with a closed set, enforce membership
+    // on the string value. Mirrors the `'enum'`-typed variant above but for
+    // string literals.
+    if (expected === 'string' && a.value.kind === 'string' && closedSet) {
+      if (!closedSet.includes(a.value.value)) {
+        out.push(diag('E003', MSG.E003(d.name, a.name, `one of [${closedSet.map(s => `"${s}"`).join(', ')}]`), a.loc))
       }
     }
   }
@@ -455,14 +612,23 @@ function validateDirective(
   // error code in §12, so we do not emit anything here).
 }
 
-function matchesType(v: Value, expected: 'string' | 'int' | 'float' | 'bool' | 'enum' | 'any' | 'list'): boolean {
+function matchesType(
+  v: Value,
+  expected: 'string' | 'int' | 'float' | 'number' | 'bool' | 'enum' | 'any' | 'list' | 'object',
+): boolean {
   switch (expected) {
     case 'string': return v.kind === 'string'
     case 'int':    return v.kind === 'int'
     case 'float':  return v.kind === 'float' || v.kind === 'int'
+    // DRIFT-4 (Wave 3A): explicit numeric tag for `@range.min/max`. Accepts
+    // either int or float literals; per-field type compatibility (R180)
+    // remains a separate E015 check.
+    case 'number': return v.kind === 'int' || v.kind === 'float'
     case 'bool':   return v.kind === 'bool'
     case 'enum':   return v.kind === 'enum'
     case 'list':   return v.kind === 'list'
+    // v0.3.7 — object-literal arg (e.g. `soft_delete: { ... }`).
+    case 'object': return v.kind === 'object'
     case 'any':    return true
   }
 }
@@ -509,8 +675,9 @@ function checkDefaultValue(
       if (v.kind !== 'int') out.push(diag('E013', MSG.E013(f.name, baseName), v.loc))
       break
     case 'Float':
+    case 'Float32':
       if (v.kind !== 'int' && v.kind !== 'float') {
-        out.push(diag('E013', MSG.E013(f.name, 'Float'), v.loc))
+        out.push(diag('E013', MSG.E013(f.name, baseName), v.loc))
       }
       break
     case 'Boolean':
@@ -584,5 +751,315 @@ function describeType(t: TypeExprNode): string {
 
 function isNumeric(t: TypeExprNode): boolean {
   if (t.list) return false
-  return t.name === 'Int' || t.name === 'Float' || t.name === 'Duration' || t.name === 'Timestamp'
+  return t.name === 'Int' || t.name === 'Float' || t.name === 'Float32' || t.name === 'Duration' || t.name === 'Timestamp'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v0.3.6 — composite CRDT document consistency (E027)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Covers SPEC §7.15 `@crdt_doc_member`, §7.16 `@crdt_doc_topic`, §7.17
+// `@schema_version`. Single-file scope (cross-file checks are a follow-up,
+// same boundary as E007/E008).
+
+function stringArg(d: DirectiveNode, name: string): string | null {
+  const a = d.args.find(aa => aa.name === name)
+  if (!a || a.value.kind !== 'string') return null
+  return a.value.value
+}
+
+function validateCompositeDocs(
+  ast: FileAST,
+  _schema: IR['schemas'][string],
+  out: Diagnostic[],
+): void {
+  type MemberRef = { doc: string; map: string; recName: string; dirLoc: SourceLoc }
+  const members: MemberRef[] = []
+  const memberScopeConflict: { doc: string; recName: string; dirLoc: SourceLoc }[] = []
+  const topics = new Map<string, { pattern: string; dirLoc: SourceLoc }>()
+  const duplicateTopics: { doc: string; dirLoc: SourceLoc }[] = []
+  const schemaVersions = new Map<string, { value: number; dirLoc: SourceLoc }>()
+
+  // ── Schema-level directives: collect @crdt_doc_topic and @schema_version.
+  const schemaDirs = ast.schema?.directives ?? []
+  for (const d of schemaDirs) {
+    if (d.name === 'crdt_doc_topic') {
+      const doc = stringArg(d, 'doc')
+      const pattern = stringArg(d, 'pattern')
+      if (doc === null || pattern === null) continue // arg validation emits its own diagnostic
+      if (topics.has(doc)) {
+        duplicateTopics.push({ doc, dirLoc: d.loc })
+      } else {
+        topics.set(doc, { pattern, dirLoc: d.loc })
+      }
+    } else if (d.name === 'schema_version') {
+      const doc = stringArg(d, 'doc')
+      const valArg = d.args.find(a => a.name === 'value')
+      const value = valArg && valArg.value.kind === 'int' ? valArg.value.value : null
+      if (doc === null || value === null) continue
+      // Duplicate @schema_version for same doc — report as an inconsistency.
+      if (schemaVersions.has(doc)) {
+        out.push(diag('E027', MSG.E027(doc, 'multiple @schema_version directives for the same document'), d.loc))
+      } else {
+        schemaVersions.set(doc, { value, dirLoc: d.loc })
+      }
+    }
+  }
+
+  // ── Record-level @crdt_doc_member — and co-occurrence checks.
+  for (const def of ast.definitions) {
+    if (def.kind !== 'record') continue
+    const memberDir = def.directives.find(d => d.name === 'crdt_doc_member')
+    if (!memberDir) continue
+    const doc = stringArg(memberDir, 'doc')
+    const map = stringArg(memberDir, 'map')
+    if (doc === null || map === null) continue // missing required args → E023 elsewhere
+    members.push({ doc, map, recName: def.name, dirLoc: memberDir.loc })
+
+    // R233: @crdt_doc_member and @scope are mutually exclusive.
+    const scopeDir = def.directives.find(d => d.name === 'scope')
+    if (scopeDir) {
+      memberScopeConflict.push({ doc, recName: def.name, dirLoc: scopeDir.loc })
+    }
+
+    // R230: @crdt_doc_member requires @crdt (the directive itself; LWW-vs-key
+    // consistency is already E004's job). A member without @crdt has no
+    // per-entry merge rule — flag it.
+    const crdtDir = def.directives.find(d => d.name === 'crdt')
+    if (!crdtDir) {
+      out.push(diag('E027', MSG.E027(
+        doc,
+        `record "${def.name}" carries @crdt_doc_member but no @crdt(type: LWW_MAP, key: ...)`,
+      ), memberDir.loc))
+    }
+
+    // v0.3.7 — R234: `lww_field` must name an existing record field of
+    // type `Timestamp!` or `Int!`. When both `lww_field` and `@crdt(key:)`
+    // are present they MUST name the same field.
+    const lwwFieldArg = memberDir.args.find(a => a.name === 'lww_field')
+    const lwwFieldName = lwwFieldArg && lwwFieldArg.value.kind === 'string'
+      ? lwwFieldArg.value.value : null
+    if (lwwFieldName !== null) {
+      const target = def.fields.find(f => f.name === lwwFieldName)
+      if (!target) {
+        out.push(diag('E027', MSG.E027(
+          doc,
+          `lww_field "${lwwFieldName}" does not exist on record "${def.name}"`,
+        ), lwwFieldArg!.loc))
+      } else {
+        const t = target.type
+        const isTimestampInt = !t.list && t.required && (t.name === 'Timestamp' || t.name === 'Int')
+        if (!isTimestampInt) {
+          out.push(diag('E027', MSG.E027(
+            doc,
+            `lww_field "${lwwFieldName}" on record "${def.name}" must be Timestamp! or Int!`,
+          ), lwwFieldArg!.loc))
+        }
+      }
+      if (crdtDir) {
+        const crdtKeyArg = crdtDir.args.find(a => a.name === 'key')
+        const crdtKeyName = crdtKeyArg && crdtKeyArg.value.kind === 'string'
+          ? crdtKeyArg.value.value : null
+        if (crdtKeyName !== null && crdtKeyName !== lwwFieldName) {
+          out.push(diag('E027', MSG.E027(
+            doc,
+            `lww_field "${lwwFieldName}" disagrees with @crdt(key: "${crdtKeyName}") on record "${def.name}"`,
+          ), lwwFieldArg!.loc))
+        }
+      }
+    }
+
+    // v0.3.7 — R235: `soft_delete` object shape. `flag` must name a
+    // `Boolean!` field; `ts_field` must name a `Timestamp!`/`Int!`
+    // field. Both required inside the object.
+    const softDeleteArg = memberDir.args.find(a => a.name === 'soft_delete')
+    if (softDeleteArg && softDeleteArg.value.kind === 'object') {
+      const obj = softDeleteArg.value
+      const flagField = obj.fields.find(f => f.name === 'flag')
+      const tsField = obj.fields.find(f => f.name === 'ts_field')
+      const flagName = flagField && flagField.value.kind === 'string'
+        ? flagField.value.value : null
+      const tsName = tsField && tsField.value.kind === 'string'
+        ? tsField.value.value : null
+      if (flagName === null) {
+        out.push(diag('E027', MSG.E027(
+          doc,
+          `soft_delete object on record "${def.name}" is missing the "flag" key (expected string)`,
+        ), softDeleteArg.loc))
+      } else {
+        const target = def.fields.find(f => f.name === flagName)
+        if (!target) {
+          out.push(diag('E027', MSG.E027(
+            doc,
+            `soft_delete.flag "${flagName}" does not exist on record "${def.name}"`,
+          ), flagField!.loc))
+        } else if (target.type.name !== 'Boolean' || !target.type.required || target.type.list) {
+          out.push(diag('E027', MSG.E027(
+            doc,
+            `soft_delete.flag "${flagName}" on record "${def.name}" must be Boolean!`,
+          ), flagField!.loc))
+        }
+      }
+      if (tsName === null) {
+        out.push(diag('E027', MSG.E027(
+          doc,
+          `soft_delete object on record "${def.name}" is missing the "ts_field" key (expected string)`,
+        ), softDeleteArg.loc))
+      } else {
+        const target = def.fields.find(f => f.name === tsName)
+        if (!target) {
+          out.push(diag('E027', MSG.E027(
+            doc,
+            `soft_delete.ts_field "${tsName}" does not exist on record "${def.name}"`,
+          ), tsField!.loc))
+        } else {
+          const t = target.type
+          const isTimestampInt = !t.list && t.required && (t.name === 'Timestamp' || t.name === 'Int')
+          if (!isTimestampInt) {
+            out.push(diag('E027', MSG.E027(
+              doc,
+              `soft_delete.ts_field "${tsName}" on record "${def.name}" must be Timestamp! or Int!`,
+            ), tsField!.loc))
+          }
+        }
+      }
+    }
+  }
+
+  // ── (a) Every member needs a topic.
+  for (const m of members) {
+    if (!topics.has(m.doc)) {
+      out.push(diag('E027', MSG.E027(
+        m.doc,
+        `record "${m.recName}" declares @crdt_doc_member but no @crdt_doc_topic(doc: "${m.doc}", ...) exists on the schema`,
+      ), m.dirLoc))
+    }
+  }
+
+  // ── (b) Every topic needs ≥1 member.
+  for (const [doc, info] of topics) {
+    const hasMember = members.some(m => m.doc === doc)
+    if (!hasMember) {
+      out.push(diag('E027', MSG.E027(
+        doc,
+        `@crdt_doc_topic declared but no record carries @crdt_doc_member(doc: "${doc}", ...)`,
+      ), info.dirLoc))
+    }
+  }
+
+  // ── (c) Members sharing a `doc:` cannot collide on `map:` slot.
+  const byDoc = new Map<string, MemberRef[]>()
+  for (const m of members) {
+    if (!byDoc.has(m.doc)) byDoc.set(m.doc, [])
+    byDoc.get(m.doc)!.push(m)
+  }
+  for (const [doc, group] of byDoc) {
+    const seenMap = new Map<string, MemberRef>()
+    for (const m of group) {
+      const prior = seenMap.get(m.map)
+      if (prior) {
+        out.push(diag('E027', MSG.E027(
+          doc,
+          `records "${prior.recName}" and "${m.recName}" both claim root map "${m.map}"`,
+        ), m.dirLoc))
+      } else {
+        seenMap.set(m.map, m)
+      }
+    }
+  }
+
+  // ── (c, continued) @crdt_doc_member + @scope is forbidden per R233.
+  for (const conflict of memberScopeConflict) {
+    out.push(diag('E027', MSG.E027(
+      conflict.doc,
+      `record "${conflict.recName}" carries both @crdt_doc_member and @scope (R233)`,
+    ), conflict.dirLoc))
+  }
+
+  // ── (d) Every @schema_version needs a matching topic.
+  for (const [doc, info] of schemaVersions) {
+    if (!topics.has(doc)) {
+      out.push(diag('E027', MSG.E027(
+        doc,
+        `@schema_version declared but no @crdt_doc_topic(doc: "${doc}", ...) exists`,
+      ), info.dirLoc))
+    }
+  }
+
+  // ── Duplicate @crdt_doc_topic for the same doc — report as an
+  // inconsistency.
+  for (const dup of duplicateTopics) {
+    out.push(diag('E027', MSG.E027(
+      dup.doc,
+      'multiple @crdt_doc_topic directives for the same document',
+    ), dup.dirLoc))
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v0.3.6 — `Any` placement (E026)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// `Any` is the SDL's runtime-typed opaque CBOR value (SPEC §4.1). It is
+// permitted only in two positions:
+//   - as the declared type of a `record` field (caller passes `topLevel:
+//     true`);
+//   - as the value type of a `Map<K, Any>` (caller recurses into `valueType`
+//     with `topLevel: true`).
+// Every other position is E026:
+//   - list elements (`[Any]`, `[Any!]`, nested lists of Any)
+//   - map keys (`Map<Any, V>`)
+//   - action input argument types
+//   - action output types
+//   - event field types
+
+function isAnyTypeRef(t: TypeExprNode): boolean {
+  if (t.map) return false
+  if (t.list) return isAnyTypeRef(t.inner!)
+  return t.name === 'Any'
+}
+
+/**
+ * Walk a type expression and emit E026 for any `Any` occurrence in a
+ * forbidden position. `topLevel` indicates whether the outer type is a
+ * permitted host (record field type, Map value type); `where` names the
+ * enclosing site for the diagnostic message.
+ */
+function checkAnyPlacement(
+  t: TypeExprNode,
+  where: string,
+  topLevel: boolean,
+  out: Diagnostic[],
+): void {
+  if (t.map) {
+    // Map key: Any forbidden regardless of topLevel.
+    if (t.keyType) {
+      if (isAnyTypeRef(t.keyType)) {
+        out.push(diag('E026', MSG.E026('a Map key'), t.keyType.loc))
+      }
+      checkAnyPlacement(t.keyType, where, false, out)
+    }
+    // Map value: Any permitted (this is the canonical allowed position).
+    if (t.valueType) {
+      // Descend with topLevel=true to allow direct `Map<K, Any>`, but also
+      // recurse to catch `Map<K, [Any]>` (list element inside the value).
+      checkAnyPlacement(t.valueType, where, true, out)
+    }
+    return
+  }
+  if (t.list) {
+    // List element: Any forbidden regardless of topLevel (`[Any]`, `[Any!]`,
+    // and any deeper nested list of Any all fire E026).
+    if (t.inner) {
+      if (isAnyTypeRef(t.inner)) {
+        out.push(diag('E026', MSG.E026(`a list element in ${where}`), t.inner.loc))
+      }
+      checkAnyPlacement(t.inner, where, false, out)
+    }
+    return
+  }
+  // Bare type.
+  if (t.name === 'Any' && !topLevel) {
+    out.push(diag('E026', MSG.E026(where), t.loc))
+  }
 }

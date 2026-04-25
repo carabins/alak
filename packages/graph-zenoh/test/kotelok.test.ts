@@ -208,8 +208,9 @@ describe('CRDT + atomic smoke test', () => {
     expect(out).toContain(`pub fn encode_cbor(&self) -> Result<Vec<u8>, serde_cbor::Error> {`)
     expect(out).toContain(`pub fn decode_cbor(bytes: &[u8]) -> Result<Self, serde_cbor::Error> {`)
     // Cargo header advertises cbor + automerge deps because of the directives.
+    // v0.3.6: automerge is pinned to the exact busynca wire version for parity.
     expect(out).toContain(`serde_cbor = "0.11"`)
-    expect(out).toContain(`automerge = "0.6"`)
+    expect(out).toContain(`automerge = "=0.6.0"`)
   })
 
   test('unsupported CRDT type emits stub + warning', () => {

@@ -478,6 +478,12 @@ export type DiagnosticCode =
   /** v0.3.7: `@rename_case` applied to a declaration that is neither a
    *  `record` nor an `enum`. Emitted by the validator. */
   | 'E028'
+  /** v0.3.9 (Wave 3A — DRIFT-2): centralised site validation. Generic
+   *  fall-back when a directive appears at a site outside its declared
+   *  `DirectiveSignature.sites`. E028 / E006 / E024 keep tailored
+   *  messages and fire alongside E029 only where they were already
+   *  defined; new directives get site validation for free. */
+  | 'E029'
   | 'W001'
   | 'W002'
   | 'W003'

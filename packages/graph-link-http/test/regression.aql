@@ -1,0 +1,46 @@
+schema Regression @transport(kind: "http") { version: 1, namespace: "regression.ns" }
+
+enum Channel { master, test, dev }
+
+enum Platform { windows_msi, linux_deb, android_apk }
+
+record Tag {
+  id: UUID!
+  name: String!
+}
+
+record Item {
+  id: ID!
+  title: String!
+  count: Int!
+  ratio: Float!
+  active: Boolean!
+  updated_at: Timestamp!
+  tags: [Tag!]!
+  optional_tag: Tag
+  optional_tags: [Tag]
+  metadata: Map<String, String!>!
+  channel: Channel!
+}
+
+# Action named `Delete` — a JS reserved word.
+action Delete {
+  input: { id: ID! }
+  output: Boolean!
+}
+
+# Action that returns a list — regression for the `outputList` flag.
+action List {
+  input: { channel: Channel! }
+  output: [Item!]!
+}
+
+# Empty-input action.
+action Ping {
+  output: Boolean!
+}
+
+# Action with no output.
+action FireAndForget {
+  input: { payload: String! }
+}

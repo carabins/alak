@@ -276,4 +276,171 @@ record R { id: ID! }`
       expect(codes).toContain('E001')
     })
   })
+
+  // v0.3.6 — §7.15 / §7.16 / §7.17 composite CRDT document directives land
+  // in IR in the same flattened shape as any other directive: args mapped by
+  // name, required fields present.
+  describe('§7.15–§7.17 composite CRDT directives — IR round-trip', () => {
+    test('IR preserves @crdt_doc_topic and @schema_version on schema', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "GroupSync", pattern: "valkyrie/{group}/sync/patch")\n' +
+        '         @schema_version(doc: "GroupSync", value: 2) {\n' +
+        '  version: 1, namespace: "s"\n' +
+        '}\n' +
+        'record P @crdt_doc_member(doc: "GroupSync", map: "points")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const schema = ir!.schemas['s']!
+      const schemaDirs = schema.directives ?? []
+      const topicDir = schemaDirs.find(d => d.name === 'crdt_doc_topic')
+      expect(topicDir).toBeDefined()
+      expect(topicDir!.args.doc).toBe('GroupSync')
+      expect(topicDir!.args.pattern).toBe('valkyrie/{group}/sync/patch')
+      const schemaVerDir = schemaDirs.find(d => d.name === 'schema_version')
+      expect(schemaVerDir).toBeDefined()
+      expect(schemaVerDir!.args.doc).toBe('GroupSync')
+      expect(schemaVerDir!.args.value).toBe(2)
+    })
+
+    test('IR preserves @crdt_doc_member on record', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const memDir = ir!.schemas['s']!.records['P']!.directives!
+        .find(d => d.name === 'crdt_doc_member')
+      expect(memDir).toBeDefined()
+      expect(memDir!.args.doc).toBe('D')
+      expect(memDir!.args.map).toBe('points')
+    })
+
+    test('missing required args fire E023', () => {
+      const onlyDoc = 'schema S @crdt_doc_topic(doc: "X") { version: 1, namespace: "s" }'
+      expect(parseSource(onlyDoc).diagnostics.map(d => d.code)).toContain('E023')
+      const onlyPat = 'schema S @crdt_doc_topic(pattern: "x") { version: 1, namespace: "s" }'
+      expect(parseSource(onlyPat).diagnostics.map(d => d.code)).toContain('E023')
+      const noDoc = 'schema S @schema_version(value: 2) { version: 1, namespace: "s" }'
+      expect(parseSource(noDoc).diagnostics.map(d => d.code)).toContain('E023')
+    })
+
+    test('@crdt_doc_topic wrong arg type fires E003', () => {
+      const src = 'schema S @crdt_doc_topic(doc: 42, pattern: "x") { version: 1, namespace: "s" }'
+      expect(parseSource(src).diagnostics.map(d => d.code)).toContain('E003')
+    })
+
+    test('@schema_version with non-int value fires E003', () => {
+      const src = 'schema S @schema_version(doc: "D", value: "two") { version: 1, namespace: "s" }'
+      expect(parseSource(src).diagnostics.map(d => d.code)).toContain('E003')
+    })
+  })
+
+  // v0.3.7 — @rename_case on enum/record (SPEC §7.18) + object-literal values
+  describe('§7.18 @rename_case — IR round-trip', () => {
+    test('IR preserves @rename_case on enum', () => {
+      const src = 'schema S { version: 1, namespace: "s" }\n' +
+                  'enum PointKind @rename_case(kind: PASCAL) { Target Observation }'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const e = ir!.schemas['s']!.enums['PointKind']!
+      expect(e.directives).toBeDefined()
+      const d = e.directives!.find(x => x.name === 'rename_case')
+      expect(d).toBeDefined()
+      expect(d!.args.kind).toBe('PASCAL')
+    })
+
+    test('IR preserves @rename_case on record', () => {
+      const src = 'schema S { version: 1, namespace: "s" }\n' +
+                  'record R @rename_case(kind: CAMEL) { id: ID!, fc_connected: Boolean! }'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const r = ir!.schemas['s']!.records['R']!
+      const d = r.directives!.find(x => x.name === 'rename_case')
+      expect(d).toBeDefined()
+      expect(d!.args.kind).toBe('CAMEL')
+    })
+
+    test('enum without directives keeps .directives absent (back-compat)', () => {
+      const src = 'schema S { version: 1, namespace: "s" }\n' +
+                  'enum E { A B }'
+      const { ir } = parseSource(src)
+      expect(ir!.schemas['s']!.enums['E']!.directives).toBeUndefined()
+    })
+  })
+
+  describe('§7.15 @crdt_doc_member — v0.3.7 extended args', () => {
+    test('IR preserves lww_field + soft_delete object', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "ns/{id}/patch") { version: 1, namespace: "s" }\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          lww_field: "updated_at",\n' +
+        '                          soft_delete: { flag: "is_deleted", ts_field: "updated_at" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const mem = ir!.schemas['s']!.records['P']!.directives!
+        .find(d => d.name === 'crdt_doc_member')!
+      expect(mem.args.doc).toBe('D')
+      expect(mem.args.map).toBe('points')
+      expect(mem.args.lww_field).toBe('updated_at')
+      // object-literal value flattens to a plain record in IR.
+      expect(mem.args.soft_delete).toEqual({
+        flag: 'is_deleted',
+        ts_field: 'updated_at',
+      })
+      // argTypes reflects the object kind so generators can distinguish.
+      expect(mem.argTypes!.soft_delete).toBe('object')
+    })
+
+    test('soft_delete: { } empty object → E027 downstream, but IR shape is parseable', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points", soft_delete: { })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      const { ir, diagnostics } = parseSource(src)
+      expect(ir).not.toBeNull()
+      // Validator flags the empty object (missing flag / ts_field keys).
+      expect(diagnostics.map(d => d.code)).toContain('E027')
+    })
+  })
+
+  // v0.3.6 — `Any` as a built-in scalar (SPEC §4.1)
+  describe('§4.1 Any — parse + IR', () => {
+    test('`Any` is accepted as a field type', () => {
+      const src = 'schema S { version: 1, namespace: "s" }\n' +
+                  'record R { payload: Any! }'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const field = ir!.schemas['s']!.records['R']!.fields[0]!
+      expect(field.name).toBe('payload')
+      expect(field.type).toBe('Any')
+      expect(field.required).toBe(true)
+    })
+
+    test('`Map<String, Any>` is accepted', () => {
+      const src = 'schema S { version: 1, namespace: "s" }\n' +
+                  'record R { extras: Map<String, Any>! }'
+      const { ir, diagnostics } = parseSource(src)
+      expect(diagnostics.filter(d => d.severity === 'error')).toEqual([])
+      const field = ir!.schemas['s']!.records['R']!.fields[0]!
+      expect(field.map).toBe(true)
+      expect(field.mapKey!.type).toBe('String')
+      expect(field.mapValue!.type).toBe('Any')
+    })
+  })
 })

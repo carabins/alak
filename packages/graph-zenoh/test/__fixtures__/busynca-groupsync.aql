@@ -1,0 +1,131 @@
+# Busynca GroupSync — Phase-0 wire model.
+#
+# Tracks A:\source\rest.valkyrie\busynca\src\models.rs:9-144 exactly.
+# Intent: `@alaq/graph-zenoh` emits Rust from this SDL that speaks the
+# same Automerge + JSON wire bytes as Busynca's hand-written types.
+#
+# Scope: Phase-0 CRDT document (SyncPoint + DeviceEntry under
+# `valkyrie/{group}/sync/patch`) plus the two hot-stream messages
+# (PositionMsg, StatusMsg under `valkyrie/{group}/device/{id}/{kind}`).
+# Sokol/v1 legacy types are explicitly out of scope for this fixture
+# and will land separately in E2.5 with their own wire-parity tests.
+schema Busynca @transport(kind: "zenoh")
+               @crdt_doc_topic(doc: "GroupSync", pattern: "valkyrie/{group}/sync/patch")
+               @schema_version(doc: "GroupSync", value: 2) {
+  version: 1
+  namespace: "valkyrie"
+}
+
+# SDL: mirrors Busynca's `PointKind` (models.rs:52-64). Busynca declares
+# the enum without `#[serde(rename_all = ...)]`, so Rust's default
+# serialises each variant in PascalCase (`"Target"`, `"GroundStation"`).
+# @rename_case(kind: PASCAL) emits the matching `rename_all`.
+enum PointKind @rename_case(kind: PASCAL) {
+  TARGET
+  OBSERVATION
+  GROUP_POSITION
+  GROUND_STATION
+}
+
+# SDL: mirrors Busynca's `DeviceRole` (models.rs:83-94). Same PascalCase
+# wire shape as PointKind.
+enum DeviceRole @rename_case(kind: PASCAL) {
+  VALKYRIE
+  KLADINETS
+  SOKOL
+  NIGHT_WATCH
+}
+
+# SDL: mirrors Busynca's `SyncPoint` (models.rs:11-50). Composite CRDT
+# document member under root map "points"; LWW key = `updated_at`;
+# soft-delete via `is_deleted` + bump `updated_at` (matches Busynca's
+# tombstone convention — see models.rs:41 and the mesh-sync spec).
+record SyncPoint @crdt_doc_member(doc: "GroupSync",
+                                  map: "points",
+                                  lww_field: "updated_at",
+                                  soft_delete: { flag: "is_deleted", ts_field: "updated_at" })
+                 @crdt(type: LWW_MAP, key: "updated_at") {
+  id: ID!
+  group: String!
+  kind: PointKind!
+
+  # Geometry
+  lat: Float!
+  lon: Float!
+  altitude: Float
+  heading: Float
+  speed: Float
+
+  # Semantics
+  label: String
+  subtype: String
+  # busynca::SyncPoint.confidence is `Option<f32>` → Float32 keeps the
+  # Rust width on both sides; widening to f64 would drift JSON bytes on
+  # non-exact-representable values (SPEC 0.3.8, closes f32 wire-parity).
+  confidence: Float32
+
+  # Provenance
+  author: String!
+  created_at: Timestamp!
+  updated_at: Timestamp!
+
+  # Relationships
+  parent_id: String
+
+  # Lifecycle
+  is_deleted: Boolean!
+
+  # Extension bag — kind-specific CBOR payload (Target: kalman /
+  # assigned_uav_id; GroundStation: ip / port; etc.). Mirrors
+  # `BTreeMap<String, serde_cbor::Value>` in models.rs:48-49. `Any!` on
+  # the value slot (not just `Any`) keeps the Rust type at
+  # `BTreeMap<String, serde_cbor::Value>` rather than
+  # `BTreeMap<String, Option<serde_cbor::Value>>` — busynca never stores
+  # None inside `extras`, so tightening matches wire exactly.
+  extras: Map<String, Any!>!
+}
+
+# SDL: mirrors Busynca's `DeviceEntry` (models.rs:67-81). Composite CRDT
+# member under root map "devices"; LWW key = `ts`; **no soft-delete**
+# (Busynca hard-deletes devices from the map — no `is_deleted` flag).
+record DeviceEntry @crdt_doc_member(doc: "GroupSync",
+                                    map: "devices",
+                                    lww_field: "ts")
+                   @crdt(type: LWW_MAP, key: "ts") {
+  device_id: ID!
+  name: String!
+  nickname: String
+  role: DeviceRole!
+  subtype: String
+  ts: Timestamp!
+}
+
+# SDL: mirrors Busynca's `PositionMsg` (models.rs:114-124). Hot-stream
+# position — published as a CBOR blob (matches @atomic wire rule in
+# SPEC §11), NOT stored in the CRDT. Topic pattern is the Busynca
+# convention `valkyrie/{group}/device/{id}/position` — placeholder
+# resolution is the caller's responsibility in v0.1.
+record PositionMsg @atomic
+                   @topic(pattern: "valkyrie/{group}/device/{id}/position") {
+  device_id: String!
+  ts: Timestamp!
+  lat: Float!
+  lon: Float!
+  altitude: Float
+  heading: Float
+  speed: Float
+  # busynca::PositionMsg.accuracy_m is `Option<f32>` — see SPEC 0.3.8.
+  accuracy_m: Float32
+}
+
+# SDL: mirrors Busynca's `StatusMsg` (models.rs:127-134). Same hot-stream
+# treatment as PositionMsg, topic `valkyrie/{group}/device/{id}/status`.
+record StatusMsg @atomic
+                 @topic(pattern: "valkyrie/{group}/device/{id}/status") {
+  device_id: String!
+  ts: Timestamp!
+  # busynca::StatusMsg.battery / .signal are `Option<f32>` — see SPEC 0.3.8.
+  battery: Float32
+  signal: Float32
+  online: Boolean!
+}

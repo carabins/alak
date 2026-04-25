@@ -11,6 +11,10 @@ export interface HeaderOptions {
   zenohVersion: string
   needsCbor: boolean
   needsAutomerge: boolean
+  /** v0.3.6: schema uses composite Automerge documents (@crdt_doc_topic /
+   *  @crdt_doc_member / @schema_version). Pulls in the alaq-graph-zenoh-rt
+   *  runtime crate alongside the automerge dep. */
+  needsComposite: boolean
   header: boolean
 }
 
@@ -30,10 +34,14 @@ export function emitHeader(buf: LineBuffer, opts: HeaderOptions) {
     buf.line(`//   serde = { version = "1", features = ["derive"] }`)
     buf.line(`//   serde_json = "1"`)
     if (opts.needsCbor) {
-      buf.line(`//   serde_cbor = "0.11"   # for @atomic records`)
+      buf.line(`//   serde_cbor = "0.11"   # for @atomic records and Any fields`)
     }
     if (opts.needsAutomerge) {
-      buf.line(`//   automerge = "0.6"     # for @crdt records`)
+      buf.line(`//   automerge = "=0.6.0"  # pinned — matches composite CRDT wire format`)
+    }
+    if (opts.needsComposite) {
+      buf.line(`//   alaq-graph-zenoh-rt = { path = "../alaq-graph-zenoh-rt" }`)
+      buf.line(`//     # composite CRDT document runtime (CrdtDoc bridge)`)
     }
     buf.blank()
   }
@@ -44,6 +52,13 @@ export function emitHeader(buf: LineBuffer, opts: HeaderOptions) {
   buf.line(`use std::sync::Arc;`)
   if (opts.needsCbor) {
     buf.line(`use serde_cbor;`)
+  }
+  if (opts.needsComposite) {
+    // v0.3.6 — composite CRDT document runtime. Provides `CrdtDoc` which
+    // wraps `automerge::AutoCommit` with a typed upsert/delete/list API
+    // keyed by (root-map, entry-id). Generated code calls this API; the
+    // crate itself ships separately (alak/crates/alaq-graph-zenoh-rt).
+    buf.line(`use alaq_graph_zenoh_rt::CrdtDoc;`)
   }
   buf.blank()
 }
@@ -65,7 +80,12 @@ export function emitSection(buf: LineBuffer, title: string) {
  */
 export function emitCargoFooter(
   buf: LineBuffer,
-  opts: { zenohVersion: string; needsCbor: boolean; needsAutomerge: boolean },
+  opts: {
+    zenohVersion: string
+    needsCbor: boolean
+    needsAutomerge: boolean
+    needsComposite: boolean
+  },
 ) {
   buf.line(`/*`)
   buf.line(` * Suggested Cargo.toml fragment:`)
@@ -79,7 +99,13 @@ export function emitCargoFooter(
     buf.line(` * serde_cbor = "0.11"`)
   }
   if (opts.needsAutomerge) {
-    buf.line(` * automerge = "0.6"`)
+    // v0.3.6: pinned to busynca's automerge version for wire-parity.
+    buf.line(` * automerge = "=0.6.0"`)
+  }
+  if (opts.needsComposite) {
+    // v0.3.6: runtime bridge between generated <Doc>Doc wrappers and
+    // automerge::AutoCommit. Lives at alak/crates/alaq-graph-zenoh-rt.
+    buf.line(` * alaq-graph-zenoh-rt = { path = "../alaq-graph-zenoh-rt" }`)
   }
   buf.line(` */`)
 }

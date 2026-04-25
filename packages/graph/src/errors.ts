@@ -36,6 +36,10 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   E027: 'error',
   // v0.3.7: `@rename_case` placement — enum or record only.
   E028: 'error',
+  // v0.3.9 (Wave 3A — DRIFT-2): centralised site validation. Generic
+  // fallback for directives appearing at a site outside their declared
+  // `DirectiveSignature.sites`. E028/E006/E024 keep tailored messages.
+  E029: 'error',
   W001: 'warning',
   W002: 'warning',
   W003: 'warning',
@@ -119,6 +123,13 @@ export const MSG = {
   E028: (where: string) =>
     `@rename_case is only valid on \`enum\` or \`record\` declarations; ` +
     `applied to ${where}`,
+
+  // v0.3.9 (Wave 3A — DRIFT-2): generic site-mismatch. `where` is the
+  // canonical Site enum value the directive was found at; `allowed` is the
+  // signature's permitted set.
+  E029: (directive: string, where: string, allowed: readonly string[]) =>
+    `directive @${directive} is not valid on ${where}; ` +
+    `allowed sites: ${allowed.join(', ')}`,
 
   W001: (field: string) =>
     `@sync(qos: REALTIME) on composite field "${field}" without @atomic`,

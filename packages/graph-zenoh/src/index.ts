@@ -33,8 +33,8 @@ import {
   emitSection,
 } from './emit'
 import { emitActions } from './actions-gen'
-import { emitAllPubSub } from './publishers-gen'
-import { emitEnums, emitRecords, emitUserScalars } from './types-gen'
+import { emitAllPubSub, emitCompositePubSub } from './publishers-gen'
+import { emitCrdtDocWrappers, emitEnums, emitRecords, emitUserScalars } from './types-gen'
 import { emitTopicsModule } from './topics-gen'
 import { LineBuffer, buildTypeContext, hasDirective } from './utils'
 
@@ -151,7 +151,7 @@ function generateNamespace(
   const ctx = buildTypeContext(schema)
 
   // Scan directives once to decide which imports we need.
-  const { needsCbor, needsAutomerge } = scanFeatureFlags(schema)
+  const { needsCbor, needsAutomerge, needsComposite } = scanFeatureFlags(schema)
 
   emitHeader(buf, {
     namespace: schema.namespace,
@@ -159,6 +159,7 @@ function generateNamespace(
     zenohVersion: opts.zenohVersion,
     needsCbor: needsCbor && opts.cbor,
     needsAutomerge: needsAutomerge && opts.automerge,
+    needsComposite,
     header: opts.header,
   })
 
@@ -184,10 +185,22 @@ function generateNamespace(
     emitRecords(buf, schema.records, ctx, schema.namespace, diagnostics)
   }
 
+  // ── Composite CRDT document wrappers (v0.3.6, SPEC §7.15–§7.17) ──
+  if (needsComposite) {
+    emitSection(buf, 'Composite CRDT document wrappers')
+    emitCrdtDocWrappers(buf, schema, diagnostics)
+  }
+
   // ── Publisher / Subscriber helpers ──
   if (Object.keys(schema.records).length > 0) {
     emitSection(buf, 'Publish / Subscribe helpers')
     emitAllPubSub(buf, schema.records)
+  }
+
+  // ── Composite document pub/sub helpers ──
+  if (needsComposite) {
+    emitSection(buf, 'Publish / Subscribe helpers — composite CRDT documents')
+    emitCompositePubSub(buf, schema, diagnostics)
   }
 
   // ── Actions ──
@@ -222,6 +235,7 @@ function generateNamespace(
     zenohVersion: opts.zenohVersion,
     needsCbor: needsCbor && opts.cbor,
     needsAutomerge: needsAutomerge && opts.automerge,
+    needsComposite,
   })
 
   return buf.toString()
@@ -234,18 +248,62 @@ function generateNamespace(
 function scanFeatureFlags(schema: IRSchema): {
   needsCbor: boolean
   needsAutomerge: boolean
+  needsComposite: boolean
 } {
   let needsCbor = false
   let needsAutomerge = false
+  let needsComposite = false
+  // Composite CRDT documents (v0.3.6 SPEC §7.15–§7.17) pull in both the
+  // Automerge dep and the `alaq-graph-zenoh-rt` bridge.
+  const schemaDirs = schema.directives ?? []
+  if (schemaDirs.some(d => d.name === 'crdt_doc_topic')) {
+    needsAutomerge = true
+    needsComposite = true
+  }
   for (const rec of Object.values(schema.records)) {
     if (hasDirective(rec.directives, 'atomic')) needsCbor = true
     if (hasDirective(rec.directives, 'crdt')) needsAutomerge = true
+    if (hasDirective(rec.directives, 'crdt_doc_member')) {
+      needsAutomerge = true
+      needsComposite = true
+    }
+    // `Any` in any field forces serde_cbor into the dep list.
     for (const f of rec.fields) {
       if (hasDirective(f.directives, 'atomic')) needsCbor = true
       if (hasDirective(f.directives, 'crdt')) needsAutomerge = true
+      if (fieldMentionsAny(f)) needsCbor = true
     }
   }
-  return { needsCbor, needsAutomerge }
+  return { needsCbor, needsAutomerge, needsComposite }
+}
+
+// Walk an IRField's type tree and look for `Any`. Covers bare `Any`, lists
+// containing Any (the validator already rejects these — E026 — but the
+// scanner must be tolerant of pre-validator IR so snapshot tests read
+// cleanly), and Map values of Any (the permitted position).
+function fieldMentionsAny(f: {
+  type: string
+  map?: boolean
+  mapKey?: { type: string; map?: boolean; mapValue?: unknown }
+  mapValue?: { type: string; map?: boolean; mapValue?: unknown }
+}): boolean {
+  if (f.type === 'Any') return true
+  if (f.map && f.mapValue) {
+    return refMentionsAny(f.mapValue as { type: string; map?: boolean; mapValue?: unknown })
+  }
+  return false
+}
+
+function refMentionsAny(ref: {
+  type: string
+  map?: boolean
+  mapValue?: unknown
+}): boolean {
+  if (ref.type === 'Any') return true
+  if (ref.map && ref.mapValue) {
+    return refMentionsAny(ref.mapValue as { type: string; map?: boolean; mapValue?: unknown })
+  }
+  return false
 }
 
 // ────────────────────────────────────────────────────────────────

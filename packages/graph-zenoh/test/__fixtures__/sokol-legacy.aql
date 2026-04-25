@@ -1,0 +1,188 @@
+# Sokol/v1 — legacy wire model (Phase < 0).
+#
+# Tracks A:\source\rest.valkyrie\busynca\src\models.rs:150-407. These
+# types are deprecated but still live on the wire (bort/mesh traffic
+# from Sokol-Bus). All of them use `#[serde(rename_all = "camelCase")]`
+# on the struct — SDL declares that as `@rename_case(kind: CAMEL)` on
+# the record. The one exception is `Telemetry` which has no rename_all
+# directive and expects snake_case wire field names.
+#
+# Scope: every Sokol legacy type that appears on a Zenoh topic in
+# Busynca. Nested structs (CpuInfo / MemoryInfo / DiskInfo / NetIface /
+# SerialStatus / CollectorResult + MeshModemNode / TransmissionDelay)
+# are also declared so the outer record can reference them.
+#
+# Known limitations vs. raw busynca types:
+#   * Integer widths: busynca uses `u32`, `u64`, `u8` in various spots.
+#     SDL has only `Int!` (= `i64` in the generator). JSON wire is the
+#     same (`Number`), but the Rust type of generated structs is `i64`
+#     throughout. Runtime round-tripping is byte-parity in JSON; Rust
+#     struct assignment between generated and busynca types requires
+#     explicit conversion. Documented as a known gap.
+#   * `[f32; 3]` fixed-size arrays (BortSysTelemetry.load_avg) are
+#     expressed as `[Float!]!` — same JSON wire, different Rust type.
+schema SokolLegacy @transport(kind: "zenoh") {
+  version: 1
+  namespace: "sokol.v1"
+}
+
+# Bort telemetry hot-stream. NOT in CRDT. Topic:
+# `sokol/v1/bort/{hw_id}/tele`. Note: Telemetry is the only legacy type
+# that does NOT carry `rename_all = "camelCase"` on the Rust side, so
+# we do NOT attach `@rename_case` here either. Wire field names are
+# snake_case (hw_id, display_id, fc_connected, etc.) by serde default
+# when no rename directive is present.
+#
+# `fc_connected: Boolean!` — busynca declares this with a serde
+# `default = default_true`. That affects deserialize only; on the
+# serialize side the field is always emitted as a bool. SDL has no
+# directive for "default on deserialize"; documented as a gap.
+#
+# SPEC 0.3.8: alt/speed/heading are `f32` on the busynca side
+# (models.rs:159-161) → `Float32` on SDL for byte-exact JSON wire.
+record Telemetry @topic(pattern: "sokol/v1/bort/{hw_id}/tele") {
+  hw_id: String!
+  display_id: String!
+  ip: String!
+  lat: Float!
+  lon: Float!
+  alt: Float32!
+  speed: Float32!
+  heading: Float32!
+  ts: Timestamp!
+  fc_connected: Boolean!
+}
+
+# Bort system telemetry. Topic: `sokol/v1/bort/{hw_id}/sys`.
+record BortSysTelemetry @rename_case(kind: CAMEL)
+                        @topic(pattern: "sokol/v1/bort/{hw_id}/sys") {
+  hw_id: String!
+  ts: Timestamp!
+  uptime_secs: Int!
+  cpu: CpuInfo!
+  memory: MemoryInfo!
+  disk: DiskInfo!
+  # busynca: Option<f32> — Float32 for f32 wire-parity (SPEC 0.3.8).
+  temperature: Float32
+  # busynca: [f32; 3] fixed-size array — SDL has no fixed-size
+  # constructor. `[Float32!]!` gives a `Vec<f32>` with the same JSON
+  # wire and f32 width (SPEC 0.3.8).
+  load_avg: [Float32!]!
+  network: [NetIface!]!
+  serial: SerialStatus!
+  collectors: [CollectorResult!]!
+}
+
+record CpuInfo @rename_case(kind: CAMEL) {
+  # busynca: `usage_percent: f32` (models.rs:362).
+  usage_percent: Float32!
+  core_count: Int!
+}
+
+record MemoryInfo @rename_case(kind: CAMEL) {
+  used_mb: Int!
+  total_mb: Int!
+  available_mb: Int!
+}
+
+record DiskInfo @rename_case(kind: CAMEL) {
+  used_mb: Int!
+  total_mb: Int!
+  available_mb: Int!
+}
+
+record NetIface @rename_case(kind: CAMEL) {
+  name: String!
+  ip: String!
+  up: Boolean!
+}
+
+record SerialStatus @rename_case(kind: CAMEL) {
+  connected: Boolean!
+  port: String!
+  baud: Int!
+  bytes_rx: Int!
+  bytes_tx: Int!
+  last_mavlink_ts: Timestamp
+}
+
+record CollectorResult @rename_case(kind: CAMEL) {
+  id: String!
+  value: String!
+  error: String
+}
+
+# Mesh modem status hot-stream. Topic:
+# `sokol/v1/mesh/{modem_id}/status`.
+record MeshModemStatus @rename_case(kind: CAMEL)
+                       @topic(pattern: "sokol/v1/mesh/{modem_id}/status") {
+  modem_id: String!
+  publisher_id: String!
+  node_number: Int!
+  nodes: [MeshModemNode!]!
+  transmission_delay: [TransmissionDelay!]!
+  temperature: Float!
+  battery_voltage: Float!
+  ts: Timestamp!
+}
+
+record MeshModemNode @rename_case(kind: CAMEL) {
+  id: Int!
+  ip: String!
+  snr: Float!
+  rssi_ant1: Float!
+  rssi_ant2: Float!
+}
+
+record TransmissionDelay @rename_case(kind: CAMEL) {
+  target_node_id: Int!
+  delay: Int!
+  distance_km: Float!
+}
+
+# GPS inject — Zenoh fire-and-forget. Topic:
+# `sokol/v1/bort/{hw_id}/cmd/gps_inject`.
+record GpsInjectCmd @rename_case(kind: CAMEL)
+                    @topic(pattern: "sokol/v1/bort/{hw_id}/cmd/gps_inject") {
+  lat: Float!
+  lon: Float!
+  alt: Float!
+  fix_type: Int!
+  gps_id: Int!
+  satellites: Int!
+  # busynca: `hdop/vdop: f32` (models.rs:308-309) — Float32 for parity.
+  hdop: Float32!
+  vdop: Float32!
+  sender_id: String!
+  ts: Timestamp!
+}
+
+# Goto — Zenoh fire-and-forget. Topic:
+# `sokol/v1/bort/{hw_id}/cmd/goto`.
+record GotoCmd @rename_case(kind: CAMEL)
+               @topic(pattern: "sokol/v1/bort/{hw_id}/cmd/goto") {
+  lat: Float!
+  lon: Float!
+  alt: Float!
+  # busynca: `speed: f32` (models.rs:321) — Float32 for parity.
+  speed: Float32!
+  sender_id: String!
+  ts: Timestamp!
+}
+
+# Goto (extended) — Zenoh fire-and-forget. Topic:
+# `sokol/v1/bort/{hw_id}/cmd/goto_ext`.
+record GotoCmdExtended @rename_case(kind: CAMEL)
+                       @topic(pattern: "sokol/v1/bort/{hw_id}/cmd/goto_ext") {
+  lat: Float!
+  lon: Float!
+  alt: Float!
+  alt_frame: String!
+  # busynca: `speed/loiter_radius: f32` (models.rs:334/337) — Float32 for parity.
+  speed: Float32!
+  max_speed: Boolean!
+  arrival_mode: String!
+  loiter_radius: Float32!
+  sender_id: String!
+  ts: Timestamp!
+}

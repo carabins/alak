@@ -61,8 +61,11 @@ describe('empty-input actions — graph-axum (C2)', () => {
     // Body of the dispatcher calls handler with (ctx) only.
     expect(s).toContain('state.handlers.ping(ctx).await?')
     expect(s).toContain('state.handlers.close_window(ctx).await?')
-    // Echo dispatcher still has Json<EchoInput> and passes (ctx, input).
-    expect(s).toContain('Json(input): Json<EchoInput>,')
+    // Echo (has input) — default wireEnvelope='wrapped' emits EchoEnvelope +
+    // unwrap, handler still receives (ctx, input).
+    expect(s).toContain('struct EchoEnvelope { input: EchoInput }')
+    expect(s).toContain('Json(env): Json<EchoEnvelope>,')
+    expect(s).toContain('let input = env.input;')
     expect(s).toContain('state.handlers.echo(ctx, input).await?')
   })
 

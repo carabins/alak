@@ -26,17 +26,95 @@ import type {
 } from './types'
 
 /** Directive signatures — used for IR flattening and validation.
- *  `undefined` type means "accept anything" (handled by validator). */
-export type DirectiveArgType = 'string' | 'int' | 'float' | 'bool' | 'enum' | 'any' | 'list'
+ *
+ *  Two forms accepted in `args`:
+ *    1. legacy `DirectiveArgType` — bare type tag (`'string'`, `'int'`, …).
+ *       Closed-set membership and conditional-required still live in
+ *       sibling fields (`enumValues`, `required`) on the signature.
+ *    2. rich `ArgSpec` object — `{ type, enumValues?, requiredIf? }`. Lets a
+ *       single argument carry its own enum-set or conditional-required
+ *       predicate without lifting them onto the signature. Validator reads
+ *       both forms and merges (signature-level fields still apply when
+ *       both are set).
+ *
+ *  `'any'` means "accept anything" — runtime-shaped value, handled by the
+ *  validator's per-context checks (e.g. `@default` matches the field type).
+ */
+export type DirectiveArgType = 'string' | 'int' | 'float' | 'number' | 'bool' | 'enum' | 'any' | 'list' | 'object'
+export type ArgSpec =
+  | { type: 'string', enumValues?: string[], requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'int',    requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'float',  requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'number', requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'bool',   requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'enum',   enumValues?: string[], requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'any',    requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'list',   requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+  | { type: 'object', requiredIf?: (otherArgs: Record<string, unknown>) => boolean }
+
+/** Where a directive may appear. Validator runs a single `checkSite()` pass
+ *  per directive node; the existing context-specific diagnostics (E028, E024)
+ *  remain for nicer messages. Declared in SPEC §7.x header tables (Sites
+ *  row); the directive signature is the single source of truth for code. */
+export type Site =
+  | 'SCHEMA'
+  | 'RECORD'
+  | 'FIELD'
+  | 'ENUM'
+  | 'ENUM_VALUE'
+  | 'ARGUMENT'
+  | 'EVENT'
+  | 'ACTION'
+  | 'OPAQUE'
+
 export interface DirectiveSignature {
-  args: Record<string, DirectiveArgType>
+  /** Per-arg type. Either a bare type tag or a richer `ArgSpec`. Mixed shapes
+   *  in the same signature are allowed. */
+  args: Record<string, DirectiveArgType | ArgSpec>
   /** Required argument names — enforced by validator via E023. Args declared
    *  with `!` in SPEC §7 go here. Everything else is optional (may or may not
    *  have a default at generator level, but the compiler does not require it
-   *  to appear in source). */
+   *  to appear in source). For conditional-required arguments use
+   *  `requiredIf` on the per-arg `ArgSpec` instead (`@crdt.key` style). */
   required?: string[]
-  // Enum values are validated when argType is 'enum' or 'enum-or-string'
+  /** Closed-set enum values for selected args. Mirrors `ArgSpec.enumValues`
+   *  but at the signature level — kept for back-compat with pre-0.3.9
+   *  signatures. New code should put the set into the per-arg `ArgSpec`. */
   enumValues?: Record<string, string[]>
+  /** Where this directive may appear. Single source of truth for site
+   *  validation. Empty / unset is treated as "any site" (transitional —
+   *  every directive in 0.3.9+ declares this field). */
+  sites?: Site[]
+}
+
+/** Resolve a signature arg to its bare type tag, regardless of whether it
+ *  was declared in legacy or rich form. */
+export function argType(spec: DirectiveArgType | ArgSpec): DirectiveArgType {
+  return typeof spec === 'string' ? spec : spec.type
+}
+
+/** Resolve a signature arg's closed-set values (signature-level wins iff
+ *  defined; per-arg `ArgSpec.enumValues` is the fallback). */
+export function argEnumValues(
+  sig: DirectiveSignature,
+  argName: string,
+): string[] | undefined {
+  if (sig.enumValues?.[argName]) return sig.enumValues[argName]
+  const spec = sig.args[argName]
+  if (typeof spec === 'object' && (spec.type === 'string' || spec.type === 'enum')) {
+    return spec.enumValues
+  }
+  return undefined
+}
+
+/** Resolve a signature arg's `requiredIf` predicate, if any. */
+export function argRequiredIf(
+  sig: DirectiveSignature,
+  argName: string,
+): ((otherArgs: Record<string, unknown>) => boolean) | undefined {
+  const spec = sig.args[argName]
+  if (typeof spec === 'object') return spec.requiredIf
+  return undefined
 }
 
 // Required-arg lists are derived from SPEC §7:
@@ -51,10 +129,16 @@ export interface DirectiveSignature {
 //   §7.11 @deprecated(since: String!, reason: String)
 //   §7.12 @added(in: String!)
 //   §7.13 @topic(pattern: String!)
-// @sync, @crdt, @auth, @atomic, @this, @store have no required args per SPEC:
+// @sync, @crdt, @auth, @atomic, @this, @store have no signature-level
+// required args:
 //   - @sync: all three args have defaults
-//   - @crdt: `key` is required only for LWW_* (enforced by E004, not E023)
-//   - @auth: both args default to "public"
+//   - @crdt: `key` is required only for LWW_* — encoded as a per-arg
+//            `requiredIf` predicate (closes DRIFT-3 from Wave 2). Validator
+//            still emits E004 with its tailored message; E023 is a fallback
+//            when the predicate fires for any future LWW_* variant.
+//   - @auth: both args default to "public"; closed-set `Access` values
+//            `{public, owner, scope, server}` enforced via per-arg
+//            `enumValues` (closes DRIFT-1 from Wave 2).
 //   - @atomic/@this/@store: no args
 export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
   sync: {
@@ -63,30 +147,60 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
       qos: ['RELIABLE', 'REALTIME', 'ORDERED_RELIABLE'],
       mode: ['EAGER', 'LAZY'],
     },
+    sites: ['FIELD', 'RECORD'],
   },
   crdt: {
-    args: { type: 'enum', key: 'string' },
+    args: {
+      type: 'enum',
+      // DRIFT-3: `key` is required iff `type` starts with `LWW_`.
+      // Predicate keeps the rule next to the arg; validator surfaces E004
+      // with the dedicated "@crdt(type: LWW_*) requires key" message and
+      // skips the generic E023 to avoid double-reporting (see validator
+      // `validateDirective`).
+      key: { type: 'string', requiredIf: (a) => typeof a.type === 'string' && /^LWW_/.test(a.type) },
+    },
     enumValues: {
       type: ['LWW_REGISTER', 'LWW_MAP', 'OR_SET', 'G_COUNTER', 'PN_COUNTER', 'RGA'],
     },
+    sites: ['FIELD', 'RECORD'],
   },
-  atomic: { args: {} },
-  auth: { args: { read: 'string', write: 'string' } },
-  scope: { args: { name: 'string' }, required: ['name'] },
-  this: { args: {} },
-  store: { args: {} },
-  default: { args: { value: 'any' }, required: ['value'] },
+  atomic: { args: {}, sites: ['FIELD', 'RECORD'] },
+  // DRIFT-1: closed-set `Access` for `@auth.read/write`. Mismatch → E003 via
+  // the same string-membership path used by `@transport(kind: ...)`.
+  auth: {
+    args: {
+      read:  { type: 'string', enumValues: ['public', 'owner', 'scope', 'server'] },
+      write: { type: 'string', enumValues: ['public', 'owner', 'scope', 'server'] },
+    },
+    sites: ['FIELD', 'RECORD'],
+  },
+  scope: { args: { name: 'string' }, required: ['name'], sites: ['RECORD'] },
+  this: { args: {}, sites: ['ARGUMENT'] },
+  store: { args: {}, sites: ['FIELD', 'RECORD'] },
+  default: { args: { value: 'any' }, required: ['value'], sites: ['FIELD', 'ARGUMENT'] },
   liveness: {
     args: { source: 'string', timeout: 'int', on_lost: 'enum' },
     required: ['source', 'timeout'],
     enumValues: {
       on_lost: ['MARK_ABSENT', 'REMOVE', 'EMIT_EVENT'],
     },
+    sites: ['FIELD', 'RECORD'],
   },
-  range: { args: { min: 'any', max: 'any' }, required: ['min', 'max'] }, // Number — Int or Float
-  deprecated: { args: { since: 'string', reason: 'string' }, required: ['since'] },
-  added: { args: { in: 'string' }, required: ['in'] },
-  topic: { args: { pattern: 'string' }, required: ['pattern'] },
+  // DRIFT-4: `@range(min, max)` are explicitly numeric (Int or Float).
+  // `'number'` matches either (E003 message says "number"); per-field type
+  // compatibility (R180) still emits E015 separately. Sites widened to
+  // ARGUMENT — action input arguments accept `@range` for input validation
+  // (real-world usage in `pharos/Belladonna/schema/reader.aql`); SPEC §7.10
+  // header now reflects this.
+  range: { args: { min: 'number', max: 'number' }, required: ['min', 'max'], sites: ['FIELD', 'ARGUMENT'] },
+  // SPEC R068 explicitly allows `@deprecated` / `@added` on events; sites
+  // widened to EVENT to match. Argument placement (action input field) is
+  // also accepted in real-world schemas.
+  deprecated: { args: { since: 'string', reason: 'string' }, required: ['since'], sites: ['FIELD', 'RECORD', 'ACTION', 'EVENT', 'ARGUMENT'] },
+  added: { args: { in: 'string' }, required: ['in'], sites: ['FIELD', 'RECORD', 'ACTION', 'EVENT', 'ARGUMENT'] },
+  // `@topic` on events is allowed by R068 (event payload may carry @topic to
+  // override the default snake_case derivation). Sites widened to EVENT.
+  topic: { args: { pattern: 'string' }, required: ['pattern'], sites: ['RECORD', 'ACTION', 'OPAQUE', 'EVENT'] },
   // v0.3.4 (W8) — §7.14. Schema-level marker directive. `kind` is a string
   // from a closed set; validator enforces membership in `{tauri, http, zenoh,
   // any}` via `enumValues`. `kind` is typed `'string'` (not `'enum'`) so
@@ -96,6 +210,53 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
     args: { kind: 'string' },
     required: ['kind'],
     enumValues: { kind: ['tauri', 'http', 'zenoh', 'any'] },
+    sites: ['SCHEMA'],
+  },
+  // v0.3.6 — §7.15. Record-level directive opting a record into a composite
+  // CRDT Automerge document. `doc` names the document; `map` is the root-key
+  // inside that document under which the record's entries are stored. Both
+  // required. v0.3.7 adds `lww_field` (optional — override / fallback for
+  // @crdt(key:)) and `soft_delete` (optional — tombstone-by-flag). Shape
+  // consistency (field types, soft_delete object shape) lives in the
+  // validator (E027), not in the signature.
+  crdt_doc_member: {
+    args: {
+      doc: 'string',
+      map: 'string',
+      lww_field: 'string',
+      soft_delete: 'object',
+    },
+    required: ['doc', 'map'],
+    sites: ['RECORD'],
+  },
+  // v0.3.6 — §7.16. Schema-level directive declaring the Zenoh wire topic
+  // for a composite CRDT document. Placement is the same as @transport —
+  // between the schema name and the opening `{`. A schema may carry multiple
+  // @crdt_doc_topic directives, one per distinct `doc:`.
+  crdt_doc_topic: {
+    args: { doc: 'string', pattern: 'string' },
+    required: ['doc', 'pattern'],
+    sites: ['SCHEMA'],
+  },
+  // v0.3.6 — §7.17. Schema-level directive pinning an integer schema_version
+  // into a composite CRDT document. On load-time mismatch the document is
+  // dropped and re-initialised (R251: destructive, MUST be logged).
+  schema_version: {
+    args: { doc: 'string', value: 'int' },
+    required: ['doc', 'value'],
+    sites: ['SCHEMA'],
+  },
+  // v0.3.7 — §7.18. ENUM | RECORD. Emits `#[serde(rename_all = "<kind>")]`
+  // on the generated Rust type. Closed-set `kind:` matches the Rust serde
+  // `rename_all` vocabulary. Validator (E028) rejects `@rename_case` on
+  // anything other than enum or record.
+  rename_case: {
+    args: { kind: 'enum' },
+    required: ['kind'],
+    enumValues: {
+      kind: ['PASCAL', 'CAMEL', 'SNAKE', 'SCREAMING_SNAKE', 'KEBAB', 'LOWER', 'UPPER'],
+    },
+    sites: ['ENUM', 'RECORD'],
   },
 }
 
@@ -116,6 +277,14 @@ export function valueToRaw(v: Value): unknown {
     case 'bool':   return v.value
     case 'enum':   return v.value // stored as bare identifier string
     case 'list':   return v.values.map(valueToRaw)
+    // v0.3.7 — object-literal value: flatten to a plain JS record for IR.
+    // Duplicate keys inside the same object are left as-is (last-wins);
+    // generators that care can re-inspect argTypes to detect collisions.
+    case 'object': {
+      const out: Record<string, unknown> = {}
+      for (const f of v.fields) out[f.name] = valueToRaw(f.value)
+      return out
+    }
   }
 }
 
@@ -294,6 +463,10 @@ export function buildIR(ast: FileAST): IR {
       }
     } else if (def.kind === 'enum') {
       const existing: IREnum = { name: def.name, values: def.values.slice() }
+      // v0.3.7 — project enum-level directives into IR.
+      if (def.directives && def.directives.length > 0) {
+        existing.directives = def.directives.map(directiveToIR)
+      }
       if (def.leadingComments && def.leadingComments.length > 0) {
         existing.leadingComments = def.leadingComments.slice()
       }

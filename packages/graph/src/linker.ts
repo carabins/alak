@@ -363,7 +363,18 @@ function mergeGroup(
       if (mergedSchema.enums[name]) {
         const loc = findDefLoc(f.ast, 'enum', name) ?? { line: 1, column: 1 }
         diagnostics.push(diag('E010', MSG.E010(name), loc))
-      } else mergedSchema.enums[name] = { name: en.name, values: en.values.slice() }
+      } else {
+        const merged: typeof en = { name: en.name, values: en.values.slice() }
+        // v0.3.7: preserve enum-level directives through the linker merge.
+        if (en.directives && en.directives.length > 0) {
+          merged.directives = en.directives.map(d => ({
+            name: d.name,
+            args: { ...d.args },
+            argTypes: d.argTypes ? { ...d.argTypes } : undefined,
+          }))
+        }
+        mergedSchema.enums[name] = merged
+      }
     }
     for (const [name, sc] of Object.entries(fSchema.scalars)) {
       if (!mergedSchema.scalars[name]) mergedSchema.scalars[name] = { ...sc }
@@ -521,8 +532,11 @@ function findDefLoc(
 // ────────────────────────────────────────────────────────────────
 
 const BUILTIN_SCALARS = new Set([
-  'ID', 'String', 'Int', 'Float', 'Boolean',
+  'ID', 'String', 'Int', 'Float', 'Float32', 'Boolean',
   'Timestamp', 'UUID', 'Bytes', 'Duration',
+  // v0.3.6 — `Any` is a built-in scalar (SPEC §4.1). E026 enforces
+  // positional constraints; E009 must accept it as a known type name.
+  'Any',
 ])
 
 function collectImports(

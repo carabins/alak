@@ -576,6 +576,24 @@ export function parse(tokens: Token[], file?: string): ParserResult {
       expect('RBRACKET')
       return { kind: 'list', values, loc: locOf(t) }
     }
+    // v0.3.7 — object literal `{ key: value, ... }`. Only meaningful
+    // inside directive arguments today (e.g. `@crdt_doc_member(soft_delete:
+    // { flag: "is_deleted", ts_field: "updated_at" })`). Reuses the
+    // `parseArg` shape: each field is a `DirectiveArg` = { name, value,
+    // loc }. Trailing comma tolerated; empty objects (`{ }`) parse too.
+    if (t.kind === 'LBRACE') {
+      pos++
+      const fields: DirectiveArg[] = []
+      if (peek().kind !== 'RBRACE') {
+        fields.push(parseArg())
+        while (accept('COMMA')) {
+          if (peek().kind === 'RBRACE') break
+          fields.push(parseArg())
+        }
+      }
+      expect('RBRACE')
+      return { kind: 'object', fields, loc: locOf(t) }
+    }
     // Identifiers (bare) are enum literals
     if (t.kind === 'IDENTIFIER' || t.kind === 'KEYWORD') {
       pos++
@@ -635,6 +653,12 @@ export function parse(tokens: Token[], file?: string): ParserResult {
   const parseEnumDecl = (): EnumNode => {
     const kw = expect('KEYWORD', 'enum')
     const nameTok = expect('IDENTIFIER')
+    // v0.3.7 — accept `{ Directive }` between the identifier and the
+    // opening `{`. Mirror `RecordDecl` placement so authors learn one
+    // shape. The only enum-level directive defined in 0.3.7 is
+    // `@rename_case` (§7.18); unknown directives emit E001 via the
+    // usual validator path.
+    const directives = parseDirectives()
     expect('LBRACE')
     const values: string[] = []
     while (peek().kind !== 'RBRACE' && !isEOF()) {
@@ -645,7 +669,7 @@ export function parse(tokens: Token[], file?: string): ParserResult {
       accept('COMMA') // optional separator (R003)
     }
     expect('RBRACE')
-    return { kind: 'enum', name: nameTok.value, values, loc: locOf(kw) }
+    return { kind: 'enum', name: nameTok.value, values, directives, loc: locOf(kw) }
   }
 
   // ─── ScalarDecl = "scalar" Identifier

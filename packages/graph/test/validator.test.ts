@@ -218,6 +218,362 @@ describe('validator — errors E001–E020', () => {
         .not.toContain('E023')
     })
   })
+
+  // v0.3.6 — `Any` placement (SPEC §4.1 + E026)
+  describe('E026 — `Any` placement', () => {
+    test('`Any` as a record field → clean', () => {
+      expect(codesOf(base + 'record R { x: Any }')).not.toContain('E026')
+    })
+
+    test('`Any!` (required) as a record field → clean', () => {
+      expect(codesOf(base + 'record R { x: Any! }')).not.toContain('E026')
+    })
+
+    test('`Map<String, Any>` value → clean', () => {
+      expect(codesOf(base + 'record R { extras: Map<String, Any>! }')).not.toContain('E026')
+    })
+
+    test('`Map<Any, String>` key → E026', () => {
+      expect(codesOf(base + 'record R { m: Map<Any, String>! }')).toContain('E026')
+    })
+
+    test('`[Any]` list element → E026', () => {
+      expect(codesOf(base + 'record R { xs: [Any] }')).toContain('E026')
+    })
+
+    test('`[Any!]!` required list of required Any → E026', () => {
+      expect(codesOf(base + 'record R { xs: [Any!]! }')).toContain('E026')
+    })
+
+    test('`Any` in action input → E026', () => {
+      const src = base +
+        'record R { id: ID! }\n' +
+        'action A { scope: "r", input: { payload: Any! } output: Boolean! }'
+      expect(codesOf(src)).toContain('E026')
+    })
+
+    test('`Any` in action output → E026', () => {
+      expect(codesOf(base + 'action A { output: Any! }')).toContain('E026')
+    })
+
+    test('`Any` in event field → E026', () => {
+      expect(codesOf(base + 'event E { payload: Any! }')).toContain('E026')
+    })
+
+    test('`Map<String, [Any]>` — list-of-Any inside map value still fires E026', () => {
+      expect(codesOf(base + 'record R { m: Map<String, [Any]>! }')).toContain('E026')
+    })
+
+    test('clean schema without Any — no E026 noise', () => {
+      expect(codesOf(base + 'record R { id: ID!, name: String! }')).not.toContain('E026')
+    })
+  })
+
+  // v0.3.6 — composite CRDT document consistency (SPEC §7.15–§7.17 + E027)
+  describe('E027 — composite CRDT document', () => {
+    const composite = (body: string) =>
+      'schema S @crdt_doc_topic(doc: "D", pattern: "ns/{id}/patch") { version: 1, namespace: "s" }\n' + body
+
+    test('topic + matching member + @crdt → clean', () => {
+      const src = composite(
+        'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      )
+      expect(codesOf(src)).not.toContain('E027')
+    })
+
+    test('member without matching topic → E027', () => {
+      const src = base +
+        'record P @crdt_doc_member(doc: "Missing", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('topic without any member → E027', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "Orphan", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+        'record R { id: ID! }'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('member without @crdt → E027', () => {
+      const src = composite(
+        'record P @crdt_doc_member(doc: "D", map: "points") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      )
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('member with @scope → E027 (R233 forbids combo)', () => {
+      const src = composite(
+        'record P @crdt_doc_member(doc: "D", map: "points")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at")\n' +
+        '         @scope(name: "room") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      )
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('two members of doc share same map slot → E027', () => {
+      const src = composite(
+        'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}\n' +
+        'record Q @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      )
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('two topics for same doc → E027', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "a")\n' +
+        '         @crdt_doc_topic(doc: "D", pattern: "b") {\n' +
+        '  version: 1, namespace: "s"\n' +
+        '}\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('@schema_version without matching topic → E027', () => {
+      const src =
+        'schema S @schema_version(doc: "Missing", value: 2) { version: 1, namespace: "s" }\n' +
+        'record R { id: ID! }'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('@schema_version with matching topic + member → clean', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "ns/{id}/patch")\n' +
+        '         @schema_version(doc: "D", value: 2) {\n' +
+        '  version: 1, namespace: "s"\n' +
+        '}\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).not.toContain('E027')
+    })
+
+    test('two @schema_version for same doc → E027', () => {
+      const src =
+        'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x")\n' +
+        '         @schema_version(doc: "D", value: 1)\n' +
+        '         @schema_version(doc: "D", value: 2) {\n' +
+        '  version: 1, namespace: "s"\n' +
+        '}\n' +
+        'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('full Busynca-like composite: two members, schema_version, topic → clean', () => {
+      const src =
+        'schema Busynca @crdt_doc_topic(doc: "GroupSync", pattern: "valkyrie/{group}/sync/patch")\n' +
+        '               @schema_version(doc: "GroupSync", value: 2) {\n' +
+        '  version: 1\n' +
+        '  namespace: "valkyrie"\n' +
+        '}\n' +
+        'record SyncPoint @crdt_doc_member(doc: "GroupSync", map: "points")\n' +
+        '                 @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '  extras: Map<String, Any>!\n' +
+        '}\n' +
+        'record DeviceEntry @crdt_doc_member(doc: "GroupSync", map: "devices")\n' +
+        '                   @crdt(type: LWW_MAP, key: "ts") {\n' +
+        '  device_id: ID!\n' +
+        '  ts: Timestamp!\n' +
+        '  name: String!\n' +
+        '}'
+      const codes = codesOf(src)
+      expect(codes).not.toContain('E027')
+      expect(codes).not.toContain('E026')
+      expect(codes).not.toContain('E023')
+      expect(codes).not.toContain('E004')
+      expect(codes).not.toContain('E005')
+    })
+  })
+
+  // v0.3.7 — @rename_case on enum/record (SPEC §7.18 + E028)
+  describe('E028 — @rename_case placement', () => {
+    test('@rename_case on enum → clean', () => {
+      expect(codesOf(base + 'enum E @rename_case(kind: PASCAL) { A B }'))
+        .not.toContain('E028')
+    })
+
+    test('@rename_case on record → clean', () => {
+      expect(codesOf(base + 'record R @rename_case(kind: CAMEL) { id: ID! }'))
+        .not.toContain('E028')
+    })
+
+    test('@rename_case on field → E028', () => {
+      expect(codesOf(base + 'record R { id: ID! @rename_case(kind: CAMEL) }'))
+        .toContain('E028')
+    })
+
+    test('@rename_case on action argument → E028', () => {
+      const src = base +
+        'record R { id: ID! }\n' +
+        'action A { scope: "r", input: { x: Int! @rename_case(kind: SNAKE) } output: Boolean! }'
+      expect(codesOf(src)).toContain('E028')
+    })
+
+    test('@rename_case on event → E028', () => {
+      expect(codesOf(base + 'event E @rename_case(kind: PASCAL) { x: Int! }'))
+        .toContain('E028')
+    })
+
+    test('@rename_case without kind → E023', () => {
+      expect(codesOf(base + 'enum E @rename_case { A B }')).toContain('E023')
+    })
+
+    test('@rename_case(kind: BOGUS) → E003', () => {
+      expect(codesOf(base + 'enum E @rename_case(kind: BOGUS) { A B }')).toContain('E003')
+    })
+
+    test('every closed-set kind accepted', () => {
+      for (const kind of ['PASCAL', 'CAMEL', 'SNAKE', 'SCREAMING_SNAKE', 'KEBAB', 'LOWER', 'UPPER']) {
+        const codes = codesOf(base + `enum E @rename_case(kind: ${kind}) { A B }`)
+        expect(codes).not.toContain('E003')
+        expect(codes).not.toContain('E028')
+      }
+    })
+  })
+
+  // v0.3.7 — @crdt_doc_member lww_field + soft_delete (SPEC §7.15 R234–R235)
+  describe('E027 — lww_field / soft_delete consistency', () => {
+    const compositeBase =
+      'schema S @crdt_doc_topic(doc: "D", pattern: "ns/{id}/patch") { version: 1, namespace: "s" }\n'
+
+    test('lww_field matching @crdt(key) → clean', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points", lww_field: "updated_at")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).not.toContain('E027')
+    })
+
+    test('lww_field naming missing field → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points", lww_field: "nope")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('lww_field naming non-Timestamp/Int field → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points", lww_field: "label")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  label: String!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('lww_field disagreeing with @crdt(key) → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points", lww_field: "ts")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  ts: Timestamp!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('soft_delete well-formed → clean', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          lww_field: "updated_at",\n' +
+        '                          soft_delete: { flag: "is_deleted", ts_field: "updated_at" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).not.toContain('E027')
+    })
+
+    test('soft_delete.flag missing from record → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          soft_delete: { flag: "gone", ts_field: "updated_at" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('soft_delete.flag pointing at non-Boolean → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          soft_delete: { flag: "name", ts_field: "updated_at" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  name: String!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('soft_delete.ts_field pointing at missing field → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          soft_delete: { flag: "is_deleted", ts_field: "nope" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('soft_delete missing "flag" key → E027', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          soft_delete: { ts_field: "updated_at" })\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E027')
+    })
+
+    test('@crdt_doc_member without lww_field/soft_delete still works (0.3.6 shape)', () => {
+      const src = compositeBase +
+        'record P @crdt_doc_member(doc: "D", map: "points")\n' +
+        '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+        '  id: ID!\n' +
+        '  updated_at: Timestamp!\n' +
+        '}'
+      expect(codesOf(src)).not.toContain('E027')
+    })
+  })
 })
 
 describe('validator — warnings W001–W004', () => {
@@ -243,5 +599,76 @@ describe('validator — warnings W001–W004', () => {
   test('W004 — not emitted by core validator (advisory)', () => {
     // Any valid schema — W004 should not appear.
     expect(codesOf(base + 'record R { id: ID! }')).not.toContain('W004')
+  })
+})
+
+// ──────────────────────────────────────────────────────────────────────────
+// Wave 3A — DRIFT FIXES (v0.3.9)
+// ──────────────────────────────────────────────────────────────────────────
+//
+// Four drifts found during Wave 2's §7 header pass:
+//   DRIFT-1: `@auth(read/write)` closed-set was not enforced.
+//   DRIFT-2: site-validation was scattered across bespoke per-directive
+//            checks; centralised via `DirectiveSignature.sites` + E029.
+//   DRIFT-3: `@crdt(key)` conditional-required encoded as a per-arg
+//            `requiredIf` predicate (not a separate hard-coded rule).
+//   DRIFT-4: `@range(min/max)` had `'any'` argType; now `'number'`.
+describe('Wave 3A — drift fixes', () => {
+  test('DRIFT-1: @auth(read: "blah") fires E003 (closed Access set)', () => {
+    const src = base + 'record R @auth(read: "blah") { id: ID! }'
+    expect(codesOf(src)).toContain('E003')
+  })
+
+  test('DRIFT-1: @auth(read: "owner") is clean', () => {
+    const src = base + 'record R @auth(read: "owner") { id: ID! }'
+    expect(codesOf(src)).not.toContain('E003')
+  })
+
+  test('DRIFT-1: @auth(write: "server") is clean', () => {
+    const src = base + 'record R @auth(write: "server") { id: ID! }'
+    expect(codesOf(src)).not.toContain('E003')
+  })
+
+  test('DRIFT-2: @scope on a field fires E029 (RECORD-only directive)', () => {
+    const src = base + 'record R { id: ID! @scope(name: "room") }'
+    expect(codesOf(src)).toContain('E029')
+  })
+
+  test('DRIFT-2: @atomic on a schema fires E029 (FIELD/RECORD-only)', () => {
+    const src = 'schema S @atomic { version: 1, namespace: "s" }\nrecord R { id: ID! }'
+    expect(codesOf(src)).toContain('E029')
+  })
+
+  test('DRIFT-2: @transport on a record fires E029 (SCHEMA-only)', () => {
+    const src = base + 'record R @transport(kind: "tauri") { id: ID! }'
+    expect(codesOf(src)).toContain('E029')
+  })
+
+  test('DRIFT-3: @crdt(type: LWW_MAP) without key still fires E004 (tailored)', () => {
+    // `requiredIf` predicate fires, but the validator suppresses the generic
+    // E023 in favour of the dedicated E004 message.
+    const src = base + 'record R @crdt(type: LWW_MAP) { id: ID!, updated_at: Timestamp! }'
+    const codes = codesOf(src)
+    expect(codes).toContain('E004')
+    expect(codes).not.toContain('E023')
+  })
+
+  test('DRIFT-3: @crdt(type: OR_SET) without key is clean (predicate is false)', () => {
+    const src = base + 'record R @crdt(type: OR_SET) { id: ID! }'
+    const codes = codesOf(src)
+    expect(codes).not.toContain('E004')
+    expect(codes).not.toContain('E023')
+  })
+
+  test('DRIFT-4: @range(min: "x", max: 10) on Int field fires E003 (number-typed)', () => {
+    const src = base + 'record R { n: Int! @range(min: "x", max: 10) }'
+    expect(codesOf(src)).toContain('E003')
+  })
+
+  test('DRIFT-4: @range(min: 1.5, max: 9.5) on Float field is clean', () => {
+    const src = base + 'record R { f: Float! @range(min: 1.5, max: 9.5) }'
+    const codes = codesOf(src)
+    expect(codes).not.toContain('E003')
+    expect(codes).not.toContain('E015')
   })
 })

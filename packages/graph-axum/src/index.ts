@@ -67,6 +67,16 @@ export interface GenerateOptions {
   /** Name of the runtime crate to import from (ActionContext, HandlerError,
    *  async_trait re-export). Default `alaq-graph-axum-rt`. */
   runtimeCrate?: string
+  /**
+   * Wire-format envelope for input bodies. Canonical alak HTTP transport wraps
+   * the input object as `{ "input": <body> }` — this is what the alak HTTP
+   * clients (`@alaq/graph-link-http`, `@alaq/graph-link-http-rs`,
+   * `alaq-link-http-client`) emit. Servers generated with `wireEnvelope:
+   * 'wrapped'` (default) accept the wrapped body and unwrap it before dispatch;
+   * `'bare'` preserves pre-envelope behaviour (`Json(input): Json<T>` —
+   * request body IS the input struct).
+   */
+  wireEnvelope?: 'bare' | 'wrapped'
 }
 
 export interface GenerateDiagnostic {
@@ -87,6 +97,7 @@ export interface GenerateResult {
 const DEFAULTS: Required<Omit<GenerateOptions, 'namespace'>> = {
   header: true,
   runtimeCrate: 'alaq_graph_axum_rt',
+  wireEnvelope: 'wrapped',
 }
 
 /**
@@ -109,6 +120,7 @@ export function generate(ir: IR, options: GenerateOptions = {}): GenerateResult 
   const opts = {
     header: options.header ?? DEFAULTS.header,
     runtimeCrate,
+    wireEnvelope: options.wireEnvelope ?? DEFAULTS.wireEnvelope,
   }
 
   const files: GenerateFile[] = []
@@ -159,7 +171,7 @@ export { SUPPORTED_TRANSPORTS }
 
 function generateNamespaceFiles(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
   files: GenerateFile[],
   diagnostics: GenerateDiagnostic[],
 ) {
@@ -255,7 +267,7 @@ function generateNamespaceFiles(
 
 function buildModFile(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
 ): string {
   const buf = new LineBuffer()
   emitFileHeader(buf, {
@@ -281,7 +293,7 @@ function buildModFile(
 
 function buildTypesFile(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
   ctx: ReturnType<typeof buildTypeContext>,
 ): string {
   const buf = new LineBuffer()
@@ -315,7 +327,7 @@ function buildTypesFile(
 
 function buildHandlersFile(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
 ): string {
   const buf = new LineBuffer()
   emitFileHeader(buf, {
@@ -331,7 +343,7 @@ function buildHandlersFile(
 
 function buildStateFile(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
 ): string {
   const buf = new LineBuffer()
   emitFileHeader(buf, {
@@ -347,7 +359,7 @@ function buildStateFile(
 
 function buildRoutesFile(
   schema: IRSchema,
-  opts: { header: boolean; runtimeCrate: string },
+  opts: { header: boolean; runtimeCrate: string; wireEnvelope: 'bare' | 'wrapped' },
 ): string {
   const buf = new LineBuffer()
   emitFileHeader(buf, {
@@ -357,7 +369,7 @@ function buildRoutesFile(
     header: opts.header,
   })
   emitSection(buf, 'Router + per-action dispatchers')
-  emitRouterFn(buf, schema, opts.runtimeCrate)
+  emitRouterFn(buf, schema, opts.runtimeCrate, opts.wireEnvelope)
   return buf.toString()
 }
 
