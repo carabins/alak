@@ -88,9 +88,13 @@ record SyncPoint @crdt_doc_member(doc: "GroupSync",
 # SDL: mirrors Busynca's `DeviceEntry` (models.rs:67-81). Composite CRDT
 # member under root map "devices"; LWW key = `ts`; **no soft-delete**
 # (Busynca hard-deletes devices from the map — no `is_deleted` flag).
+# v0.3.9 R236 forbids hard-delete by default; this fixture preserves the
+# pre-existing Busynca wire contract via `@breaking_change(reason:)`,
+# which opts the record out of E030 with self-documenting justification.
 record DeviceEntry @crdt_doc_member(doc: "GroupSync",
                                     map: "devices",
                                     lww_field: "ts")
+                   @breaking_change(reason: "Busynca Phase-0 wire contract — devices are hard-deleted (models.rs:67-81). Migrating to soft_delete is a wire break for live peers.")
                    @crdt(type: LWW_MAP, key: "ts") {
   device_id: ID!
   name: String!

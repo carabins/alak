@@ -6,7 +6,7 @@ SDL compiler for the alaqlink stack. Parses `.aql` schemas into a typed IR with 
 
 `6.0.0-alpha.0` — **unstable**. Breaking changes to the IR shape, directive set, and diagnostic codes are expected before 6.0.0 GA. Pin exact versions and treat alpha-to-alpha upgrades as source-breaking.
 
-SPEC version: **0.3.8**. The package version (`6.0.0-alpha.0`) and the SPEC version are tracked independently — see `./SPEC.md` and `./CHANGELOG.md`.
+SPEC version: **0.3.9**. The package version (`6.0.0-alpha.0`) and the SPEC version are tracked independently — see `./SPEC.md` and `./CHANGELOG.md`.
 
 ## What it is
 

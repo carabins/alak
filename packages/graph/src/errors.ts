@@ -40,10 +40,26 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   // fallback for directives appearing at a site outside their declared
   // `DirectiveSignature.sites`. E028/E006/E024 keep tailored messages.
   E029: 'error',
+  // v0.3.9 (Wave 3B — R236): hard-delete forbidden on @crdt_doc_member.
+  // `soft_delete: { flag, ts_field }` is required; missing → E030.
+  E030: 'error',
+  // v0.3.9 (Wave 3B — B7 baseline checker, deferred to v0.4): structural
+  // changes against a baseline IR that would invalidate live consumers.
+  // E031-E034 are reserved by the catalog; the full diff implementation
+  // lands in v0.4. The CLI flag (`aqc build --baseline=<git-ref>`) accepts
+  // the option today and emits W009 (stub-active) per file.
+  E031: 'error',
+  E032: 'error',
+  E033: 'error',
+  E034: 'error',
   W001: 'warning',
   W002: 'warning',
   W003: 'warning',
   W004: 'warning',
+  // v0.3.9 (Wave 3B): backward-compat advisories.
+  W007: 'warning',  // optional field added in middle of record
+  W008: 'warning',  // @envelope override-coherence (e.g. stream + block_first)
+  W009: 'warning',  // @deprecated_field used; baseline-checker stub active
 }
 
 export function diag(
@@ -131,10 +147,51 @@ export const MSG = {
     `directive @${directive} is not valid on ${where}; ` +
     `allowed sites: ${allowed.join(', ')}`,
 
+  // v0.3.9 (Wave 3B — R236): @crdt_doc_member without soft_delete. Hard
+  // delete is forbidden for composite-document members; tombstone-by-flag
+  // (`soft_delete: { flag, ts_field }`) MUST be supplied so peers replay
+  // deletes deterministically. Records that genuinely need hard delete
+  // must opt out with `@breaking_change(reason: "...")`.
+  E030: (record: string) =>
+    `record "${record}" carries @crdt_doc_member but no soft_delete; ` +
+    `hard-delete is forbidden (R236). ` +
+    `Add soft_delete: { flag: "...", ts_field: "..." } or opt out with @breaking_change(reason: ...)`,
+
+  // v0.3.9 (Wave 3B — B7, deferred to v0.4): backward-compat baseline-
+  // checker error catalog. The CLI today accepts `--baseline=<git-ref>`
+  // but only emits a stub warning; the full diff lives in v0.4. Messages
+  // are placeholders so that catalog references resolve.
+  E031: (field: string) =>
+    `field "${field}" type changed in a wire-incompatible way without ` +
+    `@breaking_change (deferred to v0.4 baseline-checker)`,
+  E032: (doc: string) =>
+    `topic for @crdt_doc_topic(doc: "${doc}") removed without @retired_topic ` +
+    `(deferred to v0.4 baseline-checker)`,
+  E033: (doc: string, was: number, now: number) =>
+    `@schema_version(doc: "${doc}") downgraded from ${was} to ${now} ` +
+    `(deferred to v0.4 baseline-checker)`,
+  E034: (target: string) =>
+    `@rename_case on ${target} changed without @breaking_change ` +
+    `(deferred to v0.4 baseline-checker)`,
+
   W001: (field: string) =>
     `@sync(qos: REALTIME) on composite field "${field}" without @atomic`,
   W002: (field: string) => `@store on "${field}" without explicit @sync; defaults to RELIABLE`,
   W003: (record: string) =>
     `record ${record} has @crdt but no Timestamp! field named "updated_at"`,
   W004: (what: string) => `directive declared but target does not use it: ${what}`,
+  // v0.3.9 (Wave 3B): backward-compat advisories.
+  W007: (record: string, field: string) =>
+    `optional field "${field}" added in the middle of record "${record}"; ` +
+    `wire is CBOR-map keyed by name so order is normally tolerant, but ` +
+    `array-frozen consumers (legacy or fixture-bound) break. Append at end ` +
+    `or use @breaking_change`,
+  W008: (envelopeKind: string, override: string) =>
+    `@envelope(${envelopeKind}) overridden by @${override} — incoherent ` +
+    `combination; preset defaults are likely better. ` +
+    `If intentional, suppress with @breaking_change(reason: ...).`,
+  W009: (field: string, replacedBy?: string) =>
+    `field "${field}" is @deprecated_field` +
+    (replacedBy ? ` (replaced by "${replacedBy}")` : '') +
+    `; consumers should migrate before next major bump`,
 }

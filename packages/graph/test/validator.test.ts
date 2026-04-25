@@ -672,3 +672,91 @@ describe('Wave 3A — drift fixes', () => {
     expect(codes).not.toContain('E015')
   })
 })
+
+// ──────────────────────────────────────────────────────────────────────────
+// Wave 3B — new directives + R236 (SPEC 0.3.9)
+// ──────────────────────────────────────────────────────────────────────────
+describe('Wave 3B — new directives (SPEC 0.3.9)', () => {
+  // §7.19 @envelope
+  test('@envelope(snapshot) on RECORD is clean', () => {
+    expect(codesOf(base + 'record R @envelope(kind: snapshot) { id: ID! }')).not.toContain('E003')
+  })
+
+  test('@envelope(blah) fires E003 (closed set)', () => {
+    expect(codesOf(base + 'record R @envelope(kind: blah) { id: ID! }')).toContain('E003')
+  })
+
+  test('@envelope on FIELD fires E029 (RECORD/EVENT/ACTION-only)', () => {
+    expect(codesOf(base + 'record R { id: ID! @envelope(kind: snapshot) }')).toContain('E029')
+  })
+
+  // W008 — @envelope override-coherence: stream + crdt is incoherent.
+  test('W008: @envelope(stream) + @crdt fires advisory', () => {
+    const src = base + 'record R @envelope(kind: stream) @crdt(type: LWW_REGISTER) { id: ID!, updated_at: Timestamp! }'
+    expect(codesOf(src)).toContain('W008')
+  })
+
+  // §7.20 @conflict
+  test('@conflict(operator_review) on RECORD is clean', () => {
+    expect(codesOf(base + 'record R @conflict(strategy: operator_review) { id: ID! }')).not.toContain('E003')
+  })
+
+  test('@conflict(invalid) fires E003 (closed set)', () => {
+    expect(codesOf(base + 'record R @conflict(strategy: invalid) { id: ID! }')).toContain('E003')
+  })
+
+  // §7.21 @bootstrap
+  test('@bootstrap(crdt_sync) on SCHEMA is clean', () => {
+    const src = 'schema S @bootstrap(mode: crdt_sync) { version: 1, namespace: "s" }\nrecord R { id: ID! }'
+    expect(codesOf(src)).not.toContain('E003')
+  })
+
+  test('@bootstrap on RECORD fires E029 (SCHEMA-only)', () => {
+    expect(codesOf(base + 'record R @bootstrap(mode: crdt_sync) { id: ID! }')).toContain('E029')
+  })
+
+  // §7.22 @large
+  test('@large(threshold_kb: 256) on FIELD parses cleanly', () => {
+    expect(codesOf(base + 'record R { blob: Bytes! @large(threshold_kb: 256) }')).not.toContain('E003')
+  })
+
+  test('@large on RECORD fires E029 (FIELD-only)', () => {
+    expect(codesOf(base + 'record R @large(threshold_kb: 256) { id: ID! }')).toContain('E029')
+  })
+
+  // §7.25 @breaking_change — required reason
+  test('@breaking_change without reason fires E023', () => {
+    expect(codesOf(base + 'record R @breaking_change { id: ID! }')).toContain('E023')
+  })
+
+  // R236 / E030 — hard delete forbidden on @crdt_doc_member
+  test('E030: @crdt_doc_member without soft_delete fires', () => {
+    const src =
+      'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+      'record P @crdt_doc_member(doc: "D", map: "points") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+      '  id: ID!, updated_at: Timestamp!\n' +
+      '}'
+    expect(codesOf(src)).toContain('E030')
+  })
+
+  test('R236 opt-out: @breaking_change suppresses E030', () => {
+    const src =
+      'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+      'record P @crdt_doc_member(doc: "D", map: "points")\n' +
+      '         @breaking_change(reason: "legacy wire contract") @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+      '  id: ID!, updated_at: Timestamp!\n' +
+      '}'
+    expect(codesOf(src)).not.toContain('E030')
+  })
+
+  test('R236 with soft_delete is clean', () => {
+    const src =
+      'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
+      'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+      '                          soft_delete: { flag: "is_deleted", ts_field: "updated_at" })\n' +
+      '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
+      '  id: ID!, is_deleted: Boolean!, updated_at: Timestamp!\n' +
+      '}'
+    expect(codesOf(src)).not.toContain('E030')
+  })
+})

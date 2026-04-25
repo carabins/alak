@@ -122,6 +122,28 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
           validateDirective(d, out, 'record', rec.name)
         }
 
+        // v0.3.9 (Wave 3B — W008): @envelope override-coherence. The preset
+        // expansion happens at codegen time (see SPEC §7.19); when an author
+        // also writes a sibling directive that contradicts the preset's
+        // implicit choices, warn. Today the only contradiction we can detect
+        // structurally is `@envelope(stream)` paired with `@crdt(...)` — the
+        // `stream` preset implies `crdt_mode: none` while `@crdt` adds CRDT
+        // semantics. Other override-coherence cases (priority/congestion)
+        // need their own sibling directives, deferred to v0.4.
+        const envelopeDir = recNode.directives.find(d => d.name === 'envelope')
+        if (envelopeDir) {
+          const kindArg = envelopeDir.args.find(a => a.name === 'kind')
+          const kindVal = kindArg && kindArg.value.kind === 'enum' ? kindArg.value.value : null
+          const hasCrdt = recNode.directives.some(d => d.name === 'crdt')
+            || recNode.directives.some(d => d.name === 'crdt_doc_member')
+          if (kindVal === 'stream' && hasCrdt) {
+            out.push(diag('W008', MSG.W008('stream', 'crdt'), envelopeDir.loc))
+          }
+          if (kindVal === 'event' && hasCrdt) {
+            out.push(diag('W008', MSG.W008('event', 'crdt'), envelopeDir.loc))
+          }
+        }
+
         // E010: duplicate field detection across `record` + `extend record`.
         // Use AST-level data since extend blocks live there.
         const allFieldNames = new Map<string, SourceLoc>()
@@ -869,10 +891,19 @@ function validateCompositeDocs(
       }
     }
 
+    // v0.3.9 — R236: hard-delete forbidden. `soft_delete: { flag, ts_field }`
+    // is required for `@crdt_doc_member`. Records that genuinely need hard
+    // delete must opt out with `@breaking_change(reason: "...")`. The
+    // existing R235 shape checks below only run when soft_delete IS
+    // supplied — they remain unchanged.
+    const softDeleteArg = memberDir.args.find(a => a.name === 'soft_delete')
+    const hasBreakingChange = def.directives.some(d => d.name === 'breaking_change')
+    if (!softDeleteArg && !hasBreakingChange) {
+      out.push(diag('E030', MSG.E030(def.name), memberDir.loc))
+    }
     // v0.3.7 — R235: `soft_delete` object shape. `flag` must name a
     // `Boolean!` field; `ts_field` must name a `Timestamp!`/`Int!`
     // field. Both required inside the object.
-    const softDeleteArg = memberDir.args.find(a => a.name === 'soft_delete')
     if (softDeleteArg && softDeleteArg.value.kind === 'object') {
       const obj = softDeleteArg.value
       const flagField = obj.fields.find(f => f.name === 'flag')

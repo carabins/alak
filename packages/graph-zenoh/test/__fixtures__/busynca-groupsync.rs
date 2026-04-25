@@ -63,7 +63,7 @@ pub enum PointKind {
 // Records — structs and impl blocks
 // ────────────────────────────────────────────────────────────────
 
-// SDL: record DeviceEntry @crdt_doc_member(doc: "GroupSync", map: "devices", lww_field: "ts") @crdt(type: LWW_MAP, key: "ts")
+// SDL: record DeviceEntry @crdt_doc_member(doc: "GroupSync", map: "devices", lww_field: "ts") @breaking_change(reason: "Busynca Phase-0 wire contract — devices are hard-deleted (models.rs:67-81). Migrating to soft_delete is a wire break for live peers.") @crdt(type: LWW_MAP, key: "ts")
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeviceEntry {
     pub device_id: String,

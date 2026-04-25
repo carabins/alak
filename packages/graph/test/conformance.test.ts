@@ -287,9 +287,12 @@ record R { id: ID! }`
         '         @schema_version(doc: "GroupSync", value: 2) {\n' +
         '  version: 1, namespace: "s"\n' +
         '}\n' +
-        'record P @crdt_doc_member(doc: "GroupSync", map: "points")\n' +
+        // v0.3.9 — R236: soft_delete required for @crdt_doc_member.
+        'record P @crdt_doc_member(doc: "GroupSync", map: "points",\n' +
+        '                          soft_delete: { flag: "is_deleted", ts_field: "updated_at" })\n' +
         '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
         '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
         '  updated_at: Timestamp!\n' +
         '}'
       const { ir, diagnostics } = parseSource(src)
@@ -309,9 +312,12 @@ record R { id: ID! }`
     test('IR preserves @crdt_doc_member on record', () => {
       const src =
         'schema S @crdt_doc_topic(doc: "D", pattern: "ns/x") { version: 1, namespace: "s" }\n' +
-        'record P @crdt_doc_member(doc: "D", map: "points")\n' +
+        // v0.3.9 — R236: soft_delete required for @crdt_doc_member.
+        'record P @crdt_doc_member(doc: "D", map: "points",\n' +
+        '                          soft_delete: { flag: "is_deleted", ts_field: "updated_at" })\n' +
         '         @crdt(type: LWW_MAP, key: "updated_at") {\n' +
         '  id: ID!\n' +
+        '  is_deleted: Boolean!\n' +
         '  updated_at: Timestamp!\n' +
         '}'
       const { ir, diagnostics } = parseSource(src)

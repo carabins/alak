@@ -484,10 +484,33 @@ export type DiagnosticCode =
    *  messages and fire alongside E029 only where they were already
    *  defined; new directives get site validation for free. */
   | 'E029'
+  /** v0.3.9 (Wave 3B — R236): hard-delete forbidden on @crdt_doc_member.
+   *  `soft_delete: { flag, ts_field }` is required. */
+  | 'E030'
+  /** v0.3.9 (Wave 3B — B7, deferred to v0.4): baseline-checker reserved
+   *  codes. CLI flag `aqc build --baseline=<git-ref>` is wired today but
+   *  only emits a stub warning; full IR-vs-baseline diff lands in v0.4.
+   *   - E031: required field type changed without @breaking_change
+   *   - E032: @crdt_doc_topic removed without @retired_topic
+   *   - E033: @schema_version downgraded
+   *   - E034: @rename_case changed without @breaking_change */
+  | 'E031'
+  | 'E032'
+  | 'E033'
+  | 'E034'
   | 'W001'
   | 'W002'
   | 'W003'
   | 'W004'
+  /** v0.3.9 (Wave 3B): backward-compat advisories.
+   *  W007: optional field added in the middle of a record (CBOR-map keyed
+   *  by name normally tolerates this; array-frozen consumers break).
+   *  W008: @envelope override-coherence (e.g. `@envelope(stream)` paired
+   *  with `@congestion(block_first)` — preset override is incoherent).
+   *  W009: field annotated with @deprecated_field; codegen advisory. */
+  | 'W007'
+  | 'W008'
+  | 'W009'
   // Reserved for generic structural parse errors (lexical / syntactic). Not in §12
   // but needed so the pipeline can report malformed source without crashing.
   | 'E000'

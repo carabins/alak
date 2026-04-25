@@ -66,9 +66,11 @@ describe('Composite CRDT document — single-member', () => {
       version: 1
       namespace: "single_mem"
     }
-    record Item @crdt_doc_member(doc: "Single", map: "items")
+    record Item @crdt_doc_member(doc: "Single", map: "items",
+                                  soft_delete: { flag: "is_deleted", ts_field: "updated_at" })
                 @crdt(type: LWW_MAP, key: "updated_at") {
       id: ID!
+      is_deleted: Boolean!
       updated_at: Timestamp!
       name: String!
     }
@@ -156,15 +158,19 @@ describe('Composite CRDT document — two members + @schema_version', () => {
       version: 1
       namespace: "valkyrie"
     }
-    record SyncPoint @crdt_doc_member(doc: "GroupSync", map: "points")
+    record SyncPoint @crdt_doc_member(doc: "GroupSync", map: "points",
+                                      soft_delete: { flag: "is_deleted", ts_field: "updated_at" })
                      @crdt(type: LWW_MAP, key: "updated_at") {
       id: ID!
+      is_deleted: Boolean!
       updated_at: Timestamp!
       extras: Map<String, Any>!
     }
-    record DeviceEntry @crdt_doc_member(doc: "GroupSync", map: "devices")
+    record DeviceEntry @crdt_doc_member(doc: "GroupSync", map: "devices",
+                                        soft_delete: { flag: "is_deleted", ts_field: "ts" })
                        @crdt(type: LWW_MAP, key: "ts") {
       id: ID!
+      is_deleted: Boolean!
       ts: Timestamp!
       name: String!
     }
@@ -377,6 +383,9 @@ describe('@crdt_doc_member soft_delete (v0.3.7)', () => {
   })
 
   test('hard-delete record (no soft_delete arg) passes None to rt', () => {
+    // v0.3.9 R236 forbids hard-delete on @crdt_doc_member; the
+    // @breaking_change opt-out keeps the codegen path exercised so that
+    // pre-existing wire contracts (Busynca DeviceEntry) stay reproducible.
     const src = `
       schema S @crdt_doc_topic(doc: "D", pattern: "ns/{id}/patch") {
         version: 1
@@ -384,6 +393,7 @@ describe('@crdt_doc_member soft_delete (v0.3.7)', () => {
       }
       record DeviceEntry @crdt_doc_member(doc: "D", map: "devices",
                                           lww_field: "ts")
+                         @breaking_change(reason: "hard-delete fixture for soft_delete=None codegen path")
                          @crdt(type: LWW_MAP, key: "ts") {
         id: ID!
         ts: Timestamp!
@@ -404,6 +414,7 @@ describe('@crdt_doc_member soft_delete (v0.3.7)', () => {
       }
       record DeviceEntry @crdt_doc_member(doc: "D", map: "devices",
                                           lww_field: "ts")
+                         @breaking_change(reason: "lww_field test fixture — no soft_delete (R236 opt-out)")
                          @crdt(type: LWW_MAP, key: "ts") {
         id: ID!
         ts: Timestamp!

@@ -1,6 +1,6 @@
 # @alaq/graph — SPEC Changelog
 
-Normative history of the `.aql` SPEC. Current SPEC version: **0.3.8**.
+Normative history of the `.aql` SPEC. Current SPEC version: **0.3.9**.
 Source of truth for behaviour: `./SPEC.md`. This file records *what changed when* and *why*.
 
 Versioning policy:
@@ -8,6 +8,44 @@ Versioning policy:
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.
 
 ---
+
+## 0.3.9 (2026-04-25) — envelope, conflict, bootstrap, large + backward-compat (Wave 3)
+
+Additive (seven new directives, seven new validation codes, three new advisory codes) + drift-fix (four §7 directive signatures aligned with their SPEC headers). Driven by Valkyrie v2 wire planning: a single `@envelope` annotation must drive QoS / ordering / retention / CRDT-mode choices that previously required composing four separate sibling directives, and a baseline-aware backward-compat checker becomes a build-script affordance.
+
+**Wave 3A — DRIFT FIXES** (closes the four drifts found during the Wave 2 §7 header pass):
+- **§7.4 `@auth.read/write`.** Closed-set `Access` enforcement: `{public, owner, scope, server}`. Mismatch fires **E003** via the same string-membership path used by `@transport(kind: ...)` (DRIFT-1).
+- **§7.x — centralised site validation.** Every directive signature now declares `sites: Site[]` (`'SCHEMA' | 'RECORD' | 'FIELD' | 'ENUM' | 'ENUM_VALUE' | 'ARGUMENT' | 'EVENT' | 'ACTION' | 'OPAQUE'`). Validator runs a single `checkSite()` pass per directive node; mismatches fire **E029**. Existing E028 / E006 / E024 keep their tailored messages and fire alongside E029 only at sites where they were already defined (DRIFT-2).
+- **§7.2 `@crdt.key`.** Conditional-required encoded as a per-arg `requiredIf` predicate. `key` is required iff `type` is `LWW_*`; the existing E004 message stays canonical and the generic E023 path is suppressed for that exact pair to avoid double-reporting (DRIFT-3).
+- **§7.10 `@range.min/max`.** Explicit `number` arg type (Int or Float literal). Site widened to FIELD | ARGUMENT (action input arguments accept `@range` per real-world fixtures — `pharos/Belladonna/schema/reader.aql`). Per-field type compatibility (R180) remains a separate E015 check (DRIFT-4).
+- **§7.11 `@deprecated`, §7.12 `@added`.** Sites widened to include EVENT and ARGUMENT per R068 (events MAY carry deprecation markers).
+- **§7.13 `@topic`.** Site widened to include EVENT per R068.
+
+**Wave 3B — new directives + R236 + backward-compat plumbing.**
+
+- **§7.19 — new directive `@envelope(kind: snapshot|stream|event|patch|ask)` on RECORD | EVENT | ACTION.** Single source of truth for QoS/ordering/retention/CRDT-mode. Each preset expands at codegen time into a default tuple; sibling-directive overrides apply per-axis. **W008** fires on incoherent overrides (today: `@envelope(stream|event)` paired with `@crdt`/`@crdt_doc_member` since the preset implies `crdt_mode: none`). R270–R272 normative.
+- **§7.20 — new directive `@conflict(strategy: lww|operator_review)` on RECORD.** CRDT merge strategy. Default `lww`; `operator_review` routes conflicts to a side-channel surfaced to UI Кладенец. Meaningful only with `@crdt_doc_member`. R280 normative.
+- **§7.21 — new directive `@bootstrap(mode: crdt_sync|full_snapshot)` on SCHEMA.** Composite-document handshake mode. Default `crdt_sync` triggers Automerge sync handshake on (re)connect — closes the **offline-resurrection bug** where `full_snapshot` mode replays a peer's local-only edits as if remote. R290–R291 normative.
+- **§7.22 — new directive `@large(threshold_kb: Int!)` on FIELD.** Field-level large-blob splitting. Field type MUST be `Bytes` or `Bytes!`; codegen emits a sub-topic publish (`<topic>/blob/{blob_id}`) for the binary payload and replaces the value in the main message with a `blob_id` reference; below the threshold the field rides inline. R300–R301 normative.
+- **§7.15 — R236: hard-delete forbidden on `@crdt_doc_member`.** `soft_delete: { flag, ts_field }` is now **required** by default; missing fires **E030**. Records that genuinely need hard delete (legacy wire contracts, e.g. Busynca `DeviceEntry`) MUST opt out with `@breaking_change(reason: "...")` (§7.25). Reason: hard delete on a CRDT map is not deterministic across rejoining peers — soft-delete + LWW timestamp is the deterministic floor.
+- **§7.23 — new directive `@deprecated_field(replaced_by: String?)` on FIELD.** Soft-deprecation. Codegen emits **W009**; baseline-checker (v0.4) classifies removal as soft (W009) vs. breaking (E031). R310 normative.
+- **§7.24 — new directive `@retired_topic` on SCHEMA.** Marker permitting `@crdt_doc_topic` removal under the baseline-checker (E032 opt-out). Consumed only by v0.4 checker; parse-time recognition only in v0.3.9. R320 normative.
+- **§7.25 — new directive `@breaking_change(reason: String!)` on SCHEMA | RECORD | FIELD | EVENT | ACTION | ENUM.** Opt-in for wire-incompatible changes; required `reason:` self-documents the diff. Doubles as the R236 opt-out. R330 normative.
+
+- **§12 — new validation codes.**
+  - **E029** centralised site-mismatch (Wave 3A — DRIFT-2).
+  - **E030** hard-delete on `@crdt_doc_member` without `soft_delete` (Wave 3B — R236).
+  - **E031** *(deferred to v0.4)* required field type changed without `@breaking_change`.
+  - **E032** *(deferred to v0.4)* topic removed without `@retired_topic`.
+  - **E033** *(deferred to v0.4)* `@schema_version` downgraded.
+  - **E034** *(deferred to v0.4)* `@rename_case` changed without `@breaking_change`.
+  - **W007** *(deferred to v0.4)* optional field added in middle of record (array-frozen consumers).
+  - **W008** `@envelope` override-coherence.
+  - **W009** `@deprecated_field` advisory.
+
+- **CLI `aqc build --baseline=<git-ref>` (stub).** Validates the git-ref resolves and emits a single advisory; full IR-vs-baseline diff (E031–E034 + W007) lands in v0.4. The flag is wired today so build scripts can adopt it without churn.
+
+- **IR additions.** `DirectiveSignature.sites: Site[]`; per-arg `ArgSpec` form supporting `enumValues` and `requiredIf` predicates inline (signature-level fields stay valid for back-compat). Helpers `argType()` / `argEnumValues()` / `argRequiredIf()` consolidate the dual-form lookup.
 
 ## 0.3.8 (2026-04-25) — wire-parity close, AI-First SPEC restructure
 
@@ -80,4 +118,5 @@ Additive.
 ## Deferred
 
 - **R400** (byte-identical wire across deployments): no implementation. **(deferred to v0.4)**
-- **R500/R501** (`specVersion` metadata in generated code, runtime compatibility check on connect): no `specVersion` references in any generator as of 0.3.8. **(deferred to v0.4)**
+- **R500/R501** (`specVersion` metadata in generated code, runtime compatibility check on connect): no `specVersion` references in any generator as of 0.3.9. **(deferred to v0.4)**
+- **Baseline-checker (Wave 3B B7)**: `aqc build --baseline=<git-ref>` is wired in 0.3.9 as a stub — validates the ref resolves, emits a single advisory. Full IR-vs-baseline diff that fires **E031–E034 + W007** lands in v0.4. The flag is callable today so build scripts can adopt it without churn at the version bump.

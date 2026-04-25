@@ -219,6 +219,12 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
   // @crdt(key:)) and `soft_delete` (optional — tombstone-by-flag). Shape
   // consistency (field types, soft_delete object shape) lives in the
   // validator (E027), not in the signature.
+  // v0.3.9 — R236: hard-delete is forbidden for composite-document members.
+  // `soft_delete: { flag, ts_field }` MUST be present; missing → E030
+  // (validator-emitted, with a tailored message). The signature keeps
+  // `required: ['doc', 'map']` so that the generic E023 path stays focused
+  // on directives whose `!`-required args are actually optional in
+  // pre-0.3.9 schemas; E030 is the upgrade signal for the corpus.
   crdt_doc_member: {
     args: {
       doc: 'string',
@@ -257,6 +263,81 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
       kind: ['PASCAL', 'CAMEL', 'SNAKE', 'SCREAMING_SNAKE', 'KEBAB', 'LOWER', 'UPPER'],
     },
     sites: ['ENUM', 'RECORD'],
+  },
+  // v0.3.9 — §7.19. Single source of truth for QoS/ordering/retention/CRDT
+  // mode for a record / event / action. Closed-set `kind:`. Each preset
+  // expands at codegen-time into a default tuple (priority, congestion,
+  // ordering, retention, crdt_mode) — see SPEC §7.19 Defaults table. Author
+  // overrides with sibling directives still apply; W008 fires on incoherent
+  // combinations (e.g. `@envelope(stream)` + `@congestion(block_first)`).
+  envelope: {
+    args: { kind: 'enum' },
+    required: ['kind'],
+    enumValues: {
+      kind: ['snapshot', 'stream', 'event', 'patch', 'ask'],
+    },
+    sites: ['RECORD', 'EVENT', 'ACTION'],
+  },
+  // v0.3.9 — §7.20. CRDT merge strategy. Closed-set `strategy:`. Default
+  // `lww` matches existing @crdt(LWW_*) behaviour; `operator_review` routes
+  // conflicts through a side-channel surfaced to UI Кладенец. Validator
+  // E027 will reject `@conflict` on records that lack `@crdt_doc_member`.
+  conflict: {
+    args: { strategy: 'enum' },
+    required: ['strategy'],
+    enumValues: {
+      strategy: ['lww', 'operator_review'],
+    },
+    sites: ['RECORD'],
+  },
+  // v0.3.9 — §7.21. Composite-document handshake mode. Closed-set `mode:`.
+  // Default `crdt_sync` triggers Automerge sync handshake on (re)connect —
+  // closes the offline-resurrection bug where `full_snapshot` would replay
+  // local-only edits as if remote. `full_snapshot` is opt-in for clients
+  // that genuinely need a fresh document load. Schema-level (placed beside
+  // `@crdt_doc_topic`).
+  bootstrap: {
+    args: { mode: 'enum' },
+    required: ['mode'],
+    enumValues: {
+      mode: ['crdt_sync', 'full_snapshot'],
+    },
+    sites: ['SCHEMA'],
+  },
+  // v0.3.9 — §7.22. Field-level large-blob splitting. The annotated field
+  // MUST be `Bytes` or `Bytes!`; codegen emits a sub-topic
+  // `<topic>/blob/{blob_id}` for the binary payload and replaces the
+  // value in the main message with a `blob_id` reference. `threshold_kb`
+  // is the inline-vs-blob cutoff (below it, the field rides inline).
+  large: {
+    args: { threshold_kb: 'number' },
+    required: ['threshold_kb'],
+    sites: ['FIELD'],
+  },
+  // v0.3.9 — §7.23. Soft-deprecation marker on a field. Field stays in the
+  // generated code; codegen emits warning W009 on use. Optional
+  // `replaced_by:` names the successor field so docs/codegen can render a
+  // pointer. Distinct from the legacy `@deprecated(since, reason)`: this
+  // one is field-scoped and links to a replacement, not a removal.
+  deprecated_field: {
+    args: { replaced_by: 'string' },
+    sites: ['FIELD'],
+  },
+  // v0.3.9 — §7.24. Marker on a `@crdt_doc_topic` declaration permitting
+  // its removal under the backward-compat baseline checker (B7). Without
+  // this marker, removing a previously-declared topic fires E032.
+  retired_topic: {
+    args: {},
+    sites: ['SCHEMA'],
+  },
+  // v0.3.9 — §7.25. Opt-in for a wire-incompatible change. `reason:` is
+  // required so the diff produced by the baseline checker self-documents
+  // what justified the break. Without `@breaking_change`, structural
+  // changes that would invalidate live consumers fire E031 / E034.
+  breaking_change: {
+    args: { reason: 'string' },
+    required: ['reason'],
+    sites: ['SCHEMA', 'RECORD', 'FIELD', 'EVENT', 'ACTION', 'ENUM'],
   },
 }
 

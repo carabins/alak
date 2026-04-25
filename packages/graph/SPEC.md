@@ -1,6 +1,6 @@
 # @alaq/graph — SDL Specification
 
-**Version:** 0.3.8
+**Version:** 0.3.9
 **Format:** `.aql`
 **Status:** normative
 **Audience:** compilers, generators, AI agents writing SDL
@@ -441,15 +441,14 @@ Closed set. Adding a directive requires a spec version bump.
 
 | Field   | Value |
 |---------|-------|
-| Args    | `read: string = "public"`, `write: string = "public"` |
+| Args    | `read: Access = "public"` (closed set), `write: Access = "public"` (closed set) |
 | Sites   | FIELD \| RECORD |
 | Rules   | R130, R131, R132, R133 |
-| Errors  | E001, E002, E003 |
+| Errors  | E001, E002, E003, E029 |
 | Wire    | `../graph-zenoh/WIRE.md` (row: `@auth(read: "owner")`) |
 | IR      | `IRRecord.directives[]` / `IRField.directives[]` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.auth` |
-| Since   | v0.1 |
-| Drift   | SPEC declares closed `Access` set `{public, owner, scope, server}`; code has no `enumValues` — values not enforced by validator. |
+| Since   | v0.1; closed-set enforcement v0.3.9 (DRIFT-1) |
 
 ```
 @auth(read: Access = "public", write: Access = "public") on FIELD | RECORD
@@ -573,14 +572,14 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 | Field   | Value |
 |---------|-------|
-| Args    | `min: any` (req), `max: any` (req) — Number = Int or Float |
-| Sites   | FIELD |
+| Args    | `min: number` (req), `max: number` (req) — Int or Float literal |
+| Sites   | FIELD \| ARGUMENT |
 | Rules   | R180, R181 |
-| Errors  | E001, E002, E003, E015, E016, E023 |
+| Errors  | E001, E002, E003, E015, E016, E023, E029 |
 | Wire    | (no wire row — validation hint, runtime-enforced) |
 | IR      | `IRField.directives[]` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.range` |
-| Since   | v0.1 |
+| Since   | v0.1; explicit `number` arg type + ARGUMENT site v0.3.9 (DRIFT-4) |
 
 ```
 @range(min: Number, max: Number) on FIELD
@@ -594,13 +593,13 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 | Field   | Value |
 |---------|-------|
 | Args    | `since: string` (req), `reason: string` |
-| Sites   | FIELD \| RECORD \| ACTION |
+| Sites   | FIELD \| RECORD \| ACTION \| EVENT \| ARGUMENT |
 | Rules   | R190, R191 |
-| Errors  | E001, E002, E003, E023 |
+| Errors  | E001, E002, E003, E023, E029 |
 | Wire    | (no wire row — codegen-time advisory) |
 | IR      | `IRRecord.directives[]` / `IRField.directives[]` / `IRAction.directives[]` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.deprecated` |
-| Since   | v0.1 |
+| Since   | v0.1; EVENT/ARGUMENT sites added v0.3.9 (Wave 3A site widening) |
 
 ```
 @deprecated(since: String!, reason: String) on FIELD | RECORD | ACTION
@@ -614,13 +613,13 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 | Field   | Value |
 |---------|-------|
 | Args    | `in: string` (req) |
-| Sites   | FIELD \| RECORD \| ACTION |
+| Sites   | FIELD \| RECORD \| ACTION \| EVENT \| ARGUMENT |
 | Rules   | R200 |
-| Errors  | E001, E002, E003, E023 |
+| Errors  | E001, E002, E003, E023, E029 |
 | Wire    | (no wire row — migration tooling metadata) |
 | IR      | `IRRecord.directives[]` / `IRField.directives[]` / `IRAction.directives[]` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.added` |
-| Since   | v0.1 |
+| Since   | v0.1; EVENT/ARGUMENT sites added v0.3.9 (Wave 3A site widening) |
 
 ```
 @added(in: String!) on FIELD | RECORD | ACTION
@@ -633,13 +632,13 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 | Field   | Value |
 |---------|-------|
 | Args    | `pattern: string` (req) |
-| Sites   | RECORD \| ACTION \| OPAQUE |
+| Sites   | RECORD \| ACTION \| OPAQUE \| EVENT |
 | Rules   | R210, R211 |
-| Errors  | E001, E002, E003, E023 |
+| Errors  | E001, E002, E003, E023, E029 |
 | Wire    | overrides default topic pattern in `../graph-zenoh/WIRE.md` |
 | IR      | `IRRecord.directives[]`; projected to `IRRecord.topic` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.topic` |
-| Since   | v0.1 |
+| Since   | v0.1; EVENT site added v0.3.9 per R068 (Wave 3A site widening) |
 
 ```
 @topic(pattern: String!) on RECORD | ACTION | OPAQUE
@@ -686,21 +685,21 @@ schema BelladonnaReader @transport(kind: "tauri") {
 
 | Field   | Value |
 |---------|-------|
-| Args    | `doc: string` (req), `map: string` (req), `lww_field: string`, `soft_delete: object` (`{flag: String!, ts_field: String!}`) |
+| Args    | `doc: string` (req), `map: string` (req), `soft_delete: object` (req per R236, `{flag: String!, ts_field: String!}`), `lww_field: string` |
 | Sites   | RECORD |
-| Rules   | R230, R231, R232, R233, R234, R235 |
-| Errors  | E001, E002, E003, E023, E027 (a)–(h) |
+| Rules   | R230, R231, R232, R233, R234, R235, R236 |
+| Errors  | E001, E002, E003, E023, E027 (a)–(h), E029, E030 |
 | Wire    | `../graph-zenoh/WIRE.md` (rows: `@crdt_doc_member`, soft-delete variant) |
 | IR      | `IRRecord.directives[]` |
 | Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.crdt_doc_member` |
-| Since   | v0.3.6; `lww_field` + `soft_delete` added v0.3.7 |
+| Since   | v0.3.6; `lww_field` + `soft_delete` added v0.3.7; `soft_delete` becomes required v0.3.9 (R236, opt-out via `@breaking_change`) |
 
 ```
 @crdt_doc_member(
   doc: String!,
   map: String!,
-  lww_field: String,
-  soft_delete: { flag: String!, ts_field: String! }
+  soft_delete: { flag: String!, ts_field: String! },  # required (R236)
+  lww_field: String
 ) on RECORD
 ```
 
@@ -724,6 +723,8 @@ Opts a record into a **composite CRDT document** — a single Automerge document
 **R234** When `lww_field` is supplied it MUST name a record field of type `Timestamp!` or `Int!`. When both `lww_field` and `@crdt(key: ...)` are present they MUST refer to the same field; disagreement → **E027**.
 
 **R235** When `soft_delete` is supplied, `flag` must name a `Boolean!` field and `ts_field` must name a `Timestamp!`/`Int!` field. Violations → **E027**. Soft-delete writes `<flag>: true` + `<ts_field>: tombstone_ts` and bumps the LWW key to `tombstone_ts`. When `soft_delete` is absent the delete is a hard delete (`automerge::Map::delete`).
+
+**R236 (v0.3.9)** Hard delete is forbidden for `@crdt_doc_member` records. `soft_delete` is **required** by default. Records that genuinely need hard delete (legacy wire contracts, e.g. Busynca `DeviceEntry`) MUST opt out explicitly with `@breaking_change(reason: "...")` (§7.25). Without the opt-out, missing `soft_delete` fires **E030**. Reason: hard delete on a CRDT map is not deterministic across rejoining peers — a peer that missed the delete will re-introduce the entry on next sync. Soft-delete + LWW timestamp is the deterministic floor.
 
 ### 7.16 `@crdt_doc_topic`
 
@@ -818,6 +819,173 @@ Selects the wire-name casing for all members of the target. Maps to `#[serde(ren
 | `LOWER`             | `"lowercase"` |
 | `UPPER`             | `"UPPERCASE"` |
 
+### 7.19 `@envelope`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `kind: enum` (req) — closed set `{snapshot, stream, event, patch, ask}` |
+| Sites   | RECORD \| EVENT \| ACTION |
+| Rules   | R270, R271, R272 |
+| Errors  | E001, E002, E003, E023, E029 |
+| Warnings| W008 (override-coherence) |
+| Wire    | drives codegen-time defaults (priority, congestion, ordering, retention, crdt_mode) — see Defaults table below |
+| IR      | `IRRecord.directives[]` / `IREvent.directives[]` / `IRAction.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.envelope` |
+| Since   | v0.3.9 |
+
+```
+@envelope(kind: EnvelopeKind!) on RECORD | EVENT | ACTION
+```
+
+Single source of truth for QoS, ordering, retention, and CRDT mode. The closed-set `kind` value expands at codegen time into a default tuple of sibling concerns; authors override individual axes with companion directives where needed (W008 fires on incoherent overrides — e.g. `@envelope(stream)` paired with `@crdt(LWW_*)` since `stream` presumes `crdt_mode: none`).
+
+| `kind`    | priority         | congestion  | ordering         | retention             | crdt_mode      |
+|-----------|------------------|-------------|------------------|-----------------------|----------------|
+| `snapshot`| Data             | BlockFirst  | unordered        | persistent (sled)     | none           |
+| `stream`  | RealTime         | Drop        | unordered        | none                  | none           |
+| `event`   | Data             | Drop        | unordered        | none                  | none           |
+| `patch`   | InteractiveHigh  | BlockFirst  | causal           | append-only           | automerge_doc  |
+| `ask`     | InteractiveHigh  | BlockFirst  | request-reply    | none                  | none           |
+
+**R270** Defaults from the table apply at codegen time, not runtime. Generators that do not implement an axis (e.g. an HTTP target with no congestion control) skip silently — the default is advisory unless the author also writes a sibling override.
+
+**R271** Sibling-directive overrides apply per-axis. The author writes the directive that contradicts the preset, generators emit code matching the override; W008 fires when the combination is structurally incoherent (today: `@envelope(stream|event)` paired with `@crdt`/`@crdt_doc_member` — stream/event presets imply `crdt_mode: none`).
+
+**R272** `kind` value identifiers are SNAKE_CASE bare identifiers (R040). Adding a new envelope kind is a spec version bump (closed set).
+
+### 7.20 `@conflict`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `strategy: enum` (req) — closed set `{lww, operator_review}` |
+| Sites   | RECORD (only meaningful with `@crdt_doc_member`) |
+| Rules   | R280 |
+| Errors  | E001, E002, E003, E023, E029 |
+| Wire    | `lww` rides the standard `@crdt(LWW_*)` rules; `operator_review` routes conflicts to a side-channel (UI Кладенец) — see `../graph-zenoh/WIRE.md` |
+| IR      | `IRRecord.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.conflict` |
+| Since   | v0.3.9 |
+
+```
+@conflict(strategy: ConflictStrategy = lww) on RECORD
+```
+
+CRDT merge strategy. Default `lww` matches the existing `@crdt(LWW_*)` semantics; `operator_review` is a structural escape hatch for records where automatic merge is unsafe — the runtime queues both sides and surfaces a resolution prompt to the operator UI (Кладенец).
+
+**R280** `@conflict` is meaningful only on records that also carry `@crdt_doc_member`. Standalone `@crdt` records use `@conflict` advisorially (codegen no-op in v0.3.9; reserved for future generators).
+
+### 7.21 `@bootstrap`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `mode: enum` (req) — closed set `{crdt_sync, full_snapshot}` |
+| Sites   | SCHEMA (alongside `@crdt_doc_topic`) |
+| Rules   | R290, R291 |
+| Errors  | E001, E002, E003, E023, E029 |
+| Wire    | governs handshake when a peer connects to a composite document — see `../graph-zenoh/WIRE.md` |
+| IR      | `IRSchema.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.bootstrap` |
+| Since   | v0.3.9 |
+
+```
+@bootstrap(mode: BootstrapMode = crdt_sync) on SCHEMA
+```
+
+Composite-document handshake mode. Default `crdt_sync` triggers an Automerge sync handshake on (re)connect — closes the **offline-resurrection bug** where `full_snapshot` mode replays a peer's local-only edits as if they were remote. `full_snapshot` is opt-in for clients that genuinely need a fresh document load (recovery scenarios, debugging).
+
+**R290** `@bootstrap` is meaningful only on schemas that declare at least one `@crdt_doc_topic`. Without composite documents, the directive is a codegen no-op.
+
+**R291** Default mode (`crdt_sync`) is the safe choice for live mesh peers. Switching to `full_snapshot` requires `@breaking_change(reason: ...)` to self-document the divergence.
+
+### 7.22 `@large`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `threshold_kb: number` (req) |
+| Sites   | FIELD (field type MUST be `Bytes` or `Bytes!`) |
+| Rules   | R300, R301 |
+| Errors  | E001, E002, E003, E023, E029 |
+| Wire    | large field rides a sub-topic `<topic>/blob/{blob_id}`; the parent message carries `blob_id` reference — see `../graph-zenoh/WIRE.md` |
+| IR      | `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.large` |
+| Since   | v0.3.9 |
+
+```
+@large(threshold_kb: Int!) on FIELD
+```
+
+Field-level large-blob splitting. The annotated field MUST be `Bytes` or `Bytes!`. When the runtime payload exceeds `threshold_kb` kilobytes, codegen emits a sub-topic publish (`<topic>/blob/{blob_id}`) for the binary payload and replaces the value in the main message with a `blob_id` reference; below the threshold the field rides inline.
+
+**R300** Field type is constrained to `Bytes` / `Bytes!`. Other types fire E029 via the centralised site check (FIELD-only) plus a generator-level type check.
+
+**R301** `threshold_kb` is the inline-vs-blob cutoff in kilobytes. Negative or zero values are rejected at the generator level; the SDL itself accepts any number literal.
+
+### 7.23 `@deprecated_field`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `replaced_by: string` (optional) |
+| Sites   | FIELD |
+| Rules   | R310 |
+| Errors  | E001, E002, E003, E029 |
+| Warnings| W009 |
+| Wire    | (no wire row — codegen-time advisory) |
+| IR      | `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.deprecated_field` |
+| Since   | v0.3.9 |
+
+```
+@deprecated_field(replaced_by: String) on FIELD
+```
+
+Soft-deprecation on a field. The field stays in the generated code; codegen emits W009 on the source declaration and advisorially in the generated docstring. Optional `replaced_by:` names the successor field for migration tooling.
+
+**R310** Distinct from `@deprecated(since, reason)` (§7.11): `@deprecated_field` is field-scoped, links to a replacement, and is the marker the v0.4 baseline-checker uses to classify removals as soft (W009) vs. breaking (E031).
+
+### 7.24 `@retired_topic`
+
+| Field   | Value |
+|---------|-------|
+| Args    | (none) |
+| Sites   | SCHEMA |
+| Rules   | R320 |
+| Errors  | E001, E029 |
+| Wire    | governs baseline-checker `@crdt_doc_topic` removal classification |
+| IR      | `IRSchema.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.retired_topic` |
+| Since   | v0.3.9 |
+
+```
+@retired_topic on SCHEMA
+```
+
+Marker placed alongside (or in lieu of) a `@crdt_doc_topic` declaration permitting the topic's removal under the backward-compat baseline checker (§12 / E032). Without this marker, removing a previously-declared topic between baseline and HEAD fires E032.
+
+**R320** `@retired_topic` is consumed only by the baseline-checker (B7, deferred to v0.4). At parse time the directive is recognised and validated for shape; no runtime semantics are emitted.
+
+### 7.25 `@breaking_change`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `reason: string` (req) |
+| Sites   | SCHEMA \| RECORD \| FIELD \| EVENT \| ACTION \| ENUM |
+| Rules   | R330 |
+| Errors  | E001, E002, E003, E023, E029 |
+| Wire    | (no wire row — opt-out marker for backward-compat checker) |
+| IR      | `IRSchema.directives[]` / record/field/event/action/enum directives |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.breaking_change` |
+| Since   | v0.3.9 |
+
+```
+@breaking_change(reason: String!) on SCHEMA | RECORD | FIELD | EVENT | ACTION | ENUM
+```
+
+Opt-in marker for a wire-incompatible change. `reason:` is required so the diff produced by the baseline-checker self-documents what justified the break. Without `@breaking_change`, structural changes that would invalidate live consumers fire **E031** / **E034** (deferred to v0.4).
+
+Also serves as the **R236 opt-out**: a record carrying `@crdt_doc_member` without `soft_delete` MUST also carry `@breaking_change(reason: ...)` to suppress E030 — the `reason:` documents the legacy contract being preserved (Busynca `DeviceEntry` is the canonical example).
+
+**R330** `reason:` MUST be a non-empty string literal. The baseline-checker (v0.4) renders `reason` text in its diff report.
+
 ---
 
 ## 8. Cookbook
@@ -883,6 +1051,12 @@ Errors halt compilation. Warnings do not.
 - **E026** `Any` appears in a forbidden position. Valid positions (§4.1): value of a `Map<K, Any>`, or a `record` field.
 - **E027** Composite CRDT document (§7.15/§7.16/§7.17) has an inconsistent or incomplete declaration. Triggers (a)–(h) are enumerated in `MSG.E027` body via the `detail` argument.
 - **E028** `@rename_case` applied to a declaration that is neither a `record` nor an `enum`.
+- **E029** (v0.3.9) Centralised site validation. Generic fall-back when a directive appears at a site outside its declared `DirectiveSignature.sites`. E028 / E006 / E024 keep tailored messages and fire alongside E029 only where they were already defined; new directives get site validation for free.
+- **E030** (v0.3.9 — R236) Hard-delete forbidden on `@crdt_doc_member`. `soft_delete: { flag, ts_field }` is required by default; opt out with `@breaking_change(reason: ...)` (§7.25) for legacy wire contracts.
+- **E031** *(deferred to v0.4 — baseline-checker stub)* Required field type changed in a wire-incompatible way without `@breaking_change`. CLI flag `aqc build --baseline=<git-ref>` accepts the option today and emits a stub advisory; full IR-vs-baseline diff lands in v0.4.
+- **E032** *(deferred to v0.4 — baseline-checker stub)* `@crdt_doc_topic(doc: ...)` removed from the schema between baseline and HEAD without `@retired_topic` (§7.24).
+- **E033** *(deferred to v0.4 — baseline-checker stub)* `@schema_version(doc: ...)` downgraded between baseline and HEAD.
+- **E034** *(deferred to v0.4 — baseline-checker stub)* `@rename_case(kind: ...)` value changed between baseline and HEAD without `@breaking_change`.
 
 ### Warnings
 
@@ -890,6 +1064,9 @@ Errors halt compilation. Warnings do not.
 - **W002** `@store` without explicit `@sync`; defaults to `RELIABLE`.
 - **W003** Record has `@crdt` but no `Timestamp!` field named `updated_at`.
 - **W004** Directive declared but target does not use it (detected by generator context; advisory only).
+- **W007** *(deferred to v0.4 — baseline-checker stub)* Optional field added in the middle of a record between baseline and HEAD. CBOR-map wire (keyed by name) tolerates positional additions; array-frozen consumers (legacy fixtures) break. Append at end or use `@breaking_change`.
+- **W008** (v0.3.9) `@envelope` override-coherence. The preset expansion implies a default for each axis (priority, congestion, ordering, retention, crdt_mode); when a sibling directive contradicts the preset, W008 fires. Today the only structural check is `@envelope(stream|event)` paired with `@crdt`/`@crdt_doc_member` (preset implies `crdt_mode: none`); other axes are deferred to v0.4 alongside their sibling directives.
+- **W009** (v0.3.9) Field annotated with `@deprecated_field`; codegen emits the advisory at the source declaration and inside the generated docstring. The `replaced_by:` argument, when supplied, is rendered as a migration pointer.
 
 (The historical W005 was retired in 0.3.5 and replaced by E025. See `./CHANGELOG.md`.)
 
@@ -909,7 +1086,7 @@ Full multi-file example: see `packages/graph/test/__fixtures__/` and `packages/g
 
 ## 15. Versioning
 
-Current SPEC version: **0.3.8**.
+Current SPEC version: **0.3.9**.
 
 - **Minor bump** (0.2 → 0.3): new directives, new scalars, new type constructors, new enum values in existing spec enums, new validation codes. Backwards-compatible for existing `.aql`.
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.

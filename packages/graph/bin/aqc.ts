@@ -76,6 +76,10 @@ Compile mode options:
   -o, --output <path>   Write IR to file instead of stdout.
   --pretty              Pretty-print IR (2-space indent). Default: compact.
   --json                Emit diagnostics as JSON (stderr). Default: human-readable.
+  --baseline <git-ref>  Backward-compat baseline check (stub for v0.3.9).
+                        Validates the ref resolves and emits an advisory;
+                        full IR-vs-baseline diff (E031-E034 + W007) lands
+                        in v0.4. Wire this into build scripts now.
   -h, --help            Show this help and exit 0.
 
 Generator targets (for \`aqc gen <target> ...\`):
@@ -182,6 +186,12 @@ interface CompileArgs {
   output?: string
   pretty: boolean
   json: boolean
+  /** v0.3.9 (Wave 3B — B7, deferred to v0.4): baseline IR git-ref. When
+   *  set, the CLI will emit a single advisory warning ("baseline check
+   *  stub — full diff in v0.4") today; the full IR-vs-baseline diff
+   *  (E031–E034 + W007) lands in v0.4. The flag is wired now so build
+   *  scripts can adopt it without churn when v0.4 ships. */
+  baseline?: string
 }
 
 function parseCompileArgs(argv: string[]): CompileArgs | 'help' {
@@ -189,6 +199,7 @@ function parseCompileArgs(argv: string[]): CompileArgs | 'help' {
   let output: string | undefined
   let pretty = false
   let json = false
+  let baseline: string | undefined
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
@@ -212,6 +223,18 @@ function parseCompileArgs(argv: string[]): CompileArgs | 'help' {
       output = a.slice('--output='.length)
       continue
     }
+    // v0.3.9 — baseline-checker stub.
+    if (a === '--baseline') {
+      const next = argv[i + 1]
+      if (!next) fail(`${a} requires a git-ref argument`)
+      baseline = next
+      i++
+      continue
+    }
+    if (a.startsWith('--baseline=')) {
+      baseline = a.slice('--baseline='.length)
+      continue
+    }
     if (a.startsWith('-') && a !== '-') {
       fail(`unknown option: ${a}`)
     }
@@ -222,7 +245,32 @@ function parseCompileArgs(argv: string[]): CompileArgs | 'help' {
   }
 
   if (!input) fail('missing input file (run `aqc --help` for usage)')
-  return { input, output, pretty, json }
+  return { input, output, pretty, json, baseline }
+}
+
+/** v0.3.9 (Wave 3B — B7, deferred to v0.4). Validate that `--baseline=<ref>`
+ *  resolves in the current git repository, then emit a single stub
+ *  advisory. Full IR-vs-baseline diff (E031-E034 + W007) lands in v0.4.
+ *  The function returns silently when `baseline` is unset. */
+async function runBaselineCheckerStub(baseline: string | undefined): Promise<void> {
+  if (!baseline) return
+  const proc = await import('node:child_process')
+  const result = proc.spawnSync('git', ['rev-parse', '--verify', baseline], {
+    encoding: 'utf8',
+  })
+  if (result.status !== 0) {
+    process.stderr.write(
+      `aqc: --baseline=${baseline}: git ref does not resolve ` +
+      `(${(result.stderr ?? '').trim()})\n`,
+    )
+    process.exit(2)
+  }
+  process.stderr.write(
+    `aqc: --baseline=${baseline} accepted (stub). ` +
+    `Full IR-vs-baseline diff (E031-E034 + W007) is deferred to v0.4; ` +
+    `today this flag is a no-op compatibility shim so build scripts can ` +
+    `adopt it ahead of the full release.\n`,
+  )
 }
 
 async function runCompile(argv: string[]): Promise<never> {
@@ -232,7 +280,11 @@ async function runCompile(argv: string[]): Promise<never> {
     process.exit(0)
   }
 
-  const { input, output, pretty, json } = parsed
+  const { input, output, pretty, json, baseline } = parsed
+
+  // v0.3.9 (Wave 3B — B7): baseline-checker stub. Validates the git ref
+  // exists and emits a single stub advisory; full diff in v0.4.
+  await runBaselineCheckerStub(baseline)
 
   const source = await readInput(input)
   const { ir, diagnostics } = parseSource(source, input)
