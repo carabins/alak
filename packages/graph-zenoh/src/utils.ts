@@ -449,3 +449,35 @@ export function getRenameCase(
   const kind = typeof dir.args?.kind === 'string' ? (dir.args.kind as string) : null
   return kind
 }
+
+// ────────────────────────────────────────────────────────────────
+// v0.3.12 — @codegen_target(rust: { … })
+// ────────────────────────────────────────────────────────────────
+
+/** Rust-target codegen knobs from `@codegen_target(rust: { ... })`. */
+export interface RustCodegenTarget {
+  /** When false, skip `zenoh::Session`-using helpers (per-record pub/sub,
+   *  composite pub/sub, liveliness presence, action call helpers) and
+   *  drop the `use zenoh::*` import + zenoh from the Cargo dep header.
+   *  Default: true. */
+  emitPubsub: boolean
+}
+
+const DEFAULT_RUST_TARGET: RustCodegenTarget = { emitPubsub: true }
+
+/**
+ * Read the schema-level `@codegen_target(rust: { ... })` directive and
+ * return the resolved Rust knobs. Missing directive / missing `rust:` arg
+ * → defaults. Unknown inner keys are ignored (forward-compat: SDL author
+ * ahead of generator).
+ */
+export function getRustCodegenTarget(schema: IRSchema): RustCodegenTarget {
+  const dir = findDirective(schema.directives, 'codegen_target')
+  if (!dir) return DEFAULT_RUST_TARGET
+  const rustArg = dir.args?.rust
+  if (!rustArg || typeof rustArg !== 'object') return DEFAULT_RUST_TARGET
+  const rust = rustArg as Record<string, unknown>
+  const emitPubsub =
+    typeof rust.emit_pubsub === 'boolean' ? (rust.emit_pubsub as boolean) : true
+  return { emitPubsub }
+}

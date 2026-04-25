@@ -16,6 +16,10 @@ export interface HeaderOptions {
    *  runtime crate alongside the automerge dep. */
   needsComposite: boolean
   header: boolean
+  /** v0.3.12: when false (`@codegen_target(rust: { emit_pubsub: false })`),
+   *  skip zenoh imports + drop zenoh from the dep-list header comment.
+   *  Default: true. */
+  emitPubsub: boolean
 }
 
 /**
@@ -30,7 +34,9 @@ export function emitHeader(buf: LineBuffer, opts: HeaderOptions) {
     buf.line(`// DO NOT EDIT — regenerate from .aql sources`)
     buf.line(`//`)
     buf.line(`// Required Cargo dependencies:`)
-    buf.line(`//   zenoh = "${opts.zenohVersion}"`)
+    if (opts.emitPubsub) {
+      buf.line(`//   zenoh = "${opts.zenohVersion}"`)
+    }
     buf.line(`//   serde = { version = "1", features = ["derive"] }`)
     buf.line(`//   serde_json = "1"`)
     if (opts.needsCbor) {
@@ -48,8 +54,10 @@ export function emitHeader(buf: LineBuffer, opts: HeaderOptions) {
   buf.line(`#![allow(dead_code, unused_imports, clippy::all)]`)
   buf.blank()
   buf.line(`use serde::{Serialize, Deserialize};`)
-  buf.line(`use zenoh::{Session, prelude::r#async::*};`)
-  buf.line(`use std::sync::Arc;`)
+  if (opts.emitPubsub) {
+    buf.line(`use zenoh::{Session, prelude::r#async::*};`)
+    buf.line(`use std::sync::Arc;`)
+  }
   if (opts.needsCbor) {
     buf.line(`use serde_cbor;`)
   }
@@ -85,16 +93,23 @@ export function emitCargoFooter(
     needsCbor: boolean
     needsAutomerge: boolean
     needsComposite: boolean
+    /** v0.3.12: drop the `zenoh = ...` and `tokio = ...` Cargo lines when
+     *  the generated module no longer references zenoh::Session helpers. */
+    emitPubsub: boolean
   },
 ) {
   buf.line(`/*`)
   buf.line(` * Suggested Cargo.toml fragment:`)
   buf.line(` *`)
   buf.line(` * [dependencies]`)
-  buf.line(` * zenoh = "${opts.zenohVersion}"`)
+  if (opts.emitPubsub) {
+    buf.line(` * zenoh = "${opts.zenohVersion}"`)
+  }
   buf.line(` * serde = { version = "1", features = ["derive"] }`)
   buf.line(` * serde_json = "1"`)
-  buf.line(` * tokio = { version = "1", features = ["full"] }`)
+  if (opts.emitPubsub) {
+    buf.line(` * tokio = { version = "1", features = ["full"] }`)
+  }
   if (opts.needsCbor) {
     buf.line(` * serde_cbor = "0.11"`)
   }

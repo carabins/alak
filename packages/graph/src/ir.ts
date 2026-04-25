@@ -353,6 +353,23 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
     required: ['pattern'],
     sites: ['RECORD'],
   },
+  // v0.3.12 — §7.27. Schema-level codegen-target overrides. Per-target
+  // object literals carry generator-specific knobs that don't fit the
+  // SDL's wire-semantic vocabulary. Today the only target is `rust:`,
+  // and the only knob is `emit_pubsub: bool` — when `false`, the
+  // `@alaq/graph-zenoh` generator skips all `zenoh::Session`-using
+  // helpers (per-record pub/sub, composite pub/sub, liveliness presence,
+  // action request/reply) and drops the `use zenoh::*` import + zenoh
+  // Cargo dep. Used by Бусинка, which keeps types from codegen but
+  // wraps publish/subscribe in its own `BusyncaNode` layer.
+  //
+  // Closed-set arg names (today: just `rust`); adding a new target is
+  // a SPEC version bump. Inner object shape is generator-private —
+  // validated by the consuming generator, not by `@alaq/graph`.
+  codegen_target: {
+    args: { rust: 'object' },
+    sites: ['SCHEMA'],
+  },
 }
 
 /** Map AST Value.kind to the IR-level literal-kind tag. See §10. */

@@ -10,6 +10,7 @@
 # Sokol/v1 legacy types are explicitly out of scope for this fixture
 # and will land separately in E2.5 with their own wire-parity tests.
 schema Busynca @transport(kind: "zenoh")
+               @codegen_target(rust: { emit_pubsub: false })
                @crdt_doc_topic(doc: "GroupSync", pattern: "valkyrie/{group}/sync/patch")
                @schema_version(doc: "GroupSync", value: 2) {
   version: 1

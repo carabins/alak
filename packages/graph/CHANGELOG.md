@@ -1,6 +1,6 @@
 # @alaq/graph — SPEC Changelog
 
-Normative history of the `.aql` SPEC. Current SPEC version: **0.3.10**.
+Normative history of the `.aql` SPEC. Current SPEC version: **0.3.12**.
 Source of truth for behaviour: `./SPEC.md`. This file records *what changed when* and *why*.
 
 Versioning policy:
@@ -8,6 +8,28 @@ Versioning policy:
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.
 
 ---
+
+## 0.3.12 (2026-04-25) — `@codegen_target(rust: { ... })` — generator-target knobs
+
+(SPEC version 0.3.11 was claimed by graph-zenoh's Wave 5 event-emission work — committed as `codegen: SPEC 0.3.11 — event emission for @crdt_doc_member records` — but that change did not bump `SPEC.md`. This entry continues the sequence at 0.3.12 to avoid collision.)
+
+Additive (one new directive, no new error/warning codes — the directive's contract is generator-private knobs that don't change wire bytes). Driven by Бусинка's regen workflow: `@alaq/graph-zenoh` emits per-record `publish_*`/`subscribe_*` and composite-doc pub/sub helpers over `zenoh::Session`, but Бусинка wraps publish/subscribe in its own `BusyncaNode` layer and was hand-stripping the generator output (and its `use zenoh::*` import) after every regeneration. The hand-strip is drift-prone — every codegen change reopens the same diff.
+
+- **§7.27 — new directive `@codegen_target(rust: object)` on SCHEMA.** Outer arg names form a closed set per SPEC version (today: just `rust`); inner-object keys are generator-private and forward-compat (unknown keys ignored). R350–R351 normative. The directive **MUST NOT** alter wire bytes — it changes which helpers are emitted, not which bytes go on the wire.
+
+- **Rust-target knobs (graph-zenoh).** v0.3.11 ships exactly one knob: `emit_pubsub: Bool` (default `true`). When `false`, the generator drops:
+  - per-record `publish_*` / `subscribe_*` helpers,
+  - composite-doc `publish_<doc>` / `subscribe_<doc>`,
+  - `@liveliness_token` declare-alive / subscribe-alive helpers,
+  - action `call_<action>` request/reply helpers,
+  - `use zenoh::{Session, prelude::r#async::*};` + `use std::sync::Arc;` imports,
+  - the `zenoh = "..."` and `tokio = "..."` lines in the Cargo dep-list header / footer.
+
+  Types, enums, scalars, CRDT-doc wrappers, `*Event` enums and `emit_*_diffs` / `merge_remote_with_events` survive — they never touch `zenoh::Session`.
+
+- **No new validation codes.** Site mismatch (record-level `@codegen_target`) is caught by the existing centralised E029 path (Wave 3A DRIFT-2). Unknown outer args (e.g. `@codegen_target(go: { ... })` against a SPEC where `go:` is not declared) are caught by the existing E001 path on directive-arg keys.
+
+- **WIRE.md — unchanged.** This directive is intentionally orthogonal to wire bytes; no new row needed.
 
 ## 0.3.10 (2026-04-25) — `@liveliness_token` for Zenoh presence (Wave 4)
 

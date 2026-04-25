@@ -38,7 +38,7 @@ import { emitAllLiveliness, hasAnyLiveliness } from './liveliness-gen'
 import { emitAllPubSub, emitCompositePubSub } from './publishers-gen'
 import { emitCrdtDocWrappers, emitEnums, emitRecords, emitUserScalars } from './types-gen'
 import { emitTopicsModule } from './topics-gen'
-import { LineBuffer, buildTypeContext, hasDirective } from './utils'
+import { LineBuffer, buildTypeContext, getRustCodegenTarget, hasDirective } from './utils'
 
 // ────────────────────────────────────────────────────────────────
 // Public API
@@ -155,6 +155,14 @@ function generateNamespace(
   // Scan directives once to decide which imports we need.
   const { needsCbor, needsAutomerge, needsComposite } = scanFeatureFlags(schema)
 
+  // v0.3.12 — schema-level @codegen_target(rust: { ... }) overrides. When
+  // `emit_pubsub: false`, we keep types/CRDT wrappers but skip every helper
+  // that touches `zenoh::Session` — used by Бусинка, which wraps publish /
+  // subscribe in its own BusyncaNode layer and was hand-stripping the
+  // generator output after every regen.
+  const rustTarget = getRustCodegenTarget(schema)
+  const emitPubsub = rustTarget.emitPubsub
+
   emitHeader(buf, {
     namespace: schema.namespace,
     schemaVersion: schema.version,
@@ -163,6 +171,7 @@ function generateNamespace(
     needsAutomerge: needsAutomerge && opts.automerge,
     needsComposite,
     header: opts.header,
+    emitPubsub,
   })
 
   // ── Topic module ──
@@ -194,13 +203,16 @@ function generateNamespace(
   }
 
   // ── Publisher / Subscriber helpers ──
-  if (Object.keys(schema.records).length > 0) {
+  // v0.3.12: gated on @codegen_target(rust: { emit_pubsub }). Composite-doc
+  // SyncEvent + emit_*_diffs stays — those operate on local snapshots and
+  // never touch zenoh::Session.
+  if (emitPubsub && Object.keys(schema.records).length > 0) {
     emitSection(buf, 'Publish / Subscribe helpers')
     emitAllPubSub(buf, schema.records)
   }
 
   // ── Composite document pub/sub helpers ──
-  if (needsComposite) {
+  if (emitPubsub && needsComposite) {
     emitSection(buf, 'Publish / Subscribe helpers — composite CRDT documents')
     emitCompositePubSub(buf, schema, diagnostics)
   }
@@ -212,13 +224,13 @@ function generateNamespace(
   }
 
   // ── Zenoh liveliness presence helpers (v0.3.10, SPEC §7.26) ──
-  if (hasAnyLiveliness(schema.records)) {
+  if (emitPubsub && hasAnyLiveliness(schema.records)) {
     emitSection(buf, 'Liveliness presence helpers (@liveliness_token)')
     emitAllLiveliness(buf, schema.records)
   }
 
   // ── Actions ──
-  if (Object.keys(schema.actions).length > 0) {
+  if (emitPubsub && Object.keys(schema.actions).length > 0) {
     emitSection(buf, 'Actions (request/reply + fire-forget)')
     emitActions(buf, schema.actions, ctx)
   }
@@ -250,6 +262,7 @@ function generateNamespace(
     needsCbor: needsCbor && opts.cbor,
     needsAutomerge: needsAutomerge && opts.automerge,
     needsComposite,
+    emitPubsub,
   })
 
   return buf.toString()

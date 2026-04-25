@@ -1,6 +1,6 @@
 # @alaq/graph — SDL Specification
 
-**Version:** 0.3.10
+**Version:** 0.3.12
 **Format:** `.aql`
 **Status:** normative
 **Audience:** compilers, generators, AI agents writing SDL
@@ -1021,6 +1021,49 @@ record DeviceAlive
 }
 ```
 
+### 7.27 `@codegen_target`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `rust: object` |
+| Sites   | SCHEMA |
+| Rules   | R350, R351 |
+| Errors  | E001, E029 |
+| Wire    | none — generator-private knobs do not change wire bytes |
+| IR      | `IRSchema.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.codegen_target` |
+| Since   | v0.3.12 |
+
+```
+@codegen_target(rust: { emit_pubsub: Bool }) on SCHEMA
+```
+
+Schema-level escape hatch for **generator-target-specific knobs** that are not part of the wire vocabulary. Each top-level argument names a target (today: `rust:`); its value is an object literal of generator-private settings. Targets the directive does not name use defaults.
+
+The directive **MUST NOT** alter wire bytes — generators that consume it adjust shape of the emitted module (which helpers exist, which imports are present), not the bytes that go on Zenoh. Consumers that round-trip data through the generator output are unaffected.
+
+**R350** Outer arg names form a closed set per SPEC version. v0.3.11 defines exactly one: `rust:` (consumed by `@alaq/graph-zenoh`). Adding a new target arg is a SPEC version bump. Unknown outer args → **E001** (unknown directive arg).
+
+**R351** Inner-object keys are **not** validated by the SDL parser/validator — each generator owns the shape of its own knob bag. Unknown inner keys are silently ignored (forward-compat: an SDL author writing for a newer generator must remain parseable by older ones). Generators MUST document their accepted inner keys in their own README.
+
+#### Rust knobs (`@alaq/graph-zenoh`)
+
+| Inner key      | Type | Default | Meaning |
+|----------------|------|---------|---------|
+| `emit_pubsub`  | Bool | `true`  | When `false`: skip every `zenoh::Session`-using helper (per-record `publish_*`/`subscribe_*`, composite-doc pub/sub, `@liveliness_token` declare/subscribe, action `call_*`), drop `use zenoh::*` + `use std::sync::Arc;` imports, and drop zenoh + tokio from the Cargo dep-list / footer. Types, scalars, enums, CRDT-doc wrappers, `*Event` enums and `emit_*_diffs` / `merge_remote_with_events` survive — they never touch `zenoh::Session`. |
+
+Use case: a downstream crate has its own pub/sub layer (e.g. Бусинка's `BusyncaNode`) and wants the generator's types but not its wire helpers. Without this directive the only options were to hand-strip the generator output after every regen (drift-prone) or fork the generator (worse).
+
+```aql
+schema BusyncaProtocol @transport(kind: "zenoh")
+                       @codegen_target(rust: { emit_pubsub: false })
+                       @crdt_doc_topic(doc: "GroupSync", pattern: "busynca/v2/{group}/sync/patch")
+                       @schema_version(doc: "GroupSync", value: 2) {
+  version: 1
+  namespace: "busynca"
+}
+```
+
 ---
 
 ## 8. Cookbook
@@ -1123,7 +1166,7 @@ Full multi-file example: see `packages/graph/test/__fixtures__/` and `packages/g
 
 ## 15. Versioning
 
-Current SPEC version: **0.3.10**.
+Current SPEC version: **0.3.12**.
 
 - **Minor bump** (0.2 → 0.3): new directives, new scalars, new type constructors, new enum values in existing spec enums, new validation codes. Backwards-compatible for existing `.aql`.
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.

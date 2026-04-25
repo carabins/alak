@@ -154,15 +154,19 @@ describe('Busynca GroupSync — codegen snapshot', () => {
     expect(window).not.toContain('.filter')
   })
 
-  test('PositionMsg is a per-record @atomic publisher (not a composite member)', () => {
+  // v0.3.12: fixture now sets `@codegen_target(rust: { emit_pubsub: false })`
+  // — the SDL-driven Бусинка use-case is "types only, no pub/sub". The
+  // CBOR codec stays (no zenoh::Session involved), the publisher does not.
+  test('PositionMsg has CBOR codec but no publisher (emit_pubsub: false)', () => {
     expect(rust).toContain('pub struct PositionMsg {')
     expect(rust).toContain('pub fn encode_cbor(&self)')
-    expect(rust).toContain('pub async fn publish_position_msg(')
+    expect(rust).not.toContain('pub async fn publish_position_msg(')
   })
 
-  test('StatusMsg likewise has @atomic CBOR codec + publisher', () => {
+  test('StatusMsg has CBOR codec but no publisher (emit_pubsub: false)', () => {
     expect(rust).toContain('pub struct StatusMsg {')
-    expect(rust).toContain('pub async fn publish_status_msg(')
+    expect(rust).toContain('pub fn encode_cbor(&self)')
+    expect(rust).not.toContain('pub async fn publish_status_msg(')
   })
 
   test('SyncPoint.extras: Map<String, Any!>! → BTreeMap<String, serde_cbor::Value>', () => {
@@ -174,9 +178,16 @@ describe('Busynca GroupSync — codegen snapshot', () => {
     )
   })
 
-  test('publish_group_sync / subscribe_group_sync are emitted once', () => {
-    expect(rust).toContain('pub async fn publish_group_sync(')
-    expect(rust).toContain('pub async fn subscribe_group_sync<F>(')
+  // v0.3.12: composite-doc pub/sub gated on emit_pubsub. Fixture is now
+  // `emit_pubsub: false`, so neither helper is emitted.
+  test('publish_group_sync / subscribe_group_sync are not emitted (emit_pubsub: false)', () => {
+    expect(rust).not.toContain('pub async fn publish_group_sync(')
+    expect(rust).not.toContain('pub async fn subscribe_group_sync')
+  })
+
+  test('no zenoh::Session imports / no Arc — Бусинка-shape output', () => {
+    expect(rust).not.toContain('use zenoh::')
+    expect(rust).not.toContain('use std::sync::Arc;')
   })
 
   // ── v0.3.11 — codegen-time event emission ──

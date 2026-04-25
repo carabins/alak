@@ -3,7 +3,6 @@
 // DO NOT EDIT — regenerate from .aql sources
 //
 // Required Cargo dependencies:
-//   zenoh = "0.11"
 //   serde = { version = "1", features = ["derive"] }
 //   serde_json = "1"
 //   serde_cbor = "0.11"   # for @atomic records and Any fields
@@ -14,8 +13,6 @@
 #![allow(dead_code, unused_imports, clippy::all)]
 
 use serde::{Serialize, Deserialize};
-use zenoh::{Session, prelude::r#async::*};
-use std::sync::Arc;
 use serde_cbor;
 use alaq_graph_zenoh_rt::CrdtDoc;
 
@@ -293,122 +290,6 @@ impl GroupSyncDoc {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Publish / Subscribe helpers
-// ────────────────────────────────────────────────────────────────
-
-/// Publish a `PositionMsg` snapshot to `topic`.
-/// The caller resolves `PositionMsg::TOPIC_PATTERN` placeholders.
-pub async fn publish_position_msg(
-    session: &Session,
-    topic: &str,
-    value: &PositionMsg,
-) -> zenoh::Result<()> {
-    let key = topic.to_string();
-    let payload: Vec<u8> = value.encode_cbor().map_err(|e| zenoh::Error::from(format!("cbor encode: {e}")))?;
-    session.put(&key, payload).res().await?;
-    Ok(())
-}
-
-/// Subscribe to a pre-resolved `PositionMsg` topic.
-/// The caller resolves `PositionMsg::TOPIC_PATTERN` placeholders.
-pub async fn subscribe_position_msg<F>(
-    session: Arc<Session>,
-    topic: String,
-    mut callback: F,
-) -> zenoh::Result<()>
-where
-    F: FnMut(PositionMsg) + Send + 'static,
-{
-    let key = topic.clone();
-    let subscriber = session.declare_subscriber(&key).res().await?;
-    tokio::spawn(async move {
-        while let Ok(sample) = subscriber.recv_async().await {
-            let bytes = sample.value.payload.contiguous().to_vec();
-            if let Some(v) = PositionMsg::decode_cbor(&bytes).ok() {
-                callback(v);
-            }
-        }
-    });
-    Ok(())
-}
-
-/// Publish a `StatusMsg` snapshot to `topic`.
-/// The caller resolves `StatusMsg::TOPIC_PATTERN` placeholders.
-pub async fn publish_status_msg(
-    session: &Session,
-    topic: &str,
-    value: &StatusMsg,
-) -> zenoh::Result<()> {
-    let key = topic.to_string();
-    let payload: Vec<u8> = value.encode_cbor().map_err(|e| zenoh::Error::from(format!("cbor encode: {e}")))?;
-    session.put(&key, payload).res().await?;
-    Ok(())
-}
-
-/// Subscribe to a pre-resolved `StatusMsg` topic.
-/// The caller resolves `StatusMsg::TOPIC_PATTERN` placeholders.
-pub async fn subscribe_status_msg<F>(
-    session: Arc<Session>,
-    topic: String,
-    mut callback: F,
-) -> zenoh::Result<()>
-where
-    F: FnMut(StatusMsg) + Send + 'static,
-{
-    let key = topic.clone();
-    let subscriber = session.declare_subscriber(&key).res().await?;
-    tokio::spawn(async move {
-        while let Ok(sample) = subscriber.recv_async().await {
-            let bytes = sample.value.payload.contiguous().to_vec();
-            if let Some(v) = StatusMsg::decode_cbor(&bytes).ok() {
-                callback(v);
-            }
-        }
-    });
-    Ok(())
-}
-
-// ────────────────────────────────────────────────────────────────
-// Publish / Subscribe helpers — composite CRDT documents
-// ────────────────────────────────────────────────────────────────
-
-/// Publish the current snapshot of `GroupSyncDoc` to `topic`.
-/// The caller resolves `GroupSyncDoc::TOPIC_PATTERN` placeholders.
-pub async fn publish_group_sync(
-    session: &Session,
-    topic: &str,
-    doc: &mut GroupSyncDoc,
-) -> zenoh::Result<()> {
-    let payload: Vec<u8> = doc.save();
-    session.put(topic, payload).res().await?;
-    Ok(())
-}
-
-/// Subscribe to `topic` and invoke `callback` with a freshly-loaded
-/// `GroupSyncDoc` on every incoming blob. Rebuild-on-mismatch is
-/// handled by `GroupSyncDoc::load_or_init`; callers that care about
-/// rebuild events should wrap this helper.
-pub async fn subscribe_group_sync<F>(
-    session: Arc<Session>,
-    topic: String,
-    mut callback: F,
-) -> zenoh::Result<()>
-where
-    F: FnMut(GroupSyncDoc, /* rebuilt */ bool) + Send + 'static,
-{
-    let subscriber = session.declare_subscriber(&topic).res().await?;
-    tokio::spawn(async move {
-        while let Ok(sample) = subscriber.recv_async().await {
-            let bytes = sample.value.payload.contiguous().to_vec();
-            if let Ok((doc, rebuilt)) = GroupSyncDoc::load_or_init(Some(&bytes)) {
-                callback(doc, rebuilt);
-            }
-        }
-    });
-    Ok(())
-}
-
-// ────────────────────────────────────────────────────────────────
 // Composite CRDT document events (SyncEvent + emit_*_diffs)
 // ────────────────────────────────────────────────────────────────
 
@@ -538,10 +419,8 @@ impl GroupSyncDoc {
  * Suggested Cargo.toml fragment:
  *
  * [dependencies]
- * zenoh = "0.11"
  * serde = { version = "1", features = ["derive"] }
  * serde_json = "1"
- * tokio = { version = "1", features = ["full"] }
  * serde_cbor = "0.11"
  * automerge = "=0.6.0"
  * alaq-graph-zenoh-rt = { path = "../alaq-graph-zenoh-rt" }
