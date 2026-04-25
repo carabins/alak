@@ -1,6 +1,6 @@
 # @alaq/graph — SDL Specification
 
-**Version:** 0.3.9
+**Version:** 0.3.10
 **Format:** `.aql`
 **Status:** normative
 **Audience:** compilers, generators, AI agents writing SDL
@@ -986,6 +986,41 @@ Also serves as the **R236 opt-out**: a record carrying `@crdt_doc_member` withou
 
 **R330** `reason:` MUST be a non-empty string literal. The baseline-checker (v0.4) renders `reason` text in its diff report.
 
+### 7.26 `@liveliness_token`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `pattern: string` (req) |
+| Sites   | RECORD |
+| Rules   | R340, R341 |
+| Errors  | E001, E002, E003, E023, E029, E035 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `record R @liveliness_token(pattern: ...)`) |
+| IR      | `IRRecord.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.liveliness_token` |
+| Since   | v0.3.10 |
+
+```
+@liveliness_token(pattern: String!) on RECORD
+```
+
+Declares the annotated record as a **presence beacon** atop the Zenoh `liveliness` API. Each producer instance calls `<Record>::declare_alive(...)` (codegen-emitted) which performs `session.liveliness().declare_token(<resolved-pattern>)`; the returned `LivelinessToken` is a Drop-guard. Subscribers call `<Record>::subscribe_alive(...)` and receive `SampleKind::Put` on token appearance and `SampleKind::Delete` on session-keepalive loss (Zenoh tracks this internally — no application-level heartbeat).
+
+`pattern` is a Zenoh key-expression (free-form, no closed set). `{field}` placeholders MUST resolve to fields of the record; missing → **E035**.
+
+**R340** Every `{placeholder}` in `pattern` MUST name a field declared on the annotated record (or merged in via `extend record`). The producer-side codegen reads the field value off the instance to resolve the key; an unresolved placeholder would yield a compile error in the generated Rust. Validator-emitted **E035**.
+
+**R341** Presence records SHOULD be minimal — typically the placeholder fields plus an `id`. Wide presence records (>3 fields) waste session-tracking bandwidth and confuse the role of the record (presence vs. payload). Validator-emitted **W010** (advisory). Move payload data to a sibling record carrying `@envelope(kind: snapshot|stream)`.
+
+`@liveliness_token` is **orthogonal to `@envelope`** (which describes payload QoS) and to `@topic` (which describes the put/sub topic). A presence record may also carry `@envelope` and `@topic` — they govern any sample-payload publishes the consumer chooses to make alongside the liveliness signal. The directive does not imply `crdt_mode`, retention, or ordering.
+
+```aql
+record DeviceAlive
+  @liveliness_token(pattern: "busynca/v2/{group}/alive/{device_id}") {
+  group: String!
+  device_id: String!
+}
+```
+
 ---
 
 ## 8. Cookbook
@@ -1057,6 +1092,7 @@ Errors halt compilation. Warnings do not.
 - **E032** *(deferred to v0.4 — baseline-checker stub)* `@crdt_doc_topic(doc: ...)` removed from the schema between baseline and HEAD without `@retired_topic` (§7.24).
 - **E033** *(deferred to v0.4 — baseline-checker stub)* `@schema_version(doc: ...)` downgraded between baseline and HEAD.
 - **E034** *(deferred to v0.4 — baseline-checker stub)* `@rename_case(kind: ...)` value changed between baseline and HEAD without `@breaking_change`.
+- **E035** (v0.3.10 — R340) `@liveliness_token.pattern` references a `{placeholder}` that does not name a field of the annotated record. Producer-side codegen resolves placeholders against the record instance, so each one MUST be a real field.
 
 ### Warnings
 
@@ -1067,6 +1103,7 @@ Errors halt compilation. Warnings do not.
 - **W007** *(deferred to v0.4 — baseline-checker stub)* Optional field added in the middle of a record between baseline and HEAD. CBOR-map wire (keyed by name) tolerates positional additions; array-frozen consumers (legacy fixtures) break. Append at end or use `@breaking_change`.
 - **W008** (v0.3.9) `@envelope` override-coherence. The preset expansion implies a default for each axis (priority, congestion, ordering, retention, crdt_mode); when a sibling directive contradicts the preset, W008 fires. Today the only structural check is `@envelope(stream|event)` paired with `@crdt`/`@crdt_doc_member` (preset implies `crdt_mode: none`); other axes are deferred to v0.4 alongside their sibling directives.
 - **W009** (v0.3.9) Field annotated with `@deprecated_field`; codegen emits the advisory at the source declaration and inside the generated docstring. The `replaced_by:` argument, when supplied, is rendered as a migration pointer.
+- **W010** (v0.3.10 — R341) Presence record carrying `@liveliness_token` declares more than 3 fields. Advisory: presence records should be minimal (id + placeholder fields). Move payload data to a sibling record carrying `@envelope(kind: snapshot|stream)`.
 
 (The historical W005 was retired in 0.3.5 and replaced by E025. See `./CHANGELOG.md`.)
 
@@ -1086,7 +1123,7 @@ Full multi-file example: see `packages/graph/test/__fixtures__/` and `packages/g
 
 ## 15. Versioning
 
-Current SPEC version: **0.3.9**.
+Current SPEC version: **0.3.10**.
 
 - **Minor bump** (0.2 → 0.3): new directives, new scalars, new type constructors, new enum values in existing spec enums, new validation codes. Backwards-compatible for existing `.aql`.
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.

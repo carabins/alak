@@ -32,6 +32,7 @@ SPEC normative behaviour: see `../graph/SPEC.md` (§4 types, §5 actions, §5.5 
 | `@auth(read: "owner")` | Generator emits ACL check; wire includes identity token in frame |
 | `@store` | Runtime persists to storage backend; not visible on wire directly |
 | `Map<K, V>` | CBOR map on the wire. With `@crdt(type: LWW_MAP)` → LWW-Map CRDT keyed by `K`. Default TS mapping: `Record<K, V>`. |
+| `record R @liveliness_token(pattern: "p/{f}/...")` (v0.3.10, SPEC §7.26) | Producer: `session.liveliness().declare_token(<pattern with placeholders resolved from instance fields>)` returning a Drop-guard. Subscriber: `session.liveliness().declare_subscriber(<wildcard form: every {f} → *>)`. Receives `SampleKind::Put` on token appearance, `SampleKind::Delete` on session-keepalive loss. No payload — session-tracking only. Orthogonal to `@envelope` and `@topic`. |
 
 ## 2. Field-vs-record `@sync` precedence
 

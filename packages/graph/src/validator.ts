@@ -122,6 +122,45 @@ export function validate(ir: IR, opts: ValidateOptions = {}): Diagnostic[] {
           validateDirective(d, out, 'record', rec.name)
         }
 
+        // v0.3.10 (§7.26 — R340/R341): @liveliness_token validation.
+        // E035: every {placeholder} in pattern must resolve to a record
+        // field. W010: presence record carries >3 fields (advisory).
+        const livenessTokenDir = recNode.directives.find(d => d.name === 'liveliness_token')
+        if (livenessTokenDir) {
+          const patArg = livenessTokenDir.args.find(a => a.name === 'pattern')
+          if (patArg && patArg.value.kind === 'string') {
+            const pattern = patArg.value.value
+            const fieldNames = new Set<string>(recNode.fields.map(f => f.name))
+            if (ast) {
+              for (const ext of ast.definitions) {
+                if (ext.kind !== 'extend' || ext.name !== recName) continue
+                for (const f of ext.fields) fieldNames.add(f.name)
+              }
+            }
+            const placeholderRe = /\{([A-Za-z_][A-Za-z0-9_]*)\}/g
+            let m: RegExpExecArray | null
+            while ((m = placeholderRe.exec(pattern)) !== null) {
+              const placeholder = m[1]!
+              if (!fieldNames.has(placeholder)) {
+                out.push(diag('E035', MSG.E035(recName, placeholder), patArg.loc))
+              }
+            }
+          }
+          // W010: presence record should be minimal. The threshold is 3
+          // (id + scope-key + maybe one keepalive metadata field). Counts
+          // include extend-record fields.
+          let totalFields = recNode.fields.length
+          if (ast) {
+            for (const ext of ast.definitions) {
+              if (ext.kind !== 'extend' || ext.name !== recName) continue
+              totalFields += ext.fields.length
+            }
+          }
+          if (totalFields > 3) {
+            out.push(diag('W010', MSG.W010(recName, totalFields), livenessTokenDir.loc))
+          }
+        }
+
         // v0.3.9 (Wave 3B — W008): @envelope override-coherence. The preset
         // expansion happens at codegen time (see SPEC §7.19); when an author
         // also writes a sibling directive that contradicts the preset's

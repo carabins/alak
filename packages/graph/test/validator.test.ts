@@ -759,4 +759,84 @@ describe('Wave 3B — new directives (SPEC 0.3.9)', () => {
       '}'
     expect(codesOf(src)).not.toContain('E030')
   })
+
+  // §7.26 / R340-R341 — @liveliness_token (v0.3.10)
+  describe('@liveliness_token (v0.3.10, §7.26)', () => {
+    test('clean pattern with placeholders matching record fields parses', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/v2/{group}/alive/{device_id}") {\n' +
+        '  group: String!, device_id: String!\n' +
+        '}'
+      const codes = codesOf(src)
+      expect(codes).not.toContain('E001')
+      expect(codes).not.toContain('E029')
+      expect(codes).not.toContain('E035')
+    })
+
+    test('E035: pattern references a {placeholder} that is not a field', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/{nope}/alive/{device_id}") {\n' +
+        '  group: String!, device_id: String!\n' +
+        '}'
+      expect(codesOf(src)).toContain('E035')
+    })
+
+    test('E035: multiple missing placeholders all fire', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "{a}/{b}") {\n' +
+        '  id: ID!\n' +
+        '}'
+      const codes = codesOf(src).filter(c => c === 'E035')
+      expect(codes.length).toBe(2)
+    })
+
+    test('placeholders may resolve to extend-record fields', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/{group}/alive/{device_id}") {\n' +
+        '  group: String!\n' +
+        '}\n' +
+        'extend record DeviceAlive { device_id: String! }'
+      expect(codesOf(src)).not.toContain('E035')
+    })
+
+    test('@liveliness_token without pattern fires E023', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token { id: ID! }'
+      expect(codesOf(src)).toContain('E023')
+    })
+
+    test('@liveliness_token on FIELD fires E029 (RECORD-only site)', () => {
+      const src = base +
+        'record R { id: ID! @liveliness_token(pattern: "ns/{id}") }'
+      expect(codesOf(src)).toContain('E029')
+    })
+
+    test('W010: presence record with >3 fields warns', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/{group}/alive/{device_id}") {\n' +
+        '  group: String!, device_id: String!, extra1: String!, extra2: String!\n' +
+        '}'
+      expect(codesOf(src)).toContain('W010')
+    })
+
+    test('W010: minimal presence record (≤3 fields) does NOT warn', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/{group}/alive/{device_id}") {\n' +
+        '  group: String!, device_id: String!\n' +
+        '}'
+      expect(codesOf(src)).not.toContain('W010')
+    })
+
+    test('IR carries @liveliness_token with pattern in record directives', () => {
+      const src = base +
+        'record DeviceAlive @liveliness_token(pattern: "ns/{group}/alive/{device_id}") {\n' +
+        '  group: String!, device_id: String!\n' +
+        '}'
+      const { ir } = parseSource(src)
+      const dirs = ir!.schemas['s']!.records['DeviceAlive']!.directives ?? []
+      const lt = dirs.find(d => d.name === 'liveliness_token')
+      expect(lt).toBeDefined()
+      expect(lt!.args.pattern).toBe('ns/{group}/alive/{device_id}')
+    })
+  })
 })

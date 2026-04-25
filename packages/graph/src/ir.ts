@@ -339,6 +339,20 @@ export const DIRECTIVE_SIGS: Record<string, DirectiveSignature> = {
     required: ['reason'],
     sites: ['SCHEMA', 'RECORD', 'FIELD', 'EVENT', 'ACTION', 'ENUM'],
   },
+  // v0.3.10 — §7.26. Record-level presence-token declaration on top of the
+  // Zenoh `liveliness` API. `pattern:` is a Zenoh key-expression with
+  // `{field}` placeholders that MUST resolve to fields of the annotated
+  // record. Codegen-zenoh emits `<Record>::declare_token(session, ctx)` and
+  // `<Record>::subscribe_alive(session, callback)` — peers receive a `PUT`
+  // SampleKind on appearance, `DELETE` on session-keepalive loss. Missing
+  // placeholder field → E035; wide presence record (>3 fields) → W010
+  // advisory. Orthogonal to `@envelope` (envelope is payload QoS, liveliness
+  // is session-tracking).
+  liveliness_token: {
+    args: { pattern: 'string' },
+    required: ['pattern'],
+    sites: ['RECORD'],
+  },
 }
 
 /** Map AST Value.kind to the IR-level literal-kind tag. See §10. */

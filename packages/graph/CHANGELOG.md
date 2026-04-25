@@ -1,6 +1,6 @@
 # @alaq/graph — SPEC Changelog
 
-Normative history of the `.aql` SPEC. Current SPEC version: **0.3.9**.
+Normative history of the `.aql` SPEC. Current SPEC version: **0.3.10**.
 Source of truth for behaviour: `./SPEC.md`. This file records *what changed when* and *why*.
 
 Versioning policy:
@@ -8,6 +8,22 @@ Versioning policy:
 - **Major bump** (0.x → 1.0): grammar changes, directive removals, IR breaking changes. Requires migration document.
 
 ---
+
+## 0.3.10 (2026-04-25) — `@liveliness_token` for Zenoh presence (Wave 4)
+
+Additive (one new directive, one new error code, one new advisory). Driven by Бусинка v2 device-presence requirement: each device-instance must publish a Zenoh liveliness token at startup so peers know exactly which devices are online; departures (crash, network drop, explicit shutdown) are detected by Zenoh's session keepalive and surfaced to subscribers as `SampleKind::Delete` — no application-level heartbeat. The SDL needs a first-class affordance because the alternative is hand-written Zenoh-API code in every consumer.
+
+- **§7.26 — new directive `@liveliness_token(pattern: String!)` on RECORD.** The pattern is a Zenoh key-expression with `{field}` placeholders that resolve from the record instance. Codegen-zenoh emits `declare_alive_<rec>(session, value) -> LivelinessToken<'static>` (Drop-guard) and `subscribe_alive_<rec>(session, callback)` (callback receives `(SampleKind, KeyExpr)`). Subscribers see `Put` on appearance, `Delete` on session-keepalive loss. R340–R341 normative.
+
+  Design note (kept here, not in the SPEC body): orthogonal to `@envelope`. Envelope describes payload QoS (priority/congestion/ordering/retention/crdt_mode); liveliness is session-tracking with no payload. Forcing presence into a synthetic `@envelope(kind: presence)` would require populating five axes that don't apply. The two directives compose freely on the same record.
+
+- **§12 — new validation codes.**
+  - **E035** (R340) `@liveliness_token.pattern` references a `{placeholder}` that does not name a field of the annotated record.
+  - **W010** (R341) Presence record carries `@liveliness_token` but has more than 3 fields. Advisory: presence records should be minimal; move payload data to a sibling record.
+
+- **graph-zenoh codegen.** New emitter `liveliness-gen.ts`. Output is two free async functions per `@liveliness_token` record, ordered after the composite-doc pub/sub block in the generated namespace module. No new Cargo dependency — uses `zenoh::liveliness` directly off the existing `zenoh` dep.
+
+- **WIRE.md.** New row documenting `@liveliness_token` mapping to `session.liveliness().declare_token` / `declare_subscriber`.
 
 ## 0.3.9 (2026-04-25) — envelope, conflict, bootstrap, large + backward-compat (Wave 3)
 

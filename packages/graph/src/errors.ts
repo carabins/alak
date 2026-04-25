@@ -52,6 +52,9 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   E032: 'error',
   E033: 'error',
   E034: 'error',
+  // v0.3.10 — §7.26: @liveliness_token pattern references a {placeholder}
+  // that does not name a field of the annotated record.
+  E035: 'error',
   W001: 'warning',
   W002: 'warning',
   W003: 'warning',
@@ -60,6 +63,9 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   W007: 'warning',  // optional field added in middle of record
   W008: 'warning',  // @envelope override-coherence (e.g. stream + block_first)
   W009: 'warning',  // @deprecated_field used; baseline-checker stub active
+  // v0.3.10 — §7.26: presence record declared with @liveliness_token has
+  // many fields (>3); presence records should be minimal (id + scope).
+  W010: 'warning',
 }
 
 export function diag(
@@ -194,4 +200,21 @@ export const MSG = {
     `field "${field}" is @deprecated_field` +
     (replacedBy ? ` (replaced by "${replacedBy}")` : '') +
     `; consumers should migrate before next major bump`,
+
+  // v0.3.10 (§7.26 — R340): @liveliness_token.pattern references a
+  // {placeholder} that does not name a field of the annotated record. The
+  // placeholder must resolve at producer time from the record instance, so
+  // it MUST exist in the record's field set.
+  E035: (record: string, placeholder: string) =>
+    `@liveliness_token.pattern on record "${record}" references {${placeholder}} ` +
+    `but no such field exists on the record; ` +
+    `placeholders must resolve to record fields`,
+
+  // v0.3.10 (§7.26 — R341 advisory): a record carrying @liveliness_token
+  // exists to signal presence. Wide records waste session-tracking bandwidth
+  // and confuse the role of the record (presence vs payload).
+  W010: (record: string, count: number) =>
+    `presence record "${record}" carries @liveliness_token but has ${count} fields; ` +
+    `presence records should be minimal (id + scope keys); ` +
+    `move payload data to a separate snapshot/stream record`,
 }
