@@ -363,7 +363,20 @@ Standard scope names (convention, not spec-enforced): `"global"`, `"session"`, `
 
 Closed set. Adding a directive requires a spec version bump.
 
+> Each directive section starts with a header table. Field **Code** points to the canonical machine declaration in `packages/graph/src/ir.ts → DIRECTIVE_SIGS` — single source of truth. If the table and code disagree, the code wins; file an issue.
+
 ### 7.1 `@sync`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `qos: enum = RELIABLE`, `mode: enum = EAGER`, `atomic: bool = false` |
+| Sites   | FIELD \| RECORD |
+| Rules   | R100, R101, R102, R401 |
+| Errors  | E001, E002, E003 |
+| Wire    | `../graph-zenoh/WIRE.md` (rows: `record R @sync(qos: …)`, `field f @sync(qos: REALTIME)`) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.sync` |
+| Since   | v0.1 |
 
 ```
 @sync(qos: QoS = RELIABLE, mode: SyncMode = EAGER, atomic: Boolean = false) on FIELD | RECORD
@@ -381,6 +394,17 @@ Closed set. Adding a directive requires a spec version bump.
 
 ### 7.2 `@crdt`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `type: enum = LWW_REGISTER`, `key: string` (required iff `type` is `LWW_*` — E004) |
+| Sites   | FIELD \| RECORD |
+| Rules   | R110, R111, R112 |
+| Errors  | E001, E002, E003, E004, E005, W003 |
+| Wire    | `../graph-zenoh/WIRE.md` (rows: `record R @crdt(type: LWW_MAP, …)`, composite-doc rows) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.crdt` |
+| Since   | v0.1 |
+
 ```
 @crdt(type: CrdtType = LWW_REGISTER, key: String) on FIELD | RECORD
 ```
@@ -396,6 +420,17 @@ Closed set. Adding a directive requires a spec version bump.
 
 ### 7.3 `@atomic`
 
+| Field   | Value |
+|---------|-------|
+| Args    | (none) |
+| Sites   | FIELD \| RECORD |
+| Rules   | R120 (single source of truth for `@atomic ≡ @sync(atomic: true)`) |
+| Errors  | E001 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `record R @atomic`) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.atomic` |
+| Since   | v0.1 |
+
 ```
 @atomic on FIELD | RECORD
 ```
@@ -403,6 +438,18 @@ Closed set. Adding a directive requires a spec version bump.
 **R120** `@atomic` is exactly equivalent to `@sync(atomic: true)`. Use `@atomic` for brevity; do not combine with `@sync`. (Single source of truth for the equivalence; do not duplicate elsewhere.)
 
 ### 7.4 `@auth`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `read: string = "public"`, `write: string = "public"` |
+| Sites   | FIELD \| RECORD |
+| Rules   | R130, R131, R132, R133 |
+| Errors  | E001, E002, E003 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `@auth(read: "owner")`) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.auth` |
+| Since   | v0.1 |
+| Drift   | SPEC declares closed `Access` set `{public, owner, scope, server}`; code has no `enumValues` — values not enforced by validator. |
 
 ```
 @auth(read: Access = "public", write: Access = "public") on FIELD | RECORD
@@ -417,6 +464,17 @@ Closed set. Adding a directive requires a spec version bump.
 
 ### 7.5 `@scope`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `name: string` (req) |
+| Sites   | RECORD |
+| Rules   | R135, R136, R137 |
+| Errors  | E001, E002, E003, E023 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `record R @scope(name: "room")`) |
+| IR      | `IRRecord.directives[]`; projected to `IRRecord.scope` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.scope` |
+| Since   | v0.1 |
+
 ```
 @scope(name: String!) on RECORD
 ```
@@ -429,6 +487,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 ### 7.6 `@this`
 
+| Field   | Value |
+|---------|-------|
+| Args    | (none) |
+| Sites   | ARGUMENT (action input field) |
+| Rules   | R140 |
+| Errors  | E001, E006 |
+| Wire    | (no direct wire row — argument-binding hint for codegen) |
+| IR      | `IRField.directives[]` (on action input fields) |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.this` |
+| Since   | v0.1 |
+
 ```
 @this on ARGUMENT
 ```
@@ -437,6 +506,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 ### 7.7 `@store`
 
+| Field   | Value |
+|---------|-------|
+| Args    | (none) |
+| Sites   | FIELD \| RECORD |
+| Rules   | R150 |
+| Errors  | E001, W002 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `@store`) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.store` |
+| Since   | v0.1 |
+
 ```
 @store on FIELD | RECORD
 ```
@@ -444,6 +524,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 **R150** Without `@store`, data is ephemeral. With `@store`, the runtime persists it. The persistence mechanism is not described here.
 
 ### 7.8 `@default`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `value: any` (req) |
+| Sites   | FIELD \| ARGUMENT |
+| Rules   | R160 |
+| Errors  | E001, E002, E003, E012, E013, E023 |
+| Wire    | (no wire row — value is materialised by the runtime, not on wire) |
+| IR      | `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.default` |
+| Since   | v0.1 |
 
 ```
 @default(value: Any) on FIELD | ARGUMENT
@@ -457,6 +548,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 ### 7.9 `@liveness`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `source: string` (req), `timeout: int` (req), `on_lost: enum = MARK_ABSENT` (`{MARK_ABSENT, REMOVE, EMIT_EVENT}`) |
+| Sites   | FIELD \| RECORD |
+| Rules   | R170, R171, R172 |
+| Errors  | E001, E002, E003, E023 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `@liveness(source, timeout)`) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.liveness` |
+| Since   | v0.1 |
+
 ```
 @liveness(source: String!, timeout: Duration!, on_lost: LivenessAction = MARK_ABSENT) on FIELD | RECORD
 ```
@@ -469,6 +571,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 ### 7.10 `@range`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `min: any` (req), `max: any` (req) — Number = Int or Float |
+| Sites   | FIELD |
+| Rules   | R180, R181 |
+| Errors  | E001, E002, E003, E015, E016, E023 |
+| Wire    | (no wire row — validation hint, runtime-enforced) |
+| IR      | `IRField.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.range` |
+| Since   | v0.1 |
+
 ```
 @range(min: Number, max: Number) on FIELD
 ```
@@ -477,6 +590,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 **R181** Inclusive on both ends.
 
 ### 7.11 `@deprecated`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `since: string` (req), `reason: string` |
+| Sites   | FIELD \| RECORD \| ACTION |
+| Rules   | R190, R191 |
+| Errors  | E001, E002, E003, E023 |
+| Wire    | (no wire row — codegen-time advisory) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` / `IRAction.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.deprecated` |
+| Since   | v0.1 |
 
 ```
 @deprecated(since: String!, reason: String) on FIELD | RECORD | ACTION
@@ -487,6 +611,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 
 ### 7.12 `@added`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `in: string` (req) |
+| Sites   | FIELD \| RECORD \| ACTION |
+| Rules   | R200 |
+| Errors  | E001, E002, E003, E023 |
+| Wire    | (no wire row — migration tooling metadata) |
+| IR      | `IRRecord.directives[]` / `IRField.directives[]` / `IRAction.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.added` |
+| Since   | v0.1 |
+
 ```
 @added(in: String!) on FIELD | RECORD | ACTION
 ```
@@ -494,6 +629,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 **R200** Documents the schema version when the element first appeared. Used by migration tooling.
 
 ### 7.13 `@topic`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `pattern: string` (req) |
+| Sites   | RECORD \| ACTION \| OPAQUE |
+| Rules   | R210, R211 |
+| Errors  | E001, E002, E003, E023 |
+| Wire    | overrides default topic pattern in `../graph-zenoh/WIRE.md` |
+| IR      | `IRRecord.directives[]`; projected to `IRRecord.topic` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.topic` |
+| Since   | v0.1 |
 
 ```
 @topic(pattern: String!) on RECORD | ACTION | OPAQUE
@@ -503,6 +649,17 @@ See §6 for semantics, §17 for what `@scope` deliberately does **not** cover.
 **R211** Pattern may contain placeholders `{name}` which are resolved at runtime from scope identifiers and record fields.
 
 ### 7.14 `@transport`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `kind: string` (req) — closed set `{tauri, http, zenoh, any}` |
+| Sites   | SCHEMA (between schema name and opening `{`) |
+| Rules   | R220, R221, R222, R223, R224 |
+| Errors  | E001, E002, E003, E023, E025 |
+| Wire    | governs generator refusal; not a wire-mapping row |
+| IR      | `IRSchema.directives[]`; projected to `IRSchema.transport` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.transport` |
+| Since   | v0.3.4 |
 
 ```
 @transport(kind: String!) on SCHEMA
@@ -526,6 +683,17 @@ schema BelladonnaReader @transport(kind: "tauri") {
 | **R224** | E025 refusal contract: `GenerateResult` MUST contain (a) an empty `files` array, (b) exactly one `GenerateDiagnostic` with `severity: "error"` and a message naming schema namespace, declared `kind`, generator, and supported list. |
 
 ### 7.15 `@crdt_doc_member`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `doc: string` (req), `map: string` (req), `lww_field: string`, `soft_delete: object` (`{flag: String!, ts_field: String!}`) |
+| Sites   | RECORD |
+| Rules   | R230, R231, R232, R233, R234, R235 |
+| Errors  | E001, E002, E003, E023, E027 (a)–(h) |
+| Wire    | `../graph-zenoh/WIRE.md` (rows: `@crdt_doc_member`, soft-delete variant) |
+| IR      | `IRRecord.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.crdt_doc_member` |
+| Since   | v0.3.6; `lww_field` + `soft_delete` added v0.3.7 |
 
 ```
 @crdt_doc_member(
@@ -559,6 +727,17 @@ Opts a record into a **composite CRDT document** — a single Automerge document
 
 ### 7.16 `@crdt_doc_topic`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `doc: string` (req), `pattern: string` (req) |
+| Sites   | SCHEMA (between schema name and opening `{`); may repeat per distinct `doc` |
+| Rules   | R240, R241 |
+| Errors  | E001, E002, E003, E023, E027 |
+| Wire    | declares the Zenoh topic for a composite document; see `../graph-zenoh/WIRE.md` `@crdt_doc_member` row |
+| IR      | `IRSchema.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.crdt_doc_topic` |
+| Since   | v0.3.6 |
+
 ```
 @crdt_doc_topic(doc: String!, pattern: String!) on SCHEMA
 ```
@@ -579,6 +758,17 @@ schema Busynca @transport(kind: "zenoh")
 
 ### 7.17 `@schema_version`
 
+| Field   | Value |
+|---------|-------|
+| Args    | `doc: string` (req), `value: int` (req) |
+| Sites   | SCHEMA (between schema name and opening `{`) |
+| Rules   | R250, R251 |
+| Errors  | E001, E002, E003, E023, E027 |
+| Wire    | `../graph-zenoh/WIRE.md` (row: `schema S @schema_version(...)`) |
+| IR      | `IRSchema.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.schema_version` |
+| Since   | v0.3.6 |
+
 ```
 @schema_version(doc: String!, value: Int!) on SCHEMA
 ```
@@ -590,6 +780,17 @@ Pins an integer `schema_version` into a composite CRDT document (§7.15). The ge
 **R251** Drop-and-rebuild on mismatch is **destructive**. Generators MUST log this at WARN level or equivalent; silent rebuild is non-conformant.
 
 ### 7.18 `@rename_case`
+
+| Field   | Value |
+|---------|-------|
+| Args    | `kind: enum` (req) — closed set `{PASCAL, CAMEL, SNAKE, SCREAMING_SNAKE, KEBAB, LOWER, UPPER}` |
+| Sites   | ENUM \| RECORD |
+| Rules   | R260, R261 |
+| Errors  | E001, E002, E003, E023, E028 |
+| Wire    | `../graph-zenoh/WIRE.md` (rows: `enum E @rename_case`, `record R @rename_case`) |
+| IR      | `IREnum.directives[]` / `IRRecord.directives[]` |
+| Code    | `packages/graph/src/ir.ts → DIRECTIVE_SIGS.rename_case` |
+| Since   | v0.3.7 |
 
 ```
 @rename_case(kind: CaseStyle) on ENUM | RECORD
