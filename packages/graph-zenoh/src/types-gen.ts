@@ -127,6 +127,19 @@ export function emitRecordStruct(
     if (!rcKind && needsRenameAttr(f.name, snake)) {
       buf.line(`#[serde(rename = "${f.name}")]`)
     }
+    // SPEC §7.23 (codegen completed v0.3.10): @deprecated_field emits a
+    // Rust `#[deprecated]` attribute on the field. The optional
+    // `replaced_by:` arg is rendered as the migration pointer in the note.
+    const depField = findDirective(f.directives, 'deprecated_field')
+    if (depField) {
+      const rep = typeof depField.args?.replaced_by === 'string'
+        ? (depField.args.replaced_by as string)
+        : null
+      const note = rep
+        ? `replaced by \`${rep}\``
+        : 'soft-deprecated; consumers should migrate before next major bump'
+      buf.line(`#[deprecated(note = "${note}")]`)
+    }
     const rustType = mapFieldType(f, ctx)
     buf.line(`pub ${rustIdent(snake)}: ${rustType},`)
   }
@@ -262,6 +275,45 @@ export function emitRecordImpl(
     buf.line(`serde_cbor::from_slice(bytes)`)
     buf.dedent()
     buf.line(`}`)
+    buf.blank()
+  }
+
+  // ── @conflict → strategy const (codegen completed v0.3.10, SPEC §7.20) ──
+  // Runtime introspection only: the rt crate reads this constant to pick
+  // between LWW and operator_review side-channel routing during merge.
+  // Codegen does not yet route operator_review samples — left to the rt
+  // crate / consumer. R280: meaningful only paired with @crdt_doc_member;
+  // standalone @crdt records expose the const advisorially.
+  const conflictDir = findDirective(rec.directives, 'conflict')
+  if (conflictDir) {
+    const strategy = typeof conflictDir.args?.strategy === 'string'
+      ? (conflictDir.args.strategy as string)
+      : 'lww'
+    buf.line(`/// CRDT conflict strategy (SPEC §7.20). Read by the runtime`)
+    buf.line(`/// to route conflicting writes — \`lww\` resolves locally,`)
+    buf.line(`/// \`operator_review\` surfaces to a side-channel.`)
+    buf.line(`pub const CONFLICT_STRATEGY: &'static str = "${strategy}";`)
+    buf.blank()
+  }
+
+  // ── @large → per-field threshold const (codegen completed v0.3.10, SPEC §7.22) ──
+  // For each field carrying @large(threshold_kb: N) we emit a const
+  // `LARGE_<FIELD>_THRESHOLD_KB: usize = N`. The runtime decides inline
+  // vs. blob-split publish at `<topic>/blob/{blob_id}` based on this
+  // constant. Full split-publisher integration lives in the runtime
+  // crate and is out of scope for the v0.1 codegen — the const is the
+  // compile-time signal.
+  for (const f of rec.fields) {
+    const large = findDirective(f.directives, 'large')
+    if (!large) continue
+    const thr = typeof large.args?.threshold_kb === 'number'
+      ? (large.args.threshold_kb as number)
+      : 0
+    const fieldUpper = snakeCase(f.name).toUpperCase()
+    buf.line(`/// @large threshold for field \`${f.name}\` (SPEC §7.22). Bytes`)
+    buf.line(`/// payloads at or above this many KB are split to a blob`)
+    buf.line(`/// sub-topic by the runtime; below threshold rides inline.`)
+    buf.line(`pub const LARGE_${fieldUpper}_THRESHOLD_KB: usize = ${thr};`)
     buf.blank()
   }
 

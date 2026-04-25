@@ -340,7 +340,27 @@ function collectAdvisoryWarnings(
 
   for (const rec of Object.values(schema.records)) {
     scan(rec.directives)
-    for (const f of rec.fields) scan(f.directives)
+    for (const f of rec.fields) {
+      scan(f.directives)
+      // SPEC §7.23 / W009 (codegen completed v0.3.10): emit the
+      // advisory at generation time so build-script consumers see it.
+      // The struct field has been annotated with `#[deprecated]` in
+      // types-gen.ts; this surface raises the same signal at the
+      // generator-diagnostic level.
+      const dep = (f.directives ?? []).find(d => d.name === 'deprecated_field')
+      if (dep) {
+        const rep = typeof dep.args?.replaced_by === 'string'
+          ? (dep.args.replaced_by as string)
+          : null
+        diagnostics.push({
+          severity: 'warning',
+          message:
+            `[W009] field "${rec.name}.${f.name}" is @deprecated_field` +
+            (rep ? ` (replaced by "${rep}")` : '') +
+            `; consumers should migrate before next major bump`,
+        })
+      }
+    }
   }
   for (const a of Object.values(schema.actions)) {
     scan(a.directives)
