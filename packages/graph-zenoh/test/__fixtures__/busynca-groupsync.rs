@@ -408,6 +408,132 @@ where
     Ok(())
 }
 
+// ────────────────────────────────────────────────────────────────
+// Composite CRDT document events (SyncEvent + emit_*_diffs)
+// ────────────────────────────────────────────────────────────────
+
+/// CRDT-document events for the `GroupSync` composite document.
+/// Emitted by `emit_group_sync_*_diffs` and by
+/// `GroupSyncDoc::merge_remote_with_events`.
+/// Variants are derived from each `@crdt_doc_member` map key —
+/// one `Upserted` and one `Deleted` per member record.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum GroupSyncEvent {
+    /// Upsert (insert or update) of a `DeviceEntry` entry
+    /// in root map `"devices"`.
+    DevicesUpserted(DeviceEntry),
+    /// Removal of a `DeviceEntry` entry from root map
+    /// `"devices"` — the payload is the entry id.
+    DevicesDeleted(String),
+    /// Upsert (insert or update) of a `SyncPoint` entry
+    /// in root map `"points"`.
+    PointsUpserted(SyncPoint),
+    /// Removal of a `SyncPoint` entry from root map
+    /// `"points"` — the payload is the entry id.
+    PointsDeleted(String),
+}
+
+/// Diff two snapshots of root map `"devices"` and emit
+/// `GroupSyncEvent::DevicesUpserted` / `DevicesDeleted` events
+/// onto `tx`. An entry is "changed" when its `ts` value
+/// differs between `before` and `after` — the same key the LWW
+/// merge uses, so we never emit spurious upserts for unchanged
+/// records. `broadcast::Sender::send` errors are dropped: a
+/// dead receiver is the caller's contract, not ours.
+pub fn emit_group_sync_devices_diffs(
+    tx: &tokio::sync::broadcast::Sender<GroupSyncEvent>,
+    before: &[DeviceEntry],
+    after: &[DeviceEntry],
+) {
+    use std::collections::HashMap;
+    let before_map: HashMap<&str, &DeviceEntry> =
+        before.iter().map(|e| (e.device_id.as_str(), e)).collect();
+    let after_map: HashMap<&str, &DeviceEntry> =
+        after.iter().map(|e| (e.device_id.as_str(), e)).collect();
+
+    for (id, entry) in &after_map {
+        match before_map.get(id) {
+            Some(prev) if prev.ts == entry.ts => {}
+            _ => {
+                let _ = tx.send(GroupSyncEvent::DevicesUpserted((*entry).clone()));
+            }
+        }
+    }
+    for id in before_map.keys() {
+        if !after_map.contains_key(id) {
+            let _ = tx.send(GroupSyncEvent::DevicesDeleted((*id).to_string()));
+        }
+    }
+}
+
+/// Diff two snapshots of root map `"points"` and emit
+/// `GroupSyncEvent::PointsUpserted` / `PointsDeleted` events
+/// onto `tx`. An entry is "changed" when its `updated_at` value
+/// differs between `before` and `after` — the same key the LWW
+/// merge uses, so we never emit spurious upserts for unchanged
+/// records. `broadcast::Sender::send` errors are dropped: a
+/// dead receiver is the caller's contract, not ours.
+pub fn emit_group_sync_points_diffs(
+    tx: &tokio::sync::broadcast::Sender<GroupSyncEvent>,
+    before: &[SyncPoint],
+    after: &[SyncPoint],
+) {
+    use std::collections::HashMap;
+    let before_map: HashMap<&str, &SyncPoint> =
+        before.iter().map(|e| (e.id.as_str(), e)).collect();
+    let after_map: HashMap<&str, &SyncPoint> =
+        after.iter().map(|e| (e.id.as_str(), e)).collect();
+
+    for (id, entry) in &after_map {
+        match before_map.get(id) {
+            Some(prev) if prev.updated_at == entry.updated_at => {}
+            _ => {
+                let _ = tx.send(GroupSyncEvent::PointsUpserted((*entry).clone()));
+            }
+        }
+    }
+    for id in before_map.keys() {
+        if !after_map.contains_key(id) {
+            let _ = tx.send(GroupSyncEvent::PointsDeleted((*id).to_string()));
+        }
+    }
+}
+
+impl GroupSyncDoc {
+    /// Merge a remote snapshot and emit per-map diff events on `tx`.
+    /// Snapshots every member root-map before and after the merge,
+    /// runs the underlying `merge_remote`, then fans out
+    /// `GroupSyncEvent` events for entries that changed.
+    ///
+    /// Mirrors the `start_group_sync_listener` pattern in busynca's
+    /// hand-written runtime: snapshot → merge → snapshot → diff →
+    /// broadcast. Returning `anyhow::Result<()>` keeps the merge
+    /// error path identical to plain `merge_remote`.
+    pub fn merge_remote_with_events(
+        &mut self,
+        other: &[u8],
+        tx: &tokio::sync::broadcast::Sender<GroupSyncEvent>,
+    ) -> anyhow::Result<()> {
+        // Snapshot every member root-map before the merge.
+        let before_devices = self.list_devices().unwrap_or_default();
+        let before_points = self.list_points().unwrap_or_default();
+
+        // Run the underlying Automerge merge. Errors short-circuit;
+        // nothing is emitted on failure (caller sees the error).
+        self.merge_remote(other)?;
+
+        // Snapshot after, then diff each member root-map.
+        let after_devices = self.list_devices().unwrap_or_default();
+        let after_points = self.list_points().unwrap_or_default();
+
+        emit_group_sync_devices_diffs(tx, &before_devices, &after_devices);
+        emit_group_sync_points_diffs(tx, &before_points, &after_points);
+
+        Ok(())
+    }
+}
+
 /*
  * Suggested Cargo.toml fragment:
  *
@@ -419,4 +545,5 @@ where
  * serde_cbor = "0.11"
  * automerge = "=0.6.0"
  * alaq-graph-zenoh-rt = { path = "../alaq-graph-zenoh-rt" }
+ * anyhow = "1"
  */

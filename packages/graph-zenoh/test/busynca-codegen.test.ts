@@ -178,6 +178,44 @@ describe('Busynca GroupSync — codegen snapshot', () => {
     expect(rust).toContain('pub async fn publish_group_sync(')
     expect(rust).toContain('pub async fn subscribe_group_sync<F>(')
   })
+
+  // ── v0.3.11 — codegen-time event emission ──
+
+  test('GroupSyncEvent enum has Upserted+Deleted variants per map key', () => {
+    expect(rust).toContain('pub enum GroupSyncEvent {')
+    expect(rust).toContain('DevicesUpserted(DeviceEntry),')
+    expect(rust).toContain('DevicesDeleted(String),')
+    expect(rust).toContain('PointsUpserted(SyncPoint),')
+    expect(rust).toContain('PointsDeleted(String),')
+    // Non-exhaustive so adding a future map doesn't break consumers' match arms.
+    expect(rust).toContain('#[non_exhaustive]')
+  })
+
+  test('emit_group_sync_devices_diffs uses device_id as the key', () => {
+    expect(rust).toContain('pub fn emit_group_sync_devices_diffs(')
+    expect(rust).toContain('before.iter().map(|e| (e.device_id.as_str(), e))')
+    // LWW comparator must be `ts` (DeviceEntry's lww_field), not updated_at.
+    expect(rust).toContain('Some(prev) if prev.ts == entry.ts => {}')
+  })
+
+  test('emit_group_sync_points_diffs uses id + updated_at LWW comparator', () => {
+    expect(rust).toContain('pub fn emit_group_sync_points_diffs(')
+    expect(rust).toContain('before.iter().map(|e| (e.id.as_str(), e))')
+    expect(rust).toContain('Some(prev) if prev.updated_at == entry.updated_at => {}')
+  })
+
+  test('GroupSyncDoc::merge_remote_with_events snapshots before/after and fans out diffs', () => {
+    expect(rust).toContain('pub fn merge_remote_with_events(')
+    expect(rust).toContain('tx: &tokio::sync::broadcast::Sender<GroupSyncEvent>,')
+    // before-snapshot uses list_<map>().unwrap_or_default() — must not panic
+    // when the map is empty / freshly created.
+    expect(rust).toContain('let before_devices = self.list_devices().unwrap_or_default();')
+    expect(rust).toContain('let before_points = self.list_points().unwrap_or_default();')
+    expect(rust).toContain('self.merge_remote(other)?;')
+    // diffs are called in MAP_KEYS order (devices < points alphabetically)
+    expect(rust).toContain('emit_group_sync_devices_diffs(tx, &before_devices, &after_devices);')
+    expect(rust).toContain('emit_group_sync_points_diffs(tx, &before_points, &after_points);')
+  })
 })
 
 // ────────────────────────────────────────────────────────────────

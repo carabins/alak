@@ -33,6 +33,7 @@ import {
   emitSection,
 } from './emit'
 import { emitActions } from './actions-gen'
+import { emitAllCrdtDocEvents, hasAnyCrdtDocEvents } from './events-gen'
 import { emitAllLiveliness, hasAnyLiveliness } from './liveliness-gen'
 import { emitAllPubSub, emitCompositePubSub } from './publishers-gen'
 import { emitCrdtDocWrappers, emitEnums, emitRecords, emitUserScalars } from './types-gen'
@@ -202,6 +203,12 @@ function generateNamespace(
   if (needsComposite) {
     emitSection(buf, 'Publish / Subscribe helpers — composite CRDT documents')
     emitCompositePubSub(buf, schema, diagnostics)
+  }
+
+  // ── Composite document SyncEvent + emit_*_diffs (v0.3.11, SPEC §7.15+) ──
+  if (needsComposite && hasAnyCrdtDocEvents(schema)) {
+    emitSection(buf, 'Composite CRDT document events (SyncEvent + emit_*_diffs)')
+    emitAllCrdtDocEvents(buf, schema, diagnostics)
   }
 
   // ── Zenoh liveliness presence helpers (v0.3.10, SPEC §7.26) ──

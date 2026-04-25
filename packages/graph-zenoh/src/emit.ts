@@ -106,6 +106,9 @@ export function emitCargoFooter(
     // v0.3.6: runtime bridge between generated <Doc>Doc wrappers and
     // automerge::AutoCommit. Lives at alak/crates/alaq-graph-zenoh-rt.
     buf.line(` * alaq-graph-zenoh-rt = { path = "../alaq-graph-zenoh-rt" }`)
+    // v0.3.11: composite-doc fallible helpers (load_or_init,
+    // merge_remote_with_events) surface errors as anyhow::Result.
+    buf.line(` * anyhow = "1"`)
   }
   buf.line(` */`)
 }
