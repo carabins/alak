@@ -30,14 +30,16 @@ const SEVERITY: Record<DiagnosticCode, 'error' | 'warning'> = {
   // v0.3.5 (C7): @transport mismatch is now an error (generator-emitted).
   // Supersedes W005 — see §7.14 R221/R224 and §15 Changelog.
   E025: 'error',
+  // v0.3.6: `Any` placement and composite-CRDT-document consistency.
+  // Both are validator-emitted; see SPEC §4.1 (E026), §7.15–§7.17 (E027).
+  E026: 'error',
+  E027: 'error',
+  // v0.3.7: `@rename_case` placement — enum or record only.
+  E028: 'error',
   W001: 'warning',
   W002: 'warning',
   W003: 'warning',
   W004: 'warning',
-  // W005 is retired as of v0.3.5 (replaced by E025). The entry is kept so
-  // DiagnosticCode stays a strict superset of historical codes and any
-  // stored/cached diagnostic referencing 'W005' still types.
-  W005: 'warning',
 }
 
 export function diag(
@@ -99,15 +101,29 @@ export const MSG = {
     `which is outside ${generator} supported transports [${supported}]; ` +
     `generation refused (E025). Set @transport(kind: "any") or omit the directive to opt out.`,
 
+  // v0.3.6: `Any` used outside its permitted positions.
+  // `where` describes the offending site (e.g. "action input argument",
+  // "event field", "list element", "map key").
+  E026: (where: string) =>
+    `\`Any\` is not permitted as ${where}; ` +
+    `allowed positions are record fields and Map<K, Any> values (SPEC §4.1)`,
+
+  // v0.3.6: composite CRDT document inconsistency.
+  // `doc` is the document id; `detail` names the specific trigger.
+  E027: (doc: string, detail: string) =>
+    `composite CRDT document "${doc}": ${detail}`,
+
+  // v0.3.7: @rename_case only applies to enum or record declarations.
+  // `where` names the offending site (e.g. "field", "action", "scalar",
+  // "opaque", "event").
+  E028: (where: string) =>
+    `@rename_case is only valid on \`enum\` or \`record\` declarations; ` +
+    `applied to ${where}`,
+
   W001: (field: string) =>
     `@sync(qos: REALTIME) on composite field "${field}" without @atomic`,
   W002: (field: string) => `@store on "${field}" without explicit @sync; defaults to RELIABLE`,
   W003: (record: string) =>
     `record ${record} has @crdt but no Timestamp! field named "updated_at"`,
   W004: (what: string) => `directive declared but target does not use it: ${what}`,
-  // W005 retired as of v0.3.5 (replaced by E025). Message template kept
-  // for back-compat tooling that reads historical diagnostics by code.
-  W005: (generator: string, schemaTransport: string, supported: string) =>
-    `schema @transport(kind: "${schemaTransport}") does not match ` +
-    `${generator} supported transports [${supported}]; generation proceeds`,
 }

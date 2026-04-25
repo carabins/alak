@@ -6,6 +6,8 @@ SDL compiler for the alaqlink stack. Parses `.aql` schemas into a typed IR with 
 
 `6.0.0-alpha.0` — **unstable**. Breaking changes to the IR shape, directive set, and diagnostic codes are expected before 6.0.0 GA. Pin exact versions and treat alpha-to-alpha upgrades as source-breaking.
 
+SPEC version: **0.3.8**. The package version (`6.0.0-alpha.0`) and the SPEC version are tracked independently — see `./SPEC.md` and `./CHANGELOG.md`.
+
 ## What it is
 
 `@alaq/graph` is the front half of the alaqlink toolchain: a lexer, parser, linker, IR builder, and validator for the `.aql` schema definition language. It takes a set of source files and emits a single merged, typed intermediate representation plus a list of diagnostics. That's the entire surface.
@@ -132,7 +134,7 @@ The same `bunx aqc gen …` line can live in a `package.json` (or `package.yaml`
 
 ## Diagnostics
 
-Every diagnostic carries a stable code. Errors are `E001`–`E022`, warnings are `W001`–`W004`. Codes do not get reused across versions; if a check is retired, its code is retired with it. The catalog — with message templates, trigger conditions, and examples — lives in [`./SPEC.md`](./SPEC.md) §12.
+Every diagnostic carries a stable code. Errors are `E001`–`E028`, warnings are `W001`–`W004` (`W005` retired in 0.3.5, see [`./CHANGELOG.md`](./CHANGELOG.md)). Codes do not get reused across versions; if a check is retired, its code is retired with it. The catalog — with message templates, trigger conditions, and examples — lives in [`./SPEC.md`](./SPEC.md) §12.
 
 Consumers should treat `d.code` as the stable key for programmatic handling. The `d.message` field is human-readable and may be reworded between patch releases.
 

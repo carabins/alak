@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AlaqGraphIR",
+  "type": "object",
+  "required": ["schemas"],
+  "properties": {
+    "schemas": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/SchemaBlock" }
+    }
+  },
+  "$defs": {
+    "SchemaBlock": {
+      "type": "object",
+      "required": ["name", "namespace", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "namespace": { "type": "string" },
+        "version": { "type": "integer" },
+        "records": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Record" } },
+        "actions": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Action" } },
+        "enums":   { "type": "object", "additionalProperties": { "$ref": "#/$defs/Enum" } },
+        "scalars": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Scalar" } },
+        "opaques": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Opaque" } },
+        "events":  { "type": "object", "additionalProperties": { "$ref": "#/$defs/Event" }, "description": "v0.3.4 (additive, W9): broadcast-event payloads declared with `event Name { … }`. Mirrors `records` in shape but lives in its own bucket so generators can fan out pub/sub emitters separately from state." },
+        "transport": {
+          "type": "string",
+          "enum": ["tauri", "http", "zenoh", "any"],
+          "description": "v0.3.4 (additive, W8): schema-level intended transport projected from `@transport(kind: ...)` (SPEC §7.14). Absent ≡ 'any'. Consulted by generators for E025 mismatch errors. Pre-0.3.4 consumers ignore."
+        },
+        "directives": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Directive" },
+          "description": "v0.3.4 (additive, W8): schema-level directives in source order. `@transport` is also projected into `transport`; this array preserves the raw list for uniform walks."
+        }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "required": ["name", "fields"],
+      "properties": {
+        "name": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/Field" } },
+        "directives": { "type": "array", "items": { "$ref": "#/$defs/Directive" } },
+        "scope": { "type": ["string", "null"] },
+        "topic": { "type": ["string", "null"] },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): raw `#`-comment lines immediately preceding the declaration (leading `#` + one optional space stripped). Absent when no leading comments were attached (not `[]`). No built-in semantics — generator extension point." }
+      }
+    },
+    "Field": {
+      "type": "object",
+      "required": ["name", "type", "required", "list"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "required": { "type": "boolean" },
+        "list": { "type": "boolean" },
+        "listItemRequired": { "type": "boolean" },
+        "map":       { "type": "boolean", "description": "v0.3: true when field is Map<K,V>. `type` is then the literal string 'Map'." },
+        "mapKey":    { "$ref": "#/$defs/TypeRef", "description": "v0.3: key type; present iff map=true. v0.3.4: `mapKey.required` is always `true` — see SPEC §4.8 R023 (map keys are never null). Syntactic `!` on the key is redundant; parsers normalise both `Map<K, V>` and `Map<K!, V>` to the same IR." },
+        "mapValue":  { "$ref": "#/$defs/TypeRef", "description": "v0.3: value type; present iff map=true. `mapValue.required` reflects the syntactic `!` on V (SPEC §4.3)." },
+        "directives": { "type": "array", "items": { "$ref": "#/$defs/Directive" } }
+      }
+    },
+    "TypeRef": {
+      "type": "object",
+      "description": "v0.3: nested type reference used inside map key/value slots. Recursively describes scalars, lists, and nested maps.",
+      "required": ["type", "required", "list"],
+      "properties": {
+        "type":     { "type": "string" },
+        "required": { "type": "boolean" },
+        "list":     { "type": "boolean" },
+        "listItemRequired": { "type": "boolean" },
+        "map":      { "type": "boolean" },
+        "mapKey":   { "$ref": "#/$defs/TypeRef" },
+        "mapValue": { "$ref": "#/$defs/TypeRef" }
+      }
+    },
+    "Action": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "scope": { "type": ["string", "null"] },
+        "input": { "type": "array", "items": { "$ref": "#/$defs/Field" } },
+        "output": { "type": ["string", "null"] },
+        "outputRequired": { "type": "boolean" },
+        "outputList": { "type": "boolean", "description": "v0.3.1: true when output is a list [T] / [T!] / [T]! / [T!]!. `output` still carries the element's base type name." },
+        "outputListItemRequired": { "type": "boolean", "description": "v0.3.1: meaningful only when outputList=true. True iff the list element carries `!`." },
+        "directives": { "type": "array", "items": { "$ref": "#/$defs/Directive" } },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): see Record.leadingComments." }
+      }
+    },
+    "Enum": {
+      "type": "object",
+      "required": ["name", "values"],
+      "properties": {
+        "name": { "type": "string" },
+        "values": { "type": "array", "items": { "type": "string" } },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): see Record.leadingComments." }
+      }
+    },
+    "Scalar": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): see Record.leadingComments." }
+      }
+    },
+    "Opaque": {
+      "type": "object",
+      "required": ["name", "qos"],
+      "properties": {
+        "name": { "type": "string" },
+        "qos": { "type": "string" },
+        "maxSize": { "type": "integer" },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): see Record.leadingComments." }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "description": "v0.3.4 (additive, W9): broadcast-event payload declaration. Shape mirrors `Record` exactly — same fields, same directives, same leading-comments passthrough — but with pub/sub (not state) semantics. See SPEC §5.5.",
+      "required": ["name", "fields"],
+      "properties": {
+        "name": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/Field" } },
+        "directives": { "type": "array", "items": { "$ref": "#/$defs/Directive" } },
+        "leadingComments": { "type": "array", "items": { "type": "string" }, "description": "v0.3.2 (additive): see Record.leadingComments." }
+      }
+    },
+    "Directive": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "args": { "type": "object", "additionalProperties": true },
+        "argTypes": {
+          "type": "object",
+          "description": "v0.3.3 (additive): per-argument literal-kind tag. Keys mirror `args` exactly. Values are one of 'string' | 'int' | 'float' | 'bool' | 'enum_ref' | 'list'. Present iff the directive has at least one argument. Generators MUST consult `argTypes[k] === 'enum_ref'` to distinguish a bare-identifier enum literal (per SPEC R041) from a string literal when emitting defaults; pre-0.3.3 consumers may ignore and fall back to resolving by enclosing field type.",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["string", "int", "float", "bool", "enum_ref", "list"]
+          }
+        }
+      }
+    }
+  }
+}

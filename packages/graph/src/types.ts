@@ -82,6 +82,13 @@ export type Value =
   | { kind: 'bool'; value: boolean; loc: SourceLoc }
   | { kind: 'enum'; value: string; loc: SourceLoc }
   | { kind: 'list'; values: Value[]; loc: SourceLoc }
+  /** v0.3.7 — object-literal `{ key: value, ... }` value kind. Accepted
+   *  only inside directive arguments (currently only `@crdt_doc_member`'s
+   *  `soft_delete: { flag: ..., ts_field: ... }`). Not a general-purpose
+   *  nested value; generators and validators that do not expect it MAY
+   *  report E003 at the call site. Fields reuse `DirectiveArg` for
+   *  (name, value, loc) — nested objects compose the same way. */
+  | { kind: 'object'; fields: DirectiveArg[]; loc: SourceLoc }
 
 export interface DirectiveArg {
   name: string
@@ -158,6 +165,12 @@ export interface EnumNode {
   kind: 'enum'
   name: string
   values: string[]
+  /** v0.3.7 (additive): enum-level directives parsed between the identifier
+   *  and the opening `{`. Mirror of `RecordNode.directives`. The only
+   *  enum-level directive defined in 0.3.7 is `@rename_case`; unknown
+   *  directives still fire E001 via the validator. Absent (not `[]`) when
+   *  no directives are present, matching the pre-0.3.7 on-disk shape. */
+  directives?: DirectiveNode[]
   loc: SourceLoc
   /** v0.3.2 (additive): see RecordNode.leadingComments. */
   leadingComments?: string[]
@@ -248,7 +261,7 @@ export interface FileAST {
  * `enum` renamed to `enum_ref` for IR-level clarity (the IR speaks about
  * references; the AST speaks about literals).
  */
-export type IRLiteralKind = 'string' | 'int' | 'float' | 'bool' | 'enum_ref' | 'list'
+export type IRLiteralKind = 'string' | 'int' | 'float' | 'bool' | 'enum_ref' | 'list' | 'object'
 
 export interface IRDirective {
   name: string
@@ -338,6 +351,10 @@ export interface IRAction {
 export interface IREnum {
   name: string
   values: string[]
+  /** v0.3.7 (additive): enum-level directives in source order. Mirror of
+   *  `IRRecord.directives`. Pre-0.3.7 IR consumers ignore; absent (not
+   *  `[]`) when no directives were written. */
+  directives?: IRDirective[]
   /** v0.3.2 (additive): see IRRecord.leadingComments. */
   leadingComments?: string[]
 }
@@ -400,7 +417,7 @@ export interface IRSchema {
    *  `"tauri" | "http" | "zenoh" | "any"`; absent when no `@transport` is
    *  declared (treated as `"any"` for back-compat). Carries no runtime
    *  behavior at the parser level — the parser neither rewires wire mapping
-   *  nor rejects generators. Generators consult this to emit W005 when the
+   *  nor rejects generators. Generators consult this to emit E025 when the
    *  schema's intended transport does not match their supported set. */
   transport?: string
   /** v0.3.4 (additive, W8): schema-level directives in source order, mirror
@@ -445,18 +462,26 @@ export type DiagnosticCode =
   /** v0.3.4 (W9): `event` declaration with a disallowed directive (currently
    *  just `@scope` — events are broadcast and not lifecycle-bound). */
   | 'E024'
-  /** v0.3.5 (C7): generator-emitted @transport mismatch. Supersedes W005.
+  /** v0.3.5 (C7): generator-emitted @transport mismatch.
    *  On E025 the generator returns `files: []` and a single error
    *  diagnostic. See SPEC §7.14 R221/R224 and §12. */
   | 'E025'
+  /** v0.3.6: `Any` used in a forbidden position. `Any` is a runtime-typed
+   *  opaque CBOR value (§4.1); permitted only as a record field type or the
+   *  value type of a `Map<K, Any>`. Forbidden in action input/output, event
+   *  fields, list elements, and map keys. */
+  | 'E026'
+  /** v0.3.6: composite CRDT document (§7.15/§7.16/§7.17) has an inconsistent
+   *  declaration — orphan member, orphan topic, member disagreement, or
+   *  orphan `@schema_version`. Emitted by the validator. */
+  | 'E027'
+  /** v0.3.7: `@rename_case` applied to a declaration that is neither a
+   *  `record` nor an `enum`. Emitted by the validator. */
+  | 'E028'
   | 'W001'
   | 'W002'
   | 'W003'
   | 'W004'
-  /** v0.3.4 (W8), retired v0.3.5 (C7): superseded by E025. Code retained in
-   *  the union so legacy callers that persist historical diagnostics still
-   *  type-check; no live code path emits W005 as of v0.3.5. */
-  | 'W005'
   // Reserved for generic structural parse errors (lexical / syntactic). Not in §12
   // but needed so the pipeline can report malformed source without crashing.
   | 'E000'
